@@ -105,7 +105,7 @@ button{
   <button onclick="loginGoogle()">Entrar com Google</button>
 </div>
 
-<!-- 📊 APP (ESCONDIDO ATÉ LOGAR) -->
+<!-- 📊 APP -->
 <div id="app" style="display:none">
 
 <div class="wrap">
@@ -114,7 +114,6 @@ button{
 <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
 </h1>
 
-<!-- 👤 USUÁRIO -->
 <div class="card">
   <b id="userName"></b>
   <br><br>
@@ -273,11 +272,16 @@ function render(){
   let sobra = dataMes.salary - total;
 
   let alerta = total > dataMes.salary ? `<div class="danger">⚠️ Gastou mais que seu salário</div>` : "";
+
   let metaStatus = dataMes.meta > 0
     ? (sobra >= dataMes.meta
       ? `<div class="success">🎯 Meta atingida!</div>`
       : `<div class="warn">Faltam R$ ${(dataMes.meta - sobra).toFixed(2)}</div>`)
     : "";
+
+  let mensagemEconomia = sobra > 0
+    ? `<div class="success">🏆 Esse mês você economizou R$ ${sobra.toFixed(2)}</div>`
+    : `<div class="danger">⚠️ Esse mês você não conseguiu economizar</div>`;
 
   kpis.innerHTML = `
   <div class="kpi">Salário<br><b>R$ ${dataMes.salary.toFixed(2)}</b></div>
@@ -285,6 +289,7 @@ function render(){
   <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
   ${alerta}
   ${metaStatus}
+  ${mensagemEconomia}
   `;
 
   list.innerHTML = dataMes.items.map((i,idx)=>`
@@ -333,7 +338,6 @@ window.logout = function(){
 }
 
 onAuthStateChanged(auth, (user) => {
-
   const loginScreen = document.getElementById("loginScreen");
   const appScreen = document.getElementById("app");
 
@@ -345,7 +349,6 @@ onAuthStateChanged(auth, (user) => {
     loginScreen.style.display = "flex";
     appScreen.style.display = "none";
   }
-
 });
 </script>
 
