@@ -133,6 +133,12 @@ button{
 <button onclick="saveSettings()">Salvar</button>
 </div>
 
+<!-- 📂 IMPORTAR EXTRATO -->
+<div class="card">
+  <button onclick="document.getElementById('fileInput').click()">📂 Importar extrato (CSV)</button>
+  <input type="file" id="fileInput" accept=".csv" style="display:none" onchange="importarExtrato(event)">
+</div>
+
 <div class="kpis" id="kpis"></div>
 
 <div class="card">
@@ -206,6 +212,44 @@ function abrirAdd(){
   });
 
   save();
+}
+
+/* 🔥 NOVA FUNÇÃO IMPORTAR CSV */
+function importarExtrato(event){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+    const text = e.target.result;
+    const linhas = text.split("\n");
+
+    mesAtual = getMes();
+    let dataMes = getDataMes();
+
+    for(let i=1; i<linhas.length; i++){
+      let cols = linhas[i].split(",");
+
+      if(cols.length < 2) continue;
+
+      let desc = cols[1] || "Extrato";
+      let valor = parseFloat(cols[2]?.replace(",","."));
+
+      if(isNaN(valor)) continue;
+
+      dataMes.items.push({
+        desc: desc,
+        amount: Math.abs(valor),
+        category: "Extrato"
+      });
+    }
+
+    save();
+    alert("Extrato importado com sucesso!");
+  };
+
+  reader.readAsText(file);
 }
 
 function del(i){
@@ -314,7 +358,7 @@ function toggleTheme(){
 render();
 </script>
 
-<!-- 🔐 FIREBASE LOGIN -->
+<!-- 🔐 FIREBASE LOGIN (igual você já tinha) -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
