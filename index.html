@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Controle de Gastos PRO</title>
+
+<style>
+:root{
+  --bg:#0b1020;
+  --card:#ffffff0f;
+  --text:#eaf0ff;
+  --accent:#569cff;
+}
+
+.light{
+  --bg:#f4f6ff;
+  --card:#ffffff;
+  --text:#111;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui;
+}
+
+.wrap{max-width:980px;margin:auto;padding:16px}
+
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:14px;
+  margin-bottom:12px;
+}
+
+h1{font-size:20px;margin:0 0 10px}
+
+input,select,button,textarea{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-top:5px;
+}
+
+button{
+  background:var(--accent);
+  color:#fff;
+  cursor:pointer;
+}
+
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.kpi{
+  background:var(--card);
+  padding:10px;
+  border-radius:10px;
+}
+
+.table{width:100%}
+
+.danger{color:#ff6b6b}
+.warn{color:#ffd166}
+
+#chart{
+  width:100%;
+  height:220px;
+}
+
+.fab{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#4CAF50;
+  color:white;
+  border-radius:50%;
+  width:55px;
+  height:55px;
+  font-size:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.toggle{
+  float:right;
+  font-size:12px;
+  cursor:pointer;
+  opacity:.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<h1>Controle de Gastos PRO
+<span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
+</h1>
+
+<div class="card">
+<label>Salário</label>
+<input id="salary" type="number">
+
+<label>Mês</label>
+<input id="month" type="month">
+
+<button onclick="saveSettings()">Salvar</button>
+</div>
+
+<div class="kpis" id="kpis"></div>
+
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
+
+<div class="card">
+<h3>Adicionar</h3>
+
+<input id="desc" placeholder="Descrição">
+<input id="amount" type="number" placeholder="Valor">
+
+<select id="category">
+<option>Moradia</option>
+<option>Alimentação</option>
+<option>Transporte</option>
+<option>Lazer</option>
+<option>Outros</option>
+</select>
+
+<input id="date" type="date">
+
+<button onclick="addItem()">Adicionar</button>
+</div>
+
+<div class="card">
+<table class="table" id="list"></table>
+</div>
+
+</div>
+
+<div class="fab" onclick="scrollTo(0,0)">+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
+
+if(!state.items) state={salary:0,month:"",items:[]};
+
+function save(){
+localStorage.setItem("gastos_pro",JSON.stringify(state));
+render();
+}
+
+function saveSettings(){
+state.salary = Number(salary.value);
+state.month = month.value;
+save();
+}
+
+function addItem(){
+state.items.push({
+desc:desc.value,
+amount:Number(amount.value),
+category:category.value,
+date:date.value
+});
+save();
+}
+
+function render(){
+
+salary.value=state.salary;
+month.value=state.month;
+
+let total = state.items.reduce((a,b)=>a+b.amount,0);
+
+kpis.innerHTML = `
+<div class="kpi">Salário<br><b>R$ ${state.salary}</b></div>
+<div class="kpi">Gasto<br><b>R$ ${total}</b></div>
+<div class="kpi ${total>state.salary?"danger":""}">
+Sobra<br><b>R$ ${state.salary-total}</b></div>
+`;
+
+list.innerHTML = state.items.map((i,idx)=>`
+<tr>
+<td>${i.desc}</td>
+<td>R$ ${i.amount}</td>
+<td>${i.category}</td>
+<td><button onclick="del(${idx})">X</button></td>
+</tr>
+`).join("");
+
+drawChart();
+}
+
+function del(i){
+state.items.splice(i,1);
+save();
+}
+
+function drawChart(){
+let ctx=document.getElementById("chart");
+
+let cat={};
+
+state.items.forEach(i=>{
+cat[i.category]=(cat[i.category]||0)+i.amount;
+});
+
+new Chart(ctx,{
+type:"doughnut",
+data:{
+labels:Object.keys(cat),
+datasets:[{data:Object.values(cat)}]
+}
+});
+}
+
+function toggleTheme(){
+document.body.classList.toggle("light");
+}
+
+render();
+</script>
+
+</body>
+</html>
