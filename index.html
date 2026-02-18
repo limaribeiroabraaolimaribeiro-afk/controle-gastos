@@ -66,6 +66,8 @@ button{
 .table{width:100%}
 
 .danger{color:#ff6b6b}
+.warn{color:#ffd166}
+.success{color:#4CAF50}
 
 #chart, #chartEvolucao{
   width:100%;
@@ -111,6 +113,9 @@ button{
 <label>Mês</label>
 <input id="month" type="month">
 
+<label>Meta de economia (R$)</label>
+<input id="meta" type="number" placeholder="Ex: 500">
+
 <button onclick="saveSettings()">Salvar</button>
 </div>
 
@@ -120,7 +125,6 @@ button{
 <canvas id="chart"></canvas>
 </div>
 
-<!-- NOVO GRÁFICO DE EVOLUÇÃO -->
 <div class="card">
 <h3>Evolução dos gastos</h3>
 <canvas id="chartEvolucao"></canvas>
@@ -138,44 +142,35 @@ button{
 
 <script>
 
-/* ===============================
-   SISTEMA COM MESES
-=================================*/
-
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
-
 if(!state.meses) state = {meses:{}};
 
 let mesAtual = "";
 
-/* pegar mês atual */
 function getMes(){
   return month.value || new Date().toISOString().slice(0,7);
 }
 
-/* pegar dados do mês */
 function getDataMes(){
   if(!state.meses[mesAtual]){
-    state.meses[mesAtual] = {salary:0, items:[]};
+    state.meses[mesAtual] = {salary:0, items:[], meta:0};
   }
   return state.meses[mesAtual];
 }
 
-/* salvar */
 function save(){
   localStorage.setItem("gastos_pro",JSON.stringify(state));
   render();
 }
 
-/* salvar salário */
 function saveSettings(){
   mesAtual = getMes();
   let data = getDataMes();
   data.salary = Number(salary.value);
+  data.meta = Number(meta.value);
   save();
 }
 
-/* botão verde */
 function abrirAdd(){
   mesAtual = getMes();
   let dataMes = getDataMes();
@@ -200,7 +195,6 @@ function abrirAdd(){
   save();
 }
 
-/* deletar */
 function del(i){
   mesAtual = getMes();
   let dataMes = getDataMes();
@@ -208,12 +202,12 @@ function del(i){
   save();
 }
 
-/* gráfico pizza */
+/* gráficos */
 let grafico;
+let graficoEvolucao;
 
 function drawChart(items){
   let ctx=document.getElementById("chart");
-
   let cat={};
 
   items.forEach(i=>{
@@ -230,9 +224,6 @@ function drawChart(items){
     }
   });
 }
-
-/* NOVO GRÁFICO DE EVOLUÇÃO */
-let graficoEvolucao;
 
 function drawEvolucao(){
   let ctx = document.getElementById("chartEvolucao");
@@ -259,7 +250,6 @@ function drawEvolucao(){
   });
 }
 
-/* render */
 function render(){
 
   mesAtual = getMes();
@@ -267,14 +257,35 @@ function render(){
 
   salary.value = dataMes.salary;
   month.value = mesAtual;
+  meta.value = dataMes.meta || "";
 
   let total = dataMes.items.reduce((a,b)=>a+b.amount,0);
+  let sobra = dataMes.salary - total;
+  let economia = sobra;
+
+  let alerta = "";
+  let metaStatus = "";
+
+  if(total > dataMes.salary){
+    alerta = `<div class="danger">⚠️ Você gastou mais que seu salário!</div>`;
+  }
+
+  if(dataMes.meta > 0){
+    if(economia >= dataMes.meta){
+      metaStatus = `<div class="success">🎯 Meta de economia atingida!</div>`;
+    } else {
+      metaStatus = `<div class="warn">Faltam R$ ${(dataMes.meta - economia).toFixed(2)} para sua meta</div>`;
+    }
+  }
 
   kpis.innerHTML = `
   <div class="kpi">Salário<br><b>R$ ${dataMes.salary.toFixed(2)}</b></div>
   <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
-  <div class="kpi ${total>dataMes.salary?"danger":""}">
-  Sobra<br><b>R$ ${(dataMes.salary-total).toFixed(2)}</b></div>
+  <div class="kpi ${sobra<0?"danger":""}">
+  Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
+  <div class="kpi">Meta<br><b>R$ ${(dataMes.meta||0).toFixed(2)}</b></div>
+  ${alerta}
+  ${metaStatus}
   `;
 
   list.innerHTML = dataMes.items.map((i,idx)=>`
@@ -290,15 +301,12 @@ function render(){
   drawEvolucao();
 }
 
-/* trocar mês */
 month.addEventListener("change", render);
 
-/* tema */
 function toggleTheme(){
   document.body.classList.toggle("light");
 }
 
-/* iniciar */
 render();
 
 </script>
