@@ -66,7 +66,6 @@ button{
 .table{width:100%}
 
 .danger{color:#ff6b6b}
-.warn{color:#ffd166}
 
 #chart{
   width:100%;
@@ -122,31 +121,12 @@ button{
 </div>
 
 <div class="card">
-<h3>Adicionar</h3>
-
-<input id="desc" placeholder="Descrição">
-<input id="amount" type="number" placeholder="Valor">
-
-<select id="category">
-<option>Moradia</option>
-<option>Alimentação</option>
-<option>Transporte</option>
-<option>Lazer</option>
-<option>Outros</option>
-</select>
-
-<input id="date" type="date">
-
-<button onclick="addItem()">Adicionar</button>
-</div>
-
-<div class="card">
 <table class="table" id="list"></table>
 </div>
 
 </div>
 
-<!-- BOTÃO VERDE CORRIGIDO -->
+<!-- BOTÃO VERDE -->
 <div class="fab" onclick="abrirAdd()">+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -167,17 +147,7 @@ state.month = month.value;
 save();
 }
 
-function addItem(){
-state.items.push({
-desc:desc.value,
-amount:Number(amount.value),
-category:category.value,
-date:date.value
-});
-save();
-}
-
-/* NOVA FUNÇÃO DO BOTÃO VERDE */
+/* BOTÃO VERDE AGORA ADICIONA */
 function abrirAdd(){
   const descricao = prompt("Descrição do gasto:");
   const valor = parseFloat(prompt("Valor:"));
@@ -230,7 +200,7 @@ state.items.splice(i,1);
 save();
 }
 
-/* CORREÇÃO DO GRÁFICO */
+/* GRÁFICO CORRIGIDO */
 let grafico;
 
 function drawChart(){
