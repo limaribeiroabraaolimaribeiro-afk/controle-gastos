@@ -126,108 +126,146 @@ button{
 
 </div>
 
-<!-- BOTÃO VERDE -->
 <div class="fab" onclick="abrirAdd()">+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
+/* ===============================
+   NOVO SISTEMA COM MESES
+=================================*/
+
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
 
-if(!state.items) state={salary:0,month:"",items:[]};
+if(!state.meses) state = {meses:{}};
 
+let mesAtual = "";
+
+/* pegar mês atual */
+function getMes(){
+  return month.value || new Date().toISOString().slice(0,7);
+}
+
+/* pegar dados do mês */
+function getDataMes(){
+  if(!state.meses[mesAtual]){
+    state.meses[mesAtual] = {salary:0, items:[]};
+  }
+  return state.meses[mesAtual];
+}
+
+/* salvar */
 function save(){
-localStorage.setItem("gastos_pro",JSON.stringify(state));
-render();
+  localStorage.setItem("gastos_pro",JSON.stringify(state));
+  render();
 }
 
+/* salvar salário */
 function saveSettings(){
-state.salary = Number(salary.value);
-state.month = month.value;
-save();
+  mesAtual = getMes();
+  let data = getDataMes();
+  data.salary = Number(salary.value);
+  save();
 }
 
-/* BOTÃO VERDE AGORA ADICIONA */
+/* botão verde */
 function abrirAdd(){
+  mesAtual = getMes();
+  let dataMes = getDataMes();
+
   const descricao = prompt("Descrição do gasto:");
   const valor = parseFloat(prompt("Valor:"));
   const categoria = prompt("Categoria (Moradia, Alimentação, Transporte, Lazer, Outros):") || "Outros";
-  const data = new Date().toISOString().split("T")[0];
+  const dataHoje = new Date().toISOString().split("T")[0];
 
   if(!descricao || isNaN(valor)){
     alert("Preencha corretamente!");
     return;
   }
 
-  state.items.push({
+  dataMes.items.push({
     desc: descricao,
     amount: valor,
     category: categoria,
-    date: data
+    date: dataHoje
   });
 
   save();
 }
 
-function render(){
-
-salary.value=state.salary;
-month.value=state.month;
-
-let total = state.items.reduce((a,b)=>a+b.amount,0);
-
-kpis.innerHTML = `
-<div class="kpi">Salário<br><b>R$ ${state.salary}</b></div>
-<div class="kpi">Gasto<br><b>R$ ${total}</b></div>
-<div class="kpi ${total>state.salary?"danger":""}">
-Sobra<br><b>R$ ${state.salary-total}</b></div>
-`;
-
-list.innerHTML = state.items.map((i,idx)=>`
-<tr>
-<td>${i.desc}</td>
-<td>R$ ${i.amount}</td>
-<td>${i.category}</td>
-<td><button onclick="del(${idx})">X</button></td>
-</tr>
-`).join("");
-
-drawChart();
-}
-
+/* deletar */
 function del(i){
-state.items.splice(i,1);
-save();
+  mesAtual = getMes();
+  let dataMes = getDataMes();
+  dataMes.items.splice(i,1);
+  save();
 }
 
-/* GRÁFICO CORRIGIDO */
+/* gráfico */
 let grafico;
 
-function drawChart(){
-let ctx=document.getElementById("chart");
+function drawChart(items){
+  let ctx=document.getElementById("chart");
 
-let cat={};
+  let cat={};
 
-state.items.forEach(i=>{
-cat[i.category]=(cat[i.category]||0)+i.amount;
-});
+  items.forEach(i=>{
+    cat[i.category]=(cat[i.category]||0)+i.amount;
+  });
 
-if(grafico) grafico.destroy();
+  if(grafico) grafico.destroy();
 
-grafico = new Chart(ctx,{
-type:"doughnut",
-data:{
-labels:Object.keys(cat),
-datasets:[{data:Object.values(cat)}]
+  grafico = new Chart(ctx,{
+    type:"doughnut",
+    data:{
+      labels:Object.keys(cat),
+      datasets:[{data:Object.values(cat)}]
+    }
+  });
 }
-});
+
+/* render */
+function render(){
+
+  mesAtual = getMes();
+  let dataMes = getDataMes();
+
+  salary.value = dataMes.salary;
+  month.value = mesAtual;
+
+  let total = dataMes.items.reduce((a,b)=>a+b.amount,0);
+
+  kpis.innerHTML = `
+  <div class="kpi">Salário<br><b>R$ ${dataMes.salary.toFixed(2)}</b></div>
+  <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
+  <div class="kpi ${total>dataMes.salary?"danger":""}">
+  Sobra<br><b>R$ ${(dataMes.salary-total).toFixed(2)}</b></div>
+  `;
+
+  list.innerHTML = dataMes.items.map((i,idx)=>`
+  <tr>
+  <td>${i.desc}</td>
+  <td>R$ ${i.amount.toFixed(2)}</td>
+  <td>${i.category}</td>
+  <td><button onclick="del(${idx})">X</button></td>
+  </tr>
+  `).join("");
+
+  drawChart(dataMes.items);
 }
 
+/* trocar mês */
+month.addEventListener("change", render);
+
+/* tema */
 function toggleTheme(){
-document.body.classList.toggle("light");
+  document.body.classList.toggle("light");
 }
 
+/* iniciar */
 render();
+
 </script>
 
 </body>
