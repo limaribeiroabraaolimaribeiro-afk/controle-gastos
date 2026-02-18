@@ -67,7 +67,7 @@ button{
 
 .danger{color:#ff6b6b}
 
-#chart{
+#chart, #chartEvolucao{
   width:100%;
   height:220px;
 }
@@ -120,6 +120,12 @@ button{
 <canvas id="chart"></canvas>
 </div>
 
+<!-- NOVO GRÁFICO DE EVOLUÇÃO -->
+<div class="card">
+<h3>Evolução dos gastos</h3>
+<canvas id="chartEvolucao"></canvas>
+</div>
+
 <div class="card">
 <table class="table" id="list"></table>
 </div>
@@ -133,7 +139,7 @@ button{
 <script>
 
 /* ===============================
-   NOVO SISTEMA COM MESES
+   SISTEMA COM MESES
 =================================*/
 
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
@@ -202,7 +208,7 @@ function del(i){
   save();
 }
 
-/* gráfico */
+/* gráfico pizza */
 let grafico;
 
 function drawChart(items){
@@ -221,6 +227,34 @@ function drawChart(items){
     data:{
       labels:Object.keys(cat),
       datasets:[{data:Object.values(cat)}]
+    }
+  });
+}
+
+/* NOVO GRÁFICO DE EVOLUÇÃO */
+let graficoEvolucao;
+
+function drawEvolucao(){
+  let ctx = document.getElementById("chartEvolucao");
+
+  let meses = Object.keys(state.meses).sort();
+
+  let valores = meses.map(m=>{
+    return state.meses[m].items.reduce((a,b)=>a+b.amount,0);
+  });
+
+  if(graficoEvolucao) graficoEvolucao.destroy();
+
+  graficoEvolucao = new Chart(ctx,{
+    type:"line",
+    data:{
+      labels: meses,
+      datasets:[{
+        label:"Gastos por mês",
+        data: valores,
+        fill:false,
+        tension:0.3
+      }]
     }
   });
 }
@@ -253,6 +287,7 @@ function render(){
   `).join("");
 
   drawChart(dataMes.items);
+  drawEvolucao();
 }
 
 /* trocar mês */
