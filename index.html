@@ -146,7 +146,8 @@ button{
 
 </div>
 
-<div class="fab" onclick="scrollTo(0,0)">+</div>
+<!-- BOTÃO VERDE CORRIGIDO -->
+<div class="fab" onclick="abrirAdd()">+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -174,6 +175,28 @@ category:category.value,
 date:date.value
 });
 save();
+}
+
+/* NOVA FUNÇÃO DO BOTÃO VERDE */
+function abrirAdd(){
+  const descricao = prompt("Descrição do gasto:");
+  const valor = parseFloat(prompt("Valor:"));
+  const categoria = prompt("Categoria (Moradia, Alimentação, Transporte, Lazer, Outros):") || "Outros";
+  const data = new Date().toISOString().split("T")[0];
+
+  if(!descricao || isNaN(valor)){
+    alert("Preencha corretamente!");
+    return;
+  }
+
+  state.items.push({
+    desc: descricao,
+    amount: valor,
+    category: categoria,
+    date: data
+  });
+
+  save();
 }
 
 function render(){
@@ -207,6 +230,9 @@ state.items.splice(i,1);
 save();
 }
 
+/* CORREÇÃO DO GRÁFICO */
+let grafico;
+
 function drawChart(){
 let ctx=document.getElementById("chart");
 
@@ -216,7 +242,9 @@ state.items.forEach(i=>{
 cat[i.category]=(cat[i.category]||0)+i.amount;
 });
 
-new Chart(ctx,{
+if(grafico) grafico.destroy();
+
+grafico = new Chart(ctx,{
 type:"doughnut",
 data:{
 labels:Object.keys(cat),
