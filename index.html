@@ -37,7 +37,7 @@ body{
 
 h1{font-size:20px;margin:0 0 10px}
 
-input,select,button,textarea{
+input,select,button{
   width:100%;
   padding:10px;
   border-radius:10px;
@@ -62,8 +62,6 @@ button{
   padding:10px;
   border-radius:10px;
 }
-
-.table{width:100%}
 
 .danger{color:#ff6b6b}
 .warn{color:#ffd166}
@@ -100,17 +98,26 @@ button{
 
 <body>
 
+<!-- 🔐 TELA DE LOGIN -->
+<div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
+  <h2>Controle de Gastos PRO</h2>
+  <p>Entre com sua conta Google para continuar</p>
+  <button onclick="loginGoogle()">Entrar com Google</button>
+</div>
+
+<!-- 📊 APP (ESCONDIDO ATÉ LOGAR) -->
+<div id="app" style="display:none">
+
 <div class="wrap">
 
 <h1>Controle de Gastos PRO
 <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
 </h1>
 
-<!-- 🔐 LOGIN -->
+<!-- 👤 USUÁRIO -->
 <div class="card">
-  <b id="userName">Não logado</b>
+  <b id="userName"></b>
   <br><br>
-  <button onclick="loginGoogle()">Entrar com Google</button>
   <button onclick="logout()">Sair</button>
 </div>
 
@@ -145,6 +152,8 @@ button{
 </div>
 
 <div class="fab" onclick="abrirAdd()">+</div>
+
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -185,7 +194,6 @@ function abrirAdd(){
   const descricao = prompt("Descrição do gasto:");
   const valor = parseFloat(prompt("Valor:"));
   const categoria = prompt("Categoria (Moradia, Alimentação, Transporte, Lazer, Outros):") || "Outros";
-  const dataHoje = new Date().toISOString().split("T")[0];
 
   if(!descricao || isNaN(valor)){
     alert("Preencha corretamente!");
@@ -195,8 +203,7 @@ function abrirAdd(){
   dataMes.items.push({
     desc: descricao,
     amount: valor,
-    category: categoria,
-    date: dataHoje
+    category: categoria
   });
 
   save();
@@ -248,7 +255,6 @@ function drawEvolucao(){
       datasets:[{
         label:"Gastos por mês",
         data: valores,
-        fill:false,
         tension:0.3
       }]
     }
@@ -266,25 +272,17 @@ function render(){
   let total = dataMes.items.reduce((a,b)=>a+b.amount,0);
   let sobra = dataMes.salary - total;
 
-  let alerta = "";
-  let metaStatus = "";
-
-  if(total > dataMes.salary){
-    alerta = `<div class="danger">⚠️ Você gastou mais que seu salário!</div>`;
-  }
-
-  if(dataMes.meta > 0){
-    if(sobra >= dataMes.meta){
-      metaStatus = `<div class="success">🎯 Meta atingida!</div>`;
-    } else {
-      metaStatus = `<div class="warn">Faltam R$ ${(dataMes.meta - sobra).toFixed(2)}</div>`;
-    }
-  }
+  let alerta = total > dataMes.salary ? `<div class="danger">⚠️ Gastou mais que seu salário</div>` : "";
+  let metaStatus = dataMes.meta > 0
+    ? (sobra >= dataMes.meta
+      ? `<div class="success">🎯 Meta atingida!</div>`
+      : `<div class="warn">Faltam R$ ${(dataMes.meta - sobra).toFixed(2)}</div>`)
+    : "";
 
   kpis.innerHTML = `
   <div class="kpi">Salário<br><b>R$ ${dataMes.salary.toFixed(2)}</b></div>
   <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
-  <div class="kpi ${sobra<0?"danger":""}">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
+  <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
   ${alerta}
   ${metaStatus}
   `;
@@ -319,10 +317,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChang
 const firebaseConfig = {
   apiKey: "AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
   authDomain: "controle-gastos-pro.firebaseapp.com",
-  projectId: "controle-gastos-pro",
-  storageBucket: "controle-gastos-pro.firebasestorage.app",
-  messagingSenderId: "56836717317",
-  appId: "1:56836717317:web:be0ce8fc03729b87f5956c"
+  projectId: "controle-gastos-pro"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -330,10 +325,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 window.loginGoogle = function(){
-  signInWithPopup(auth, provider)
-  .then((result)=>{
-    document.getElementById("userName").innerText = result.user.displayName;
-  });
+  signInWithPopup(auth, provider);
 }
 
 window.logout = function(){
@@ -341,7 +333,19 @@ window.logout = function(){
 }
 
 onAuthStateChanged(auth, (user) => {
-  document.getElementById("userName").innerText = user ? user.displayName : "Não logado";
+
+  const loginScreen = document.getElementById("loginScreen");
+  const appScreen = document.getElementById("app");
+
+  if(user){
+    loginScreen.style.display = "none";
+    appScreen.style.display = "block";
+    document.getElementById("userName").innerText = user.displayName;
+  }else{
+    loginScreen.style.display = "flex";
+    appScreen.style.display = "none";
+  }
+
 });
 </script>
 
