@@ -99,7 +99,6 @@ button{
   opacity:.7;
 }
 
-/* 🔥 BOTÃO INSTALAR APP */
 .installBtn{
   background:#4CAF50;
   margin-top:10px;
@@ -109,13 +108,11 @@ button{
 
 <body>
 
-<!-- 🔐 TELA DE LOGIN -->
+<!-- 🔐 LOGIN -->
 <div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
   <h2>Controle de Gastos PRO</h2>
   <p>Entre com sua conta Google para continuar</p>
   <button onclick="loginGoogle()">Entrar com Google</button>
-
-  <!-- botão instalar -->
   <button id="installBtn" class="installBtn" style="display:none">📲 Instalar App</button>
 </div>
 
@@ -175,6 +172,144 @@ button{
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- 🔥 SCRIPT PRINCIPAL (AGORA FUNCIONANDO) -->
+<script>
+
+window.addEventListener("DOMContentLoaded", ()=>{
+
+let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
+if(!state.meses) state = {meses:{}};
+
+let mesAtual = "";
+
+window.getMes = function(){
+  return document.getElementById("month").value || new Date().toISOString().slice(0,7);
+}
+
+window.getDataMes = function(){
+  if(!state.meses[mesAtual]){
+    state.meses[mesAtual] = {salary:0, items:[], meta:0};
+  }
+  return state.meses[mesAtual];
+}
+
+window.save = function(){
+  localStorage.setItem("gastos_pro",JSON.stringify(state));
+  render();
+}
+
+window.saveSettings = function(){
+  mesAtual = getMes();
+  let data = getDataMes();
+  data.salary = Number(document.getElementById("salary").value);
+  data.meta = Number(document.getElementById("meta").value);
+  save();
+}
+
+window.abrirAdd = function(){
+  mesAtual = getMes();
+  let dataMes = getDataMes();
+
+  const descricao = prompt("Descrição do gasto:");
+  const valor = parseFloat(prompt("Valor:"));
+  const categoria = prompt("Categoria") || "Outros";
+
+  if(!descricao || isNaN(valor)){
+    alert("Preencha corretamente!");
+    return;
+  }
+
+  dataMes.items.push({
+    desc: descricao,
+    amount: valor,
+    category: categoria
+  });
+
+  save();
+}
+
+window.importarExtrato = function(event){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+    const linhas = e.target.result.split("\n");
+
+    mesAtual = getMes();
+    let dataMes = getDataMes();
+
+    for(let i=1;i<linhas.length;i++){
+      let cols = linhas[i].split(",");
+      if(cols.length < 2) continue;
+
+      let desc = cols[1] || "Extrato";
+      let valor = parseFloat(cols[2]?.replace(",",".")) || 0;
+
+      dataMes.items.push({
+        desc,
+        amount: Math.abs(valor),
+        category:"Extrato"
+      });
+    }
+
+    save();
+    alert("Extrato importado!");
+  };
+
+  reader.readAsText(file);
+}
+
+window.del = function(i){
+  mesAtual = getMes();
+  let dataMes = getDataMes();
+  dataMes.items.splice(i,1);
+  save();
+}
+
+window.toggleTheme = function(){
+  document.body.classList.toggle("light");
+}
+
+window.render = function(){
+  mesAtual = getMes();
+  let dataMes = getDataMes();
+
+  document.getElementById("salary").value = dataMes.salary;
+  document.getElementById("month").value = mesAtual;
+  document.getElementById("meta").value = dataMes.meta || "";
+
+  let total = dataMes.items.reduce((a,b)=>a+b.amount,0);
+  let sobra = dataMes.salary - total;
+
+  let mensagemEconomia = sobra > 0
+    ? `<div class="success">🏆 Você economizou R$ ${sobra.toFixed(2)}</div>`
+    : `<div class="danger">⚠️ Sem economia</div>`;
+
+  document.getElementById("kpis").innerHTML = `
+  <div class="kpi">Salário<br><b>R$ ${dataMes.salary.toFixed(2)}</b></div>
+  <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
+  <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
+  ${mensagemEconomia}
+  `;
+
+  document.getElementById("list").innerHTML = dataMes.items.map((i,idx)=>`
+  <tr>
+  <td>${i.desc}</td>
+  <td>R$ ${i.amount.toFixed(2)}</td>
+  <td>${i.category}</td>
+  <td><button onclick="del(${idx})">X</button></td>
+  </tr>
+  `).join("");
+}
+
+render();
+
+});
+
+</script>
+
 <!-- 🔥 PWA SCRIPT -->
 <script>
 let deferredPrompt;
@@ -201,7 +336,7 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-<!-- 🔐 FIREBASE LOGIN (igual você já tinha) -->
+<!-- 🔐 FIREBASE LOGIN -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
@@ -225,17 +360,9 @@ window.logout = function(){
 }
 
 onAuthStateChanged(auth, (user) => {
-  const loginScreen = document.getElementById("loginScreen");
-  const appScreen = document.getElementById("app");
-
-  if(user){
-    loginScreen.style.display = "none";
-    appScreen.style.display = "block";
-    document.getElementById("userName").innerText = user.displayName;
-  }else{
-    loginScreen.style.display = "flex";
-    appScreen.style.display = "none";
-  }
+  document.getElementById("loginScreen").style.display = user ? "none" : "flex";
+  document.getElementById("app").style.display = user ? "block" : "none";
+  if(user) document.getElementById("userName").innerText = user.displayName;
 });
 </script>
 
