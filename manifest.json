@@ -1,22 +1,25 @@
 {
   "name": "Controle de Gastos PRO",
   "short_name": "Gastos PRO",
-  "description": "Controle seus gastos, acompanhe sua economia mensal e organize sua vida financeira com gráficos simples.",
-  "start_url": "/controle-gastos/index.html",
+  "description": "Controle seus gastos, acompanhe sua economia mensal e organize sua vida financeira.",
+  "start_url": "/controle-gastos/",
+  "scope": "/controle-gastos/",
   "display": "standalone",
   "background_color": "#0b1020",
   "theme_color": "#569cff",
-  "scope": "/controle-gastos/",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "icone-192.png",
+      "src": "/controle-gastos/icone-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "icone-512.png",
+      "src": "/controle-gastos/icone-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
