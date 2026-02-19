@@ -1,11 +1,12 @@
 {
   "name": "Controle de Gastos PRO",
   "short_name": "Gastos PRO",
-  "start_url": ".",
+  "description": "Controle seus gastos, acompanhe sua economia mensal e organize sua vida financeira com gráficos simples.",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0b1020",
   "theme_color": "#569cff",
-  "description": "Controle seus gastos, acompanhe sua economia mensal e organize sua vida financeira com gráficos simples e objetivos.",
+
   "icons": [
     {
       "src": "icon-192.png",
