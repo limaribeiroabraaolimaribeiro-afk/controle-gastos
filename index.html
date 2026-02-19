@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Controle de Gastos PRO</title>
 
-<!-- 🔥 PWA CONFIG -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#569cff">
 
@@ -118,7 +117,6 @@ button{
 
 <!-- 📊 APP -->
 <div id="app" style="display:none">
-
 <div class="wrap">
 
 <h1>Controle de Gastos PRO
@@ -167,202 +165,151 @@ button{
 </div>
 
 <div class="fab" onclick="abrirAdd()">+</div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- 🔥 SCRIPT PRINCIPAL (AGORA FUNCIONANDO) -->
+<!-- 🔥 APP -->
 <script>
-
 window.addEventListener("DOMContentLoaded", ()=>{
 
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
 if(!state.meses) state = {meses:{}};
 
 let mesAtual = "";
+let grafico;
+let graficoEvolucao;
 
-window.getMes = function(){
-  return document.getElementById("month").value || new Date().toISOString().slice(0,7);
-}
+window.getMes = ()=> document.getElementById("month").value || new Date().toISOString().slice(0,7);
 
-window.getDataMes = function(){
+window.getDataMes = ()=>{
   if(!state.meses[mesAtual]){
-    state.meses[mesAtual] = {salary:0, items:[], meta:0};
+    state.meses[mesAtual]={salary:0,items:[],meta:0};
   }
   return state.meses[mesAtual];
-}
+};
 
-window.save = function(){
+window.save = ()=>{
   localStorage.setItem("gastos_pro",JSON.stringify(state));
   render();
-}
+};
 
-window.saveSettings = function(){
-  mesAtual = getMes();
-  let data = getDataMes();
-  data.salary = Number(document.getElementById("salary").value);
-  data.meta = Number(document.getElementById("meta").value);
+window.saveSettings = ()=>{
+  mesAtual=getMes();
+  let data=getDataMes();
+  data.salary=Number(salary.value);
+  data.meta=Number(meta.value);
   save();
-}
+};
 
-window.abrirAdd = function(){
-  mesAtual = getMes();
-  let dataMes = getDataMes();
-
-  const descricao = prompt("Descrição do gasto:");
-  const valor = parseFloat(prompt("Valor:"));
-  const categoria = prompt("Categoria") || "Outros";
-
-  if(!descricao || isNaN(valor)){
-    alert("Preencha corretamente!");
-    return;
-  }
-
-  dataMes.items.push({
-    desc: descricao,
-    amount: valor,
-    category: categoria
-  });
-
+window.abrirAdd = ()=>{
+  mesAtual=getMes();
+  let data=getDataMes();
+  let d=prompt("Descrição");
+  let v=parseFloat(prompt("Valor"));
+  let c=prompt("Categoria")||"Outros";
+  if(!d||isNaN(v)) return alert("Erro");
+  data.items.push({desc:d,amount:v,category:c});
   save();
-}
+};
 
-window.importarExtrato = function(event){
-  const file = event.target.files[0];
+window.importarExtrato = (e)=>{
+  let file=e.target.files[0];
   if(!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = function(e){
-    const linhas = e.target.result.split("\n");
-
-    mesAtual = getMes();
-    let dataMes = getDataMes();
-
+  let r=new FileReader();
+  r.onload=(ev)=>{
+    let linhas=ev.target.result.split("\n");
+    mesAtual=getMes();
+    let data=getDataMes();
     for(let i=1;i<linhas.length;i++){
-      let cols = linhas[i].split(",");
-      if(cols.length < 2) continue;
-
-      let desc = cols[1] || "Extrato";
-      let valor = parseFloat(cols[2]?.replace(",",".")) || 0;
-
-      dataMes.items.push({
-        desc,
-        amount: Math.abs(valor),
-        category:"Extrato"
-      });
+      let cols=linhas[i].split(",");
+      let valor=parseFloat(cols[2]?.replace(",","."))||0;
+      data.items.push({desc:cols[1]||"Extrato",amount:Math.abs(valor),category:"Extrato"});
     }
-
     save();
-    alert("Extrato importado!");
   };
+  r.readAsText(file);
+};
 
-  reader.readAsText(file);
-}
-
-window.del = function(i){
-  mesAtual = getMes();
-  let dataMes = getDataMes();
-  dataMes.items.splice(i,1);
+window.del=(i)=>{
+  mesAtual=getMes();
+  getDataMes().items.splice(i,1);
   save();
+};
+
+window.toggleTheme=()=>document.body.classList.toggle("light");
+
+/* 🎯 GRÁFICOS */
+function drawChart(items){
+  let cat={};
+  items.forEach(i=>cat[i.category]=(cat[i.category]||0)+i.amount);
+  if(grafico) grafico.destroy();
+  grafico=new Chart(chart,{type:"doughnut",data:{labels:Object.keys(cat),datasets:[{data:Object.values(cat)}]}});
 }
 
-window.toggleTheme = function(){
-  document.body.classList.toggle("light");
+function drawEvolucao(){
+  let meses=Object.keys(state.meses).sort();
+  let valores=meses.map(m=>state.meses[m].items.reduce((a,b)=>a+b.amount,0));
+  if(graficoEvolucao) graficoEvolucao.destroy();
+  graficoEvolucao=new Chart(chartEvolucao,{type:"line",data:{labels:meses,datasets:[{data:valores}]}})
 }
 
-window.render = function(){
-  mesAtual = getMes();
-  let dataMes = getDataMes();
+window.render=()=>{
+  mesAtual=getMes();
+  let d=getDataMes();
 
-  document.getElementById("salary").value = dataMes.salary;
-  document.getElementById("month").value = mesAtual;
-  document.getElementById("meta").value = dataMes.meta || "";
+  salary.value=d.salary;
+  month.value=mesAtual;
+  meta.value=d.meta||"";
 
-  let total = dataMes.items.reduce((a,b)=>a+b.amount,0);
-  let sobra = dataMes.salary - total;
+  let total=d.items.reduce((a,b)=>a+b.amount,0);
+  let sobra=d.salary-total;
 
-  let mensagemEconomia = sobra > 0
-    ? `<div class="success">🏆 Você economizou R$ ${sobra.toFixed(2)}</div>`
-    : `<div class="danger">⚠️ Sem economia</div>`;
-
-  document.getElementById("kpis").innerHTML = `
-  <div class="kpi">Salário<br><b>R$ ${dataMes.salary.toFixed(2)}</b></div>
+  kpis.innerHTML=`
+  <div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>
   <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
   <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
-  ${mensagemEconomia}
+  <div class="success">🏆 Você economizou R$ ${sobra.toFixed(2)}</div>
   `;
 
-  document.getElementById("list").innerHTML = dataMes.items.map((i,idx)=>`
+  list.innerHTML=d.items.map((i,idx)=>`
   <tr>
   <td>${i.desc}</td>
   <td>R$ ${i.amount.toFixed(2)}</td>
   <td>${i.category}</td>
   <td><button onclick="del(${idx})">X</button></td>
-  </tr>
-  `).join("");
-}
+  </tr>`).join("");
+
+  drawChart(d.items);
+  drawEvolucao();
+};
 
 render();
 
 });
-
 </script>
 
-<!-- 🔥 PWA SCRIPT -->
-<script>
-let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt", (e)=>{
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById("installBtn").style.display = "block";
-});
-
-document.getElementById("installBtn").addEventListener("click", async ()=>{
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  }
-});
-</script>
-
-<!-- 🔥 SERVICE WORKER -->
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
-}
-</script>
-
-<!-- 🔐 FIREBASE LOGIN -->
+<!-- 🔐 FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-  authDomain: "controle-gastos-pro.firebaseapp.com",
-  projectId: "controle-gastos-pro"
-};
+const app = initializeApp({
+  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+  authDomain:"controle-gastos-pro.firebaseapp.com",
+  projectId:"controle-gastos-pro"
+});
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+const auth=getAuth(app);
+const provider=new GoogleAuthProvider();
 
-window.loginGoogle = function(){
-  signInWithPopup(auth, provider);
-}
+window.loginGoogle=()=>signInWithPopup(auth,provider);
+window.logout=()=>signOut(auth);
 
-window.logout = function(){
-  signOut(auth);
-}
-
-onAuthStateChanged(auth, (user) => {
-  document.getElementById("loginScreen").style.display = user ? "none" : "flex";
-  document.getElementById("app").style.display = user ? "block" : "none";
-  if(user) document.getElementById("userName").innerText = user.displayName;
+onAuthStateChanged(auth,(user)=>{
+  loginScreen.style.display=user?"none":"flex";
+  app.style.display=user?"block":"none";
+  if(user) userName.innerText=user.displayName;
 });
 </script>
 
