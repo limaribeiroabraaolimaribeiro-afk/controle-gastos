@@ -1,21 +1,21 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
 
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Controle de Gastos PRO</title>
+<html lang="pt-BR">    
+<head>  
+<meta charset="utf-8"/>    
+<meta name="viewport" content="width=device-width, initial-scale=1"/>    
+<title>Controle de Gastos PRO</title>  
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#569cff">
+<link rel="manifest" href="manifest.json">    
+<meta name="theme-color" content="#569cff">  
 
-<style>
-:root{
-  --bg:#0b1020;
-  --card:#ffffff0f;
-  --text:#eaf0ff;
-  --accent:#569cff;
-}
+<style>    
+:root{    
+  --bg:#0b1020;    
+  --card:#ffffff0f;    
+  --text:#eaf0ff;    
+  --accent:#569cff;    
+}    
 
 .light{
   --bg:#f4f6ff;
@@ -95,66 +95,66 @@ button{
   cursor:pointer;
   opacity:.7;
 }
-</style>
-</head>
+</style>  
+</head>  
 
-<body>
+<body>  
 
 <div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
-  <h2>Controle de Gastos PRO</h2>
-  <button onclick="loginGoogle()">Entrar com Google</button>
-</div>
+  <h2>Controle de Gastos PRO</h2>    
+  <button onclick="loginGoogle()">Entrar com Google</button>    
+</div>  
 
-<div id="app" style="display:none">
-<div class="wrap">
+<div id="app" style="display:none">    
+<div class="wrap">  
 
-<h1>Controle de Gastos PRO
-<span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
-</h1>
+<h1>Controle de Gastos PRO    
+<span class="toggle" onclick="toggleTheme()">🌙/☀️</span>    
+</h1>  
 
-<div class="card">
-  <b id="userName"></b>
-  <br><br>
-  <button onclick="logout()">Sair</button>
-</div>
+<div class="card">    
+  <b id="userName"></b>    
+  <br><br>    
+  <button onclick="logout()">Sair</button>    
+</div>  
 
-<div class="card">
-<label>Salário</label>
-<input id="salary" type="number">
+<div class="card">    
+<label>Salário</label>    
+<input id="salary" type="number">  
 
-<label>Mês</label>
-<input id="month" type="month">
+<label>Mês</label>  
+<input id="month" type="month">  
 
 <label>Meta</label>
 <input id="meta" type="number">
 
 <button onclick="saveSettings()">Salvar</button>
-</div>
+</div>  
 
-<div class="kpis" id="kpis"></div>
+<div class="kpis" id="kpis"></div>  
 
-<div class="card">
-<canvas id="chart"></canvas>
-</div>
+<div class="card">    
+<canvas id="chart"></canvas>    
+</div>  
 
-<div class="card">
-<h3>Evolução</h3>
-<canvas id="chartEvolucao"></canvas>
-</div>
+<div class="card">    
+<h3>Evolução</h3>    
+<canvas id="chartEvolucao"></canvas>    
+</div>  
 
-<div class="card">
-<table id="list"></table>
-</div>
+<div class="card">    
+<table id="list"></table>    
+</div>  
 
-</div>
+</div>  
 
-<div class="fab" onclick="abrirAdd()">+</div>
-</div>
+<div class="fab" onclick="abrirAdd()">+</div>    
+</div>  
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  
 
-<script>
-window.addEventListener("DOMContentLoaded", ()=>{
+<script>    
+window.addEventListener("DOMContentLoaded", ()=>{    
 
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
 if(!state.meses) state = {meses:{}};
@@ -203,15 +203,41 @@ window.del=(i)=>{
 
 window.toggleTheme=()=>document.body.classList.toggle("light");
 
+
+// ⭐⭐⭐ FUNÇÃO MELHORADA (AGORA MOSTRA CADA GASTO SEPARADO)
 function drawChart(items){
-  let cat={};
-  items.forEach(i=>cat[i.category]=(cat[i.category]||0)+i.amount);
+
+  let labels = items.map(i => i.desc);
+  let valores = items.map(i => i.amount);
+
+  const cores = [
+    "#4CAF50","#2196F3","#FF9800","#E91E63","#9C27B0",
+    "#00BCD4","#FFC107","#8BC34A","#FF5722","#3F51B5",
+    "#009688","#673AB7","#CDDC39","#795548","#607D8B"
+  ];
+
   if(grafico) grafico.destroy();
+
   grafico=new Chart(document.getElementById("chart"),{
     type:"doughnut",
-    data:{labels:Object.keys(cat),datasets:[{data:Object.values(cat)}]}
+    data:{
+      labels: labels,
+      datasets:[{
+        data: valores,
+        backgroundColor: cores.slice(0, valores.length),
+        borderWidth:2
+      }]
+    },
+    options:{
+      plugins:{
+        legend:{
+          labels:{ color:"#eaf0ff" }
+        }
+      }
+    }
   });
 }
+
 
 function drawEvolucao(){
   let meses=Object.keys(state.meses).sort();
@@ -235,17 +261,17 @@ window.render=()=>{
   let sobra=d.salary-total;
 
   document.getElementById("kpis").innerHTML=`
-  <div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>
-  <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
-  <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
-  <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
+  <div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>    
+  <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>    
+  <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>    
+  <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>    
   `;
 
   document.getElementById("list").innerHTML=d.items.map((i,idx)=>`
-  <tr>
-  <td>${i.desc}</td>
-  <td>R$ ${i.amount.toFixed(2)}</td>
-  <td><button onclick="del(${idx})">X</button></td>
+  <tr>    
+  <td>${i.desc}</td>    
+  <td>R$ ${i.amount.toFixed(2)}</td>    
+  <td><button onclick="del(${idx})">X</button></td>    
   </tr>`).join("");
 
   drawChart(d.items);
@@ -255,17 +281,17 @@ window.render=()=>{
 render();
 
 });
-</script>
+</script>  
 
-<!-- FIREBASE CORRIGIDO -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>  
 
 <script>
 firebase.initializeApp({
-  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-  authDomain:"controle-gastos-pro.firebaseapp.com",
-  projectId:"controle-gastos-pro"
+apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+authDomain:"controle-gastos-pro.firebaseapp.com",
+projectId:"controle-gastos-pro"
 });
 
 const auth = firebase.auth();
@@ -275,11 +301,11 @@ function loginGoogle(){ auth.signInWithPopup(provider); }
 function logout(){ auth.signOut(); }
 
 auth.onAuthStateChanged(user=>{
-  document.getElementById("loginScreen").style.display=user?"none":"flex";
-  document.getElementById("app").style.display=user?"block":"none";
-  if(user) document.getElementById("userName").innerText=user.displayName;
+document.getElementById("loginScreen").style.display=user?"none":"flex";
+document.getElementById("app").style.display=user?"block":"none";
+if(user) document.getElementById("userName").innerText=user.displayName;
 });
-</script>
+</script>  
 
 </body>
 </html>
