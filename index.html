@@ -67,8 +67,6 @@ button{
   border-radius:10px;
 }
 
-.danger{color:#ff6b6b}
-.warn{color:#ffd166}
 .success{color:#4CAF50}
 
 #chart, #chartEvolucao{
@@ -97,25 +95,16 @@ button{
   cursor:pointer;
   opacity:.7;
 }
-
-.installBtn{
-  background:#4CAF50;
-  margin-top:10px;
-}
 </style>
 </head>
 
 <body>
 
-<!-- 🔐 LOGIN -->
 <div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
   <h2>Controle de Gastos PRO</h2>
-  <p>Entre com sua conta Google para continuar</p>
   <button onclick="loginGoogle()">Entrar com Google</button>
-  <button id="installBtn" class="installBtn" style="display:none">📲 Instalar App</button>
 </div>
 
-<!-- 📊 APP -->
 <div id="app" style="display:none">
 <div class="wrap">
 
@@ -136,15 +125,10 @@ button{
 <label>Mês</label>
 <input id="month" type="month">
 
-<label>Meta de economia (R$)</label>
+<label>Meta</label>
 <input id="meta" type="number">
 
 <button onclick="saveSettings()">Salvar</button>
-</div>
-
-<div class="card">
-  <button onclick="document.getElementById('fileInput').click()">📂 Importar extrato (CSV)</button>
-  <input type="file" id="fileInput" accept=".csv" style="display:none" onchange="importarExtrato(event)">
 </div>
 
 <div class="kpis" id="kpis"></div>
@@ -154,12 +138,12 @@ button{
 </div>
 
 <div class="card">
-<h3>Evolução dos gastos</h3>
+<h3>Evolução</h3>
 <canvas id="chartEvolucao"></canvas>
 </div>
 
 <div class="card">
-<table class="table" id="list"></table>
+<table id="list"></table>
 </div>
 
 </div>
@@ -169,7 +153,6 @@ button{
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- 🔥 APP -->
 <script>
 window.addEventListener("DOMContentLoaded", ()=>{
 
@@ -197,8 +180,8 @@ window.save = ()=>{
 window.saveSettings = ()=>{
   mesAtual=getMes();
   let data=getDataMes();
-  data.salary=Number(salary.value);
-  data.meta=Number(meta.value);
+  data.salary=Number(document.getElementById("salary").value);
+  data.meta=Number(document.getElementById("meta").value);
   save();
 };
 
@@ -207,28 +190,9 @@ window.abrirAdd = ()=>{
   let data=getDataMes();
   let d=prompt("Descrição");
   let v=parseFloat(prompt("Valor"));
-  let c=prompt("Categoria")||"Outros";
-  if(!d||isNaN(v)) return alert("Erro");
-  data.items.push({desc:d,amount:v,category:c});
+  if(!d||isNaN(v)) return;
+  data.items.push({desc:d,amount:v,category:"Outros"});
   save();
-};
-
-window.importarExtrato = (e)=>{
-  let file=e.target.files[0];
-  if(!file) return;
-  let r=new FileReader();
-  r.onload=(ev)=>{
-    let linhas=ev.target.result.split("\n");
-    mesAtual=getMes();
-    let data=getDataMes();
-    for(let i=1;i<linhas.length;i++){
-      let cols=linhas[i].split(",");
-      let valor=parseFloat(cols[2]?.replace(",","."))||0;
-      data.items.push({desc:cols[1]||"Extrato",amount:Math.abs(valor),category:"Extrato"});
-    }
-    save();
-  };
-  r.readAsText(file);
 };
 
 window.del=(i)=>{
@@ -239,44 +203,48 @@ window.del=(i)=>{
 
 window.toggleTheme=()=>document.body.classList.toggle("light");
 
-/* 🎯 GRÁFICOS */
 function drawChart(items){
   let cat={};
   items.forEach(i=>cat[i.category]=(cat[i.category]||0)+i.amount);
   if(grafico) grafico.destroy();
-  grafico=new Chart(chart,{type:"doughnut",data:{labels:Object.keys(cat),datasets:[{data:Object.values(cat)}]}});
+  grafico=new Chart(document.getElementById("chart"),{
+    type:"doughnut",
+    data:{labels:Object.keys(cat),datasets:[{data:Object.values(cat)}]}
+  });
 }
 
 function drawEvolucao(){
   let meses=Object.keys(state.meses).sort();
   let valores=meses.map(m=>state.meses[m].items.reduce((a,b)=>a+b.amount,0));
   if(graficoEvolucao) graficoEvolucao.destroy();
-  graficoEvolucao=new Chart(chartEvolucao,{type:"line",data:{labels:meses,datasets:[{data:valores}]}})
+  graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{
+    type:"line",
+    data:{labels:meses,datasets:[{data:valores}]}
+  });
 }
 
 window.render=()=>{
   mesAtual=getMes();
   let d=getDataMes();
 
-  salary.value=d.salary;
-  month.value=mesAtual;
-  meta.value=d.meta||"";
+  document.getElementById("salary").value=d.salary;
+  document.getElementById("month").value=mesAtual;
+  document.getElementById("meta").value=d.meta||"";
 
   let total=d.items.reduce((a,b)=>a+b.amount,0);
   let sobra=d.salary-total;
 
-  kpis.innerHTML=`
+  document.getElementById("kpis").innerHTML=`
   <div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>
   <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
   <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
-  <div class="success">🏆 Você economizou R$ ${sobra.toFixed(2)}</div>
+  <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
   `;
 
-  list.innerHTML=d.items.map((i,idx)=>`
+  document.getElementById("list").innerHTML=d.items.map((i,idx)=>`
   <tr>
   <td>${i.desc}</td>
   <td>R$ ${i.amount.toFixed(2)}</td>
-  <td>${i.category}</td>
   <td><button onclick="del(${idx})">X</button></td>
   </tr>`).join("");
 
@@ -289,27 +257,27 @@ render();
 });
 </script>
 
-<!-- 🔐 FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+<!-- FIREBASE CORRIGIDO -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
-const app = initializeApp({
+<script>
+firebase.initializeApp({
   apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
   authDomain:"controle-gastos-pro.firebaseapp.com",
   projectId:"controle-gastos-pro"
 });
 
-const auth=getAuth(app);
-const provider=new GoogleAuthProvider();
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
 
-window.loginGoogle=()=>signInWithPopup(auth,provider);
-window.logout=()=>signOut(auth);
+function loginGoogle(){ auth.signInWithPopup(provider); }
+function logout(){ auth.signOut(); }
 
-onAuthStateChanged(auth,(user)=>{
-  loginScreen.style.display=user?"none":"flex";
-  app.style.display=user?"block":"none";
-  if(user) userName.innerText=user.displayName;
+auth.onAuthStateChanged(user=>{
+  document.getElementById("loginScreen").style.display=user?"none":"flex";
+  document.getElementById("app").style.display=user?"block":"none";
+  if(user) document.getElementById("userName").innerText=user.displayName;
 });
 </script>
 
