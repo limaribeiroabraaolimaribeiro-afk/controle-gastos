@@ -1,9 +1,14 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
+
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Controle de Gastos PRO</title>
+
+<!-- 🔥 PWA CONFIG -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#569cff">
 
 <style>
 :root{
@@ -93,6 +98,12 @@ button{
   cursor:pointer;
   opacity:.7;
 }
+
+/* 🔥 BOTÃO INSTALAR APP */
+.installBtn{
+  background:#4CAF50;
+  margin-top:10px;
+}
 </style>
 </head>
 
@@ -103,6 +114,9 @@ button{
   <h2>Controle de Gastos PRO</h2>
   <p>Entre com sua conta Google para continuar</p>
   <button onclick="loginGoogle()">Entrar com Google</button>
+
+  <!-- botão instalar -->
+  <button id="installBtn" class="installBtn" style="display:none">📲 Instalar App</button>
 </div>
 
 <!-- 📊 APP -->
@@ -133,7 +147,6 @@ button{
 <button onclick="saveSettings()">Salvar</button>
 </div>
 
-<!-- 📂 IMPORTAR EXTRATO -->
 <div class="card">
   <button onclick="document.getElementById('fileInput').click()">📂 Importar extrato (CSV)</button>
   <input type="file" id="fileInput" accept=".csv" style="display:none" onchange="importarExtrato(event)">
@@ -162,200 +175,30 @@ button{
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- 🔥 PWA SCRIPT -->
 <script>
-let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
-if(!state.meses) state = {meses:{}};
+let deferredPrompt;
 
-let mesAtual = "";
+window.addEventListener("beforeinstallprompt", (e)=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById("installBtn").style.display = "block";
+});
 
-function getMes(){
-  return month.value || new Date().toISOString().slice(0,7);
-}
-
-function getDataMes(){
-  if(!state.meses[mesAtual]){
-    state.meses[mesAtual] = {salary:0, items:[], meta:0};
+document.getElementById("installBtn").addEventListener("click", async ()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
   }
-  return state.meses[mesAtual];
+});
+</script>
+
+<!-- 🔥 SERVICE WORKER -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
 }
-
-function save(){
-  localStorage.setItem("gastos_pro",JSON.stringify(state));
-  render();
-}
-
-function saveSettings(){
-  mesAtual = getMes();
-  let data = getDataMes();
-  data.salary = Number(salary.value);
-  data.meta = Number(meta.value);
-  save();
-}
-
-function abrirAdd(){
-  mesAtual = getMes();
-  let dataMes = getDataMes();
-
-  const descricao = prompt("Descrição do gasto:");
-  const valor = parseFloat(prompt("Valor:"));
-  const categoria = prompt("Categoria (Moradia, Alimentação, Transporte, Lazer, Outros):") || "Outros";
-
-  if(!descricao || isNaN(valor)){
-    alert("Preencha corretamente!");
-    return;
-  }
-
-  dataMes.items.push({
-    desc: descricao,
-    amount: valor,
-    category: categoria
-  });
-
-  save();
-}
-
-/* 🔥 NOVA FUNÇÃO IMPORTAR CSV */
-function importarExtrato(event){
-  const file = event.target.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = function(e){
-    const text = e.target.result;
-    const linhas = text.split("\n");
-
-    mesAtual = getMes();
-    let dataMes = getDataMes();
-
-    for(let i=1; i<linhas.length; i++){
-      let cols = linhas[i].split(",");
-
-      if(cols.length < 2) continue;
-
-      let desc = cols[1] || "Extrato";
-      let valor = parseFloat(cols[2]?.replace(",","."));
-
-      if(isNaN(valor)) continue;
-
-      dataMes.items.push({
-        desc: desc,
-        amount: Math.abs(valor),
-        category: "Extrato"
-      });
-    }
-
-    save();
-    alert("Extrato importado com sucesso!");
-  };
-
-  reader.readAsText(file);
-}
-
-function del(i){
-  mesAtual = getMes();
-  let dataMes = getDataMes();
-  dataMes.items.splice(i,1);
-  save();
-}
-
-let grafico;
-let graficoEvolucao;
-
-function drawChart(items){
-  let ctx=document.getElementById("chart");
-  let cat={};
-
-  items.forEach(i=>{
-    cat[i.category]=(cat[i.category]||0)+i.amount;
-  });
-
-  if(grafico) grafico.destroy();
-
-  grafico = new Chart(ctx,{
-    type:"doughnut",
-    data:{
-      labels:Object.keys(cat),
-      datasets:[{data:Object.values(cat)}]
-    }
-  });
-}
-
-function drawEvolucao(){
-  let ctx = document.getElementById("chartEvolucao");
-  let meses = Object.keys(state.meses).sort();
-
-  let valores = meses.map(m=>{
-    return state.meses[m].items.reduce((a,b)=>a+b.amount,0);
-  });
-
-  if(graficoEvolucao) graficoEvolucao.destroy();
-
-  graficoEvolucao = new Chart(ctx,{
-    type:"line",
-    data:{
-      labels: meses,
-      datasets:[{
-        label:"Gastos por mês",
-        data: valores,
-        tension:0.3
-      }]
-    }
-  });
-}
-
-function render(){
-  mesAtual = getMes();
-  let dataMes = getDataMes();
-
-  salary.value = dataMes.salary;
-  month.value = mesAtual;
-  meta.value = dataMes.meta || "";
-
-  let total = dataMes.items.reduce((a,b)=>a+b.amount,0);
-  let sobra = dataMes.salary - total;
-
-  let alerta = total > dataMes.salary ? `<div class="danger">⚠️ Gastou mais que seu salário</div>` : "";
-
-  let metaStatus = dataMes.meta > 0
-    ? (sobra >= dataMes.meta
-      ? `<div class="success">🎯 Meta atingida!</div>`
-      : `<div class="warn">Faltam R$ ${(dataMes.meta - sobra).toFixed(2)}</div>`)
-    : "";
-
-  let mensagemEconomia = sobra > 0
-    ? `<div class="success">🏆 Esse mês você economizou R$ ${sobra.toFixed(2)}</div>`
-    : `<div class="danger">⚠️ Esse mês você não conseguiu economizar</div>`;
-
-  kpis.innerHTML = `
-  <div class="kpi">Salário<br><b>R$ ${dataMes.salary.toFixed(2)}</b></div>
-  <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
-  <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
-  ${alerta}
-  ${metaStatus}
-  ${mensagemEconomia}
-  `;
-
-  list.innerHTML = dataMes.items.map((i,idx)=>`
-  <tr>
-  <td>${i.desc}</td>
-  <td>R$ ${i.amount.toFixed(2)}</td>
-  <td>${i.category}</td>
-  <td><button onclick="del(${idx})">X</button></td>
-  </tr>
-  `).join("");
-
-  drawChart(dataMes.items);
-  drawEvolucao();
-}
-
-month.addEventListener("change", render);
-
-function toggleTheme(){
-  document.body.classList.toggle("light");
-}
-
-render();
 </script>
 
 <!-- 🔐 FIREBASE LOGIN (igual você já tinha) -->
