@@ -34,7 +34,7 @@ body{
   margin-bottom:12px;
 }
 h1{font-size:20px;margin:0 0 10px}
-input,button{
+input,select,button{
   width:100%;
   padding:10px;
   border-radius:10px;
@@ -59,9 +59,7 @@ button{
 .success{color:#4CAF50}
 .warn{color:#ffd166}
 .danger{color:#ff6b6b}
-
 #chart,#chartEvolucao{width:100%;height:220px}
-
 .fab{
   position:fixed;
   bottom:20px;
@@ -113,17 +111,49 @@ button{
 <button onclick="saveSettings()">Salvar</button>
 </div>
 
-<!-- 🧠 SIMULADOR FINANCEIRO ADICIONADO -->
+<!-- 🧠 SIMULADOR COMPLETO -->
 <div class="card">
-<h3>🧠 Simulador de Compra / Empréstimo</h3>
+<h3>🧠 Simulador Financeiro</h3>
+
+<label>Tipo</label>
+<select id="tipoSimulacao">
+  <option value="compra">Compra / Empréstimo</option>
+  <option value="investimento">Investimento</option>
+</select>
+
+<div id="areaCompra">
 
 <label>Valor total</label>
 <input id="valorSimulacao" type="number">
 
-<label>Quantidade de parcelas</label>
+<label>Parcelas</label>
 <input id="parcelasSimulacao" type="number">
 
-<button onclick="simular()">Simular</button>
+<label>Juros mensal (%)</label>
+<input id="jurosSimulacao" type="number">
+
+</div>
+
+<div id="areaInvestimento" style="display:none">
+
+<label>Valor a investir</label>
+<input id="valorInvestimento" type="number">
+
+<label>Meses</label>
+<input id="mesesInvestimento" type="number">
+
+<label>Tipo</label>
+<select id="tipoInvest">
+  <option value="cdi">CDI</option>
+  <option value="cdb">CDB</option>
+</select>
+
+<label>% do CDI</label>
+<input id="percentualInvest" type="number">
+
+</div>
+
+<button onclick="simularCompleto()">Calcular</button>
 
 <div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
 </div>
@@ -165,6 +195,16 @@ const monthInput = document.getElementById("month");
 monthInput.addEventListener("change", ()=>{
   mesAtual = getMes();
   render();
+});
+
+document.getElementById("tipoSimulacao").addEventListener("change", function(){
+  if(this.value=="compra"){
+    areaCompra.style.display="block";
+    areaInvestimento.style.display="none";
+  }else{
+    areaCompra.style.display="none";
+    areaInvestimento.style.display="block";
+  }
 });
 
 window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
@@ -227,39 +267,46 @@ function drawEvolucao(){
   });
 }
 
-/* 🧠 FUNÇÃO SIMULADOR */
-window.simular = function(){
+/* 🧠 SIMULADOR COMPLETO */
+window.simularCompleto = function(){
 
-  let valor = Number(document.getElementById("valorSimulacao").value);
-  let parcelas = Number(document.getElementById("parcelasSimulacao").value);
-
-  if(!valor || !parcelas){
-    alert("Preencha corretamente");
-    return;
-  }
+  let tipo = document.getElementById("tipoSimulacao").value;
 
   let d = getDataMes();
   let gastos = d.items.reduce((a,b)=>a+b.amount,0);
   let salario = d.salary;
 
-  let parcela = valor / parcelas;
-  let sobra = salario - gastos - parcela;
+  if(tipo=="compra"){
 
-  let resultado = "";
+    let valor = Number(valorSimulacao.value);
+    let parcelas = Number(parcelasSimulacao.value);
+    let juros = Number(jurosSimulacao.value)/100;
 
-  if(sobra > salario * 0.3){
-    resultado = "<span class='success'>🟢 Vale a pena</span>";
-  }else if(sobra > 0){
-    resultado = "<span class='warn'>🟡 Cuidado</span>";
-  }else{
-    resultado = "<span class='danger'>🔴 Não recomendado</span>";
-  }
+    let parcela = (valor * (1+juros)**parcelas)/parcelas;
+    let sobra = salario - gastos - parcela;
 
-  document.getElementById("resultadoSimulacao").innerHTML = `
-    Parcela: R$ ${parcela.toFixed(2)}<br>
-    Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>
+    let resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
+
+    resultadoSimulacao.innerHTML = `
+    Parcela com juros: R$ ${parcela.toFixed(2)}<br>
+    Sobra após pagar: R$ ${sobra.toFixed(2)}<br>
     ${resultado}
-  `;
+    `;
+  }else{
+
+    let valor = Number(valorInvestimento.value);
+    let meses = Number(mesesInvestimento.value);
+    let perc = Number(percentualInvest.value)/100;
+
+    let taxaCDI = 0.012;
+    let total = valor*(1+(taxaCDI*perc))**meses;
+    let lucro = total-valor;
+
+    resultadoSimulacao.innerHTML = `
+    Valor final: R$ ${total.toFixed(2)}<br>
+    Lucro: R$ ${lucro.toFixed(2)}
+    `;
+  }
 }
 
 window.render=()=>{
