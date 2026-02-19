@@ -1,79 +1,63 @@
 <!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Controle de Gastos PRO</title>
 
-<html lang="pt-BR">    
-<head>  
-<meta charset="utf-8"/>    
-<meta name="viewport" content="width=device-width, initial-scale=1"/>    
-<title>Controle de Gastos PRO</title>  
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#569cff">
 
-<link rel="manifest" href="manifest.json">    
-<meta name="theme-color" content="#569cff">  
-
-<style>    
-:root{    
-  --bg:#0b1020;    
-  --card:#ffffff0f;    
-  --text:#eaf0ff;    
-  --accent:#569cff;    
-}    
-
+<style>
+:root{
+  --bg:#0b1020;
+  --card:#ffffff0f;
+  --text:#eaf0ff;
+  --accent:#569cff;
+}
 .light{
   --bg:#f4f6ff;
   --card:#ffffff;
   --text:#111;
 }
-
 body{
   margin:0;
   background:var(--bg);
   color:var(--text);
   font-family:system-ui;
 }
-
 .wrap{max-width:980px;margin:auto;padding:16px}
-
 .card{
   background:var(--card);
   border-radius:12px;
   padding:14px;
   margin-bottom:12px;
 }
-
 h1{font-size:20px;margin:0 0 10px}
-
-input,select,button{
+input,button{
   width:100%;
   padding:10px;
   border-radius:10px;
   border:none;
   margin-top:5px;
 }
-
 button{
   background:var(--accent);
   color:#fff;
   cursor:pointer;
 }
-
 .kpis{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
-
 .kpi{
   background:var(--card);
   padding:10px;
   border-radius:10px;
 }
-
 .success{color:#4CAF50}
-
-#chart, #chartEvolucao{
-  width:100%;
-  height:220px;
-}
-
+#chart,#chartEvolucao{width:100%;height:220px}
 .fab{
   position:fixed;
   bottom:20px;
@@ -88,73 +72,67 @@ button{
   align-items:center;
   justify-content:center;
 }
+.toggle{float:right;cursor:pointer}
+</style>
+</head>
 
-.toggle{
-  float:right;
-  font-size:12px;
-  cursor:pointer;
-  opacity:.7;
-}
-</style>  
-</head>  
-
-<body>  
+<body>
 
 <div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
-  <h2>Controle de Gastos PRO</h2>    
-  <button onclick="loginGoogle()">Entrar com Google</button>    
-</div>  
+  <h2>Controle de Gastos PRO</h2>
+  <button onclick="loginGoogle()">Entrar com Google</button>
+</div>
 
-<div id="app" style="display:none">    
-<div class="wrap">  
+<div id="app" style="display:none">
+<div class="wrap">
 
-<h1>Controle de Gastos PRO    
-<span class="toggle" onclick="toggleTheme()">🌙/☀️</span>    
-</h1>  
+<h1>Controle de Gastos PRO
+<span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
+</h1>
 
-<div class="card">    
-  <b id="userName"></b>    
-  <br><br>    
-  <button onclick="logout()">Sair</button>    
-</div>  
+<div class="card">
+<b id="userName"></b>
+<br><br>
+<button onclick="logout()">Sair</button>
+</div>
 
-<div class="card">    
-<label>Salário</label>    
-<input id="salary" type="number">  
+<div class="card">
+<label>Salário</label>
+<input id="salary" type="number">
 
-<label>Mês</label>  
-<input id="month" type="month">  
+<label>Mês</label>
+<input id="month" type="month">
 
 <label>Meta</label>
 <input id="meta" type="number">
 
 <button onclick="saveSettings()">Salvar</button>
-</div>  
+</div>
 
-<div class="kpis" id="kpis"></div>  
+<div class="kpis" id="kpis"></div>
 
-<div class="card">    
-<canvas id="chart"></canvas>    
-</div>  
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
 
-<div class="card">    
-<h3>Evolução</h3>    
-<canvas id="chartEvolucao"></canvas>    
-</div>  
+<div class="card">
+<h3>Evolução</h3>
+<canvas id="chartEvolucao"></canvas>
+</div>
 
-<div class="card">    
-<table id="list"></table>    
-</div>  
+<div class="card">
+<table id="list"></table>
+</div>
 
-</div>  
+</div>
 
-<div class="fab" onclick="abrirAdd()">+</div>    
-</div>  
+<div class="fab" onclick="abrirAdd()">+</div>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>    
-window.addEventListener("DOMContentLoaded", ()=>{    
+<script>
+window.addEventListener("DOMContentLoaded", ()=>{
 
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
 if(!state.meses) state = {meses:{}};
@@ -163,7 +141,15 @@ let mesAtual = "";
 let grafico;
 let graficoEvolucao;
 
-window.getMes = ()=> document.getElementById("month").value || new Date().toISOString().slice(0,7);
+const monthInput = document.getElementById("month");
+
+// 👉 quando muda o mês
+monthInput.addEventListener("change", ()=>{
+  mesAtual = getMes();
+  render();
+});
+
+window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
 
 window.getDataMes = ()=>{
   if(!state.meses[mesAtual]){
@@ -179,19 +165,19 @@ window.save = ()=>{
 
 window.saveSettings = ()=>{
   mesAtual=getMes();
-  let data=getDataMes();
-  data.salary=Number(document.getElementById("salary").value);
-  data.meta=Number(document.getElementById("meta").value);
+  let d=getDataMes();
+  d.salary=Number(salary.value);
+  d.meta=Number(meta.value);
   save();
 };
 
 window.abrirAdd = ()=>{
   mesAtual=getMes();
-  let data=getDataMes();
-  let d=prompt("Descrição");
-  let v=parseFloat(prompt("Valor"));
-  if(!d||isNaN(v)) return;
-  data.items.push({desc:d,amount:v,category:"Outros"});
+  let d=getDataMes();
+  let desc=prompt("Descrição");
+  let valor=parseFloat(prompt("Valor"));
+  if(!desc||isNaN(valor)) return;
+  d.items.push({desc,amount:valor,category:"Outros"});
   save();
 };
 
@@ -203,42 +189,18 @@ window.del=(i)=>{
 
 window.toggleTheme=()=>document.body.classList.toggle("light");
 
-
-// ⭐⭐⭐ FUNÇÃO MELHORADA (AGORA MOSTRA CADA GASTO SEPARADO)
+/* GRÁFICO POR GASTO */
 function drawChart(items){
-
-  let labels = items.map(i => i.desc);
-  let valores = items.map(i => i.amount);
-
-  const cores = [
-    "#4CAF50","#2196F3","#FF9800","#E91E63","#9C27B0",
-    "#00BCD4","#FFC107","#8BC34A","#FF5722","#3F51B5",
-    "#009688","#673AB7","#CDDC39","#795548","#607D8B"
-  ];
-
+  let labels = items.map(i=>i.desc);
+  let valores = items.map(i=>i.amount);
   if(grafico) grafico.destroy();
-
   grafico=new Chart(document.getElementById("chart"),{
     type:"doughnut",
-    data:{
-      labels: labels,
-      datasets:[{
-        data: valores,
-        backgroundColor: cores.slice(0, valores.length),
-        borderWidth:2
-      }]
-    },
-    options:{
-      plugins:{
-        legend:{
-          labels:{ color:"#eaf0ff" }
-        }
-      }
-    }
+    data:{labels,datasets:[{data:valores}]}
   });
 }
 
-
+/* EVOLUÇÃO MENSAL */
 function drawEvolucao(){
   let meses=Object.keys(state.meses).sort();
   let valores=meses.map(m=>state.meses[m].items.reduce((a,b)=>a+b.amount,0));
@@ -253,25 +215,25 @@ window.render=()=>{
   mesAtual=getMes();
   let d=getDataMes();
 
-  document.getElementById("salary").value=d.salary;
-  document.getElementById("month").value=mesAtual;
-  document.getElementById("meta").value=d.meta||"";
+  salary.value=d.salary;
+  monthInput.value=mesAtual;
+  meta.value=d.meta||"";
 
   let total=d.items.reduce((a,b)=>a+b.amount,0);
   let sobra=d.salary-total;
 
-  document.getElementById("kpis").innerHTML=`
-  <div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>    
-  <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>    
-  <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>    
-  <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>    
+  kpis.innerHTML=`
+  <div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>
+  <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
+  <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
+  <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
   `;
 
-  document.getElementById("list").innerHTML=d.items.map((i,idx)=>`
-  <tr>    
-  <td>${i.desc}</td>    
-  <td>R$ ${i.amount.toFixed(2)}</td>    
-  <td><button onclick="del(${idx})">X</button></td>    
+  list.innerHTML=d.items.map((i,idx)=>`
+  <tr>
+  <td>${i.desc}</td>
+  <td>R$ ${i.amount.toFixed(2)}</td>
+  <td><button onclick="del(${idx})">X</button></td>
   </tr>`).join("");
 
   drawChart(d.items);
@@ -281,11 +243,11 @@ window.render=()=>{
 render();
 
 });
-</script>  
+</script>
 
 <!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>  
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
 <script>
 firebase.initializeApp({
@@ -305,7 +267,7 @@ document.getElementById("loginScreen").style.display=user?"none":"flex";
 document.getElementById("app").style.display=user?"block":"none";
 if(user) document.getElementById("userName").innerText=user.displayName;
 });
-</script>  
+</script>
 
 </body>
 </html>
