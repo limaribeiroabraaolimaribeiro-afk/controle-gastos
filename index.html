@@ -82,6 +82,15 @@ button{
 
 <div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
   <h2>Controle de Gastos PRO</h2>
+
+  <input id="email" type="email" placeholder="Seu e-mail">
+  <input id="senha" type="password" placeholder="Sua senha">
+
+  <button onclick="loginEmail()">Entrar com Email</button>
+  <button onclick="registrarEmail()">Criar conta</button>
+
+  <hr style="margin:10px 0;width:80%">
+
   <button onclick="loginGoogle()">Entrar com Google</button>
 </div>
 
@@ -177,6 +186,8 @@ Controle de Gastos PRO
 <script>
 window.addEventListener("DOMContentLoaded", ()=>{
 
+  const API = "https://api-rf1w.onrender.com";
+
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
 if(!state.meses) state = {meses:{}};
 
@@ -224,21 +235,48 @@ window.save = ()=>{
 window.saveSettings = ()=>{
   mesAtual=getMes();
   let d=getDataMes();
+
   d.salary=Number(salary.value);
   d.meta=Number(meta.value);
+
+  // 🔥 envia para API
+  fetch(API + "/salvarMes", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      userId: 1,
+      mes: mesAtual,
+      salary: d.salary,
+      meta: d.meta
+    })
+  });
+
   save();
 };
-
 window.abrirAdd = ()=>{
   mesAtual=getMes();
   let d=getDataMes();
+
   let desc=prompt("Descrição");
   let valor=parseFloat(prompt("Valor"));
   if(!desc||isNaN(valor)) return;
+
   d.items.push({desc,amount:valor,category:"Outros"});
+
+  // 🔥 envia para API
+  fetch(API + "/addGasto", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      userId: 1,
+      mes: mesAtual,
+      desc: desc,
+      amount: valor
+    })
+  });
+
   save();
 };
-
 window.del=(i)=>{
   mesAtual=getMes();
   getDataMes().items.splice(i,1);
@@ -325,6 +363,20 @@ Lucro: R$ ${lucro.toFixed(2)}
 }
 
 window.render=()=>{
+  fetch(API + "/mes/1/" + mesAtual)
+  .then(r=>r.json())
+  .then(data=>{
+    if(data && data.length){
+      let d = getDataMes();
+      d.items = data.filter(x=>x.desc).map(x=>({
+        desc:x.desc,
+        amount:x.amount
+      }));
+      d.salary = data[0].salary || 0;
+      d.meta = data[0].meta || 0;
+      localStorage.setItem("gastos_pro",JSON.stringify(state));
+    }
+  });
   mesAtual=getMes();
   let d=getDataMes();
 
@@ -383,3 +435,4 @@ if(user) document.getElementById("userName").innerText=user.displayName;
 
 </body>
 </html>
+
