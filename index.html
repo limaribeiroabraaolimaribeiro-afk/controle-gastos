@@ -20,87 +20,161 @@
   --card:#ffffff;
   --text:#111;
 }
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui;
+}
 .wrap{max-width:980px;margin:auto;padding:16px}
-.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px;}
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:14px;
+  margin-bottom:12px;
+}
 h1{font-size:20px;margin:0 0 10px}
-input,select,button{width:100%;padding:10px;border-radius:10px;border:none;margin-top:5px;}
-button{background:var(--accent);color:#fff;cursor:pointer;}
-.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
-.kpi{background:var(--card);padding:10px;border-radius:10px;}
+input,select,button{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-top:5px;
+}
+button{
+  background:var(--accent);
+  color:#fff;
+  cursor:pointer;
+}
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.kpi{
+  background:var(--card);
+  padding:10px;
+  border-radius:10px;
+}
 .success{color:#4CAF50}
+.warn{color:#ffd166}
+.danger{color:#ff6b6b}
 #chart,#chartEvolucao{width:100%;height:220px}
-.fab{position:fixed;bottom:20px;right:20px;background:#4CAF50;color:white;border-radius:50%;width:55px;height:55px;font-size:28px;display:flex;align-items:center;justify-content:center;}
+.fab{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#4CAF50;
+  color:white;
+  border-radius:50%;
+  width:55px;
+  height:55px;
+  font-size:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 .toggle{float:right;cursor:pointer}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
   <h2>Controle de Gastos PRO</h2>
   <button onclick="loginGoogle()">Entrar com Google</button>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none">
-
 <div class="wrap">
 
 <h1>
 Controle de Gastos PRO
 <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
-<span class="toggle" onclick="abrirConfigFull()">⚙️</span>
+<span class="toggle" onclick="abrirConfig()">⚙️</span>
 </h1>
 
-<!-- PLANEJAMENTO -->
+<!-- ⚙️ CONFIGURAÇÕES -->
+<div id="configBox" class="card" style="display:none">
+<h3>⚙️ Configurações</h3>
+<b id="userName"></b><br>
+<small id="userEmail"></small>
+<br><br>
+<button onclick="logout()">Sair da conta</button>
+</div>
+
+<!-- 💰 PLANEJAMENTO MENSAL NOVO -->
 <div class="card">
 <h3>💰 Planejamento Mensal</h3>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-<div>
-<label>Salário</label>
-<input id="salary" type="number">
-</div>
-<div>
-<label>Mês</label>
-<input id="month" type="month">
-</div>
+  <div>
+    <label>Salário</label>
+    <input id="salary" type="number">
+  </div>
+
+  <div>
+    <label>Mês</label>
+    <input id="month" type="month">
+  </div>
 </div>
 
 <label>Meta</label>
 <input id="meta" type="number">
 
-<div>
-<button id="btnSalvar" onclick="saveSettings()">Salvar</button>
-<button id="btnEditar" style="display:none;background:#ffd166;color:#000" onclick="editarPlanejamento()">Editar</button>
+<div id="areaBotoes">
+  <button id="btnSalvar" onclick="saveSettings()">Salvar</button>
+  <button id="btnEditar" style="display:none;background:#ffd166;color:#000" onclick="editarPlanejamento()">Editar</button>
 </div>
 
 </div>
 
-<!-- SIMULADOR -->
+<!-- 🧠 SIMULADOR -->
 <div class="card">
 <h3>🧠 Simulador Financeiro</h3>
 
-<label>Valor</label>
+<label>Tipo</label>
+<select id="tipoSimulacao">
+  <option value="compra">Compra / Empréstimo</option>
+  <option value="investimento">Investimento</option>
+</select>
+
+<div id="areaCompra">
+<label>Valor total</label>
 <input id="valorSimulacao" type="number">
 
 <label>Parcelas</label>
 <input id="parcelasSimulacao" type="number">
 
-<label>Juros (%)</label>
+<label>Juros mensal (%)</label>
 <input id="jurosSimulacao" type="number">
+</div>
+
+<div id="areaInvestimento" style="display:none">
+<label>Valor a investir</label>
+<input id="valorInvestimento" type="number">
+
+<label>Meses</label>
+<input id="mesesInvestimento" type="number">
+
+<label>% do CDI</label>
+<input id="percentualInvest" type="number">
+</div>
 
 <button onclick="simularCompleto()">Calcular</button>
-
-<div id="resultadoSimulacao"></div>
+<div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
 </div>
 
 <div class="kpis" id="kpis"></div>
 
-<div class="card"><canvas id="chart"></canvas></div>
-<div class="card"><canvas id="chartEvolucao"></canvas></div>
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
+
+<div class="card">
+<h3>Evolução</h3>
+<canvas id="chartEvolucao"></canvas>
+</div>
 
 <div class="card">
 <table id="list"></table>
@@ -111,209 +185,165 @@ Controle de Gastos PRO
 <div class="fab" onclick="abrirAdd()">+</div>
 </div>
 
-<!-- CONFIG FULL -->
-<div id="configFull" style="display:none">
-<div class="wrap">
-
-<h1><span onclick="fecharConfigFull()" style="cursor:pointer">⬅️</span> Configurações</h1>
-
-<div class="card">
-<b id="userName2"></b><br>
-<small id="userEmail2"></small>
-<br><br>
-<button onclick="logout()">Sair da conta</button>
-
-<hr>
-
-<button onclick="toggleTheme()">Alternar tema</button>
-
-</div>
-
-</div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 window.addEventListener("DOMContentLoaded", ()=>{
 
-/* =========================
-   🔥 CORREÇÕES DE FUNÇÕES
-========================= */
-
-// alternar tema corretamente
-window.toggleTheme = function(){
-  document.body.classList.toggle("light");
-};
-
-// controlar troca do tipo de simulador
-const tipoSelect = document.getElementById("tipoSimulacao");
-const areaCompra = document.getElementById("areaCompra");
-const areaInvest = document.getElementById("areaInvestimento");
-
-if(tipoSelect){
-  tipoSelect.addEventListener("change", function(){
-    if(this.value === "investimento"){
-      if(areaCompra) areaCompra.style.display = "none";
-      if(areaInvest) areaInvest.style.display = "block";
-    }else{
-      if(areaCompra) areaCompra.style.display = "block";
-      if(areaInvest) areaInvest.style.display = "none";
-    }
-  });
-}
-
-// garantir que os botões funcionem sempre
-document.getElementById("btnSalvar")?.addEventListener("click", saveSettings);
-document.getElementById("btnEditar")?.addEventListener("click", editarPlanejamento);
-
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
 if(!state.meses) state = {meses:{}};
 
-let mesAtual="";
+let mesAtual = "";
 let grafico;
 let graficoEvolucao;
 
-const monthInput=document.getElementById("month");
+const monthInput = document.getElementById("month");
 
-window.abrirConfigFull=()=>{
-app.style.display="none";
-configFull.style.display="block";
-}
-window.fecharConfigFull=()=>{
-configFull.style.display="none";
-app.style.display="block";
-}
-
-window.getMes=()=>monthInput.value||new Date().toISOString().slice(0,7);
-
-window.getDataMes=()=>{
-if(!state.meses[mesAtual]) state.meses[mesAtual]={salary:0,items:[],meta:0};
-return state.meses[mesAtual];
+window.abrirConfig = ()=>{
+  let box = document.getElementById("configBox");
+  box.style.display = box.style.display=="none" ? "block" : "none";
 };
 
-window.save=()=>{
-localStorage.setItem("gastos_pro",JSON.stringify(state));
-render();
+window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
+
+window.getDataMes = ()=>{
+  if(!state.meses[mesAtual]){
+    state.meses[mesAtual]={salary:0,items:[],meta:0};
+  }
+  return state.meses[mesAtual];
 };
 
-window.saveSettings=()=>{
-mesAtual=getMes();
-let d=getDataMes();
-d.salary=Number(salary.value);
-d.meta=Number(meta.value);
-save();
-
-salary.disabled=true;
-monthInput.disabled=true;
-meta.disabled=true;
-btnSalvar.style.display="none";
-btnEditar.style.display="block";
+window.save = ()=>{
+  localStorage.setItem("gastos_pro",JSON.stringify(state));
+  render();
 };
 
-window.editarPlanejamento=()=>{
-salary.disabled=false;
-monthInput.disabled=false;
-meta.disabled=false;
-btnSalvar.style.display="block";
-btnEditar.style.display="none";
+window.saveSettings = ()=>{
+  mesAtual=getMes();
+  let d=getDataMes();
+  d.salary=Number(salary.value);
+  d.meta=Number(meta.value);
+  save();
+
+  salary.disabled = true;
+  monthInput.disabled = true;
+  meta.disabled = true;
+
+  btnSalvar.style.display = "none";
+  btnEditar.style.display = "block";
 };
 
-window.abrirAdd=()=>{
-mesAtual=getMes();
-let d=getDataMes();
-let desc=prompt("Descrição");
-let valor=parseFloat(prompt("Valor"));
-if(!desc||isNaN(valor))return;
-d.items.push({desc,amount:valor});
-save();
+window.editarPlanejamento = function(){
+  salary.disabled = false;
+  monthInput.disabled = false;
+  meta.disabled = false;
+
+  btnSalvar.style.display = "block";
+  btnEditar.style.display = "none";
+};
+
+window.abrirAdd = ()=>{
+  mesAtual=getMes();
+  let d=getDataMes();
+  let desc=prompt("Descrição");
+  let valor=parseFloat(prompt("Valor"));
+  if(!desc||isNaN(valor)) return;
+  d.items.push({desc,amount:valor});
+  save();
 };
 
 window.del=(i)=>{
-getDataMes().items.splice(i,1);
-save();
+  mesAtual=getMes();
+  getDataMes().items.splice(i,1);
+  save();
 };
 
-window.simularCompleto = function(){
-
-let tipo = document.getElementById("tipoSimulacao").value;
-
-if(tipo === "compra"){
-
-  let valor = Number(valorSimulacao.value);
-  let parcelas = Number(parcelasSimulacao.value);
-  let juros = Number(jurosSimulacao.value)/100;
-
-  let parcela = valor * ( juros / (1 - Math.pow(1+juros, -parcelas)) );
-  let total = parcela * parcelas;
-  let jurosTotal = total - valor;
-
-  resultadoSimulacao.innerHTML = `
-  Parcela: R$ ${parcela.toFixed(2)}<br>
-  Total pago: R$ ${total.toFixed(2)}<br>
-  Juros: R$ ${jurosTotal.toFixed(2)}
-  `;
-
-}else{
-
-  let valor = Number(valorInvestimento.value);
-  let meses = Number(mesesInvestimento.value);
-  let perc = Number(percentualInvest.value)/100;
-
-  let taxa = 0.012; // CDI médio
-
-  let total = valor * Math.pow(1 + (taxa * perc), meses);
-  let lucro = total - valor;
-
-  resultadoSimulacao.innerHTML = `
-  Valor final: R$ ${total.toFixed(2)}<br>
-  Lucro: R$ ${lucro.toFixed(2)}
-  `;
-}
-
-};
+window.toggleTheme=()=>document.body.classList.toggle("light");
 
 function drawChart(items){
-let labels=items.map(i=>i.desc);
-let valores=items.map(i=>i.amount);
-if(grafico)grafico.destroy();
-grafico=new Chart(chart,{type:"doughnut",data:{labels,datasets:[{data:valores}]}})
+  let labels = items.map(i=>i.desc);
+  let valores = items.map(i=>i.amount);
+  if(grafico) grafico.destroy();
+  grafico=new Chart(document.getElementById("chart"),{
+    type:"doughnut",
+    data:{labels,datasets:[{data:valores}]}
+  });
 }
 
 function drawEvolucao(){
-let meses=Object.keys(state.meses);
-let valores=meses.map(m=>state.meses[m].items.reduce((a,b)=>a+b.amount,0));
-if(graficoEvolucao)graficoEvolucao.destroy();
-graficoEvolucao=new Chart(chartEvolucao,{type:"line",data:{labels:meses,datasets:[{data:valores}]}})
+  let meses=Object.keys(state.meses).sort();
+  let valores=meses.map(m=>state.meses[m].items.reduce((a,b)=>a+b.amount,0));
+  if(graficoEvolucao) graficoEvolucao.destroy();
+  graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{
+    type:"line",
+    data:{labels:meses,datasets:[{data:valores}]}
+  });
+}
+
+window.simularCompleto = function(){
+let tipo = document.getElementById("tipoSimulacao").value;
+let d = getDataMes();
+let gastos = d.items.reduce((a,b)=>a+b.amount,0);
+let salario = d.salary;
+
+if(tipo=="compra"){
+let valor = Number(valorSimulacao.value);
+let parcelas = Number(parcelasSimulacao.value);
+let juros = Number(jurosSimulacao.value)/100;
+
+let i = juros;
+let n = parcelas;
+
+let parcela = valor * ( i / (1 - Math.pow(1+i, -n)) );
+let total = parcela * n;
+let jurosTotal = total - valor;
+
+let sobra = salario - gastos - parcela;
+
+resultadoSimulacao.innerHTML = `
+Parcela: R$ ${parcela.toFixed(2)}<br>
+Total: R$ ${total.toFixed(2)}<br>
+Juros: R$ ${jurosTotal.toFixed(2)}<br>
+Sobra: R$ ${sobra.toFixed(2)}
+`;
+}
 }
 
 window.render=()=>{
-mesAtual=getMes();
-let d=getDataMes();
+  mesAtual=getMes();
+  let d=getDataMes();
 
-salary.value=d.salary;
-monthInput.value=mesAtual;
-meta.value=d.meta;
+  salary.value=d.salary;
+  monthInput.value=mesAtual;
+  meta.value=d.meta||"";
 
-let total=d.items.reduce((a,b)=>a+b.amount,0);
-let sobra=d.salary-total;
+  if(d.salary>0){
+    salary.disabled=true;
+    monthInput.disabled=true;
+    meta.disabled=true;
+    btnSalvar.style.display="none";
+    btnEditar.style.display="block";
+  }
 
-kpis.innerHTML=`
-<div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>
-<div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
-<div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
-<div class="success">Economia R$ ${sobra.toFixed(2)}</div>
-`;
+  let total=d.items.reduce((a,b)=>a+b.amount,0);
+  let sobra=d.salary-total;
 
-list.innerHTML=d.items.map((i,idx)=>`
-<tr>
-<td>${i.desc}</td>
-<td>R$ ${i.amount.toFixed(2)}</td>
-<td><button onclick="del(${idx})">X</button></td>
-</tr>`).join("");
+  kpis.innerHTML=`
+  <div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>
+  <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
+  <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
+  <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
+  `;
 
-drawChart(d.items);
-drawEvolucao();
+  list.innerHTML=d.items.map((i,idx)=>`
+  <tr>
+  <td>${i.desc}</td>
+  <td>R$ ${i.amount.toFixed(2)}</td>
+  <td><button onclick="del(${idx})">X</button></td>
+  </tr>`).join("");
+
+  drawChart(d.items);
+  drawEvolucao();
 };
 
 render();
@@ -331,24 +361,21 @@ authDomain:"controle-gastos-pro.firebaseapp.com",
 projectId:"controle-gastos-pro"
 });
 
-const auth=firebase.auth();
-const provider=new firebase.auth.GoogleAuthProvider();
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
 
-function loginGoogle(){auth.signInWithRedirect(provider);}
-auth.getRedirectResult();
-
-function logout(){auth.signOut();}
+function loginGoogle(){ auth.signInWithPopup(provider); }
+function logout(){ auth.signOut(); }
 
 auth.onAuthStateChanged(user=>{
-loginScreen.style.display=user?"none":"flex";
-app.style.display=user?"block":"none";
+document.getElementById("loginScreen").style.display=user?"none":"flex";
+document.getElementById("app").style.display=user?"block":"none";
 if(user){
-userName2.innerText=user.displayName;
-userEmail2.innerText=user.email;
+document.getElementById("userName").innerText=user.displayName;
+document.getElementById("userEmail").innerText=user.email;
 }
 });
 </script>
 
 </body>
 </html>
-
