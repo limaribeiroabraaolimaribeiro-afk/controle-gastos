@@ -410,6 +410,9 @@ render();
 });
 </script>
 
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
@@ -450,7 +453,7 @@ function registrarEmail(){
     .catch(e=>alert(e.message));
 }
 
-// 🔥 CONTROLE DE LOGIN
+// CONTROLE DE LOGIN
 auth.onAuthStateChanged(user => {
 
   window.USER_ID = user ? user.uid : null;
@@ -465,48 +468,10 @@ auth.onAuthStateChanged(user => {
 
 });
 </script>
-apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-authDomain:"controle-gastos-pro.firebaseapp.com",
-projectId:"controle-gastos-pro"
-});
-
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
-
-function loginGoogle(){ auth.signInWithPopup(provider); }
-function logout(){ auth.signOut(); }
-  function loginEmail(){
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
-
-  auth.signInWithEmailAndPassword(email, senha)
-    .catch(e=>alert(e.message));
-}
-
-function registrarEmail(){
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
-
-  auth.createUserWithEmailAndPassword(email, senha)
-    .then(()=>alert("Conta criada com sucesso!"))
-    .catch(e=>alert(e.message));
-}
-
-auth.onAuthStateChanged(user=>{
-  window.USER_ID = user ? user.uid : null;
-
-  document.getElementById("loginScreen").style.display=user?"none":"flex";
-  document.getElementById("app").style.display=user?"block":"none";
-  if(user) document.getElementById("userName").innerText=user.displayName || user.email;
-});
-document.getElementById("loginScreen").style.display=user?"none":"flex";
-document.getElementById("app").style.display=user?"block":"none";
-if(user) document.getElementById("userName").innerText=user.displayName;
-});
-</script>
 
 </body>
 </html>
+
 
 
 
