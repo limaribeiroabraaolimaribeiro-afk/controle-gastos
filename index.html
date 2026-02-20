@@ -436,8 +436,18 @@ function logout(){
 
 // LOGIN EMAIL
 function loginEmail(){
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+
+  if(!email || !senha){
+    alert("Preencha email e senha");
+    return;
+  }
+
+  if(!email.includes("@")){
+    alert("Digite um email válido");
+    return;
+  }
 
   auth.signInWithEmailAndPassword(email, senha)
     .catch(e=>alert(e.message));
@@ -445,8 +455,23 @@ function loginEmail(){
 
 // CRIAR CONTA
 function registrarEmail(){
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+
+  if(!email || !senha){
+    alert("Preencha email e senha");
+    return;
+  }
+
+  if(!email.includes("@")){
+    alert("Digite um email válido");
+    return;
+  }
+
+  if(senha.length < 6){
+    alert("A senha deve ter pelo menos 6 caracteres");
+    return;
+  }
 
   auth.createUserWithEmailAndPassword(email, senha)
     .then(()=>alert("Conta criada com sucesso!"))
@@ -471,6 +496,7 @@ auth.onAuthStateChanged(user => {
 
 </body>
 </html>
+
 
 
 
