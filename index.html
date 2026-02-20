@@ -244,7 +244,7 @@ window.saveSettings = ()=>{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({
-      userId: 1,
+      userId: window.USER_ID,
       mes: mesAtual,
       salary: d.salary,
       meta: d.meta
@@ -268,7 +268,7 @@ window.abrirAdd = ()=>{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({
-      userId: 1,
+      userId: window.USER_ID,
       mes: mesAtual,
       desc: desc,
       amount: valor
@@ -425,8 +425,30 @@ const provider = new firebase.auth.GoogleAuthProvider();
 
 function loginGoogle(){ auth.signInWithPopup(provider); }
 function logout(){ auth.signOut(); }
+  function loginEmail(){
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
+
+  auth.signInWithEmailAndPassword(email, senha)
+    .catch(e=>alert(e.message));
+}
+
+function registrarEmail(){
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
+
+  auth.createUserWithEmailAndPassword(email, senha)
+    .then(()=>alert("Conta criada com sucesso!"))
+    .catch(e=>alert(e.message));
+}
 
 auth.onAuthStateChanged(user=>{
+  window.USER_ID = user ? user.uid : null;
+
+  document.getElementById("loginScreen").style.display=user?"none":"flex";
+  document.getElementById("app").style.display=user?"block":"none";
+  if(user) document.getElementById("userName").innerText=user.displayName || user.email;
+});
 document.getElementById("loginScreen").style.display=user?"none":"flex";
 document.getElementById("app").style.display=user?"block":"none";
 if(user) document.getElementById("userName").innerText=user.displayName;
@@ -435,4 +457,5 @@ if(user) document.getElementById("userName").innerText=user.displayName;
 
 </body>
 </html>
+
 
