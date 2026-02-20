@@ -188,8 +188,7 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
   const API = "https://api-rf1w.onrender.com";
 
-let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
-if(!state.meses) state = {meses:{}};
+let state = {meses:{}};
 
 let mesAtual = "";
 let grafico;
@@ -481,7 +480,7 @@ function registrarEmail(){
 // CONTROLE DE LOGIN
 auth.onAuthStateChanged(user => {
 
-  // 🔥 LIMPA OS DADOS AO TROCAR DE USUÁRIO
+  // limpa dados antigos
   localStorage.removeItem("gastos_pro");
 
   window.USER_ID = user ? user.uid : null;
@@ -492,6 +491,10 @@ auth.onAuthStateChanged(user => {
   if(user){
     document.getElementById("userName").innerText =
       user.displayName || user.email;
+
+    // 🔥 AGORA SIM CARREGA OS DADOS DO USUÁRIO CERTO
+    state = {meses:{}};
+    render();
   }
 
 });
@@ -499,6 +502,7 @@ auth.onAuthStateChanged(user => {
 
 </body>
 </html>
+
 
 
 
