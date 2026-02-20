@@ -20,60 +20,17 @@
   --card:#ffffff;
   --text:#111;
 }
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:system-ui;
-}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui;}
 .wrap{max-width:980px;margin:auto;padding:16px}
-.card{
-  background:var(--card);
-  border-radius:12px;
-  padding:14px;
-  margin-bottom:12px;
-}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px;}
 h1{font-size:20px;margin:0 0 10px}
-input,select,button{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  margin-top:5px;
-}
-button{
-  background:var(--accent);
-  color:#fff;
-  cursor:pointer;
-}
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-.kpi{
-  background:var(--card);
-  padding:10px;
-  border-radius:10px;
-}
+input,select,button{width:100%;padding:10px;border-radius:10px;border:none;margin-top:5px;}
+button{background:var(--accent);color:#fff;cursor:pointer;}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.kpi{background:var(--card);padding:10px;border-radius:10px;}
 .success{color:#4CAF50}
-.warn{color:#ffd166}
-.danger{color:#ff6b6b}
 #chart,#chartEvolucao{width:100%;height:220px}
-.fab{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#4CAF50;
-  color:white;
-  border-radius:50%;
-  width:55px;
-  height:55px;
-  font-size:28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+.fab{position:fixed;bottom:20px;right:20px;background:#4CAF50;color:white;border-radius:50%;width:55px;height:55px;font-size:28px;display:flex;align-items:center;justify-content:center;}
 .toggle{float:right;cursor:pointer}
 </style>
 </head>
@@ -97,36 +54,27 @@ Controle de Gastos PRO
 <span class="toggle" onclick="abrirConfigFull()">⚙️</span>
 </h1>
 
-<!-- ⚙️ CONFIG SIMPLES (mantido) -->
-<div id="configBox" class="card" style="display:none">
-<h3>⚙️ Configurações</h3>
-<b id="userName"></b><br>
-<small id="userEmail"></small>
-<br><br>
-<button onclick="logout()">Sair da conta</button>
-</div>
-
-<!-- 💰 PLANEJAMENTO -->
+<!-- PLANEJAMENTO -->
 <div class="card">
 <h3>💰 Planejamento Mensal</h3>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-  <div>
-    <label>Salário</label>
-    <input id="salary" type="number">
-  </div>
-  <div>
-    <label>Mês</label>
-    <input id="month" type="month">
-  </div>
+<div>
+<label>Salário</label>
+<input id="salary" type="number">
+</div>
+<div>
+<label>Mês</label>
+<input id="month" type="month">
+</div>
 </div>
 
 <label>Meta</label>
 <input id="meta" type="number">
 
-<div id="areaBotoes">
-  <button id="btnSalvar" onclick="saveSettings()">Salvar</button>
-  <button id="btnEditar" style="display:none;background:#ffd166;color:#000" onclick="editarPlanejamento()">Editar</button>
+<div>
+<button id="btnSalvar" onclick="saveSettings()">Salvar</button>
+<button id="btnEditar" style="display:none;background:#ffd166;color:#000" onclick="editarPlanejamento()">Editar</button>
 </div>
 
 </div>
@@ -135,23 +83,18 @@ Controle de Gastos PRO
 <div class="card">
 <h3>🧠 Simulador Financeiro</h3>
 
-<label>Tipo</label>
-<select id="tipoSimulacao">
-  <option value="compra">Compra / Empréstimo</option>
-  <option value="investimento">Investimento</option>
-</select>
-
-<div id="areaCompra">
-<label>Valor total</label>
+<label>Valor</label>
 <input id="valorSimulacao" type="number">
+
 <label>Parcelas</label>
 <input id="parcelasSimulacao" type="number">
-<label>Juros mensal (%)</label>
+
+<label>Juros (%)</label>
 <input id="jurosSimulacao" type="number">
-</div>
 
 <button onclick="simularCompleto()">Calcular</button>
-<div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
+
+<div id="resultadoSimulacao"></div>
 </div>
 
 <div class="kpis" id="kpis"></div>
@@ -168,13 +111,13 @@ Controle de Gastos PRO
 <div class="fab" onclick="abrirAdd()">+</div>
 </div>
 
-<!-- 🔥 TELA CONFIG FULL -->
+<!-- CONFIG FULL -->
 <div id="configFull" style="display:none">
 <div class="wrap">
+
 <h1><span onclick="fecharConfigFull()" style="cursor:pointer">⬅️</span> Configurações</h1>
 
 <div class="card">
-<h4>👤 Conta</h4>
 <b id="userName2"></b><br>
 <small id="userEmail2"></small>
 <br><br>
@@ -182,13 +125,8 @@ Controle de Gastos PRO
 
 <hr>
 
-<h4>🎨 Aparência</h4>
 <button onclick="toggleTheme()">Alternar tema</button>
 
-<hr>
-
-<h4>💾 Dados</h4>
-<button onclick="exportarDados()">Exportar Backup</button>
 </div>
 
 </div>
@@ -202,57 +140,119 @@ window.addEventListener("DOMContentLoaded", ()=>{
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
 if(!state.meses) state = {meses:{}};
 
-let mesAtual = "";
+let mesAtual="";
 let grafico;
 let graficoEvolucao;
 
-const monthInput = document.getElementById("month");
+const monthInput=document.getElementById("month");
 
-/* 🔥 NOVAS FUNÇÕES CONFIG FULL */
-window.abrirConfigFull = ()=>{
-  document.getElementById("app").style.display="none";
-  document.getElementById("configFull").style.display="block";
+window.abrirConfigFull=()=>{
+app.style.display="none";
+configFull.style.display="block";
 }
-window.fecharConfigFull = ()=>{
-  document.getElementById("configFull").style.display="none";
-  document.getElementById("app").style.display="block";
+window.fecharConfigFull=()=>{
+configFull.style.display="none";
+app.style.display="block";
 }
 
-/* resto do seu código permanece igual */
-window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
-window.getDataMes = ()=>{
-  if(!state.meses[mesAtual]){
-    state.meses[mesAtual]={salary:0,items:[],meta:0};
-  }
-  return state.meses[mesAtual];
+window.getMes=()=>monthInput.value||new Date().toISOString().slice(0,7);
+
+window.getDataMes=()=>{
+if(!state.meses[mesAtual]) state.meses[mesAtual]={salary:0,items:[],meta:0};
+return state.meses[mesAtual];
 };
-window.save = ()=>{
-  localStorage.setItem("gastos_pro",JSON.stringify(state));
-  render();
+
+window.save=()=>{
+localStorage.setItem("gastos_pro",JSON.stringify(state));
+render();
 };
-window.saveSettings = ()=>{
-  mesAtual=getMes();
-  let d=getDataMes();
-  d.salary=Number(salary.value);
-  d.meta=Number(meta.value);
-  save();
+
+window.saveSettings=()=>{
+mesAtual=getMes();
+let d=getDataMes();
+d.salary=Number(salary.value);
+d.meta=Number(meta.value);
+save();
+
+salary.disabled=true;
+monthInput.disabled=true;
+meta.disabled=true;
+btnSalvar.style.display="none";
+btnEditar.style.display="block";
 };
-window.abrirAdd = ()=>{
-  mesAtual=getMes();
-  let d=getDataMes();
-  let desc=prompt("Descrição");
-  let valor=parseFloat(prompt("Valor"));
-  if(!desc||isNaN(valor)) return;
-  d.items.push({desc,amount:valor});
-  save();
+
+window.editarPlanejamento=()=>{
+salary.disabled=false;
+monthInput.disabled=false;
+meta.disabled=false;
+btnSalvar.style.display="block";
+btnEditar.style.display="none";
 };
+
+window.abrirAdd=()=>{
+mesAtual=getMes();
+let d=getDataMes();
+let desc=prompt("Descrição");
+let valor=parseFloat(prompt("Valor"));
+if(!desc||isNaN(valor))return;
+d.items.push({desc,amount:valor});
+save();
+};
+
+window.del=(i)=>{
+getDataMes().items.splice(i,1);
+save();
+};
+
+window.simularCompleto=()=>{
+let v=Number(valorSimulacao.value);
+let p=Number(parcelasSimulacao.value);
+let j=Number(jurosSimulacao.value)/100;
+let parcela=v*(j/(1-Math.pow(1+j,-p)));
+resultadoSimulacao.innerHTML="Parcela: R$ "+parcela.toFixed(2);
+};
+
+function drawChart(items){
+let labels=items.map(i=>i.desc);
+let valores=items.map(i=>i.amount);
+if(grafico)grafico.destroy();
+grafico=new Chart(chart,{type:"doughnut",data:{labels,datasets:[{data:valores}]}})
+}
+
+function drawEvolucao(){
+let meses=Object.keys(state.meses);
+let valores=meses.map(m=>state.meses[m].items.reduce((a,b)=>a+b.amount,0));
+if(graficoEvolucao)graficoEvolucao.destroy();
+graficoEvolucao=new Chart(chartEvolucao,{type:"line",data:{labels:meses,datasets:[{data:valores}]}})
+}
 
 window.render=()=>{
-  mesAtual=getMes();
-  let d=getDataMes();
-  salary.value=d.salary;
-  monthInput.value=mesAtual;
-  meta.value=d.meta||"";
+mesAtual=getMes();
+let d=getDataMes();
+
+salary.value=d.salary;
+monthInput.value=mesAtual;
+meta.value=d.meta;
+
+let total=d.items.reduce((a,b)=>a+b.amount,0);
+let sobra=d.salary-total;
+
+kpis.innerHTML=`
+<div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>
+<div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
+<div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
+<div class="success">Economia R$ ${sobra.toFixed(2)}</div>
+`;
+
+list.innerHTML=d.items.map((i,idx)=>`
+<tr>
+<td>${i.desc}</td>
+<td>R$ ${i.amount.toFixed(2)}</td>
+<td><button onclick="del(${idx})">X</button></td>
+</tr>`).join("");
+
+drawChart(d.items);
+drawEvolucao();
 };
 
 render();
@@ -270,27 +270,20 @@ authDomain:"controle-gastos-pro.firebaseapp.com",
 projectId:"controle-gastos-pro"
 });
 
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
+const auth=firebase.auth();
+const provider=new firebase.auth.GoogleAuthProvider();
 
-/* 🔥 LOGIN CORRIGIDO */
-function loginGoogle(){
-  auth.signInWithRedirect(provider);
-}
+function loginGoogle(){auth.signInWithRedirect(provider);}
+auth.getRedirectResult();
 
-auth.getRedirectResult().then((result)=>{});
-
-/* logout */
-function logout(){ auth.signOut(); }
+function logout(){auth.signOut();}
 
 auth.onAuthStateChanged(user=>{
-document.getElementById("loginScreen").style.display=user?"none":"flex";
-document.getElementById("app").style.display=user?"block":"none";
+loginScreen.style.display=user?"none":"flex";
+app.style.display=user?"block":"none";
 if(user){
-document.getElementById("userName").innerText=user.displayName;
-document.getElementById("userEmail").innerText=user.email;
-document.getElementById("userName2").innerText=user.displayName;
-document.getElementById("userEmail2").innerText=user.email;
+userName2.innerText=user.displayName;
+userEmail2.innerText=user.email;
 }
 });
 </script>
