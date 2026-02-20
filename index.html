@@ -88,14 +88,18 @@ button{
 <div id="app" style="display:none">
 <div class="wrap">
 
-<h1>Controle de Gastos PRO
+<h1>
+Controle de Gastos PRO
 <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
+<span class="toggle" onclick="abrirConfig()">⚙️</span>
 </h1>
 
-<div class="card">
-<b id="userName"></b>
-<br><br>
-<button onclick="logout()">Sair</button>
+<!-- ⚙️ CONFIGURAÇÕES -->
+<div id="configBox" class="card" style="display:none">
+  <h3>⚙️ Configurações</h3>
+  <b id="userName"></b>
+  <br><br>
+  <button onclick="logout()">Sair da conta</button>
 </div>
 
 <div class="card">
@@ -197,6 +201,12 @@ document.getElementById("tipoSimulacao").addEventListener("change", function(){
   }
 });
 
+/* 🔥 NOVO */
+window.abrirConfig = ()=>{
+  let box = document.getElementById("configBox");
+  box.style.display = box.style.display=="none" ? "block" : "none";
+};
+
 window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
 
 window.getDataMes = ()=>{
@@ -257,7 +267,7 @@ function drawEvolucao(){
   });
 }
 
-/* 🧠 SIMULADOR COMPLETO */
+/* 🧠 SIMULADOR PRICE */
 window.simularCompleto = function(){
 
 let tipo = document.getElementById("tipoSimulacao").value;
@@ -275,7 +285,6 @@ let juros = Number(jurosSimulacao.value)/100;
 let i = juros;
 let n = parcelas;
 
-/* TABELA PRICE */
 let parcela = valor * ( i / (1 - Math.pow(1+i, -n)) );
 let total = parcela * n;
 let jurosTotal = total - valor;
