@@ -57,8 +57,6 @@ button{
   border-radius:10px;
 }
 .success{color:#4CAF50}
-.warn{color:#ffd166}
-.danger{color:#ff6b6b}
 #chart,#chartEvolucao{width:100%;height:220px}
 .fab{
   position:fixed;
@@ -80,30 +78,24 @@ button{
 
 <body>
 
+<!-- LOGIN -->
 <div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
   <h2>Controle de Gastos PRO</h2>
   <button onclick="loginGoogle()">Entrar com Google</button>
 </div>
 
+<!-- APP -->
 <div id="app" style="display:none">
+
 <div class="wrap">
 
 <h1>
 Controle de Gastos PRO
 <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
-<span class="toggle" onclick="abrirConfig()">⚙️</span>
+<span class="toggle" onclick="abrirConfigTela()">⚙️</span>
 </h1>
 
-<!-- ⚙️ CONFIGURAÇÕES -->
-<div id="configBox" class="card" style="display:none">
-<h3>⚙️ Configurações</h3>
-<b id="userName"></b><br>
-<small id="userEmail"></small>
-<br><br>
-<button onclick="logout()">Sair da conta</button>
-</div>
-
-<!-- 💰 PLANEJAMENTO MENSAL NOVO -->
+<!-- 💰 PLANEJAMENTO -->
 <div class="card">
 <h3>💰 Planejamento Mensal</h3>
 
@@ -129,7 +121,7 @@ Controle de Gastos PRO
 
 </div>
 
-<!-- 🧠 SIMULADOR -->
+<!-- SIMULADOR -->
 <div class="card">
 <h3>🧠 Simulador Financeiro</h3>
 
@@ -150,31 +142,14 @@ Controle de Gastos PRO
 <input id="jurosSimulacao" type="number">
 </div>
 
-<div id="areaInvestimento" style="display:none">
-<label>Valor a investir</label>
-<input id="valorInvestimento" type="number">
-
-<label>Meses</label>
-<input id="mesesInvestimento" type="number">
-
-<label>% do CDI</label>
-<input id="percentualInvest" type="number">
-</div>
-
 <button onclick="simularCompleto()">Calcular</button>
 <div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
 </div>
 
 <div class="kpis" id="kpis"></div>
 
-<div class="card">
-<canvas id="chart"></canvas>
-</div>
-
-<div class="card">
-<h3>Evolução</h3>
-<canvas id="chartEvolucao"></canvas>
-</div>
+<div class="card"><canvas id="chart"></canvas></div>
+<div class="card"><canvas id="chartEvolucao"></canvas></div>
 
 <div class="card">
 <table id="list"></table>
@@ -183,6 +158,54 @@ Controle de Gastos PRO
 </div>
 
 <div class="fab" onclick="abrirAdd()">+</div>
+</div>
+
+<!-- 🔥 TELA CONFIGURAÇÕES FULL -->
+<div id="telaConfigFull" style="display:none">
+
+<div class="wrap">
+
+<h1>
+<span onclick="voltarHome()" style="cursor:pointer">⬅️</span>
+Configurações
+</h1>
+
+<div class="card">
+
+<h4>👤 Conta</h4>
+<b id="userName"></b><br>
+<small id="userEmail"></small>
+<br><br>
+<button onclick="logout()">Sair da conta</button>
+
+<hr>
+
+<h4>🎨 Aparência</h4>
+<button onclick="toggleTheme()">Alternar Claro / Escuro</button>
+
+<hr>
+
+<h4>💰 Finanças</h4>
+<label>Meta padrão</label>
+<input id="configMeta" type="number">
+
+<label>Limite de gasto (%)</label>
+<input id="configLimiteGasto" type="number">
+
+<label>Limite de parcela (%)</label>
+<input id="configLimiteParcela" type="number">
+
+<button onclick="salvarConfigFinancas()">Salvar Finanças</button>
+
+<hr>
+
+<h4>💾 Dados</h4>
+<button onclick="exportarDados()">Exportar dados</button>
+<input type="file" id="importarFile" onchange="importarDados()">
+
+</div>
+
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -199,10 +222,15 @@ let graficoEvolucao;
 
 const monthInput = document.getElementById("month");
 
-window.abrirConfig = ()=>{
-  let box = document.getElementById("configBox");
-  box.style.display = box.style.display=="none" ? "block" : "none";
-};
+window.abrirConfigTela = ()=>{
+  document.getElementById("app").style.display="none";
+  document.getElementById("telaConfigFull").style.display="block";
+}
+
+window.voltarHome = ()=>{
+  document.getElementById("telaConfigFull").style.display="none";
+  document.getElementById("app").style.display="block";
+}
 
 window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
 
@@ -252,61 +280,14 @@ window.abrirAdd = ()=>{
   save();
 };
 
-window.del=(i)=>{
-  mesAtual=getMes();
-  getDataMes().items.splice(i,1);
-  save();
-};
-
-window.toggleTheme=()=>document.body.classList.toggle("light");
-
-function drawChart(items){
-  let labels = items.map(i=>i.desc);
-  let valores = items.map(i=>i.amount);
-  if(grafico) grafico.destroy();
-  grafico=new Chart(document.getElementById("chart"),{
-    type:"doughnut",
-    data:{labels,datasets:[{data:valores}]}
-  });
-}
-
-function drawEvolucao(){
-  let meses=Object.keys(state.meses).sort();
-  let valores=meses.map(m=>state.meses[m].items.reduce((a,b)=>a+b.amount,0));
-  if(graficoEvolucao) graficoEvolucao.destroy();
-  graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{
-    type:"line",
-    data:{labels:meses,datasets:[{data:valores}]}
-  });
-}
-
 window.simularCompleto = function(){
-let tipo = document.getElementById("tipoSimulacao").value;
-let d = getDataMes();
-let gastos = d.items.reduce((a,b)=>a+b.amount,0);
-let salario = d.salary;
-
-if(tipo=="compra"){
 let valor = Number(valorSimulacao.value);
 let parcelas = Number(parcelasSimulacao.value);
 let juros = Number(jurosSimulacao.value)/100;
 
-let i = juros;
-let n = parcelas;
+let parcela = valor * ( juros / (1 - Math.pow(1+juros, -parcelas)) );
 
-let parcela = valor * ( i / (1 - Math.pow(1+i, -n)) );
-let total = parcela * n;
-let jurosTotal = total - valor;
-
-let sobra = salario - gastos - parcela;
-
-resultadoSimulacao.innerHTML = `
-Parcela: R$ ${parcela.toFixed(2)}<br>
-Total: R$ ${total.toFixed(2)}<br>
-Juros: R$ ${jurosTotal.toFixed(2)}<br>
-Sobra: R$ ${sobra.toFixed(2)}
-`;
-}
+resultadoSimulacao.innerHTML = `Parcela: R$ ${parcela.toFixed(2)}`;
 }
 
 window.render=()=>{
@@ -316,34 +297,6 @@ window.render=()=>{
   salary.value=d.salary;
   monthInput.value=mesAtual;
   meta.value=d.meta||"";
-
-  if(d.salary>0){
-    salary.disabled=true;
-    monthInput.disabled=true;
-    meta.disabled=true;
-    btnSalvar.style.display="none";
-    btnEditar.style.display="block";
-  }
-
-  let total=d.items.reduce((a,b)=>a+b.amount,0);
-  let sobra=d.salary-total;
-
-  kpis.innerHTML=`
-  <div class="kpi">Salário<br><b>R$ ${d.salary.toFixed(2)}</b></div>
-  <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
-  <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
-  <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
-  `;
-
-  list.innerHTML=d.items.map((i,idx)=>`
-  <tr>
-  <td>${i.desc}</td>
-  <td>R$ ${i.amount.toFixed(2)}</td>
-  <td><button onclick="del(${idx})">X</button></td>
-  </tr>`).join("");
-
-  drawChart(d.items);
-  drawEvolucao();
 };
 
 render();
@@ -356,7 +309,7 @@ render();
 
 <script>
 firebase.initializeApp({
-apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+apiKey:"AIzaSy...",
 authDomain:"controle-gastos-pro.firebaseapp.com",
 projectId:"controle-gastos-pro"
 });
