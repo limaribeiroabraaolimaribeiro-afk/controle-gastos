@@ -190,6 +190,18 @@ window.addEventListener("DOMContentLoaded", ()=>{
   window.USER_ID = null;
 
 let state = {meses:{}};
+  let categorias = ["Casa","Alimentação","Transporte","Lazer","Pets","Outros"];
+
+let regras = [
+  {palavra:"aluguel", categoria:"Casa"},
+  {palavra:"luz", categoria:"Casa"},
+  {palavra:"água", categoria:"Casa"},
+  {palavra:"mercado", categoria:"Alimentação"},
+  {palavra:"padaria", categoria:"Alimentação"},
+  {palavra:"gasolina", categoria:"Transporte"},
+  {palavra:"uber", categoria:"Transporte"},
+  {palavra:"ração", categoria:"Pets"}
+];
 
 let mesAtual = new Date().toISOString().slice(0,7);
 let grafico;
@@ -264,7 +276,13 @@ window.abrirAdd = ()=>{
   let valor=parseFloat(prompt("Valor"));
   if(!desc||isNaN(valor)) return;
 
-  d.items.push({desc,amount:valor,category:"Outros"});
+  let categoria = detectarCategoria(desc);
+
+d.items.push({
+  desc,
+  amount: valor,
+  category: categoria
+});
 
   // 🔥 envia para API
   fetch(API + "/addGasto", {
@@ -274,7 +292,8 @@ window.abrirAdd = ()=>{
       userId: window.USER_ID,
       mes: mesAtual,
       desc: desc,
-      amount: valor
+      amount: valor,
+category: categoria
     })
   });
 
@@ -287,11 +306,32 @@ window.del=(i)=>{
 };
 
 window.toggleTheme=()=>document.body.classList.toggle("light");
+  function detectarCategoria(desc){
+  desc = desc.toLowerCase();
+
+  for(let r of regras){
+    if(desc.includes(r.palavra)){
+      return r.categoria;
+    }
+  }
+
+  return "Outros";
+  }
 
 function drawChart(items){
-  let labels = items.map(i=>i.desc);
-  let valores = items.map(i=>i.amount);
+
+  let mapa = {};
+
+  items.forEach(i=>{
+    let cat = i.category || "Outros";
+    mapa[cat] = (mapa[cat] || 0) + i.amount;
+  });
+
+  let labels = Object.keys(mapa);
+  let valores = Object.values(mapa);
+
   if(grafico) grafico.destroy();
+
   grafico=new Chart(document.getElementById("chart"),{
     type:"doughnut",
     data:{labels,datasets:[{data:valores}]}
@@ -505,12 +545,3 @@ auth.onAuthStateChanged(user => {
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
