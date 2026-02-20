@@ -363,7 +363,7 @@ Lucro: R$ ${lucro.toFixed(2)}
 }
 
 window.render=()=>{
-  fetch(API + "/mes/1/" + mesAtual)
+  fetch(API + "/mes/" + window.USER_ID + "/" + mesAtual)
   .then(r=>r.json())
   .then(data=>{
     if(data && data.length){
@@ -481,6 +481,9 @@ function registrarEmail(){
 // CONTROLE DE LOGIN
 auth.onAuthStateChanged(user => {
 
+  // 🔥 LIMPA OS DADOS AO TROCAR DE USUÁRIO
+  localStorage.removeItem("gastos_pro");
+
   window.USER_ID = user ? user.uid : null;
 
   document.getElementById("loginScreen").style.display = user ? "none" : "flex";
@@ -496,6 +499,7 @@ auth.onAuthStateChanged(user => {
 
 </body>
 </html>
+
 
 
 
