@@ -122,7 +122,6 @@ button{
 </select>
 
 <div id="areaCompra">
-
 <label>Valor total</label>
 <input id="valorSimulacao" type="number">
 
@@ -131,26 +130,17 @@ button{
 
 <label>Juros mensal (%)</label>
 <input id="jurosSimulacao" type="number">
-
 </div>
 
 <div id="areaInvestimento" style="display:none">
-
 <label>Valor a investir</label>
 <input id="valorInvestimento" type="number">
 
 <label>Meses</label>
 <input id="mesesInvestimento" type="number">
 
-<label>Tipo</label>
-<select id="tipoInvest">
-  <option value="cdi">CDI</option>
-  <option value="cdb">CDB</option>
-</select>
-
 <label>% do CDI</label>
 <input id="percentualInvest" type="number">
-
 </div>
 
 <button onclick="simularCompleto()">Calcular</button>
@@ -267,72 +257,62 @@ function drawEvolucao(){
   });
 }
 
-/* 🧠 SIMULADOR COMPLETO COM JUROS DE BANCO REAL */
+/* 🧠 SIMULADOR COMPLETO */
 window.simularCompleto = function(){
 
-  let tipo = document.getElementById("tipoSimulacao").value;
+let tipo = document.getElementById("tipoSimulacao").value;
 
-  let d = getDataMes();
-  let gastos = d.items.reduce((a,b)=>a+b.amount,0);
-  let salario = d.salary;
+let d = getDataMes();
+let gastos = d.items.reduce((a,b)=>a+b.amount,0);
+let salario = d.salary;
 
-  if(tipo=="compra"){
+if(tipo=="compra"){
 
-    let valor = Number(valorSimulacao.value);
-    let parcelas = Number(parcelasSimulacao.value);
-    let juros = Number(jurosSimulacao.value)/100;
+let valor = Number(valorSimulacao.value);
+let parcelas = Number(parcelasSimulacao.value);
+let juros = Number(jurosSimulacao.value)/100;
 
-    if(!valor || !parcelas || !juros){
-      alert("Preencha todos os campos corretamente");
-      return;
-    }
+let i = juros;
+let n = parcelas;
 
-    // 💰 CÁLCULO REAL DE FINANCIAMENTO (TABELA PRICE)
-    let parcela = valor * (juros * Math.pow(1 + juros, parcelas)) / (Math.pow(1 + juros, parcelas) - 1);
+/* TABELA PRICE */
+let parcela = valor * ( i / (1 - Math.pow(1+i, -n)) );
+let total = parcela * n;
+let jurosTotal = total - valor;
 
-    let totalPago = parcela * parcelas;
-    let jurosPago = totalPago - valor;
+parcela = Number(parcela.toFixed(2));
+total = Number(total.toFixed(2));
+jurosTotal = Number(jurosTotal.toFixed(2));
 
-    let sobra = salario - gastos - parcela;
+let sobra = salario - gastos - parcela;
 
-    let resultado = sobra > salario * 0.3 
-      ? "<span class='success'>🟢 Vale a pena</span>"
-      : sobra > 0
-      ? "<span class='warn'>🟡 Cuidado</span>"
-      : "<span class='danger'>🔴 Não recomendado</span>";
+let resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
 
-    resultadoSimulacao.innerHTML = `
-      Parcela real: R$ ${parcela.toFixed(2)}<br>
-      Total pago: R$ ${totalPago.toFixed(2)}<br>
-      Juros pagos: R$ ${jurosPago.toFixed(2)}<br>
-      Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>
-      ${resultado}
-    `;
+resultadoSimulacao.innerHTML = `
+Parcela real: R$ ${parcela.toFixed(2)}<br>
+Total pago: R$ ${total.toFixed(2)}<br>
+Juros pagos: R$ ${jurosTotal.toFixed(2)}<br>
+Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>
+${resultado}
+`;
 
-  }else{
+}else{
 
-    let valor = Number(valorInvestimento.value);
-    let meses = Number(mesesInvestimento.value);
-    let perc = Number(percentualInvest.value)/100;
+let valor = Number(valorInvestimento.value);
+let meses = Number(mesesInvestimento.value);
+let perc = Number(percentualInvest.value)/100;
 
-    if(!valor || !meses || !perc){
-      alert("Preencha todos os campos corretamente");
-      return;
-    }
+let taxaCDI = 0.012;
 
-    // 📈 CDI médio mensal (ajustável)
-    let taxaCDI = 0.012; 
+let total = valor*(1+(taxaCDI*perc))**meses;
+let lucro = total-valor;
 
-    let taxaReal = taxaCDI * perc;
+resultadoSimulacao.innerHTML = `
+Valor final: R$ ${total.toFixed(2)}<br>
+Lucro: R$ ${lucro.toFixed(2)}
+`;
+}
 
-    let total = valor * Math.pow(1 + taxaReal, meses);
-    let lucro = total - valor;
-
-    resultadoSimulacao.innerHTML = `
-      Valor final: R$ ${total.toFixed(2)}<br>
-      Lucro: R$ ${lucro.toFixed(2)}
-    `;
-  }
 }
 
 window.render=()=>{
@@ -394,4 +374,3 @@ if(user) document.getElementById("userName").innerText=user.displayName;
 
 </body>
 </html>
-
