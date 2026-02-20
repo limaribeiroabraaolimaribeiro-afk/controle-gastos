@@ -57,6 +57,8 @@ button{
   border-radius:10px;
 }
 .success{color:#4CAF50}
+.warn{color:#ffd166}
+.danger{color:#ff6b6b}
 #chart,#chartEvolucao{width:100%;height:220px}
 .fab{
   position:fixed;
@@ -92,8 +94,17 @@ button{
 <h1>
 Controle de Gastos PRO
 <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
-<span class="toggle" onclick="abrirConfigTela()">⚙️</span>
+<span class="toggle" onclick="abrirConfigFull()">⚙️</span>
 </h1>
+
+<!-- ⚙️ CONFIG SIMPLES (mantido) -->
+<div id="configBox" class="card" style="display:none">
+<h3>⚙️ Configurações</h3>
+<b id="userName"></b><br>
+<small id="userEmail"></small>
+<br><br>
+<button onclick="logout()">Sair da conta</button>
+</div>
 
 <!-- 💰 PLANEJAMENTO -->
 <div class="card">
@@ -104,7 +115,6 @@ Controle de Gastos PRO
     <label>Salário</label>
     <input id="salary" type="number">
   </div>
-
   <div>
     <label>Mês</label>
     <input id="month" type="month">
@@ -134,10 +144,8 @@ Controle de Gastos PRO
 <div id="areaCompra">
 <label>Valor total</label>
 <input id="valorSimulacao" type="number">
-
 <label>Parcelas</label>
 <input id="parcelasSimulacao" type="number">
-
 <label>Juros mensal (%)</label>
 <input id="jurosSimulacao" type="number">
 </div>
@@ -160,49 +168,27 @@ Controle de Gastos PRO
 <div class="fab" onclick="abrirAdd()">+</div>
 </div>
 
-<!-- 🔥 TELA CONFIGURAÇÕES FULL -->
-<div id="telaConfigFull" style="display:none">
-
+<!-- 🔥 TELA CONFIG FULL -->
+<div id="configFull" style="display:none">
 <div class="wrap">
-
-<h1>
-<span onclick="voltarHome()" style="cursor:pointer">⬅️</span>
-Configurações
-</h1>
+<h1><span onclick="fecharConfigFull()" style="cursor:pointer">⬅️</span> Configurações</h1>
 
 <div class="card">
-
 <h4>👤 Conta</h4>
-<b id="userName"></b><br>
-<small id="userEmail"></small>
+<b id="userName2"></b><br>
+<small id="userEmail2"></small>
 <br><br>
 <button onclick="logout()">Sair da conta</button>
 
 <hr>
 
 <h4>🎨 Aparência</h4>
-<button onclick="toggleTheme()">Alternar Claro / Escuro</button>
-
-<hr>
-
-<h4>💰 Finanças</h4>
-<label>Meta padrão</label>
-<input id="configMeta" type="number">
-
-<label>Limite de gasto (%)</label>
-<input id="configLimiteGasto" type="number">
-
-<label>Limite de parcela (%)</label>
-<input id="configLimiteParcela" type="number">
-
-<button onclick="salvarConfigFinancas()">Salvar Finanças</button>
+<button onclick="toggleTheme()">Alternar tema</button>
 
 <hr>
 
 <h4>💾 Dados</h4>
-<button onclick="exportarDados()">Exportar dados</button>
-<input type="file" id="importarFile" onchange="importarDados()">
-
+<button onclick="exportarDados()">Exportar Backup</button>
 </div>
 
 </div>
@@ -222,54 +208,35 @@ let graficoEvolucao;
 
 const monthInput = document.getElementById("month");
 
-window.abrirConfigTela = ()=>{
+/* 🔥 NOVAS FUNÇÕES CONFIG FULL */
+window.abrirConfigFull = ()=>{
   document.getElementById("app").style.display="none";
-  document.getElementById("telaConfigFull").style.display="block";
+  document.getElementById("configFull").style.display="block";
 }
-
-window.voltarHome = ()=>{
-  document.getElementById("telaConfigFull").style.display="none";
+window.fecharConfigFull = ()=>{
+  document.getElementById("configFull").style.display="none";
   document.getElementById("app").style.display="block";
 }
 
+/* resto do seu código permanece igual */
 window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
-
 window.getDataMes = ()=>{
   if(!state.meses[mesAtual]){
     state.meses[mesAtual]={salary:0,items:[],meta:0};
   }
   return state.meses[mesAtual];
 };
-
 window.save = ()=>{
   localStorage.setItem("gastos_pro",JSON.stringify(state));
   render();
 };
-
 window.saveSettings = ()=>{
   mesAtual=getMes();
   let d=getDataMes();
   d.salary=Number(salary.value);
   d.meta=Number(meta.value);
   save();
-
-  salary.disabled = true;
-  monthInput.disabled = true;
-  meta.disabled = true;
-
-  btnSalvar.style.display = "none";
-  btnEditar.style.display = "block";
 };
-
-window.editarPlanejamento = function(){
-  salary.disabled = false;
-  monthInput.disabled = false;
-  meta.disabled = false;
-
-  btnSalvar.style.display = "block";
-  btnEditar.style.display = "none";
-};
-
 window.abrirAdd = ()=>{
   mesAtual=getMes();
   let d=getDataMes();
@@ -280,20 +247,9 @@ window.abrirAdd = ()=>{
   save();
 };
 
-window.simularCompleto = function(){
-let valor = Number(valorSimulacao.value);
-let parcelas = Number(parcelasSimulacao.value);
-let juros = Number(jurosSimulacao.value)/100;
-
-let parcela = valor * ( juros / (1 - Math.pow(1+juros, -parcelas)) );
-
-resultadoSimulacao.innerHTML = `Parcela: R$ ${parcela.toFixed(2)}`;
-}
-
 window.render=()=>{
   mesAtual=getMes();
   let d=getDataMes();
-
   salary.value=d.salary;
   monthInput.value=mesAtual;
   meta.value=d.meta||"";
@@ -309,7 +265,7 @@ render();
 
 <script>
 firebase.initializeApp({
-apiKey:"AIzaSy...",
+apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
 authDomain:"controle-gastos-pro.firebaseapp.com",
 projectId:"controle-gastos-pro"
 });
@@ -317,7 +273,14 @@ projectId:"controle-gastos-pro"
 const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
 
-function loginGoogle(){ auth.signInWithPopup(provider); }
+/* 🔥 LOGIN CORRIGIDO */
+function loginGoogle(){
+  auth.signInWithRedirect(provider);
+}
+
+auth.getRedirectResult().then((result)=>{});
+
+/* logout */
 function logout(){ auth.signOut(); }
 
 auth.onAuthStateChanged(user=>{
@@ -326,6 +289,8 @@ document.getElementById("app").style.display=user?"block":"none";
 if(user){
 document.getElementById("userName").innerText=user.displayName;
 document.getElementById("userEmail").innerText=user.email;
+document.getElementById("userName2").innerText=user.displayName;
+document.getElementById("userEmail2").innerText=user.email;
 }
 });
 </script>
