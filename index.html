@@ -227,7 +227,6 @@ window.getDataMes = ()=>{
 };
 
 window.save = ()=>{
-  localStorage.setItem("gastos_pro",JSON.stringify(state));
   render();
 };
 
@@ -481,7 +480,6 @@ function registrarEmail(){
 auth.onAuthStateChanged(user => {
 
   // limpa dados antigos
-  localStorage.removeItem("gastos_pro");
 
   window.USER_ID = user ? user.uid : null;
 
@@ -502,6 +500,7 @@ auth.onAuthStateChanged(user => {
 
 </body>
 </html>
+
 
 
 
