@@ -187,10 +187,11 @@ Controle de Gastos PRO
 window.addEventListener("DOMContentLoaded", ()=>{
 
   const API = "https://api-rf1w.onrender.com";
+  window.USER_ID = null;
 
 let state = {meses:{}};
 
-let mesAtual = "";
+let mesAtual = new Date().toISOString().slice(0,7);
 let grafico;
 let graficoEvolucao;
 
@@ -252,6 +253,10 @@ window.saveSettings = ()=>{
   save();
 };
 window.abrirAdd = ()=>{
+  if(!window.USER_ID){
+  alert("Faça login primeiro");
+  return;
+  }
   mesAtual=getMes();
   let d=getDataMes();
 
@@ -361,6 +366,7 @@ Lucro: R$ ${lucro.toFixed(2)}
 }
 
 window.render=()=>{
+  if(!window.USER_ID) return;
   fetch(API + "/mes/" + window.USER_ID + "/" + mesAtual)
   .then(r=>r.json())
   .then(data=>{
@@ -487,19 +493,19 @@ auth.onAuthStateChanged(user => {
   document.getElementById("app").style.display = user ? "block" : "none";
 
   if(user){
-    document.getElementById("userName").innerText =
-      user.displayName || user.email;
+  document.getElementById("userName").innerText =
+    user.displayName || user.email;
 
-    // 🔥 AGORA SIM CARREGA OS DADOS DO USUÁRIO CERTO
-    state = {meses:{}};
-    render();
-  }
+  state = {meses:{}};
+  render(); // 👈 ADICIONE ESTA LINHA
+}
 
 });
 </script>
 
 </body>
 </html>
+
 
 
 
