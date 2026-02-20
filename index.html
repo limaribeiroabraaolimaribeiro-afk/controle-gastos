@@ -94,82 +94,39 @@ Controle de Gastos PRO
 <span class="toggle" onclick="abrirConfig()">⚙️</span>
 </h1>
 
-<!-- ⚙️ CONFIGURAÇÕES COMPLETAS -->
+<!-- ⚙️ CONFIGURAÇÕES -->
 <div id="configBox" class="card" style="display:none">
-
 <h3>⚙️ Configurações</h3>
-
-<!-- 👤 CONTA -->
-<h4>👤 Conta</h4>
 <b id="userName"></b><br>
 <small id="userEmail"></small>
 <br><br>
 <button onclick="logout()">Sair da conta</button>
-
-<hr>
-
-<!-- 🎨 TEMA -->
-<h4>🎨 Aparência</h4>
-<button onclick="toggleTheme()">Alternar Claro / Escuro</button>
-
-<hr>
-
-<!-- 💰 FINANÇAS -->
-<h4>💰 Finanças</h4>
-
-<label>Meta padrão</label>
-<input id="configMeta" type="number">
-
-<label>Limite de gasto (%)</label>
-<input id="configLimiteGasto" type="number">
-
-<label>Limite de parcela (%)</label>
-<input id="configLimiteParcela" type="number">
-
-<button onclick="salvarConfigFinancas()">Salvar Finanças</button>
-
-<hr>
-
-<!-- 🔔 ALERTAS -->
-<h4>🔔 Alertas</h4>
-<label><input type="checkbox" id="alertaMeta"> Avisar quando passar da meta</label><br>
-<label><input type="checkbox" id="alertaSobra"> Avisar quando sobrar pouco dinheiro</label>
-
-<hr>
-
-<!-- 💾 DADOS -->
-<h4>💾 Dados</h4>
-<button onclick="exportarDados()">Exportar dados</button>
-<input type="file" id="importarFile" onchange="importarDados()">
-
-<hr>
-
-<!-- 📊 RELATÓRIOS -->
-<h4>📊 Relatórios</h4>
-<button onclick="exportarPDF()">Exportar PDF</button>
-
-<hr>
-
-<!-- 🧠 MODO INTELIGENTE -->
-<h4>🧠 Modo Inteligente</h4>
-<label>
-<input type="checkbox" id="modoInteligente">
-Ativar assistente financeiro automático
-</label>
-
 </div>
 
+<!-- 💰 PLANEJAMENTO MENSAL NOVO -->
 <div class="card">
-<label>Salário</label>
-<input id="salary" type="number">
+<h3>💰 Planejamento Mensal</h3>
 
-<label>Mês</label>
-<input id="month" type="month">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+  <div>
+    <label>Salário</label>
+    <input id="salary" type="number">
+  </div>
+
+  <div>
+    <label>Mês</label>
+    <input id="month" type="month">
+  </div>
+</div>
 
 <label>Meta</label>
 <input id="meta" type="number">
 
-<button onclick="saveSettings()">Salvar</button>
+<div id="areaBotoes">
+  <button id="btnSalvar" onclick="saveSettings()">Salvar</button>
+  <button id="btnEditar" style="display:none;background:#ffd166;color:#000" onclick="editarPlanejamento()">Editar</button>
+</div>
+
 </div>
 
 <!-- 🧠 SIMULADOR -->
@@ -205,7 +162,6 @@ Ativar assistente financeiro automático
 </div>
 
 <button onclick="simularCompleto()">Calcular</button>
-
 <div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
 </div>
 
@@ -237,8 +193,6 @@ window.addEventListener("DOMContentLoaded", ()=>{
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
 if(!state.meses) state = {meses:{}};
 
-let config = JSON.parse(localStorage.getItem("config_pro")||"{}");
-
 let mesAtual = "";
 let grafico;
 let graficoEvolucao;
@@ -249,37 +203,6 @@ window.abrirConfig = ()=>{
   let box = document.getElementById("configBox");
   box.style.display = box.style.display=="none" ? "block" : "none";
 };
-
-function salvarConfigFinancas(){
-  config.metaPadrao = Number(configMeta.value);
-  config.limiteGasto = Number(configLimiteGasto.value);
-  config.limiteParcela = Number(configLimiteParcela.value);
-  localStorage.setItem("config_pro", JSON.stringify(config));
-  alert("Salvo!");
-}
-
-function exportarDados(){
-  let data = localStorage.getItem("gastos_pro");
-  let blob = new Blob([data], {type: "application/json"});
-  let a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "backup.json";
-  a.click();
-}
-
-function importarDados(){
-  let file = document.getElementById("importarFile").files[0];
-  let reader = new FileReader();
-  reader.onload = function(e){
-    localStorage.setItem("gastos_pro", e.target.result);
-    location.reload();
-  };
-  reader.readAsText(file);
-}
-
-function exportarPDF(){
-  window.print();
-}
 
 window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
 
@@ -301,6 +224,22 @@ window.saveSettings = ()=>{
   d.salary=Number(salary.value);
   d.meta=Number(meta.value);
   save();
+
+  salary.disabled = true;
+  monthInput.disabled = true;
+  meta.disabled = true;
+
+  btnSalvar.style.display = "none";
+  btnEditar.style.display = "block";
+};
+
+window.editarPlanejamento = function(){
+  salary.disabled = false;
+  monthInput.disabled = false;
+  meta.disabled = false;
+
+  btnSalvar.style.display = "block";
+  btnEditar.style.display = "none";
 };
 
 window.abrirAdd = ()=>{
@@ -342,15 +281,12 @@ function drawEvolucao(){
 }
 
 window.simularCompleto = function(){
-
 let tipo = document.getElementById("tipoSimulacao").value;
-
 let d = getDataMes();
 let gastos = d.items.reduce((a,b)=>a+b.amount,0);
 let salario = d.salary;
 
 if(tipo=="compra"){
-
 let valor = Number(valorSimulacao.value);
 let parcelas = Number(parcelasSimulacao.value);
 let juros = Number(jurosSimulacao.value)/100;
@@ -362,39 +298,15 @@ let parcela = valor * ( i / (1 - Math.pow(1+i, -n)) );
 let total = parcela * n;
 let jurosTotal = total - valor;
 
-parcela = Number(parcela.toFixed(2));
-total = Number(total.toFixed(2));
-jurosTotal = Number(jurosTotal.toFixed(2));
-
 let sobra = salario - gastos - parcela;
 
-let resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
-
 resultadoSimulacao.innerHTML = `
-Parcela real: R$ ${parcela.toFixed(2)}<br>
-Total pago: R$ ${total.toFixed(2)}<br>
-Juros pagos: R$ ${jurosTotal.toFixed(2)}<br>
-Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>
-${resultado}
-`;
-
-}else{
-
-let valor = Number(valorInvestimento.value);
-let meses = Number(mesesInvestimento.value);
-let perc = Number(percentualInvest.value)/100;
-
-let taxaCDI = 0.012;
-
-let total = valor*(1+(taxaCDI*perc))**meses;
-let lucro = total-valor;
-
-resultadoSimulacao.innerHTML = `
-Valor final: R$ ${total.toFixed(2)}<br>
-Lucro: R$ ${lucro.toFixed(2)}
+Parcela: R$ ${parcela.toFixed(2)}<br>
+Total: R$ ${total.toFixed(2)}<br>
+Juros: R$ ${jurosTotal.toFixed(2)}<br>
+Sobra: R$ ${sobra.toFixed(2)}
 `;
 }
-
 }
 
 window.render=()=>{
@@ -404,6 +316,14 @@ window.render=()=>{
   salary.value=d.salary;
   monthInput.value=mesAtual;
   meta.value=d.meta||"";
+
+  if(d.salary>0){
+    salary.disabled=true;
+    monthInput.disabled=true;
+    meta.disabled=true;
+    btnSalvar.style.display="none";
+    btnEditar.style.display="block";
+  }
 
   let total=d.items.reduce((a,b)=>a+b.amount,0);
   let sobra=d.salary-total;
@@ -458,4 +378,4 @@ document.getElementById("userEmail").innerText=user.email;
 </script>
 
 </body>
-  </html>
+</html>
