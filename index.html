@@ -96,40 +96,26 @@ Controle de Gastos PRO
 
 <!-- ⚙️ CONFIGURAÇÕES -->
 <div id="configBox" class="card" style="display:none">
-<h3>⚙️ Configurações</h3>
-<b id="userName"></b><br>
-<small id="userEmail"></small>
-<br><br>
-<button onclick="logout()">Sair da conta</button>
+  <h3>⚙️ Configurações</h3>
+  <b id="userName"></b>
+  <br><br>
+  <button onclick="logout()">Sair da conta</button>
 </div>
 
-<!-- 💰 PLANEJAMENTO MENSAL NOVO -->
 <div class="card">
-<h3>💰 Planejamento Mensal</h3>
+<label>Salário</label>
+<input id="salary" type="number">
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-  <div>
-    <label>Salário</label>
-    <input id="salary" type="number">
-  </div>
-
-  <div>
-    <label>Mês</label>
-    <input id="month" type="month">
-  </div>
-</div>
+<label>Mês</label>
+<input id="month" type="month">
 
 <label>Meta</label>
 <input id="meta" type="number">
 
-<div id="areaBotoes">
-  <button id="btnSalvar" onclick="saveSettings()">Salvar</button>
-  <button id="btnEditar" style="display:none;background:#ffd166;color:#000" onclick="editarPlanejamento()">Editar</button>
+<button onclick="saveSettings()">Salvar</button>
 </div>
 
-</div>
-
-<!-- 🧠 SIMULADOR -->
+<!-- 🧠 SIMULADOR COMPLETO -->
 <div class="card">
 <h3>🧠 Simulador Financeiro</h3>
 
@@ -162,6 +148,7 @@ Controle de Gastos PRO
 </div>
 
 <button onclick="simularCompleto()">Calcular</button>
+
 <div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
 </div>
 
@@ -199,6 +186,22 @@ let graficoEvolucao;
 
 const monthInput = document.getElementById("month");
 
+monthInput.addEventListener("change", ()=>{
+  mesAtual = getMes();
+  render();
+});
+
+document.getElementById("tipoSimulacao").addEventListener("change", function(){
+  if(this.value=="compra"){
+    areaCompra.style.display="block";
+    areaInvestimento.style.display="none";
+  }else{
+    areaCompra.style.display="none";
+    areaInvestimento.style.display="block";
+  }
+});
+
+/* 🔥 NOVO */
 window.abrirConfig = ()=>{
   let box = document.getElementById("configBox");
   box.style.display = box.style.display=="none" ? "block" : "none";
@@ -224,22 +227,6 @@ window.saveSettings = ()=>{
   d.salary=Number(salary.value);
   d.meta=Number(meta.value);
   save();
-
-  salary.disabled = true;
-  monthInput.disabled = true;
-  meta.disabled = true;
-
-  btnSalvar.style.display = "none";
-  btnEditar.style.display = "block";
-};
-
-window.editarPlanejamento = function(){
-  salary.disabled = false;
-  monthInput.disabled = false;
-  meta.disabled = false;
-
-  btnSalvar.style.display = "block";
-  btnEditar.style.display = "none";
 };
 
 window.abrirAdd = ()=>{
@@ -248,7 +235,7 @@ window.abrirAdd = ()=>{
   let desc=prompt("Descrição");
   let valor=parseFloat(prompt("Valor"));
   if(!desc||isNaN(valor)) return;
-  d.items.push({desc,amount:valor});
+  d.items.push({desc,amount:valor,category:"Outros"});
   save();
 };
 
@@ -280,13 +267,17 @@ function drawEvolucao(){
   });
 }
 
+/* 🧠 SIMULADOR PRICE */
 window.simularCompleto = function(){
+
 let tipo = document.getElementById("tipoSimulacao").value;
+
 let d = getDataMes();
 let gastos = d.items.reduce((a,b)=>a+b.amount,0);
 let salario = d.salary;
 
 if(tipo=="compra"){
+
 let valor = Number(valorSimulacao.value);
 let parcelas = Number(parcelasSimulacao.value);
 let juros = Number(jurosSimulacao.value)/100;
@@ -298,15 +289,39 @@ let parcela = valor * ( i / (1 - Math.pow(1+i, -n)) );
 let total = parcela * n;
 let jurosTotal = total - valor;
 
+parcela = Number(parcela.toFixed(2));
+total = Number(total.toFixed(2));
+jurosTotal = Number(jurosTotal.toFixed(2));
+
 let sobra = salario - gastos - parcela;
 
+let resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
+
 resultadoSimulacao.innerHTML = `
-Parcela: R$ ${parcela.toFixed(2)}<br>
-Total: R$ ${total.toFixed(2)}<br>
-Juros: R$ ${jurosTotal.toFixed(2)}<br>
-Sobra: R$ ${sobra.toFixed(2)}
+Parcela real: R$ ${parcela.toFixed(2)}<br>
+Total pago: R$ ${total.toFixed(2)}<br>
+Juros pagos: R$ ${jurosTotal.toFixed(2)}<br>
+Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>
+${resultado}
+`;
+
+}else{
+
+let valor = Number(valorInvestimento.value);
+let meses = Number(mesesInvestimento.value);
+let perc = Number(percentualInvest.value)/100;
+
+let taxaCDI = 0.012;
+
+let total = valor*(1+(taxaCDI*perc))**meses;
+let lucro = total-valor;
+
+resultadoSimulacao.innerHTML = `
+Valor final: R$ ${total.toFixed(2)}<br>
+Lucro: R$ ${lucro.toFixed(2)}
 `;
 }
+
 }
 
 window.render=()=>{
@@ -316,14 +331,6 @@ window.render=()=>{
   salary.value=d.salary;
   monthInput.value=mesAtual;
   meta.value=d.meta||"";
-
-  if(d.salary>0){
-    salary.disabled=true;
-    monthInput.disabled=true;
-    meta.disabled=true;
-    btnSalvar.style.display="none";
-    btnEditar.style.display="block";
-  }
 
   let total=d.items.reduce((a,b)=>a+b.amount,0);
   let sobra=d.salary-total;
@@ -370,10 +377,7 @@ function logout(){ auth.signOut(); }
 auth.onAuthStateChanged(user=>{
 document.getElementById("loginScreen").style.display=user?"none":"flex";
 document.getElementById("app").style.display=user?"block":"none";
-if(user){
-document.getElementById("userName").innerText=user.displayName;
-document.getElementById("userEmail").innerText=user.email;
-}
+if(user) document.getElementById("userName").innerText=user.displayName;
 });
 </script>
 
