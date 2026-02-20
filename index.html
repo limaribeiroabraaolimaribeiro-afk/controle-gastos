@@ -267,7 +267,7 @@ function drawEvolucao(){
   });
 }
 
-/* 🧠 SIMULADOR COMPLETO */
+/* 🧠 SIMULADOR COMPLETO COM JUROS DE BANCO REAL */
 window.simularCompleto = function(){
 
   let tipo = document.getElementById("tipoSimulacao").value;
@@ -282,29 +282,55 @@ window.simularCompleto = function(){
     let parcelas = Number(parcelasSimulacao.value);
     let juros = Number(jurosSimulacao.value)/100;
 
-    let parcela = (valor * (1+juros)**parcelas)/parcelas;
+    if(!valor || !parcelas || !juros){
+      alert("Preencha todos os campos corretamente");
+      return;
+    }
+
+    // 💰 CÁLCULO REAL DE FINANCIAMENTO (TABELA PRICE)
+    let parcela = valor * (juros * Math.pow(1 + juros, parcelas)) / (Math.pow(1 + juros, parcelas) - 1);
+
+    let totalPago = parcela * parcelas;
+    let jurosPago = totalPago - valor;
+
     let sobra = salario - gastos - parcela;
 
-    let resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
+    let resultado = sobra > salario * 0.3 
+      ? "<span class='success'>🟢 Vale a pena</span>"
+      : sobra > 0
+      ? "<span class='warn'>🟡 Cuidado</span>"
+      : "<span class='danger'>🔴 Não recomendado</span>";
 
     resultadoSimulacao.innerHTML = `
-    Parcela com juros: R$ ${parcela.toFixed(2)}<br>
-    Sobra após pagar: R$ ${sobra.toFixed(2)}<br>
-    ${resultado}
+      Parcela real: R$ ${parcela.toFixed(2)}<br>
+      Total pago: R$ ${totalPago.toFixed(2)}<br>
+      Juros pagos: R$ ${jurosPago.toFixed(2)}<br>
+      Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>
+      ${resultado}
     `;
+
   }else{
 
     let valor = Number(valorInvestimento.value);
     let meses = Number(mesesInvestimento.value);
     let perc = Number(percentualInvest.value)/100;
 
-    let taxaCDI = 0.012;
-    let total = valor*(1+(taxaCDI*perc))**meses;
-    let lucro = total-valor;
+    if(!valor || !meses || !perc){
+      alert("Preencha todos os campos corretamente");
+      return;
+    }
+
+    // 📈 CDI médio mensal (ajustável)
+    let taxaCDI = 0.012; 
+
+    let taxaReal = taxaCDI * perc;
+
+    let total = valor * Math.pow(1 + taxaReal, meses);
+    let lucro = total - valor;
 
     resultadoSimulacao.innerHTML = `
-    Valor final: R$ ${total.toFixed(2)}<br>
-    Lucro: R$ ${lucro.toFixed(2)}
+      Valor final: R$ ${total.toFixed(2)}<br>
+      Lucro: R$ ${lucro.toFixed(2)}
     `;
   }
 }
@@ -368,3 +394,4 @@ if(user) document.getElementById("userName").innerText=user.displayName;
 
 </body>
 </html>
+
