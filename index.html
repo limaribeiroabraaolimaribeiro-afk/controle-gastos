@@ -137,6 +137,36 @@ Controle de Gastos PRO
 <script>
 window.addEventListener("DOMContentLoaded", ()=>{
 
+/* =========================
+   🔥 CORREÇÕES DE FUNÇÕES
+========================= */
+
+// alternar tema corretamente
+window.toggleTheme = function(){
+  document.body.classList.toggle("light");
+};
+
+// controlar troca do tipo de simulador
+const tipoSelect = document.getElementById("tipoSimulacao");
+const areaCompra = document.getElementById("areaCompra");
+const areaInvest = document.getElementById("areaInvestimento");
+
+if(tipoSelect){
+  tipoSelect.addEventListener("change", function(){
+    if(this.value === "investimento"){
+      if(areaCompra) areaCompra.style.display = "none";
+      if(areaInvest) areaInvest.style.display = "block";
+    }else{
+      if(areaCompra) areaCompra.style.display = "block";
+      if(areaInvest) areaInvest.style.display = "none";
+    }
+  });
+}
+
+// garantir que os botões funcionem sempre
+document.getElementById("btnSalvar")?.addEventListener("click", saveSettings);
+document.getElementById("btnEditar")?.addEventListener("click", editarPlanejamento);
+
 let state = JSON.parse(localStorage.getItem("gastos_pro")||"{}");
 if(!state.meses) state = {meses:{}};
 
@@ -204,12 +234,43 @@ getDataMes().items.splice(i,1);
 save();
 };
 
-window.simularCompleto=()=>{
-let v=Number(valorSimulacao.value);
-let p=Number(parcelasSimulacao.value);
-let j=Number(jurosSimulacao.value)/100;
-let parcela=v*(j/(1-Math.pow(1+j,-p)));
-resultadoSimulacao.innerHTML="Parcela: R$ "+parcela.toFixed(2);
+window.simularCompleto = function(){
+
+let tipo = document.getElementById("tipoSimulacao").value;
+
+if(tipo === "compra"){
+
+  let valor = Number(valorSimulacao.value);
+  let parcelas = Number(parcelasSimulacao.value);
+  let juros = Number(jurosSimulacao.value)/100;
+
+  let parcela = valor * ( juros / (1 - Math.pow(1+juros, -parcelas)) );
+  let total = parcela * parcelas;
+  let jurosTotal = total - valor;
+
+  resultadoSimulacao.innerHTML = `
+  Parcela: R$ ${parcela.toFixed(2)}<br>
+  Total pago: R$ ${total.toFixed(2)}<br>
+  Juros: R$ ${jurosTotal.toFixed(2)}
+  `;
+
+}else{
+
+  let valor = Number(valorInvestimento.value);
+  let meses = Number(mesesInvestimento.value);
+  let perc = Number(percentualInvest.value)/100;
+
+  let taxa = 0.012; // CDI médio
+
+  let total = valor * Math.pow(1 + (taxa * perc), meses);
+  let lucro = total - valor;
+
+  resultadoSimulacao.innerHTML = `
+  Valor final: R$ ${total.toFixed(2)}<br>
+  Lucro: R$ ${lucro.toFixed(2)}
+  `;
+}
+
 };
 
 function drawChart(items){
@@ -290,3 +351,4 @@ userEmail2.innerText=user.email;
 
 </body>
 </html>
+
