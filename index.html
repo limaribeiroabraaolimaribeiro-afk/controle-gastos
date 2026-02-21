@@ -93,77 +93,27 @@ button{
 }
 .row > * {flex:1}
 .row .mini {flex:0 0 auto; width:auto; padding:8px 10px; border-radius:10px;}
+hr{border:none;height:1px;background:rgba(255,255,255,.2); width:80%}
+.light hr{background:rgba(0,0,0,.15)}
 
 #debugBox{
   position:fixed;
   left:12px;
   right:12px;
   bottom:12px;
-  background:rgba(0,0,0,.75);
+  background:rgba(0,0,0,.80);
   color:#fff;
   padding:10px;
   border-radius:12px;
   font-size:12px;
-  z-index:999999;
+  z-index:99999;
   display:none;
   white-space:pre-wrap;
 }
-hr{border:none;height:1px;background:rgba(255,255,255,.2)}
-.light hr{background:rgba(0,0,0,.15)}
 </style>
-
-<!-- ✅ STUBS: impede "is not defined" SEM mexer nos onclick -->
-<script>
-function dbg(msg){
-  var box = document.getElementById("debugBox");
-  if(!box) return;
-  box.style.display = "block";
-  box.textContent = String(msg);
-}
-
-window.addEventListener("error", function(e){
-  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
-});
-window.addEventListener("unhandledrejection", function(e){
-  var r = e.reason;
-  dbg("Promise rejeitada:\n" + (r && (r.code || r.message) ? (r.code + " - " + r.message) : String(r)));
-});
-
-function loginEmail(){
-  if(typeof window._loginEmail === "function") return window._loginEmail();
-  dbg("App ainda carregando... (loginEmail)");
-}
-function registrarEmail(){
-  if(typeof window._registrarEmail === "function") return window._registrarEmail();
-  dbg("App ainda carregando... (registrarEmail)");
-}
-function loginGoogle(){
-  if(typeof window._loginGoogle === "function") return window._loginGoogle();
-  dbg("App ainda carregando... (loginGoogle)");
-}
-function logout(){
-  if(typeof window._logout === "function") return window._logout();
-}
-</script>
 </head>
 
 <body>
-
-<!-- ✅ ANTI-CACHE PWA/GitHub Pages (resolve travar em versão velha) -->
-<script>
-(async function(){
-  try{
-    if("serviceWorker" in navigator){
-      const regs = await navigator.serviceWorker.getRegistrations();
-      for(const r of regs) await r.unregister();
-    }
-    if("caches" in window){
-      const keys = await caches.keys();
-      for(const k of keys) await caches.delete(k);
-    }
-  }catch(e){}
-})();
-</script>
 
 <div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
   <h2>Controle de Gastos PRO</h2>
@@ -174,7 +124,7 @@ function logout(){
   <button id="btnLoginEmail" onclick="loginEmail()">Entrar com Email</button>
   <button id="btnCriarConta" onclick="registrarEmail()">Criar conta</button>
 
-  <hr style="margin:10px 0;width:80%">
+  <hr>
 
   <button id="btnLoginGoogle" onclick="loginGoogle()">Entrar com Google</button>
 </div>
@@ -206,9 +156,11 @@ function logout(){
 
     <div class="card">
       <h3>📌 Gastos Fixos (Prioridades)</h3>
+
       <input id="descFixo" placeholder="Descrição (ex: Aluguel)">
       <input id="valorFixo" type="number" placeholder="Valor (ex: 750)">
       <select id="categoriaFixo"></select>
+
       <button onclick="addFixo()">Adicionar gasto fixo</button>
       <div id="listaFixos" class="small" style="margin-top:8px"></div>
     </div>
@@ -283,6 +235,22 @@ function logout(){
 
 <div id="debugBox"></div>
 
+<script>
+function dbg(msg){
+  var box = document.getElementById("debugBox");
+  if(!box) return;
+  box.style.display = "block";
+  box.textContent = String(msg);
+}
+window.addEventListener("error", function(e){
+  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+});
+window.addEventListener("unhandledrejection", function(e){
+  var r = e.reason;
+  dbg("Promise rejeitada:\n" + (r && (r.code || r.message) ? (r.code + " - " + r.message) : String(r)));
+});
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- Firebase (compat) -->
@@ -299,7 +267,6 @@ let auth = null;
 let provider = null;
 
 window.USER_ID = null;
-
 let state = { meses:{} };
 
 const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Outros"];
@@ -325,11 +292,11 @@ let grafico = null;
 let graficoEvolucao = null;
 
 /* ===========================
-   ✅ Firebase init (ANTI DUPLICAÇÃO)
+   ✅ Firebase init
 =========================== */
 function initFirebase(){
   if(!window.firebase){
-    dbg("Firebase não carregou. Verifique internet/blocked scripts.");
+    dbg("Firebase não carregou (script bloqueado/sem internet).");
     return false;
   }
   try{
@@ -349,7 +316,7 @@ function initFirebase(){
 }
 
 /* ===========================
-   ✅ Funções storage
+   ✅ Storage
 =========================== */
 function salvarCategorias(){
   localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias));
@@ -370,7 +337,7 @@ function carregarFixos(){
 }
 
 /* ===========================
-   ✅ Helpers UI (globais p/ onclick)
+   ✅ Helpers / UI
 =========================== */
 window.toggleTheme = ()=> document.body.classList.toggle("light");
 
@@ -422,7 +389,7 @@ function detectarCategoria(desc){
 }
 
 /* ===========================
-   ✅ CATEGORIAS (globais p/ onclick)
+   ✅ Categorias
 =========================== */
 window.addCategoria = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
@@ -449,7 +416,7 @@ function renderCategorias(){
 }
 
 /* ===========================
-   ✅ FIXOS (globais p/ onclick)
+   ✅ Fixos
 =========================== */
 window.addFixo = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
@@ -488,7 +455,7 @@ function renderFixos(){
 }
 
 /* ===========================
-   ✅ CRUD GASTOS / SETTINGS
+   ✅ CRUD / Settings
 =========================== */
 window.abrirAdd = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
@@ -550,7 +517,7 @@ window.saveSettings = ()=>{
 };
 
 /* ===========================
-   ✅ GRÁFICOS + RENDER
+   ✅ Charts + Render
 =========================== */
 function drawChart(items){
   const mapa = {};
@@ -662,7 +629,7 @@ function paint(){
 }
 
 /* ===========================
-   ✅ SIMULADOR (igual você tinha)
+   ✅ Simulador
 =========================== */
 window.simularCompleto = ()=>{
   const tipo = document.getElementById("tipoSimulacao").value;
@@ -678,10 +645,15 @@ window.simularCompleto = ()=>{
     const parcelas = Number(document.getElementById("parcelasSimulacao").value);
     const juros = Number(document.getElementById("jurosSimulacao").value)/100;
 
+    if(!valor || !parcelas || parcelas<=0){ resultadoSimEl.innerHTML = "Preencha valor e parcelas."; return; }
+
     const i = juros;
     const n = parcelas;
 
-    const parcela = valor * ( i / (1 - Math.pow(1+i, -n)) );
+    const parcela = (i>0)
+      ? valor * ( i / (1 - Math.pow(1+i, -n)) )
+      : (valor / n);
+
     const total = parcela * n;
     const jurosTotal = total - valor;
 
@@ -700,9 +672,11 @@ window.simularCompleto = ()=>{
     const meses = Number(document.getElementById("mesesInvestimento").value);
     const perc = Number(document.getElementById("percentualInvest").value)/100;
 
-    const taxaCDI = 0.012; // exemplo
-    const total = valor*(1+(taxaCDI*perc))**meses;
-    const lucro = total-valor;
+    if(!valor || !meses || meses<=0){ resultadoSimEl.innerHTML = "Preencha valor e meses."; return; }
+
+    const taxaCDI = 0.012; // exemplo fixo
+    const total = valor * Math.pow(1 + (taxaCDI*perc), meses);
+    const lucro = total - valor;
 
     resultadoSimEl.innerHTML = `
       Valor final: R$ ${total.toFixed(2)}<br>
@@ -712,20 +686,44 @@ window.simularCompleto = ()=>{
 };
 
 /* ===========================
-   ✅ LOGIN (IMPLEMENTAÇÕES reais)
-   - stubs chamam essas funções
+   ✅ LOGIN (globais pros onclick)
 =========================== */
-window._loginGoogle = ()=>{
+window.loginGoogle = ()=>{
   if(!auth){ alert("Firebase não carregou."); return; }
   auth.signInWithRedirect(provider).catch(e=>alert((e.code||"") + " - " + e.message));
 };
 
-window._logout = ()=>{
+window.logout = ()=>{
   if(!auth) return;
   auth.signOut().catch(e=>alert((e.code||"") + " - " + e.message));
 };
 
-window._loginEmail = ()=>{
+window.loginEmail = ()=>{
   if(!auth){ alert("Firebase não carregou."); return; }
 
-  const email = document.getElementById(
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+
+  if(!email || !senha){ alert("Preencha email e senha"); return; }
+  if(!email.includes("@")){ alert("Digite um email válido"); return; }
+
+  auth.signInWithEmailAndPassword(email, senha)
+    .catch(e=>alert((e.code||"") + " - " + e.message));
+};
+
+window.registrarEmail = ()=>{
+  if(!auth){ alert("Firebase não carregou."); return; }
+
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+
+  if(!email || !senha){ alert("Preencha email e senha"); return; }
+  if(!email.includes("@")){ alert("Digite um email válido"); return; }
+  if(senha.length < 6){ alert("A senha deve ter pelo menos 6 caracteres"); return; }
+
+  auth.createUserWithEmailAndPassword(email, senha)
+    .then(()=>alert("Conta criada com sucesso!"))
+    .catch(e=>alert((e.code||"") + " - " + e.message));
+};
+
+/* =============
