@@ -93,6 +93,21 @@ button{
 }
 .row > * {flex:1}
 .row .mini {flex:0 0 auto; width:auto; padding:8px 10px; border-radius:10px;}
+
+#debugBox{
+  position:fixed;
+  left:12px;
+  right:12px;
+  bottom:12px;
+  background:rgba(0,0,0,.75);
+  color:#fff;
+  padding:10px;
+  border-radius:12px;
+  font-size:12px;
+  z-index:9999;
+  display:none;
+  white-space:pre-wrap;
+}
 </style>
 </head>
 
@@ -104,12 +119,13 @@ button{
   <input id="email" type="email" placeholder="Seu e-mail">
   <input id="senha" type="password" placeholder="Sua senha">
 
-  <button onclick="loginEmail()">Entrar com Email</button>
-  <button onclick="registrarEmail()">Criar conta</button>
+  <!-- Mantive seus onclick -->
+  <button id="btnLoginEmail" onclick="loginEmail()">Entrar com Email</button>
+  <button id="btnCriarConta" onclick="registrarEmail()">Criar conta</button>
 
   <hr style="margin:10px 0;width:80%">
 
-  <button onclick="loginGoogle()">Entrar com Google</button>
+  <button id="btnLoginGoogle" onclick="loginGoogle()">Entrar com Google</button>
 </div>
 
 <div id="app" style="display:none">
@@ -121,7 +137,6 @@ button{
       <span class="toggle" onclick="abrirConfig()">⚙️</span>
     </h1>
 
-    <!-- ⚙️ CONFIGURAÇÕES -->
     <div id="configBox" class="card" style="display:none">
       <h3>⚙️ Configurações</h3>
       <b id="userName"></b>
@@ -129,32 +144,24 @@ button{
       <button onclick="logout()">Sair da conta</button>
     </div>
 
-    <!-- 📂 CATEGORIAS -->
     <div class="card">
       <h3>📂 Minhas Categorias</h3>
-
       <div class="row">
         <input id="novaCategoria" placeholder="Nome da categoria">
         <button class="mini" onclick="addCategoria()">Adicionar</button>
       </div>
-
       <div id="listaCategorias" class="small" style="margin-top:8px"></div>
     </div>
 
-    <!-- 📌 FIXOS -->
     <div class="card">
       <h3>📌 Gastos Fixos (Prioridades)</h3>
-
       <input id="descFixo" placeholder="Descrição (ex: Aluguel)">
       <input id="valorFixo" type="number" placeholder="Valor (ex: 750)">
       <select id="categoriaFixo"></select>
-
       <button onclick="addFixo()">Adicionar gasto fixo</button>
-
       <div id="listaFixos" class="small" style="margin-top:8px"></div>
     </div>
 
-    <!-- SALÁRIO / MÊS / META -->
     <div class="card">
       <label>Salário</label>
       <input id="salary" type="number">
@@ -168,7 +175,6 @@ button{
       <button onclick="saveSettings()">Salvar</button>
     </div>
 
-    <!-- 🧠 SIMULADOR COMPLETO -->
     <div class="card">
       <h3>🧠 Simulador Financeiro</h3>
 
@@ -201,7 +207,6 @@ button{
       </div>
 
       <button onclick="simularCompleto()">Calcular</button>
-
       <div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
     </div>
 
@@ -225,20 +230,30 @@ button{
   <div class="fab" onclick="abrirAdd()">+</div>
 </div>
 
+<div id="debugBox"></div>
+
+<script>
+/* === Debug visual (sem depender de alert) === */
+function dbg(msg){
+  const box = document.getElementById("debugBox");
+  box.style.display = "block";
+  box.textContent = String(msg);
+}
+window.addEventListener("error", (e)=>{
+  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+});
+window.addEventListener("unhandledrejection", (e)=>{
+  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+});
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Firebase -->
+<!-- Firebase (compat) -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
 <script>
-/* ===========================
-   ✅ DEBUG: se der erro, você vê na hora
-=========================== */
-window.onerror = function(msg, url, line, col){
-  alert("Erro no app: " + msg + "\\nLinha: " + line + ":" + col);
-};
-
 /* ===========================
    ✅ Variáveis globais do app
 =========================== */
@@ -272,6 +287,30 @@ let fixos = [];
 let mesAtual = new Date().toISOString().slice(0,7);
 let grafico = null;
 let graficoEvolucao = null;
+
+/* ===========================
+   ✅ Firebase init (ANTI DUPLICAÇÃO)
+=========================== */
+function initFirebase(){
+  if(!window.firebase){
+    dbg("Firebase não carregou. Verifique internet/blocked scripts.");
+    return false;
+  }
+  try{
+    if(!firebase.apps || !firebase.apps.length){
+      firebase.initializeApp({
+        apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+        authDomain:"controle-gastos-pro.firebaseapp.com",
+        projectId:"controle-gastos-pro"
+      });
+    }
+  }catch(e){
+    // se já existir, ignora
+  }
+  auth = firebase.auth();
+  provider = new firebase.auth.GoogleAuthProvider();
+  return true;
+}
 
 /* ===========================
    ✅ Funções storage
@@ -413,7 +452,7 @@ function renderFixos(){
 }
 
 /* ===========================
-   ✅ CRUD GASTOS / SETTINGS (globais p/ onclick)
+   ✅ CRUD GASTOS / SETTINGS
 =========================== */
 window.abrirAdd = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
@@ -514,7 +553,6 @@ window.render = ()=>{
   mesAtual = window.getMes();
   const d = window.getDataMes();
 
-  // pinta rápido
   paint();
 
   fetch(API + "/mes/" + window.USER_ID + "/" + mesAtual)
@@ -588,7 +626,7 @@ function paint(){
 }
 
 /* ===========================
-   ✅ SIMULADOR (global p/ onclick)
+   ✅ SIMULADOR
 =========================== */
 window.simularCompleto = ()=>{
   const tipo = document.getElementById("tipoSimulacao").value;
@@ -637,21 +675,20 @@ window.simularCompleto = ()=>{
 };
 
 /* ===========================
-   ✅ LOGIN (global p/ onclick)
-   - Google: redirect (funciona no celular)
+   ✅ LOGIN (Email + Google redirect)
 =========================== */
 window.loginGoogle = ()=>{
-  if(!auth){ alert("Firebase ainda carregando..."); return; }
-  auth.signInWithRedirect(provider).catch(e=>alert(e.message));
+  if(!auth){ alert("Firebase não carregou."); return; }
+  auth.signInWithRedirect(provider).catch(e=>alert((e.code||"") + " - " + e.message));
 };
 
 window.logout = ()=>{
-  if(!auth){ return; }
-  auth.signOut().catch(e=>alert(e.message));
+  if(!auth) return;
+  auth.signOut().catch(e=>alert((e.code||"") + " - " + e.message));
 };
 
 window.loginEmail = ()=>{
-  if(!auth){ alert("Firebase ainda carregando..."); return; }
+  if(!auth){ alert("Firebase não carregou."); return; }
 
   const email = document.getElementById("email").value.trim();
   const senha = document.getElementById("senha").value.trim();
@@ -659,11 +696,12 @@ window.loginEmail = ()=>{
   if(!email || !senha){ alert("Preencha email e senha"); return; }
   if(!email.includes("@")){ alert("Digite um email válido"); return; }
 
-  auth.signInWithEmailAndPassword(email, senha).catch(e=>alert(e.message));
+  auth.signInWithEmailAndPassword(email, senha)
+    .catch(e=>alert((e.code||"") + " - " + e.message));
 };
 
 window.registrarEmail = ()=>{
-  if(!auth){ alert("Firebase ainda carregando..."); return; }
+  if(!auth){ alert("Firebase não carregou."); return; }
 
   const email = document.getElementById("email").value.trim();
   const senha = document.getElementById("senha").value.trim();
@@ -674,49 +712,12 @@ window.registrarEmail = ()=>{
 
   auth.createUserWithEmailAndPassword(email, senha)
     .then(()=>alert("Conta criada com sucesso!"))
-    .catch(e=>alert(e.message));
+    .catch(e=>alert((e.code||"") + " - " + e.message));
 };
 
 /* ===========================
-   ✅ INIT (quando DOM pronto)
+   ✅ INIT (garante botões funcionando)
 =========================== */
 document.addEventListener("DOMContentLoaded", ()=>{
-  // init firebase
-  auth = firebase.auth();
-  provider = new firebase.auth.GoogleAuthProvider();
-
-  // troca áreas simulador
-  document.getElementById("tipoSimulacao").addEventListener("change", function(){
-    if(this.value==="compra"){
-      document.getElementById("areaCompra").style.display="block";
-      document.getElementById("areaInvestimento").style.display="none";
-    }else{
-      document.getElementById("areaCompra").style.display="none";
-      document.getElementById("areaInvestimento").style.display="block";
-    }
-  });
-
-  // troca mês
-  document.getElementById("month").addEventListener("change", ()=>{
-    mesAtual = window.getMes();
-    window.render();
-  });
-
-  // auth state
-  auth.onAuthStateChanged(user=>{
-    window.USER_ID = user ? user.uid : null;
-
-    document.getElementById("loginScreen").style.display = user ? "none" : "flex";
-    document.getElementById("app").style.display = user ? "block" : "none";
-
-    if(user){
-      document.getElementById("userName").innerText = user.displayName || user.email;
-
-      carregarCategorias();
-      carregarFixos();
-      renderCategorias();
-      renderFixos();
-
-      state = { meses:{} };
-      mesAtual = window.getMes();
-      window.rende
+  // 1) tenta init firebase
+  const o
