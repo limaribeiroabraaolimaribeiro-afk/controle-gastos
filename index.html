@@ -45,6 +45,7 @@ button{
   background:var(--accent);
   color:#fff;
   cursor:pointer;
+  touch-action: manipulation;
 }
 .kpis{
   display:grid;
@@ -231,461 +232,477 @@ button{
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
 <script>
-window.addEventListener("DOMContentLoaded", ()=>{
+/* ===========================
+   ✅ DEBUG: se der erro, você vê na hora
+=========================== */
+window.onerror = function(msg, url, line, col){
+  alert("Erro no app: " + msg + "\\nLinha: " + line + ":" + col);
+};
 
-  // ====== CONFIG ======
-  const API = "https://api-rf1w.onrender.com";
+/* ===========================
+   ✅ Variáveis globais do app
+=========================== */
+const API = "https://api-rf1w.onrender.com";
 
-  firebase.initializeApp({
-    apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-    authDomain:"controle-gastos-pro.firebaseapp.com",
-    projectId:"controle-gastos-pro"
+let auth = null;
+let provider = null;
+
+window.USER_ID = null;
+
+let state = { meses:{} };
+
+const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Outros"];
+
+let regras = [
+  {palavra:"aluguel", categoria:"Casa"},
+  {palavra:"luz", categoria:"Casa"},
+  {palavra:"agua", categoria:"Casa"},
+  {palavra:"água", categoria:"Casa"},
+  {palavra:"mercado", categoria:"Alimentação"},
+  {palavra:"padaria", categoria:"Alimentação"},
+  {palavra:"gasolina", categoria:"Transporte"},
+  {palavra:"uber", categoria:"Transporte"},
+  {palavra:"ração", categoria:"Pets"},
+  {palavra:"pet", categoria:"Pets"}
+];
+
+let categorias = [...DEFAULT_CATEGORIAS];
+let fixos = [];
+
+let mesAtual = new Date().toISOString().slice(0,7);
+let grafico = null;
+let graficoEvolucao = null;
+
+/* ===========================
+   ✅ Funções storage
+=========================== */
+function salvarCategorias(){
+  localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias));
+}
+function carregarCategorias(){
+  const raw = localStorage.getItem("categorias_" + window.USER_ID);
+  categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
+  if(!Array.isArray(categorias) || categorias.length === 0) categorias = [...DEFAULT_CATEGORIAS];
+}
+function salvarFixos(){
+  localStorage.setItem("fixos_" + window.USER_ID, JSON.stringify(fixos));
+}
+function carregarFixos(){
+  const raw = localStorage.getItem("fixos_" + window.USER_ID);
+  fixos = raw ? JSON.parse(raw) : [];
+  if(!Array.isArray(fixos)) fixos = [];
+  fixos = fixos.map(f=>({ ...f, isFixo:true }));
+}
+
+/* ===========================
+   ✅ Helpers UI (globais p/ onclick)
+=========================== */
+window.toggleTheme = ()=> document.body.classList.toggle("light");
+
+window.abrirConfig = ()=>{
+  const box = document.getElementById("configBox");
+  box.style.display = box.style.display==="none" ? "block" : "none";
+};
+
+window.getMes = ()=>{
+  const monthInput = document.getElementById("month");
+  return monthInput.value || new Date().toISOString().slice(0,7);
+};
+
+function keyItem(i){
+  return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`;
+}
+
+function garantirFixosNoMes(d){
+  const set = new Set((d.items||[]).map(keyItem));
+  for(const f of fixos){
+    const obj = { ...f, isFixo:true };
+    const k = keyItem(obj);
+    if(!set.has(k)){
+      d.items.unshift(obj);
+      set.add(k);
+    }
+  }
+}
+
+window.getDataMes = ()=>{
+  if(!state.meses[mesAtual]){
+    state.meses[mesAtual] = {
+      salary: 0,
+      items: fixos.map(f=>({ ...f, isFixo:true })),
+      meta: 0
+    };
+  } else {
+    garantirFixosNoMes(state.meses[mesAtual]);
+  }
+  return state.meses[mesAtual];
+};
+
+function detectarCategoria(desc){
+  const txt = (desc||"").toLowerCase();
+  for(const r of regras){
+    if(txt.includes(r.palavra)) return r.categoria;
+  }
+  return "Outros";
+}
+
+/* ===========================
+   ✅ CATEGORIAS (globais p/ onclick)
+=========================== */
+window.addCategoria = ()=>{
+  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
+
+  const input = document.getElementById("novaCategoria");
+  const nome = (input.value || "").trim();
+  if(!nome) return;
+
+  const exists = categorias.some(c => c.toLowerCase() === nome.toLowerCase());
+  if(exists){ alert("Essa categoria já existe."); return; }
+
+  categorias.push(nome);
+  input.value = "";
+  salvarCategorias();
+  renderCategorias();
+};
+
+function renderCategorias(){
+  const div = document.getElementById("listaCategorias");
+  const select = document.getElementById("categoriaFixo");
+
+  div.innerHTML = categorias.map(c=>`<div>• ${c}</div>`).join("");
+  select.innerHTML = categorias.map(c=>`<option value="${c}">${c}</option>`).join("");
+}
+
+/* ===========================
+   ✅ FIXOS (globais p/ onclick)
+=========================== */
+window.addFixo = ()=>{
+  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
+
+  const desc = (document.getElementById("descFixo").value || "").trim();
+  const valor = Number(document.getElementById("valorFixo").value);
+  const categoria = document.getElementById("categoriaFixo").value || "Outros";
+
+  if(!desc || !valor || valor <= 0){
+    alert("Preencha descrição e valor (maior que 0).");
+    return;
+  }
+
+  fixos.push({ desc, amount: valor, category: categoria, isFixo:true });
+
+  document.getElementById("descFixo").value = "";
+  document.getElementById("valorFixo").value = "";
+
+  salvarFixos();
+  renderFixos();
+
+  const d = window.getDataMes();
+  garantirFixosNoMes(d);
+  window.render();
+};
+
+function renderFixos(){
+  const div = document.getElementById("listaFixos");
+  if(fixos.length === 0){
+    div.innerHTML = "<div>Nenhum gasto fixo cadastrado.</div>";
+    return;
+  }
+  div.innerHTML = fixos.map(f=>`
+    <div>• ${f.desc} — R$ ${Number(f.amount).toFixed(2)} <span class="badge">${f.category}</span></div>
+  `).join("");
+}
+
+/* ===========================
+   ✅ CRUD GASTOS / SETTINGS (globais p/ onclick)
+=========================== */
+window.abrirAdd = ()=>{
+  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
+
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
+
+  const desc = prompt("Descrição");
+  const valor = parseFloat(prompt("Valor"));
+  if(!desc || isNaN(valor)) return;
+
+  const categoria = detectarCategoria(desc);
+
+  d.items.push({ desc, amount: valor, category: categoria, isFixo:false });
+
+  fetch(API + "/addGasto", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      userId: window.USER_ID,
+      mes: mesAtual,
+      desc,
+      amount: valor,
+      category: categoria
+    })
+  }).catch(()=>{});
+
+  window.render();
+};
+
+window.del = (i)=>{
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
+  d.items.splice(i,1);
+  window.render();
+};
+
+window.saveSettings = ()=>{
+  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
+
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
+
+  d.salary = Number(document.getElementById("salary").value);
+  d.meta = Number(document.getElementById("meta").value);
+
+  fetch(API + "/salvarMes", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      userId: window.USER_ID,
+      mes: mesAtual,
+      salary: d.salary,
+      meta: d.meta
+    })
+  }).catch(()=>{});
+
+  window.render();
+};
+
+/* ===========================
+   ✅ GRÁFICOS + RENDER
+=========================== */
+function drawChart(items){
+  const mapa = {};
+  items.forEach(i=>{
+    const cat = i.category || "Outros";
+    mapa[cat] = (mapa[cat] || 0) + Number(i.amount||0);
   });
 
-  const auth = firebase.auth();
-  const provider = new firebase.auth.GoogleAuthProvider();
+  const labels = Object.keys(mapa);
+  const valores = Object.values(mapa);
 
-  // ====== ELEMENTOS (✅ SEM DEPENDER DE VARIÁVEIS GLOBAIS DO HTML) ======
-  const monthInput = document.getElementById("month");
-  const salaryInput = document.getElementById("salary");
-  const metaInput = document.getElementById("meta");
-  const kpisEl = document.getElementById("kpis");
-  const listEl = document.getElementById("list");
-  const areaCompraEl = document.getElementById("areaCompra");
-  const areaInvestEl = document.getElementById("areaInvestimento");
+  if(grafico) grafico.destroy();
+  grafico = new Chart(document.getElementById("chart"),{
+    type:"doughnut",
+    data:{ labels, datasets:[{ data: valores }] }
+  });
+}
+
+function drawEvolucao(){
+  const meses = Object.keys(state.meses).sort();
+  const valores = meses.map(m=>{
+    const it = state.meses[m].items || [];
+    return it.reduce((a,b)=>a+Number(b.amount||0),0);
+  });
+
+  if(graficoEvolucao) graficoEvolucao.destroy();
+  graficoEvolucao = new Chart(document.getElementById("chartEvolucao"),{
+    type:"line",
+    data:{ labels: meses, datasets:[{ data: valores }] }
+  });
+}
+
+window.render = ()=>{
+  if(!window.USER_ID) return;
+
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
+
+  // pinta rápido
+  paint();
+
+  fetch(API + "/mes/" + window.USER_ID + "/" + mesAtual)
+    .then(r=>r.json())
+    .then(data=>{
+      const apiItems = Array.isArray(data)
+        ? data.filter(x=>x && x.desc).map(x=>({
+            desc: x.desc,
+            amount: Number(x.amount||0),
+            category: x.category || detectarCategoria(x.desc),
+            isFixo: false
+          }))
+        : [];
+
+      if(Array.isArray(data) && data.length){
+        d.salary = Number(data[0].salary || d.salary || 0);
+        d.meta = Number(data[0].meta || d.meta || 0);
+      }
+
+      const merged = [];
+      const seen = new Set();
+
+      for(const f of fixos){
+        const obj = { ...f, isFixo:true };
+        const k = keyItem(obj);
+        if(!seen.has(k)){ merged.push(obj); seen.add(k); }
+      }
+      for(const it of apiItems){
+        const k = keyItem(it);
+        if(!seen.has(k)){ merged.push(it); seen.add(k); }
+      }
+
+      d.items = merged;
+      localStorage.setItem("gastos_pro", JSON.stringify(state));
+      paint();
+    })
+    .catch(()=> paint());
+};
+
+function paint(){
+  const d = window.getDataMes();
+
+  document.getElementById("salary").value = Number(d.salary||0);
+  document.getElementById("month").value = mesAtual;
+  document.getElementById("meta").value = d.meta || "";
+
+  const total = d.items.reduce((a,b)=>a+Number(b.amount||0),0);
+  const sobra = Number(d.salary||0) - total;
+
+  document.getElementById("kpis").innerHTML = `
+    <div class="kpi">Salário<br><b>R$ ${Number(d.salary||0).toFixed(2)}</b></div>
+    <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
+    <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
+    <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
+  `;
+
+  document.getElementById("list").innerHTML = d.items.map((i,idx)=>`
+    <tr>
+      <td>
+        ${i.desc}
+        ${i.isFixo ? `<span class="badge">Fixo</span>` : ``}
+        <span class="badge">${i.category || "Outros"}</span>
+      </td>
+      <td>R$ ${Number(i.amount||0).toFixed(2)}</td>
+      <td><button onclick="del(${idx})">X</button></td>
+    </tr>
+  `).join("");
+
+  drawChart(d.items);
+  drawEvolucao();
+}
+
+/* ===========================
+   ✅ SIMULADOR (global p/ onclick)
+=========================== */
+window.simularCompleto = ()=>{
+  const tipo = document.getElementById("tipoSimulacao").value;
+  const d = window.getDataMes();
+  const gastos = d.items.reduce((a,b)=>a+Number(b.amount||0),0);
+  const salario = Number(d.salary||0);
+
   const resultadoSimEl = document.getElementById("resultadoSimulacao");
 
-  // ====== STATE ======
-  window.USER_ID = null;
+  if(tipo==="compra"){
+    const valor = Number(document.getElementById("valorSimulacao").value);
+    const parcelas = Number(document.getElementById("parcelasSimulacao").value);
+    const juros = Number(document.getElementById("jurosSimulacao").value)/100;
 
-  let state = { meses:{} };
+    const i = juros;
+    const n = parcelas;
 
-  const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Outros"];
+    const parcela = valor * ( i / (1 - Math.pow(1+i, -n)) );
+    const total = parcela * n;
+    const jurosTotal = total - valor;
 
-  let regras = [
-    {palavra:"aluguel", categoria:"Casa"},
-    {palavra:"luz", categoria:"Casa"},
-    {palavra:"agua", categoria:"Casa"},
-    {palavra:"água", categoria:"Casa"},
-    {palavra:"mercado", categoria:"Alimentação"},
-    {palavra:"padaria", categoria:"Alimentação"},
-    {palavra:"gasolina", categoria:"Transporte"},
-    {palavra:"uber", categoria:"Transporte"},
-    {palavra:"ração", categoria:"Pets"},
-    {palavra:"pet", categoria:"Pets"}
-  ];
+    const sobra = salario - gastos - parcela;
+    const resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
 
-  let categorias = [...DEFAULT_CATEGORIAS];
-  let fixos = [];
+    resultadoSimEl.innerHTML = `
+      Parcela real: R$ ${parcela.toFixed(2)}<br>
+      Total pago: R$ ${total.toFixed(2)}<br>
+      Juros pagos: R$ ${jurosTotal.toFixed(2)}<br>
+      Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>
+      ${resultado}
+    `;
+  }else{
+    const valor = Number(document.getElementById("valorInvestimento").value);
+    const meses = Number(document.getElementById("mesesInvestimento").value);
+    const perc = Number(document.getElementById("percentualInvest").value)/100;
 
-  let mesAtual = new Date().toISOString().slice(0,7);
-  let grafico = null;
-  let graficoEvolucao = null;
+    const taxaCDI = 0.012;
+    const total = valor*(1+(taxaCDI*perc))**meses;
+    const lucro = total-valor;
 
-  // ====== STORAGE ======
-  function salvarCategorias(){
-    localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias));
+    resultadoSimEl.innerHTML = `
+      Valor final: R$ ${total.toFixed(2)}<br>
+      Lucro: R$ ${lucro.toFixed(2)}
+    `;
   }
-  function carregarCategorias(){
-    const raw = localStorage.getItem("categorias_" + window.USER_ID);
-    categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
-    if(!Array.isArray(categorias) || categorias.length === 0) categorias = [...DEFAULT_CATEGORIAS];
-  }
-  function salvarFixos(){
-    localStorage.setItem("fixos_" + window.USER_ID, JSON.stringify(fixos));
-  }
-  function carregarFixos(){
-    const raw = localStorage.getItem("fixos_" + window.USER_ID);
-    fixos = raw ? JSON.parse(raw) : [];
-    if(!Array.isArray(fixos)) fixos = [];
-    fixos = fixos.map(f=>({ ...f, isFixo:true }));
-  }
+};
 
-  // ====== UI HELPERS ======
-  window.toggleTheme = ()=> document.body.classList.toggle("light");
+/* ===========================
+   ✅ LOGIN (global p/ onclick)
+   - Google: redirect (funciona no celular)
+=========================== */
+window.loginGoogle = ()=>{
+  if(!auth){ alert("Firebase ainda carregando..."); return; }
+  auth.signInWithRedirect(provider).catch(e=>alert(e.message));
+};
 
-  window.abrirConfig = ()=>{
-    let box = document.getElementById("configBox");
-    box.style.display = box.style.display=="none" ? "block" : "none";
-  };
+window.logout = ()=>{
+  if(!auth){ return; }
+  auth.signOut().catch(e=>alert(e.message));
+};
 
-  window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
+window.loginEmail = ()=>{
+  if(!auth){ alert("Firebase ainda carregando..."); return; }
 
-  monthInput.addEventListener("change", ()=>{
-    mesAtual = window.getMes();
-    window.render();
-  });
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value.trim();
 
+  if(!email || !senha){ alert("Preencha email e senha"); return; }
+  if(!email.includes("@")){ alert("Digite um email válido"); return; }
+
+  auth.signInWithEmailAndPassword(email, senha).catch(e=>alert(e.message));
+};
+
+window.registrarEmail = ()=>{
+  if(!auth){ alert("Firebase ainda carregando..."); return; }
+
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+
+  if(!email || !senha){ alert("Preencha email e senha"); return; }
+  if(!email.includes("@")){ alert("Digite um email válido"); return; }
+  if(senha.length < 6){ alert("A senha deve ter pelo menos 6 caracteres"); return; }
+
+  auth.createUserWithEmailAndPassword(email, senha)
+    .then(()=>alert("Conta criada com sucesso!"))
+    .catch(e=>alert(e.message));
+};
+
+/* ===========================
+   ✅ INIT (quando DOM pronto)
+=========================== */
+document.addEventListener("DOMContentLoaded", ()=>{
+  // init firebase
+  auth = firebase.auth();
+  provider = new firebase.auth.GoogleAuthProvider();
+
+  // troca áreas simulador
   document.getElementById("tipoSimulacao").addEventListener("change", function(){
     if(this.value==="compra"){
-      areaCompraEl.style.display="block";
-      areaInvestEl.style.display="none";
+      document.getElementById("areaCompra").style.display="block";
+      document.getElementById("areaInvestimento").style.display="none";
     }else{
-      areaCompraEl.style.display="none";
-      areaInvestEl.style.display="block";
+      document.getElementById("areaCompra").style.display="none";
+      document.getElementById("areaInvestimento").style.display="block";
     }
   });
 
-  // ====== LÓGICA DE MÊS ======
-  function keyItem(i){
-    return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`;
-  }
-
-  function garantirFixosNoMes(d){
-    const set = new Set((d.items||[]).map(keyItem));
-    for(const f of fixos){
-      const obj = { ...f, isFixo:true };
-      const k = keyItem(obj);
-      if(!set.has(k)){
-        d.items.unshift(obj);
-        set.add(k);
-      }
-    }
-  }
-
-  window.getDataMes = ()=>{
-    if(!state.meses[mesAtual]){
-      state.meses[mesAtual] = {
-        salary: 0,
-        items: fixos.map(f=>({ ...f, isFixo:true })),
-        meta: 0
-      };
-    }else{
-      garantirFixosNoMes(state.meses[mesAtual]);
-    }
-    return state.meses[mesAtual];
-  };
-
-  // ====== CATEGORIAS ======
-  window.addCategoria = ()=>{
-    if(!window.USER_ID){ alert("Faça login primeiro"); return; }
-
-    let nome = (document.getElementById("novaCategoria").value || "").trim();
-    if(!nome) return;
-
-    const exists = categorias.some(c => c.toLowerCase() === nome.toLowerCase());
-    if(exists){ alert("Essa categoria já existe."); return; }
-
-    categorias.push(nome);
-    document.getElementById("novaCategoria").value = "";
-    salvarCategorias();
-    renderCategorias();
-  };
-
-  function renderCategorias(){
-    const div = document.getElementById("listaCategorias");
-    const select = document.getElementById("categoriaFixo");
-
-    div.innerHTML = categorias.map(c=>`<div>• ${c}</div>`).join("");
-    select.innerHTML = categorias.map(c=>`<option value="${c}">${c}</option>`).join("");
-  }
-
-  // ====== FIXOS ======
-  window.addFixo = ()=>{
-    if(!window.USER_ID){ alert("Faça login primeiro"); return; }
-
-    let desc = (document.getElementById("descFixo").value || "").trim();
-    let valor = Number(document.getElementById("valorFixo").value);
-    let categoria = document.getElementById("categoriaFixo").value || "Outros";
-
-    if(!desc || !valor || valor <= 0){
-      alert("Preencha descrição e valor (maior que 0).");
-      return;
-    }
-
-    fixos.push({ desc, amount: valor, category: categoria, isFixo:true });
-
-    document.getElementById("descFixo").value = "";
-    document.getElementById("valorFixo").value = "";
-
-    salvarFixos();
-    renderFixos();
-
-    // aplicar no mês atual
-    const d = window.getDataMes();
-    garantirFixosNoMes(d);
-    window.render();
-  };
-
-  function renderFixos(){
-    const div = document.getElementById("listaFixos");
-    if(fixos.length === 0){
-      div.innerHTML = "<div>Nenhum gasto fixo cadastrado.</div>";
-      return;
-    }
-    div.innerHTML = fixos.map(f=>`
-      <div>• ${f.desc} — R$ ${Number(f.amount).toFixed(2)} <span class="badge">${f.category}</span></div>
-    `).join("");
-  }
-
-  // ====== DETECÇÃO AUTOMÁTICA ======
-  function detectarCategoria(desc){
-    const txt = (desc||"").toLowerCase();
-    for(const r of regras){
-      if(txt.includes(r.palavra)) return r.categoria;
-    }
-    return "Outros";
-  }
-
-  // ====== CRUD GASTOS ======
-  window.abrirAdd = ()=>{
-    if(!window.USER_ID){
-      alert("Faça login primeiro");
-      return;
-    }
-
+  // troca mês
+  document.getElementById("month").addEventListener("change", ()=>{
     mesAtual = window.getMes();
-    const d = window.getDataMes();
-
-    const desc = prompt("Descrição");
-    const valor = parseFloat(prompt("Valor"));
-    if(!desc || isNaN(valor)) return;
-
-    const categoria = detectarCategoria(desc);
-
-    d.items.push({ desc, amount: valor, category: categoria, isFixo:false });
-
-    fetch(API + "/addGasto", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        userId: window.USER_ID,
-        mes: mesAtual,
-        desc: desc,
-        amount: valor,
-        category: categoria
-      })
-    }).catch(()=>{});
-
     window.render();
-  };
+  });
 
-  window.del = (i)=>{
-    mesAtual = window.getMes();
-    const d = window.getDataMes();
-    d.items.splice(i,1);
-    window.render();
-  };
-
-  // ====== SETTINGS ======
-  window.saveSettings = ()=>{
-    if(!window.USER_ID){
-      alert("Faça login primeiro");
-      return;
-    }
-
-    mesAtual = window.getMes();
-    const d = window.getDataMes();
-
-    d.salary = Number(salaryInput.value);
-    d.meta = Number(metaInput.value);
-
-    fetch(API + "/salvarMes", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        userId: window.USER_ID,
-        mes: mesAtual,
-        salary: d.salary,
-        meta: d.meta
-      })
-    }).catch(()=>{});
-
-    window.render();
-  };
-
-  // ====== GRÁFICOS ======
-  function drawChart(items){
-    const mapa = {};
-    items.forEach(i=>{
-      const cat = i.category || "Outros";
-      mapa[cat] = (mapa[cat] || 0) + Number(i.amount||0);
-    });
-
-    const labels = Object.keys(mapa);
-    const valores = Object.values(mapa);
-
-    if(grafico) grafico.destroy();
-    grafico = new Chart(document.getElementById("chart"),{
-      type:"doughnut",
-      data:{ labels, datasets:[{ data: valores }] }
-    });
-  }
-
-  function drawEvolucao(){
-    const meses = Object.keys(state.meses).sort();
-    const valores = meses.map(m=>{
-      const it = state.meses[m].items || [];
-      return it.reduce((a,b)=>a+Number(b.amount||0),0);
-    });
-
-    if(graficoEvolucao) graficoEvolucao.destroy();
-    graficoEvolucao = new Chart(document.getElementById("chartEvolucao"),{
-      type:"line",
-      data:{ labels: meses, datasets:[{ data: valores }] }
-    });
-  }
-
-  // ====== SIMULADOR ======
-  window.simularCompleto = function(){
-    const tipo = document.getElementById("tipoSimulacao").value;
-
-    const d = window.getDataMes();
-    const gastos = d.items.reduce((a,b)=>a+Number(b.amount||0),0);
-    const salario = Number(d.salary||0);
-
-    if(tipo==="compra"){
-      let valor = Number(document.getElementById("valorSimulacao").value);
-      let parcelas = Number(document.getElementById("parcelasSimulacao").value);
-      let juros = Number(document.getElementById("jurosSimulacao").value)/100;
-
-      let i = juros;
-      let n = parcelas;
-
-      let parcela = valor * ( i / (1 - Math.pow(1+i, -n)) );
-      let total = parcela * n;
-      let jurosTotal = total - valor;
-
-      parcela = Number(parcela.toFixed(2));
-      total = Number(total.toFixed(2));
-      jurosTotal = Number(jurosTotal.toFixed(2));
-
-      let sobra = salario - gastos - parcela;
-
-      let resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
-
-      resultadoSimEl.innerHTML = `
-        Parcela real: R$ ${parcela.toFixed(2)}<br>
-        Total pago: R$ ${total.toFixed(2)}<br>
-        Juros pagos: R$ ${jurosTotal.toFixed(2)}<br>
-        Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>
-        ${resultado}
-      `;
-    }else{
-      let valor = Number(document.getElementById("valorInvestimento").value);
-      let meses = Number(document.getElementById("mesesInvestimento").value);
-      let perc = Number(document.getElementById("percentualInvest").value)/100;
-
-      let taxaCDI = 0.012;
-
-      let total = valor*(1+(taxaCDI*perc))**meses;
-      let lucro = total-valor;
-
-      resultadoSimEl.innerHTML = `
-        Valor final: R$ ${total.toFixed(2)}<br>
-        Lucro: R$ ${lucro.toFixed(2)}
-      `;
-    }
-  };
-
-  // ====== RENDER ======
-  window.render = ()=>{
-    if(!window.USER_ID) return;
-
-    mesAtual = window.getMes();
-    const d = window.getDataMes();
-
-    // puxa gastos do mês na API (normais)
-    fetch(API + "/mes/" + window.USER_ID + "/" + mesAtual)
-      .then(r=>r.json())
-      .then(data=>{
-        const apiItems = Array.isArray(data)
-          ? data.filter(x=>x && x.desc).map(x=>({
-              desc: x.desc,
-              amount: Number(x.amount||0),
-              category: x.category || detectarCategoria(x.desc),
-              isFixo: false
-            }))
-          : [];
-
-        if(Array.isArray(data) && data.length){
-          d.salary = Number(data[0].salary || d.salary || 0);
-          d.meta = Number(data[0].meta || d.meta || 0);
-        }
-
-        const merged = [];
-        const seen = new Set();
-
-        for(const f of fixos){
-          const obj = { ...f, isFixo:true };
-          const k = keyItem(obj);
-          if(!seen.has(k)){ merged.push(obj); seen.add(k); }
-        }
-        for(const it of apiItems){
-          const k = keyItem(it);
-          if(!seen.has(k)){ merged.push(it); seen.add(k); }
-        }
-
-        d.items = merged;
-        localStorage.setItem("gastos_pro", JSON.stringify(state));
-        paint();
-      })
-      .catch(()=> paint());
-
-    paint();
-  };
-
-  function paint(){
-    const d = window.getDataMes();
-
-    salaryInput.value = Number(d.salary||0);
-    monthInput.value = mesAtual;
-    metaInput.value = d.meta || "";
-
-    const total = d.items.reduce((a,b)=>a+Number(b.amount||0),0);
-    const sobra = Number(d.salary||0) - total;
-
-    kpisEl.innerHTML = `
-      <div class="kpi">Salário<br><b>R$ ${Number(d.salary||0).toFixed(2)}</b></div>
-      <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
-      <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
-      <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
-    `;
-
-    listEl.innerHTML = d.items.map((i,idx)=>`
-      <tr>
-        <td>
-          ${i.desc}
-          ${i.isFixo ? `<span class="badge">Fixo</span>` : ``}
-          <span class="badge">${i.category || "Outros"}</span>
-        </td>
-        <td>R$ ${Number(i.amount||0).toFixed(2)}</td>
-        <td><button onclick="del(${idx})">X</button></td>
-      </tr>
-    `).join("");
-
-    drawChart(d.items);
-    drawEvolucao();
-  }
-
-  // ====== AUTH ======
-  window.loginGoogle = ()=> auth.signInWithPopup(provider).catch(e=>alert(e.message));
-  window.logout = ()=> auth.signOut();
-
-  window.loginEmail = ()=>{
-    const email = document.getElementById("email").value.trim();
-    const senha = document.getElementById("senha").value.trim();
-
-    if(!email || !senha){ alert("Preencha email e senha"); return; }
-    if(!email.includes("@")){ alert("Digite um email válido"); return; }
-
-    auth.signInWithEmailAndPassword(email, senha).catch(e=>alert(e.message));
-  };
-
-  window.registrarEmail = ()=>{
-    const email = document.getElementById("email").value.trim();
-    const senha = document.getElementById("senha").value.trim();
-
-    if(!email || !senha){ alert("Preencha email e senha"); return; }
-    if(!email.includes("@")){ alert("Digite um email válido"); return; }
-    if(senha.length < 6){ alert("A senha deve ter pelo menos 6 caracteres"); return; }
-
-    auth.createUserWithEmailAndPassword(email, senha)
-      .then(()=>alert("Conta criada com sucesso!"))
-      .catch(e=>alert(e.message));
-  };
-
-  // ✅ SEU CÓDIGO ESTAVA CORTADO AQUI — AGORA ESTÁ COMPLETO
+  // auth state
   auth.onAuthStateChanged(user=>{
     window.USER_ID = user ? user.uid : null;
 
@@ -702,9 +719,4 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
       state = { meses:{} };
       mesAtual = window.getMes();
-      window.render();
-    }
-  });
-
-});
-</
+      window.rende
