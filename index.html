@@ -231,15 +231,6 @@ button{
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
 <script>
-/**
- * ✅ VERSÃO COMPLETA CORRIGIDA
- * - Sem variáveis duplicadas (seu bug principal)
- * - Categorias do usuário + fixos do usuário salvos por USER_ID no localStorage
- * - Fixos aparecem em TODO mês automaticamente
- * - Gráfico por CATEGORIA
- * - Lista mostra categoria + marca FIXO
- */
-
 window.addEventListener("DOMContentLoaded", ()=>{
 
   // ====== CONFIG ======
@@ -254,6 +245,16 @@ window.addEventListener("DOMContentLoaded", ()=>{
   const auth = firebase.auth();
   const provider = new firebase.auth.GoogleAuthProvider();
 
+  // ====== ELEMENTOS (✅ SEM DEPENDER DE VARIÁVEIS GLOBAIS DO HTML) ======
+  const monthInput = document.getElementById("month");
+  const salaryInput = document.getElementById("salary");
+  const metaInput = document.getElementById("meta");
+  const kpisEl = document.getElementById("kpis");
+  const listEl = document.getElementById("list");
+  const areaCompraEl = document.getElementById("areaCompra");
+  const areaInvestEl = document.getElementById("areaInvestimento");
+  const resultadoSimEl = document.getElementById("resultadoSimulacao");
+
   // ====== STATE ======
   window.USER_ID = null;
 
@@ -261,10 +262,10 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
   const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Outros"];
 
-  // 👉 regras automáticas (pode editar depois)
   let regras = [
     {palavra:"aluguel", categoria:"Casa"},
     {palavra:"luz", categoria:"Casa"},
+    {palavra:"agua", categoria:"Casa"},
     {palavra:"água", categoria:"Casa"},
     {palavra:"mercado", categoria:"Alimentação"},
     {palavra:"padaria", categoria:"Alimentação"},
@@ -274,19 +275,14 @@ window.addEventListener("DOMContentLoaded", ()=>{
     {palavra:"pet", categoria:"Pets"}
   ];
 
-  let categorias = [...DEFAULT_CATEGORIAS]; // ✅ só 1 vez
-  let fixos = []; // {desc, amount, category, isFixo:true}
+  let categorias = [...DEFAULT_CATEGORIAS];
+  let fixos = [];
 
   let mesAtual = new Date().toISOString().slice(0,7);
   let grafico = null;
   let graficoEvolucao = null;
 
-  // ====== ELEMENTOS ======
-  const monthInput = document.getElementById("month");
-  const salaryInput = document.getElementById("salary");
-  const metaInput = document.getElementById("meta");
-
-  // ====== STORAGE (por usuário) ======
+  // ====== STORAGE ======
   function salvarCategorias(){
     localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias));
   }
@@ -302,7 +298,6 @@ window.addEventListener("DOMContentLoaded", ()=>{
     const raw = localStorage.getItem("fixos_" + window.USER_ID);
     fixos = raw ? JSON.parse(raw) : [];
     if(!Array.isArray(fixos)) fixos = [];
-    // garantir marca
     fixos = fixos.map(f=>({ ...f, isFixo:true }));
   }
 
@@ -317,45 +312,46 @@ window.addEventListener("DOMContentLoaded", ()=>{
   window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
 
   monthInput.addEventListener("change", ()=>{
-    mesAtual = getMes();
-    render();
+    mesAtual = window.getMes();
+    window.render();
   });
 
   document.getElementById("tipoSimulacao").addEventListener("change", function(){
     if(this.value==="compra"){
-      areaCompra.style.display="block";
-      areaInvestimento.style.display="none";
+      areaCompraEl.style.display="block";
+      areaInvestEl.style.display="none";
     }else{
-      areaCompra.style.display="none";
-      areaInvestimento.style.display="block";
+      areaCompraEl.style.display="none";
+      areaInvestEl.style.display="block";
     }
   });
 
   // ====== LÓGICA DE MÊS ======
   function keyItem(i){
-    // chave simples pra evitar duplicar fixos no mesmo mês
     return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`;
+  }
+
+  function garantirFixosNoMes(d){
+    const set = new Set((d.items||[]).map(keyItem));
+    for(const f of fixos){
+      const obj = { ...f, isFixo:true };
+      const k = keyItem(obj);
+      if(!set.has(k)){
+        d.items.unshift(obj);
+        set.add(k);
+      }
+    }
   }
 
   window.getDataMes = ()=>{
     if(!state.meses[mesAtual]){
-      // ✅ todo mês nasce com os fixos
       state.meses[mesAtual] = {
         salary: 0,
-        items: fixos.map(f=>({ ...f })), // cópia
+        items: fixos.map(f=>({ ...f, isFixo:true })),
         meta: 0
       };
     }else{
-      // ✅ se já existe mês, garante que os fixos estão lá (sem duplicar)
-      const d = state.meses[mesAtual];
-      const set = new Set(d.items.map(keyItem));
-      for(const f of fixos){
-        const k = keyItem(f);
-        if(!set.has(k)){
-          d.items.unshift({ ...f });
-          set.add(k);
-        }
-      }
+      garantirFixosNoMes(state.meses[mesAtual]);
     }
     return state.meses[mesAtual];
   };
@@ -367,7 +363,6 @@ window.addEventListener("DOMContentLoaded", ()=>{
     let nome = (document.getElementById("novaCategoria").value || "").trim();
     if(!nome) return;
 
-    // evita duplicar (case-insensitive)
     const exists = categorias.some(c => c.toLowerCase() === nome.toLowerCase());
     if(exists){ alert("Essa categoria já existe."); return; }
 
@@ -382,7 +377,6 @@ window.addEventListener("DOMContentLoaded", ()=>{
     const select = document.getElementById("categoriaFixo");
 
     div.innerHTML = categorias.map(c=>`<div>• ${c}</div>`).join("");
-
     select.innerHTML = categorias.map(c=>`<option value="${c}">${c}</option>`).join("");
   }
 
@@ -407,9 +401,10 @@ window.addEventListener("DOMContentLoaded", ()=>{
     salvarFixos();
     renderFixos();
 
-    // ✅ aplica no mês atual também imediatamente
-    getDataMes();
-    render();
+    // aplicar no mês atual
+    const d = window.getDataMes();
+    garantirFixosNoMes(d);
+    window.render();
   };
 
   function renderFixos(){
@@ -439,8 +434,8 @@ window.addEventListener("DOMContentLoaded", ()=>{
       return;
     }
 
-    mesAtual = getMes();
-    const d = getDataMes();
+    mesAtual = window.getMes();
+    const d = window.getDataMes();
 
     const desc = prompt("Descrição");
     const valor = parseFloat(prompt("Valor"));
@@ -450,7 +445,6 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
     d.items.push({ desc, amount: valor, category: categoria, isFixo:false });
 
-    // envia para API (salva só os gastos normais; fixos ficam no localStorage do usuário)
     fetch(API + "/addGasto", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
@@ -463,14 +457,14 @@ window.addEventListener("DOMContentLoaded", ()=>{
       })
     }).catch(()=>{});
 
-    render();
+    window.render();
   };
 
   window.del = (i)=>{
-    mesAtual = getMes();
-    const d = getDataMes();
+    mesAtual = window.getMes();
+    const d = window.getDataMes();
     d.items.splice(i,1);
-    render();
+    window.render();
   };
 
   // ====== SETTINGS ======
@@ -480,8 +474,8 @@ window.addEventListener("DOMContentLoaded", ()=>{
       return;
     }
 
-    mesAtual = getMes();
-    const d = getDataMes();
+    mesAtual = window.getMes();
+    const d = window.getDataMes();
 
     d.salary = Number(salaryInput.value);
     d.meta = Number(metaInput.value);
@@ -497,12 +491,11 @@ window.addEventListener("DOMContentLoaded", ()=>{
       })
     }).catch(()=>{});
 
-    render();
+    window.render();
   };
 
   // ====== GRÁFICOS ======
   function drawChart(items){
-    // ✅ gráfico por categoria
     const mapa = {};
     items.forEach(i=>{
       const cat = i.category || "Outros";
@@ -537,14 +530,14 @@ window.addEventListener("DOMContentLoaded", ()=>{
   window.simularCompleto = function(){
     const tipo = document.getElementById("tipoSimulacao").value;
 
-    const d = getDataMes();
+    const d = window.getDataMes();
     const gastos = d.items.reduce((a,b)=>a+Number(b.amount||0),0);
     const salario = Number(d.salary||0);
 
     if(tipo==="compra"){
-      let valor = Number(valorSimulacao.value);
-      let parcelas = Number(parcelasSimulacao.value);
-      let juros = Number(jurosSimulacao.value)/100;
+      let valor = Number(document.getElementById("valorSimulacao").value);
+      let parcelas = Number(document.getElementById("parcelasSimulacao").value);
+      let juros = Number(document.getElementById("jurosSimulacao").value)/100;
 
       let i = juros;
       let n = parcelas;
@@ -561,7 +554,7 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
       let resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
 
-      resultadoSimulacao.innerHTML = `
+      resultadoSimEl.innerHTML = `
         Parcela real: R$ ${parcela.toFixed(2)}<br>
         Total pago: R$ ${total.toFixed(2)}<br>
         Juros pagos: R$ ${jurosTotal.toFixed(2)}<br>
@@ -569,16 +562,16 @@ window.addEventListener("DOMContentLoaded", ()=>{
         ${resultado}
       `;
     }else{
-      let valor = Number(valorInvestimento.value);
-      let meses = Number(mesesInvestimento.value);
-      let perc = Number(percentualInvest.value)/100;
+      let valor = Number(document.getElementById("valorInvestimento").value);
+      let meses = Number(document.getElementById("mesesInvestimento").value);
+      let perc = Number(document.getElementById("percentualInvest").value)/100;
 
-      let taxaCDI = 0.012; // exemplo
+      let taxaCDI = 0.012;
 
       let total = valor*(1+(taxaCDI*perc))**meses;
       let lucro = total-valor;
 
-      resultadoSimulacao.innerHTML = `
+      resultadoSimEl.innerHTML = `
         Valor final: R$ ${total.toFixed(2)}<br>
         Lucro: R$ ${lucro.toFixed(2)}
       `;
@@ -589,14 +582,13 @@ window.addEventListener("DOMContentLoaded", ()=>{
   window.render = ()=>{
     if(!window.USER_ID) return;
 
-    mesAtual = getMes();
-    const d = getDataMes();
+    mesAtual = window.getMes();
+    const d = window.getDataMes();
 
-    // 1) puxa gastos do mês na API (gastos normais)
+    // puxa gastos do mês na API (normais)
     fetch(API + "/mes/" + window.USER_ID + "/" + mesAtual)
       .then(r=>r.json())
       .then(data=>{
-        // data pode vir vazio
         const apiItems = Array.isArray(data)
           ? data.filter(x=>x && x.desc).map(x=>({
               desc: x.desc,
@@ -606,53 +598,35 @@ window.addEventListener("DOMContentLoaded", ()=>{
             }))
           : [];
 
-        // 2) aplica salary/meta da API se existir
         if(Array.isArray(data) && data.length){
           d.salary = Number(data[0].salary || d.salary || 0);
           d.meta = Number(data[0].meta || d.meta || 0);
         }
 
-        // 3) mistura fixos + apiItems (sem duplicar fixos)
         const merged = [];
         const seen = new Set();
 
-        // primeiro fixos
         for(const f of fixos){
           const obj = { ...f, isFixo:true };
           const k = keyItem(obj);
-          if(!seen.has(k)){
-            merged.push(obj);
-            seen.add(k);
-          }
+          if(!seen.has(k)){ merged.push(obj); seen.add(k); }
         }
-        // depois api
         for(const it of apiItems){
           const k = keyItem(it);
-          if(!seen.has(k)){
-            merged.push(it);
-            seen.add(k);
-          }
+          if(!seen.has(k)){ merged.push(it); seen.add(k); }
         }
 
         d.items = merged;
-
-        // salva estado local do app
         localStorage.setItem("gastos_pro", JSON.stringify(state));
-
-        // atualiza UI depois de carregar
         paint();
       })
-      .catch(()=>{
-        // se API falhar, pelo menos mostra o que tem local (fixos)
-        paint();
-      });
+      .catch(()=> paint());
 
-    // pinta rápido com o que já tem (e depois paint() roda de novo ao terminar fetch)
     paint();
   };
 
   function paint(){
-    const d = getDataMes();
+    const d = window.getDataMes();
 
     salaryInput.value = Number(d.salary||0);
     monthInput.value = mesAtual;
@@ -661,15 +635,14 @@ window.addEventListener("DOMContentLoaded", ()=>{
     const total = d.items.reduce((a,b)=>a+Number(b.amount||0),0);
     const sobra = Number(d.salary||0) - total;
 
-    kpis.innerHTML = `
+    kpisEl.innerHTML = `
       <div class="kpi">Salário<br><b>R$ ${Number(d.salary||0).toFixed(2)}</b></div>
       <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
       <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
       <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
     `;
 
-    // lista
-    list.innerHTML = d.items.map((i,idx)=>`
+    listEl.innerHTML = d.items.map((i,idx)=>`
       <tr>
         <td>
           ${i.desc}
@@ -712,5 +685,26 @@ window.addEventListener("DOMContentLoaded", ()=>{
       .catch(e=>alert(e.message));
   };
 
+  // ✅ SEU CÓDIGO ESTAVA CORTADO AQUI — AGORA ESTÁ COMPLETO
   auth.onAuthStateChanged(user=>{
-    window.USER_ID
+    window.USER_ID = user ? user.uid : null;
+
+    document.getElementById("loginScreen").style.display = user ? "none" : "flex";
+    document.getElementById("app").style.display = user ? "block" : "none";
+
+    if(user){
+      document.getElementById("userName").innerText = user.displayName || user.email;
+
+      carregarCategorias();
+      carregarFixos();
+      renderCategorias();
+      renderFixos();
+
+      state = { meses:{} };
+      mesAtual = window.getMes();
+      window.render();
+    }
+  });
+
+});
+</
