@@ -9,32 +9,107 @@
 <meta name="theme-color" content="#569cff">
 
 <style>
-:root{ --bg:#0b1020; --card:#ffffff0f; --text:#eaf0ff; --accent:#569cff; }
-.light{ --bg:#f4f6ff; --card:#ffffff; --text:#111; }
-body{ margin:0; background:var(--bg); color:var(--text); font-family:system-ui; }
+:root{
+  --bg:#0b1020;
+  --card:#ffffff0f;
+  --text:#eaf0ff;
+  --accent:#569cff;
+}
+.light{
+  --bg:#f4f6ff;
+  --card:#ffffff;
+  --text:#111;
+}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui;
+}
 .wrap{max-width:980px;margin:auto;padding:16px}
-.card{ background:var(--card); border-radius:12px; padding:14px; margin-bottom:12px; }
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:14px;
+  margin-bottom:12px;
+}
 h1{font-size:20px;margin:0 0 10px}
-input,select,button{ width:100%; padding:10px; border-radius:10px; border:none; margin-top:5px; }
-button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manipulation; }
-.kpis{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-.kpi{ background:var(--card); padding:10px; border-radius:10px; }
+input,select,button{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-top:5px;
+}
+button{
+  background:var(--accent);
+  color:#fff;
+  cursor:pointer;
+  touch-action: manipulation;
+}
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.kpi{
+  background:var(--card);
+  padding:10px;
+  border-radius:10px;
+}
 .success{color:#4CAF50}
+.warn{color:#ffd166}
+.danger{color:#ff6b6b}
 #chart,#chartEvolucao{width:100%;height:220px}
-.fab{ position:fixed; bottom:20px; right:20px; background:#4CAF50; color:white; border-radius:50%; width:55px; height:55px; font-size:28px; display:flex; align-items:center; justify-content:center; }
+.fab{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#4CAF50;
+  color:white;
+  border-radius:50%;
+  width:55px;
+  height:55px;
+  font-size:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 .toggle{float:right;cursor:pointer}
 .small{opacity:.8;font-size:12px}
-.badge{ display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.12); margin-left:6px; font-size:12px; }
+.badge{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  margin-left:6px;
+  font-size:12px;
+}
 .light .badge{background:rgba(0,0,0,.08);}
-.row{ display:flex; gap:8px; align-items:center; }
+.row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
 .row > * {flex:1}
 .row .mini {flex:0 0 auto; width:auto; padding:8px 10px; border-radius:10px;}
 
 #debugBox{
-  position:fixed; left:12px; right:12px; bottom:12px;
-  background:rgba(0,0,0,.75); color:#fff; padding:10px; border-radius:12px;
-  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
+  position:fixed;
+  left:12px;
+  right:12px;
+  bottom:12px;
+  background:rgba(0,0,0,.75);
+  color:#fff;
+  padding:10px;
+  border-radius:12px;
+  font-size:12px;
+  z-index:9999;
+  display:none;
+  white-space:pre-wrap;
 }
+hr{border:none;height:1px;background:rgba(255,255,255,.2)}
+.light hr{background:rgba(0,0,0,.15)}
 </style>
 </head>
 
@@ -42,10 +117,11 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
 
 <div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
   <h2>Controle de Gastos PRO</h2>
+
   <input id="email" type="email" placeholder="Seu e-mail">
   <input id="senha" type="password" placeholder="Sua senha">
 
-  <!-- NÃO tirei nada: mantive onclick -->
+  <!-- Mantive seus onclick -->
   <button id="btnLoginEmail" onclick="loginEmail()">Entrar com Email</button>
   <button id="btnCriarConta" onclick="registrarEmail()">Criar conta</button>
 
@@ -56,6 +132,7 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
 
 <div id="app" style="display:none">
   <div class="wrap">
+
     <h1>
       Controle de Gastos PRO
       <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
@@ -64,7 +141,8 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
 
     <div id="configBox" class="card" style="display:none">
       <h3>⚙️ Configurações</h3>
-      <b id="userName"></b><br><br>
+      <b id="userName"></b>
+      <br><br>
       <button onclick="logout()">Sair da conta</button>
     </div>
 
@@ -89,48 +167,188 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
     <div class="card">
       <label>Salário</label>
       <input id="salary" type="number">
+
       <label>Mês</label>
       <input id="month" type="month">
+
       <label>Meta</label>
       <input id="meta" type="number">
+
       <button onclick="saveSettings()">Salvar</button>
     </div>
 
+    <!-- 🧠 SIMULADOR COMPLETO (MELHORADO, SEM REMOVER NADA) -->
     <div class="card">
-      <h3>🧠 Simulador Financeiro</h3>
+      <h3>🧠 Simulador Financeiro (PRO)</h3>
+
       <label>Tipo</label>
       <select id="tipoSimulacao">
-        <option value="compra">Compra / Empréstimo</option>
+        <option value="emprestimo">Empréstimo / Financiamento</option>
         <option value="investimento">Investimento</option>
       </select>
 
-      <div id="areaCompra">
-        <label>Valor total</label>
-        <input id="valorSimulacao" type="number">
-        <label>Parcelas</label>
-        <input id="parcelasSimulacao" type="number">
+      <!-- ===== EMPRÉSTIMO ===== -->
+      <div id="areaEmprestimo">
+        <label>Modalidade de cálculo</label>
+        <select id="tipoEmprestimo">
+          <option value="price">PRICE (parcela fixa)</option>
+          <option value="sac">SAC (parcela decrescente)</option>
+          <option value="americano">Americano (paga só juros + principal no final)</option>
+          <option value="bullet">Bullet (paga tudo no final)</option>
+        </select>
+
+        <label>Valor total do bem / valor desejado</label>
+        <input id="valorSimulacao" type="number" placeholder="Ex: 20000">
+
+        <label>Entrada (opcional)</label>
+        <input id="entradaEmp" type="number" placeholder="Ex: 5000">
+
+        <label>Parcelas (meses)</label>
+        <input id="parcelasSimulacao" type="number" placeholder="Ex: 24">
+
         <label>Juros mensal (%)</label>
-        <input id="jurosSimulacao" type="number">
+        <input id="jurosSimulacao" type="number" placeholder="Ex: 2.5">
+
+        <div class="row" style="margin-top:8px">
+          <label style="margin:0">
+            <input id="chkTaxasEmp" type="checkbox" style="width:auto;margin:0 8px 0 0;transform:scale(1.1);vertical-align:middle">
+            Incluir taxas (IOF + Tarifa/Seguro)
+          </label>
+        </div>
+
+        <div id="areaTaxasEmp" style="display:none;margin-top:6px">
+          <label>IOF (%) (opcional)</label>
+          <input id="iofPerc" type="number" placeholder="Ex: 0.38">
+
+          <label>Tarifa/Seguro (R$) (opcional)</label>
+          <input id="tarifaFixa" type="number" placeholder="Ex: 300">
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <label style="margin:0">
+            <input id="chkCarencia" type="checkbox" style="width:auto;margin:0 8px 0 0;transform:scale(1.1);vertical-align:middle">
+            Carência (paga só juros por alguns meses)
+          </label>
+        </div>
+
+        <div id="areaCarencia" style="display:none;margin-top:6px">
+          <label>Meses de carência</label>
+          <input id="mesesCarencia" type="number" placeholder="Ex: 3">
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <label style="margin:0">
+            <input id="chkAmortExtra" type="checkbox" style="width:auto;margin:0 8px 0 0;transform:scale(1.1);vertical-align:middle">
+            Amortização extra mensal
+          </label>
+        </div>
+
+        <div id="areaAmortExtra" style="display:none;margin-top:6px">
+          <label>Amortização extra (R$ por mês)</label>
+          <input id="amortExtraMensal" type="number" placeholder="Ex: 100">
+        </div>
       </div>
 
+      <!-- ===== INVESTIMENTO ===== -->
       <div id="areaInvestimento" style="display:none">
-        <label>Valor a investir</label>
-        <input id="valorInvestimento" type="number">
+        <label>Tipo de investimento</label>
+        <select id="tipoInvest">
+          <option value="cdb_cdi">CDB / Fundo DI (CDI %) — com IR</option>
+          <option value="lci_lca">LCI/LCA (CDI %) — isento de IR</option>
+          <option value="pre">Pré-fixado — com IR</option>
+          <option value="ipca">IPCA + — com IR</option>
+        </select>
+
+        <label>Valor inicial</label>
+        <input id="valorInvestimento" type="number" placeholder="Ex: 1000">
+
+        <div class="row" style="margin-top:8px">
+          <label style="margin:0">
+            <input id="chkAportes" type="checkbox" style="width:auto;margin:0 8px 0 0;transform:scale(1.1);vertical-align:middle">
+            Aportes mensais
+          </label>
+        </div>
+
+        <div id="areaAportes" style="display:none;margin-top:6px">
+          <label>Aporte mensal (R$)</label>
+          <input id="aporteMensal" type="number" placeholder="Ex: 200">
+        </div>
+
         <label>Meses</label>
-        <input id="mesesInvestimento" type="number">
-        <label>% do CDI</label>
-        <input id="percentualInvest" type="number">
+        <input id="mesesInvestimento" type="number" placeholder="Ex: 24">
+
+        <!-- CDI -->
+        <div id="areaCDI" style="margin-top:6px">
+          <label>% do CDI</label>
+          <input id="percentualInvest" type="number" placeholder="Ex: 110">
+          <label>CDI mensal (decimal) (opcional)</label>
+          <input id="cdiMensal" type="number" placeholder="Ex: 0.012 (1.2% ao mês)">
+          <div class="small">Se deixar vazio, o app usa 0.012 (1.2% ao mês) como referência.</div>
+        </div>
+
+        <!-- Pré -->
+        <div id="areaPRE" style="display:none;margin-top:6px">
+          <label>Taxa (%)</label>
+          <input id="taxaPre" type="number" placeholder="Ex: 12">
+          <label>Periodicidade</label>
+          <select id="periodoPre">
+            <option value="aa">ao ano (a.a.)</option>
+            <option value="am">ao mês (a.m.)</option>
+          </select>
+        </div>
+
+        <!-- IPCA+ -->
+        <div id="areaIPCA" style="display:none;margin-top:6px">
+          <label>IPCA estimado (%)</label>
+          <input id="ipcaPerc" type="number" placeholder="Ex: 4.5">
+          <label>Periodicidade do IPCA</label>
+          <select id="periodoIpca">
+            <option value="aa">ao ano (a.a.)</option>
+            <option value="am">ao mês (a.m.)</option>
+          </select>
+
+          <label>Prêmio (IPCA + taxa) (%)</label>
+          <input id="premioIpca" type="number" placeholder="Ex: 6">
+          <label>Periodicidade do prêmio</label>
+          <select id="periodoPremio">
+            <option value="aa">ao ano (a.a.)</option>
+            <option value="am">ao mês (a.m.)</option>
+          </select>
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <label style="margin:0">
+            <input id="chkCustosInv" type="checkbox" style="width:auto;margin:0 8px 0 0;transform:scale(1.1);vertical-align:middle">
+            Incluir custos (taxa adm/custódia)
+          </label>
+        </div>
+
+        <div id="areaCustosInv" style="display:none;margin-top:6px">
+          <label>Taxa (%) ao ano</label>
+          <input id="taxaAdmAA" type="number" placeholder="Ex: 1">
+        </div>
       </div>
 
       <button onclick="simularCompleto()">Calcular</button>
       <div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
+      <div id="detalhesSimulacao" class="small" style="margin-top:8px"></div>
     </div>
 
     <div class="kpis" id="kpis"></div>
 
-    <div class="card"><canvas id="chart"></canvas></div>
-    <div class="card"><h3>Evolução</h3><canvas id="chartEvolucao"></canvas></div>
-    <div class="card"><table id="list"></table></div>
+    <div class="card">
+      <canvas id="chart"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Evolução</h3>
+      <canvas id="chartEvolucao"></canvas>
+    </div>
+
+    <div class="card">
+      <table id="list"></table>
+    </div>
+
   </div>
 
   <div class="fab" onclick="abrirAdd()">+</div>
@@ -139,6 +357,7 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
 <div id="debugBox"></div>
 
 <script>
+/* === Debug visual (sem depender de alert) === */
 function dbg(msg){
   const box = document.getElementById("debugBox");
   box.style.display = "block";
@@ -153,21 +372,26 @@ window.addEventListener("unhandledrejection", (e)=>{
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Firebase (compat) -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
 <script>
 /* ===========================
-   ✅ GLOBAIS (ONCLICK PRECISA DISSO)
+   ✅ Variáveis globais do app
 =========================== */
 const API = "https://api-rf1w.onrender.com";
+
 let auth = null;
 let provider = null;
 
 window.USER_ID = null;
+
 let state = { meses:{} };
 
 const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Outros"];
+
 let regras = [
   {palavra:"aluguel", categoria:"Casa"},
   {palavra:"luz", categoria:"Casa"},
@@ -183,16 +407,19 @@ let regras = [
 
 let categorias = [...DEFAULT_CATEGORIAS];
 let fixos = [];
+
 let mesAtual = new Date().toISOString().slice(0,7);
 let grafico = null;
 let graficoEvolucao = null;
 
 /* ===========================
-   ✅ FUNÇÕES DE LOGIN (TEM QUE EXISTIR ANTES DO CLIQUE)
+   ✅ Firebase init (ANTI DUPLICAÇÃO)
 =========================== */
 function initFirebase(){
-  if(!window.firebase){ dbg("Firebase não carregou (sem internet ou bloqueado)."); return false; }
-
+  if(!window.firebase){
+    dbg("Firebase não carregou. Verifique internet/blocked scripts.");
+    return false;
+  }
   try{
     if(!firebase.apps || !firebase.apps.length){
       firebase.initializeApp({
@@ -201,52 +428,28 @@ function initFirebase(){
         projectId:"controle-gastos-pro"
       });
     }
-  }catch(e){}
-
+  }catch(e){
+    // se já existir, ignora
+  }
   auth = firebase.auth();
   provider = new firebase.auth.GoogleAuthProvider();
   return true;
 }
 
-window.loginEmail = function(){
-  if(!auth){ alert("Firebase ainda não iniciou."); return; }
-  const email = (document.getElementById("email").value||"").trim();
-  const senha = (document.getElementById("senha").value||"").trim();
-  if(!email || !senha){ alert("Preencha email e senha"); return; }
-  auth.signInWithEmailAndPassword(email, senha).catch(e=>alert((e.code||"")+" - "+e.message));
-};
-
-window.registrarEmail = function(){
-  if(!auth){ alert("Firebase ainda não iniciou."); return; }
-  const email = (document.getElementById("email").value||"").trim();
-  const senha = (document.getElementById("senha").value||"").trim();
-  if(!email || !senha){ alert("Preencha email e senha"); return; }
-  if(senha.length < 6){ alert("A senha deve ter pelo menos 6 caracteres"); return; }
-  auth.createUserWithEmailAndPassword(email, senha)
-    .then(()=>alert("Conta criada com sucesso!"))
-    .catch(e=>alert((e.code||"")+" - "+e.message));
-};
-
-window.loginGoogle = function(){
-  if(!auth){ alert("Firebase ainda não iniciou."); return; }
-  auth.signInWithRedirect(provider).catch(e=>alert((e.code||"")+" - "+e.message));
-};
-
-window.logout = function(){
-  if(!auth) return;
-  auth.signOut().catch(e=>alert((e.code||"")+" - "+e.message));
-};
-
 /* ===========================
-   ✅ RESTO DO APP (igual você tinha)
+   ✅ Funções storage
 =========================== */
-function salvarCategorias(){ localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias)); }
+function salvarCategorias(){
+  localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias));
+}
 function carregarCategorias(){
   const raw = localStorage.getItem("categorias_" + window.USER_ID);
   categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
-  if(!Array.isArray(categorias) || !categorias.length) categorias = [...DEFAULT_CATEGORIAS];
+  if(!Array.isArray(categorias) || categorias.length === 0) categorias = [...DEFAULT_CATEGORIAS];
 }
-function salvarFixos(){ localStorage.setItem("fixos_" + window.USER_ID, JSON.stringify(fixos)); }
+function salvarFixos(){
+  localStorage.setItem("fixos_" + window.USER_ID, JSON.stringify(fixos));
+}
 function carregarFixos(){
   const raw = localStorage.getItem("fixos_" + window.USER_ID);
   fixos = raw ? JSON.parse(raw) : [];
@@ -254,235 +457,226 @@ function carregarFixos(){
   fixos = fixos.map(f=>({ ...f, isFixo:true }));
 }
 
+/* ===========================
+   ✅ Helpers UI (globais p/ onclick)
+=========================== */
 window.toggleTheme = ()=> document.body.classList.toggle("light");
+
 window.abrirConfig = ()=>{
   const box = document.getElementById("configBox");
   box.style.display = box.style.display==="none" ? "block" : "none";
 };
-window.getMes = ()=> (document.getElementById("month").value || new Date().toISOString().slice(0,7));
 
-function keyItem(i){ return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`; }
+window.getMes = ()=>{
+  const monthInput = document.getElementById("month");
+  return monthInput.value || new Date().toISOString().slice(0,7);
+};
+
+function keyItem(i){
+  return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`;
+}
+
 function garantirFixosNoMes(d){
   const set = new Set((d.items||[]).map(keyItem));
   for(const f of fixos){
     const obj = { ...f, isFixo:true };
     const k = keyItem(obj);
-    if(!set.has(k)){ d.items.unshift(obj); set.add(k); }
+    if(!set.has(k)){
+      d.items.unshift(obj);
+      set.add(k);
+    }
   }
 }
+
 window.getDataMes = ()=>{
   if(!state.meses[mesAtual]){
-    state.meses[mesAtual]={ salary:0, items:fixos.map(f=>({ ...f, isFixo:true })), meta:0 };
-  }else{
+    state.meses[mesAtual] = {
+      salary: 0,
+      items: fixos.map(f=>({ ...f, isFixo:true })),
+      meta: 0
+    };
+  } else {
     garantirFixosNoMes(state.meses[mesAtual]);
   }
   return state.meses[mesAtual];
 };
+
 function detectarCategoria(desc){
-  const txt=(desc||"").toLowerCase();
-  for(const r of regras){ if(txt.includes(r.palavra)) return r.categoria; }
+  const txt = (desc||"").toLowerCase();
+  for(const r of regras){
+    if(txt.includes(r.palavra)) return r.categoria;
+  }
   return "Outros";
 }
 
+/* ===========================
+   ✅ CATEGORIAS (globais p/ onclick)
+=========================== */
 window.addCategoria = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
-  const input=document.getElementById("novaCategoria");
-  const nome=(input.value||"").trim();
+
+  const input = document.getElementById("novaCategoria");
+  const nome = (input.value || "").trim();
   if(!nome) return;
-  if(categorias.some(c=>c.toLowerCase()===nome.toLowerCase())){ alert("Essa categoria já existe."); return; }
-  categorias.push(nome); input.value="";
-  salvarCategorias(); renderCategorias();
+
+  const exists = categorias.some(c => c.toLowerCase() === nome.toLowerCase());
+  if(exists){ alert("Essa categoria já existe."); return; }
+
+  categorias.push(nome);
+  input.value = "";
+  salvarCategorias();
+  renderCategorias();
 };
+
 function renderCategorias(){
-  document.getElementById("listaCategorias").innerHTML = categorias.map(c=>`<div>• ${c}</div>`).join("");
-  document.getElementById("categoriaFixo").innerHTML = categorias.map(c=>`<option value="${c}">${c}</option>`).join("");
+  const div = document.getElementById("listaCategorias");
+  const select = document.getElementById("categoriaFixo");
+
+  div.innerHTML = categorias.map(c=>`<div>• ${c}</div>`).join("");
+  select.innerHTML = categorias.map(c=>`<option value="${c}">${c}</option>`).join("");
 }
 
+/* ===========================
+   ✅ FIXOS (globais p/ onclick)
+=========================== */
 window.addFixo = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
-  const desc=(document.getElementById("descFixo").value||"").trim();
-  const valor=Number(document.getElementById("valorFixo").value);
-  const categoria=document.getElementById("categoriaFixo").value||"Outros";
-  if(!desc || !valor || valor<=0){ alert("Preencha descrição e valor (maior que 0)."); return; }
-  fixos.push({ desc, amount:valor, category:categoria, isFixo:true });
-  document.getElementById("descFixo").value="";
-  document.getElementById("valorFixo").value="";
-  salvarFixos(); renderFixos();
-  garantirFixosNoMes(window.getDataMes());
+
+  const desc = (document.getElementById("descFixo").value || "").trim();
+  const valor = Number(document.getElementById("valorFixo").value);
+  const categoria = document.getElementById("categoriaFixo").value || "Outros";
+
+  if(!desc || !valor || valor <= 0){
+    alert("Preencha descrição e valor (maior que 0).");
+    return;
+  }
+
+  fixos.push({ desc, amount: valor, category: categoria, isFixo:true });
+
+  document.getElementById("descFixo").value = "";
+  document.getElementById("valorFixo").value = "";
+
+  salvarFixos();
+  renderFixos();
+
+  const d = window.getDataMes();
+  garantirFixosNoMes(d);
   window.render();
 };
+
 function renderFixos(){
-  const div=document.getElementById("listaFixos");
-  div.innerHTML = fixos.length
-    ? fixos.map(f=>`<div>• ${f.desc} — R$ ${Number(f.amount).toFixed(2)} <span class="badge">${f.category}</span></div>`).join("")
-    : "<div>Nenhum gasto fixo cadastrado.</div>";
+  const div = document.getElementById("listaFixos");
+  if(fixos.length === 0){
+    div.innerHTML = "<div>Nenhum gasto fixo cadastrado.</div>";
+    return;
+  }
+  div.innerHTML = fixos.map(f=>`
+    <div>• ${f.desc} — R$ ${Number(f.amount).toFixed(2)} <span class="badge">${f.category}</span></div>
+  `).join("");
 }
 
+/* ===========================
+   ✅ CRUD GASTOS / SETTINGS
+=========================== */
 window.abrirAdd = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
+
   mesAtual = window.getMes();
   const d = window.getDataMes();
+
   const desc = prompt("Descrição");
   const valor = parseFloat(prompt("Valor"));
   if(!desc || isNaN(valor)) return;
+
   const categoria = detectarCategoria(desc);
-  d.items.push({ desc, amount:valor, category:categoria, isFixo:false });
-  fetch(API+"/addGasto",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,desc,amount:valor,category:categoria})}).catch(()=>{});
+
+  d.items.push({ desc, amount: valor, category: categoria, isFixo:false });
+
+  fetch(API + "/addGasto", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      userId: window.USER_ID,
+      mes: mesAtual,
+      desc,
+      amount: valor,
+      category: categoria
+    })
+  }).catch(()=>{});
+
   window.render();
 };
+
 window.del = (i)=>{
-  mesAtual=window.getMes();
-  const d=window.getDataMes();
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
   d.items.splice(i,1);
   window.render();
 };
+
 window.saveSettings = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
-  mesAtual=window.getMes();
-  const d=window.getDataMes();
-  d.salary=Number(document.getElementById("salary").value);
-  d.meta=Number(document.getElementById("meta").value);
-  fetch(API+"/salvarMes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,salary:d.salary,meta:d.meta})}).catch(()=>{});
+
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
+
+  d.salary = Number(document.getElementById("salary").value);
+  d.meta = Number(document.getElementById("meta").value);
+
+  fetch(API + "/salvarMes", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      userId: window.USER_ID,
+      mes: mesAtual,
+      salary: d.salary,
+      meta: d.meta
+    })
+  }).catch(()=>{});
+
   window.render();
 };
 
+/* ===========================
+   ✅ GRÁFICOS + RENDER
+=========================== */
 function drawChart(items){
-  const mapa={}; items.forEach(i=>{ const cat=i.category||"Outros"; mapa[cat]=(mapa[cat]||0)+Number(i.amount||0); });
-  const labels=Object.keys(mapa), valores=Object.values(mapa);
+  const mapa = {};
+  items.forEach(i=>{
+    const cat = i.category || "Outros";
+    mapa[cat] = (mapa[cat] || 0) + Number(i.amount||0);
+  });
+
+  const labels = Object.keys(mapa);
+  const valores = Object.values(mapa);
+
   if(grafico) grafico.destroy();
-  grafico=new Chart(document.getElementById("chart"),{type:"doughnut",data:{labels,datasets:[{data:valores}]}} );
+  grafico = new Chart(document.getElementById("chart"),{
+    type:"doughnut",
+    data:{ labels, datasets:[{ data: valores }] }
+  });
 }
+
 function drawEvolucao(){
-  const meses=Object.keys(state.meses).sort();
-  const valores=meses.map(m=>(state.meses[m].items||[]).reduce((a,b)=>a+Number(b.amount||0),0));
+  const meses = Object.keys(state.meses).sort();
+  const valores = meses.map(m=>{
+    const it = state.meses[m].items || [];
+    return it.reduce((a,b)=>a+Number(b.amount||0),0);
+  });
+
   if(graficoEvolucao) graficoEvolucao.destroy();
-  graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{type:"line",data:{labels:meses,datasets:[{data:valores}]}} );
+  graficoEvolucao = new Chart(document.getElementById("chartEvolucao"),{
+    type:"line",
+    data:{ labels: meses, datasets:[{ data: valores }] }
+  });
 }
-function paint(){
-  const d=window.getDataMes();
-  document.getElementById("salary").value=Number(d.salary||0);
-  document.getElementById("month").value=mesAtual;
-  document.getElementById("meta").value=d.meta||"";
-  const total=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-  const sobra=Number(d.salary||0)-total;
 
-  document.getElementById("kpis").innerHTML=`
-    <div class="kpi">Salário<br><b>R$ ${Number(d.salary||0).toFixed(2)}</b></div>
-    <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
-    <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
-    <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
-  `;
-  document.getElementById("list").innerHTML=(d.items||[]).map((i,idx)=>`
-    <tr>
-      <td>${i.desc}${i.isFixo?` <span class="badge">Fixo</span>`:""} <span class="badge">${i.category||"Outros"}</span></td>
-      <td>R$ ${Number(i.amount||0).toFixed(2)}</td>
-      <td><button onclick="del(${idx})">X</button></td>
-    </tr>
-  `).join("");
-
-  drawChart(d.items||[]);
-  drawEvolucao();
-}
 window.render = ()=>{
   if(!window.USER_ID) return;
-  mesAtual=window.getMes();
-  const d=window.getDataMes();
+
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
+
   paint();
 
-  fetch(API+"/mes/"+window.USER_ID+"/"+mesAtual)
-    .then(r=>r.json())
-    .then(data=>{
-      const apiItems = Array.isArray(data)
-        ? data.filter(x=>x && x.desc).map(x=>({desc:x.desc,amount:Number(x.amount||0),category:x.category||detectarCategoria(x.desc),isFixo:false}))
-        : [];
-      if(Array.isArray(data) && data.length){
-        d.salary=Number(data[0].salary||d.salary||0);
-        d.meta=Number(data[0].meta||d.meta||0);
-      }
-      const merged=[], seen=new Set();
-      for(const f of fixos){ const obj={...f,isFixo:true}; const k=keyItem(obj); if(!seen.has(k)){merged.push(obj); seen.add(k);} }
-      for(const it of apiItems){ const k=keyItem(it); if(!seen.has(k)){merged.push(it); seen.add(k);} }
-      d.items=merged;
-      localStorage.setItem("gastos_pro", JSON.stringify(state));
-      paint();
-    })
-    .catch(()=>paint());
-};
-
-window.simularCompleto = ()=>{
-  const tipo=document.getElementById("tipoSimulacao").value;
-  const d=window.getDataMes();
-  const gastos=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-  const salario=Number(d.salary||0);
-  const out=document.getElementById("resultadoSimulacao");
-
-  if(tipo==="compra"){
-    const valor=Number(document.getElementById("valorSimulacao").value);
-    const parcelas=Number(document.getElementById("parcelasSimulacao").value);
-    const juros=Number(document.getElementById("jurosSimulacao").value)/100;
-    const parcela = valor * ( juros / (1 - Math.pow(1+juros, -parcelas)) );
-    const total = parcela * parcelas;
-    const jurosTotal = total - valor;
-    const sobra = salario - gastos - parcela;
-    const resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
-    out.innerHTML = `Parcela real: R$ ${parcela.toFixed(2)}<br>Total pago: R$ ${total.toFixed(2)}<br>Juros pagos: R$ ${jurosTotal.toFixed(2)}<br>Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>${resultado}`;
-  }else{
-    const valor=Number(document.getElementById("valorInvestimento").value);
-    const meses=Number(document.getElementById("mesesInvestimento").value);
-    const perc=Number(document.getElementById("percentualInvest").value)/100;
-    const taxaCDI=0.012;
-    const total=valor*(1+(taxaCDI*perc))**meses;
-    const lucro=total-valor;
-    out.innerHTML = `Valor final: R$ ${total.toFixed(2)}<br>Lucro: R$ ${lucro.toFixed(2)}`;
-  }
-};
-
-/* ===========================
-   ✅ INIT ÚNICO
-=========================== */
-document.addEventListener("DOMContentLoaded", ()=>{
-  const ok = initFirebase();
-  if(!ok) return;
-
-  // reforço de clique (não tira seu onclick)
-  document.getElementById("btnLoginEmail").addEventListener("click",(e)=>{e.preventDefault(); window.loginEmail();});
-  document.getElementById("btnCriarConta").addEventListener("click",(e)=>{e.preventDefault(); window.registrarEmail();});
-  document.getElementById("btnLoginGoogle").addEventListener("click",(e)=>{e.preventDefault(); window.loginGoogle();});
-
-  document.getElementById("tipoSimulacao").addEventListener("change", function(){
-    document.getElementById("areaCompra").style.display = this.value==="compra" ? "block" : "none";
-    document.getElementById("areaInvestimento").style.display = this.value==="investimento" ? "block" : "none";
-  });
-
-  document.getElementById("month").addEventListener("change", ()=>{
-    mesAtual = window.getMes();
-    window.render();
-  });
-
-  auth.onAuthStateChanged(user=>{
-    window.USER_ID = user ? user.uid : null;
-
-    document.getElementById("loginScreen").style.display = user ? "none" : "flex";
-    document.getElementById("app").style.display = user ? "block" : "none";
-
-    if(user){
-      document.getElementById("userName").innerText = user.displayName || user.email;
-      carregarCategorias();
-      carregarFixos();
-      renderCategorias();
-      renderFixos();
-      state = { meses:{} };
-      mesAtual = window.getMes();
-      window.render();
-    }
-  });
-
-  auth.getRedirectResult().catch(e=>{
-    // Se der erro no Google, aparece no debug
-    if(e && e.message) dbg((e.code||"") + " - " + e.message);
-  });
-});
-</script>
-
-</body>
-</html>
+  fetch(API + "/mes/" + window.
