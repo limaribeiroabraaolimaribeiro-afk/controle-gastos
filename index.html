@@ -188,10 +188,13 @@ let grafico = null;
 let graficoEvolucao = null;
 
 /* ===========================
-   ✅ FUNÇÕES DE LOGIN (TEM QUE EXISTIR ANTES DO CLIQUE)
+   ✅ FIREBASE INIT
 =========================== */
 function initFirebase(){
-  if(!window.firebase){ dbg("Firebase não carregou (sem internet ou bloqueado)."); return false; }
+  if(!window.firebase){
+    dbg("Firebase não carregou (sem internet ou bloqueado).");
+    return false;
+  }
 
   try{
     if(!firebase.apps || !firebase.apps.length){
@@ -204,10 +207,19 @@ function initFirebase(){
   }catch(e){}
 
   auth = firebase.auth();
+
+  // ✅ fix de persistência no Android (evita voltar pro login)
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+
   provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+
   return true;
 }
 
+/* ===========================
+   ✅ LOGIN/LOGOUT (mantém seus onclick)
+=========================== */
 window.loginEmail = function(){
   if(!auth){ alert("Firebase ainda não iniciou."); return; }
   const email = (document.getElementById("email").value||"").trim();
@@ -229,7 +241,14 @@ window.registrarEmail = function(){
 
 window.loginGoogle = function(){
   if(!auth){ alert("Firebase ainda não iniciou."); return; }
-  auth.signInWithRedirect(provider).catch(e=>alert((e.code||"")+" - "+e.message));
+
+  // ✅ marca que estamos indo pro redirect (evita piscar tela errada ao voltar)
+  sessionStorage.setItem("PENDING_GOOGLE_REDIRECT", "1");
+
+  auth.signInWithRedirect(provider).catch(e=>{
+    sessionStorage.removeItem("PENDING_GOOGLE_REDIRECT");
+    alert((e.code||"")+" - "+e.message);
+  });
 };
 
 window.logout = function(){
@@ -438,9 +457,9 @@ window.simularCompleto = ()=>{
 };
 
 /* ===========================
-   ✅ INIT ÚNICO
+   ✅ INIT ÚNICO (COM FIX DO REDIRECT)
 =========================== */
-document.addEventListener("DOMContentLoaded", ()=>{
+document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = initFirebase();
   if(!ok) return;
 
@@ -459,30 +478,22 @@ document.addEventListener("DOMContentLoaded", ()=>{
     window.render();
   });
 
+  // ✅ FINALIZA O REDIRECT ANTES DE "DECIDIR" A TELA
+  const pending = sessionStorage.getItem("PENDING_GOOGLE_REDIRECT");
+  if(pending){
+    dbg("Finalizando login Google...");
+    try{
+      await auth.getRedirectResult();
+    }catch(e){
+      dbg("Redirect ERROR:\n" + (e.code||"") + " - " + e.message);
+    }finally{
+      sessionStorage.removeItem("PENDING_GOOGLE_REDIRECT");
+    }
+  }
+
+  // ✅ AGORA SIM: decide tela pelo estado real
   auth.onAuthStateChanged(user=>{
     window.USER_ID = user ? user.uid : null;
 
     document.getElementById("loginScreen").style.display = user ? "none" : "flex";
-    document.getElementById("app").style.display = user ? "block" : "none";
-
-    if(user){
-      document.getElementById("userName").innerText = user.displayName || user.email;
-      carregarCategorias();
-      carregarFixos();
-      renderCategorias();
-      renderFixos();
-      state = { meses:{} };
-      mesAtual = window.getMes();
-      window.render();
-    }
-  });
-
-  auth.getRedirectResult().catch(e=>{
-    // Se der erro no Google, aparece no debug
-    if(e && e.message) dbg((e.code||"") + " - " + e.message);
-  });
-});
-</script>
-
-</body>
-</html>
+    document.getElementById("app").style.display = user ? "block" : "
