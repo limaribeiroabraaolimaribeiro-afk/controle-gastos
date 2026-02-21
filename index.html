@@ -208,7 +208,7 @@ function initFirebase(){
 
   auth = firebase.auth();
 
-  // ✅ fix de persistência no Android (evita voltar pro login)
+  // ✅ persistência (não perde sessão ao voltar do Google)
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 
   provider = new firebase.auth.GoogleAuthProvider();
@@ -239,16 +239,23 @@ window.registrarEmail = function(){
     .catch(e=>alert((e.code||"")+" - "+e.message));
 };
 
-window.loginGoogle = function(){
+window.loginGoogle = async function(){
   if(!auth){ alert("Firebase ainda não iniciou."); return; }
 
-  // ✅ marca que estamos indo pro redirect (evita piscar tela errada ao voltar)
-  sessionStorage.setItem("PENDING_GOOGLE_REDIRECT", "1");
+  try{
+    // ✅ no Android/Chrome, popup é MUITO mais estável que redirect
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+      await auth.signInWithPopup(provider);
+      return;
+    }
 
-  auth.signInWithRedirect(provider).catch(e=>{
+    // desktop pode usar redirect normal
+    sessionStorage.setItem("PENDING_GOOGLE_REDIRECT", "1");
+    await auth.signInWithRedirect(provider);
+  }catch(e){
     sessionStorage.removeItem("PENDING_GOOGLE_REDIRECT");
     alert((e.code||"")+" - "+e.message);
-  });
+  }
 };
 
 window.logout = function(){
@@ -478,10 +485,9 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     window.render();
   });
 
-  // ✅ FINALIZA O REDIRECT ANTES DE "DECIDIR" A TELA
+  // ✅ FINALIZA REDIRECT (só se rodou redirect no desktop)
   const pending = sessionStorage.getItem("PENDING_GOOGLE_REDIRECT");
   if(pending){
-    dbg("Finalizando login Google...");
     try{
       await auth.getRedirectResult();
     }catch(e){
@@ -491,9 +497,26 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     }
   }
 
-  // ✅ AGORA SIM: decide tela pelo estado real
+  // ✅ decide tela pelo estado real
   auth.onAuthStateChanged(user=>{
     window.USER_ID = user ? user.uid : null;
 
     document.getElementById("loginScreen").style.display = user ? "none" : "flex";
-    document.getElementById("app").style.display = user ? "block" : "
+    document.getElementById("app").style.display = user ? "block" : "none";
+
+    if(user){
+      document.getElementById("userName").innerText = user.displayName || user.email;
+      carregarCategorias();
+      carregarFixos();
+      renderCategorias();
+      renderFixos();
+      state = { meses:{} };
+      mesAtual = window.getMes();
+      window.render();
+    }
+  });
+});
+</script>
+
+</body>
+</html>
