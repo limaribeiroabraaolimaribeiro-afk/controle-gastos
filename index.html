@@ -243,18 +243,19 @@ window.loginGoogle = async function(){
   if(!auth){ alert("Firebase ainda não iniciou."); return; }
 
   try{
-    // ✅ no Android/Chrome, popup é MUITO mais estável que redirect
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-      await auth.signInWithPopup(provider);
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+    if(isMobile){
+      // ✅ no celular: redirect (evita popup-blocked)
+      await auth.signInWithRedirect(provider);
       return;
     }
 
-    // desktop pode usar redirect normal
-    sessionStorage.setItem("PENDING_GOOGLE_REDIRECT", "1");
-    await auth.signInWithRedirect(provider);
+    // ✅ no PC: popup
+    await auth.signInWithPopup(provider);
+
   }catch(e){
-    sessionStorage.removeItem("PENDING_GOOGLE_REDIRECT");
-    alert((e.code||"")+" - "+e.message);
+    alert((e.code||"") + " - " + e.message);
   }
 };
 
@@ -469,6 +470,13 @@ window.simularCompleto = ()=>{
 document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = initFirebase();
   if(!ok) return;
+  // ✅ Sempre finalizar o redirect do Google quando a página abrir
+  try{
+    await auth.getRedirectResult();
+  }catch(e){
+    // não trava o app; só mostra no debug
+    dbg("Redirect result:\n" + (e.code||"") + " - " + e.message);
+  }
 
   // reforço de clique (não tira seu onclick)
   document.getElementById("btnLoginEmail").addEventListener("click",(e)=>{e.preventDefault(); window.loginEmail();});
@@ -520,3 +528,4 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 </body>
 </html>
+
