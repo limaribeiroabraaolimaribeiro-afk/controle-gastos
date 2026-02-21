@@ -111,6 +111,28 @@ Controle de Gastos PRO
   <button onclick="logout()">Sair da conta</button>
 </div>
 
+  <div class="card">
+<h3>📂 Minhas Categorias</h3>
+
+<input id="novaCategoria" placeholder="Nome da categoria">
+<button onclick="addCategoria()">Adicionar</button>
+
+<div id="listaCategorias"></div>
+</div>
+
+
+<div class="card">
+<h3>📌 Gastos Fixos (Prioridades)</h3>
+
+<input id="descFixo" placeholder="Descrição">
+<input id="valorFixo" type="number" placeholder="Valor">
+<select id="categoriaFixo"></select>
+
+<button onclick="addFixo()">Adicionar gasto fixo</button>
+
+<div id="listaFixos"></div>
+</div>
+
 <div class="card">
 <label>Salário</label>
 <input id="salary" type="number">
@@ -190,6 +212,23 @@ window.addEventListener("DOMContentLoaded", ()=>{
   window.USER_ID = null;
 
 let state = {meses:{}};
+  let categorias = [];
+let fixos = [];
+  function salvarCategorias(){
+  localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias));
+}
+
+function carregarCategorias(){
+  categorias = JSON.parse(localStorage.getItem("categorias_" + window.USER_ID) || "[]");
+}
+
+function salvarFixos(){
+  localStorage.setItem("fixos_" + window.USER_ID, JSON.stringify(fixos));
+}
+
+function carregarFixos(){
+  fixos = JSON.parse(localStorage.getItem("fixos_" + window.USER_ID) || "[]");
+}
   let categorias = ["Casa","Alimentação","Transporte","Lazer","Pets","Outros"];
 
 let regras = [
@@ -234,7 +273,11 @@ window.getMes = ()=> monthInput.value || new Date().toISOString().slice(0,7);
 
 window.getDataMes = ()=>{
   if(!state.meses[mesAtual]){
-    state.meses[mesAtual]={salary:0,items:[],meta:0};
+    state.meses[mesAtual]={
+  salary:0,
+  items:[...fixos],
+  meta:0
+};
   }
   return state.meses[mesAtual];
 };
@@ -306,6 +349,42 @@ window.del=(i)=>{
 };
 
 window.toggleTheme=()=>document.body.classList.toggle("light");
+  window.addCategoria = ()=>{
+  let nome = document.getElementById("novaCategoria").value.trim();
+  if(!nome) return;
+
+  categorias.push(nome);
+  salvarCategorias();
+  renderCategorias();
+};
+
+function renderCategorias(){
+  let div = document.getElementById("listaCategorias");
+  let select = document.getElementById("categoriaFixo");
+
+  div.innerHTML = categorias.map(c=>`<div>${c}</div>`).join("");
+  select.innerHTML = categorias.map(c=>`<option>${c}</option>`).join("");
+}
+  window.addFixo = ()=>{
+  let desc = document.getElementById("descFixo").value;
+  let valor = Number(document.getElementById("valorFixo").value);
+  let categoria = document.getElementById("categoriaFixo").value;
+
+  if(!desc || !valor) return;
+
+  fixos.push({desc, amount:valor, category:categoria});
+  salvarFixos();
+  renderFixos();
+};
+
+function renderFixos(){
+  let div = document.getElementById("listaFixos");
+
+  div.innerHTML = fixos.map(f=>`
+    <div>${f.desc} - R$ ${f.amount} (${f.category})</div>
+  `).join("");
+    }
+  
   function detectarCategoria(desc){
   desc = desc.toLowerCase();
 
@@ -536,8 +615,13 @@ auth.onAuthStateChanged(user => {
   document.getElementById("userName").innerText =
     user.displayName || user.email;
 
+  carregarCategorias();
+  carregarFixos();
+  renderCategorias();
+  renderFixos();
+
   state = {meses:{}};
-  render(); // 👈 ADICIONE ESTA LINHA
+  render();
 }
 
 });
@@ -545,3 +629,4 @@ auth.onAuthStateChanged(user => {
 
 </body>
 </html>
+
