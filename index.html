@@ -35,10 +35,28 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
   background:rgba(0,0,0,.75); color:#fff; padding:10px; border-radius:12px;
   font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
+
+/* ✅ tela simples de carregamento */
+#loading{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  text-align:center;
+  padding:24px;
+  opacity:.9;
+}
 </style>
 </head>
 
 <body>
+
+<div id="loading">
+  <div>
+    <div style="font-size:18px;font-weight:700">Carregando...</div>
+    <div style="opacity:.8;margin-top:6px">Validando login</div>
+  </div>
+</div>
 
 <!-- ✅ APP (sem login aqui) -->
 <div id="app" style="display:none">
@@ -173,10 +191,19 @@ let mesAtual = new Date().toISOString().slice(0,7);
 let grafico = null;
 let graficoEvolucao = null;
 
+function showApp(){
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+function showLoading(){
+  document.getElementById("app").style.display = "none";
+  document.getElementById("loading").style.display = "flex";
+}
+
 /* ===========================
-   ✅ FIREBASE INIT
+   ✅ FIREBASE INIT (AGORA async)
 =========================== */
-function initFirebase(){
+async function initFirebase(){
   if(!window.firebase){
     dbg("Firebase não carregou (sem internet ou bloqueado).");
     return false;
@@ -194,8 +221,13 @@ function initFirebase(){
 
   auth = firebase.auth();
 
-  // ✅ mantém sessão
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+  // ✅ IMPORTANTÍSSIMO: aguarda a persistência concluir antes de checar estado
+  try{
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  }catch(e){
+    // se falhar, não trava
+    dbg("Persistência:\n" + (e.code||"") + " - " + (e.message||e));
+  }
 
   return true;
 }
@@ -211,7 +243,7 @@ window.logout = function(){
 };
 
 /* ===========================
-   ✅ RESTO DO APP (igual você tinha)
+   ✅ RESTO DO APP
 =========================== */
 function salvarCategorias(){ localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias)); }
 function carregarCategorias(){
@@ -382,7 +414,6 @@ window.render = ()=>{
     .catch(()=>paint());
 };
 
-/* ✅ simulador (mantive seu original; se quiser eu troco pela versão validada) */
 window.simularCompleto = ()=>{
   const tipo=document.getElementById("tipoSimulacao").value;
   const d=window.getDataMes();
@@ -412,10 +443,12 @@ window.simularCompleto = ()=>{
 };
 
 /* ===========================
-   ✅ INIT
+   ✅ INIT (corrigido anti-loop)
 =========================== */
-document.addEventListener("DOMContentLoaded", ()=>{
-  const ok = initFirebase();
+document.addEventListener("DOMContentLoaded", async ()=>{
+  showLoading();
+
+  const ok = await initFirebase();
   if(!ok) return;
 
   document.getElementById("tipoSimulacao").addEventListener("change", function(){
@@ -428,18 +461,21 @@ document.addEventListener("DOMContentLoaded", ()=>{
     window.render();
   });
 
-  // ✅ decide tela pelo estado real
-  auth.onAuthStateChanged(user=>{
+  // ✅ decide tela pelo estado real (com “delay” anti-falso-null)
+  auth.onAuthStateChanged(async (user)=>{
     if(!user){
-      // 🔴 não logado → manda pro login.html
-      location.replace("./login.html");
-      return;
+      // espera um pouco e confere de novo (evita loop no mobile)
+      await new Promise(r=>setTimeout(r, 700));
+      const again = auth.currentUser;
+      if(!again){
+        location.replace("./login.html");
+        return;
+      }
+      user = again;
     }
 
-    // 🔵 logado → mostra app
     window.USER_ID = user.uid;
 
-    document.getElementById("app").style.display = "block";
     document.getElementById("userName").innerText = user.displayName || user.email;
 
     carregarCategorias();
@@ -447,17 +483,17 @@ document.addEventListener("DOMContentLoaded", ()=>{
     renderCategorias();
     renderFixos();
 
-    // carrega state local (se tiver)
     try{
       const raw = localStorage.getItem("gastos_pro");
       if(raw) state = JSON.parse(raw) || { meses:{} };
     }catch(e){ state = { meses:{} }; }
 
     mesAtual = window.getMes();
+    showApp();
     window.render();
   });
 });
 </script>
 
 </body>
-</html>
+  </html>
