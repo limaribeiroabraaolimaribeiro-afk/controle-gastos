@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Login — Controle de Gastos PRO</title>
+
+  <meta name="theme-color" content="#569cff">
+
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#0e1a3a;
+      --card: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.14);
+      --text:#eaf0ff;
+      --muted: rgba(234,240,255,.7);
+      --accent:#569cff;
+      --accent2:#3ddc84;
+      --danger:#ff5c5c;
+      --radius:18px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:
+        radial-gradient(1000px 600px at 20% 20%, rgba(86,156,255,.25), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, rgba(61,220,132,.18), transparent 60%),
+        linear-gradient(180deg, var(--bg2), var(--bg1));
+      padding:18px;
+    }
+
+    .shell{
+      width:min(420px, 100%);
+    }
+
+    .brand{
+      text-align:center;
+      margin-bottom:14px;
+    }
+
+    .logo{
+      width:56px;height:56px;
+      border-radius:16px;
+      margin:0 auto 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+    }
+    .brand p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      padding:16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
+    }
+
+    .field{
+      margin-top:10px;
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px;
+    }
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color:var(--text);
+      outline:none;
+    }
+    input:focus{
+      border-color: rgba(86,156,255,.55);
+      box-shadow: 0 0 0 4px rgba(86,156,255,.18);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+    .row > *{ flex:1; }
+
+    button{
+      width:100%;
+      padding:12px 12px;
+      border:0;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:700;
+      color:#fff;
+    }
+    .btn{
+      background: linear-gradient(135deg, var(--accent), #3f7dff);
+      box-shadow: 0 10px 26px rgba(86,156,255,.22);
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btnSecondary{
+      background: rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow:none;
+    }
+
+    .divider{
+      display:flex; align-items:center; gap:10px;
+      margin:14px 0;
+      color:rgba(234,240,255,.5);
+      font-size:12px;
+    }
+    .divider:before, .divider:after{
+      content:"";
+      height:1px;
+      background: rgba(255,255,255,.14);
+      flex:1;
+    }
+
+    .google{
+      background: rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.16);
+      display:flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .gDot{
+      width:10px;height:10px;border-radius:50%;
+      background: conic-gradient(from 180deg, #4285F4, #34A853, #FBBC05, #EA4335, #4285F4);
+    }
+
+    .msg{
+      margin-top:12px;
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+      min-height:16px;
+    }
+
+    .error{ color: var(--danger); }
+    .ok{ color: var(--accent2); }
+
+    #debugBox{
+      margin-top:10px;
+      font-size:12px;
+      white-space:pre-wrap;
+      opacity:.85;
+      display:none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <div class="brand">
+      <div class="logo">R$</div>
+      <h1>Controle de Gastos PRO</h1>
+      <p>Entre para acessar seu painel</p>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>E-mail</label>
+        <input id="email" type="email" placeholder="seuemail@gmail.com" autocomplete="email">
+      </div>
+
+      <div class="field">
+        <label>Senha</label>
+        <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <div class="row">
+        <button class="btn" id="btnLoginEmail" onclick="loginEmail()">Entrar</button>
+        <button class="btnSecondary" id="btnCriarConta" onclick="registrarEmail()">Criar conta</button>
+      </div>
+
+      <div class="divider">ou</div>
+
+      <button class="google" id="btnLoginGoogle" onclick="loginGoogle()">
+        <span class="gDot"></span> Entrar com Google
+      </button>
+
+      <div class="msg" id="msg"></div>
+      <div id="debugBox"></div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+  <script>
+    function setMsg(text, cls){
+      const el = document.getElementById("msg");
+      el.className = "msg " + (cls||"");
+      el.textContent = text || "";
+    }
+
+    function dbg(msg){
+      const box = document.getElementById("debugBox");
+      box.style.display = "block";
+      box.textContent = String(msg);
+    }
+
+    // 🔥 SUA CONFIG (mantém a mesma que você já usa)
+    const firebaseConfig = {
+      apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+      authDomain:"controle-gastos-pro.firebaseapp.com",
+      projectId:"controle-gastos-pro"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+
+    // ✅ Finaliza redirect quando voltar do Google
+    auth.getRedirectResult().catch(()=>{});
+
+    // ✅ Se já está logado, vai direto pro app
+    auth.onAuthStateChanged(user=>{
+      if(user){
+        window.location.href = "./index.html";
+      }
+    });
+
+    window.loginEmail = function(){
+      const email = (document.getElementById("email").value||"").trim();
+      const senha = (document.getElementById("senha").value||"").trim();
+      if(!email || !senha){ setMsg("Preencha e-mail e senha.", "error"); return; }
+
+      setMsg("Entrando...", "");
+      auth.signInWithEmailAndPassword(email, senha)
+        .then(()=> setMsg("Ok! Abrindo...", "ok"))
+        .catch(e=> setMsg((e.code||"") + " - " + e.message, "error"));
+    };
+
+    window.registrarEmail = function(){
+      const email = (document.getElementById("email").value||"").trim();
+      const senha = (document.getElementById("senha").value||"").trim();
+      if(!email || !senha){ setMsg("Preencha e-mail e senha.", "error"); return; }
+      if(senha.length < 6){ setMsg("A senha precisa ter 6+ caracteres.", "error"); return; }
+
+      setMsg("Criando conta...", "");
+      auth.createUserWithEmailAndPassword(email, senha)
+        .then(()=> setMsg("Conta criada! Abrindo...", "ok"))
+        .catch(e=> setMsg((e.code||"") + " - " + e.message, "error"));
+    };
+
+    window.loginGoogle = async function(){
+      try{
+        setMsg("Abrindo Google...", "");
+        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+        if(isMobile){
+          await auth.signInWithRedirect(provider);
+        }else{
+          await auth.signInWithPopup(provider);
+        }
+      }catch(e){
+        setMsg((e.code||"") + " - " + e.message, "error");
+      }
+    };
+  </script>
+</body>
+  </html>
