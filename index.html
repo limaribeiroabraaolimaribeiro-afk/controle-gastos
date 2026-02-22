@@ -465,20 +465,23 @@ window.simularCompleto = ()=>{
 };
 
 /* ===========================
-   ✅ INIT ÚNICO (SEM BUG)
+   ✅ INIT ÚNICO (COM FIX DO REDIRECT)
 =========================== */
 document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = initFirebase();
   if(!ok) return;
+  // ✅ Sempre finalizar o redirect do Google quando a página abrir
+  try{
+    await auth.getRedirectResult();
+  }catch(e){
+    // não trava o app; só mostra no debug
+    dbg("Redirect result:\n" + (e.code||"") + " - " + e.message);
+  }
 
-  // 🔒 Esconde tudo até saber se está logado
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "none";
-
-  // eventos dos botões
-  document.getElementById("btnLoginEmail").addEventListener("click",(e)=>{e.preventDefault(); loginEmail();});
-  document.getElementById("btnCriarConta").addEventListener("click",(e)=>{e.preventDefault(); registrarEmail();});
-  document.getElementById("btnLoginGoogle").addEventListener("click",(e)=>{e.preventDefault(); loginGoogle();});
+  // reforço de clique (não tira seu onclick)
+  document.getElementById("btnLoginEmail").addEventListener("click",(e)=>{e.preventDefault(); window.loginEmail();});
+  document.getElementById("btnCriarConta").addEventListener("click",(e)=>{e.preventDefault(); window.registrarEmail();});
+  document.getElementById("btnLoginGoogle").addEventListener("click",(e)=>{e.preventDefault(); window.loginGoogle();});
 
   document.getElementById("tipoSimulacao").addEventListener("change", function(){
     document.getElementById("areaCompra").style.display = this.value==="compra" ? "block" : "none";
@@ -490,49 +493,57 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     window.render();
   });
 
-  // ✅ FINALIZA LOGIN GOOGLE (só se tiver redirect)
+  // ✅ FINALIZA REDIRECT (só se rodou redirect no desktop)
   const pending = sessionStorage.getItem("PENDING_GOOGLE_REDIRECT");
-
   if(pending){
     try{
       await auth.getRedirectResult();
     }catch(e){
-      dbg("Erro redirect: " + (e.code || "") + " - " + e.message);
+      dbg("Redirect ERROR:\n" + (e.code||"") + " - " + e.message);
+    }finally{
+      sessionStorage.removeItem("PENDING_GOOGLE_REDIRECT");
     }
-    sessionStorage.removeItem("PENDING_GOOGLE_REDIRECT");
   }
 
-  // ✅ DECIDE QUAL TELA MOSTRAR
-  auth.onAuthStateChanged(user=>{
-    window.USER_ID = user ? user.uid : null;
+  // ✅ decide tela pelo estado real
+auth.onAuthStateChanged(user => {
 
-    if(user){
-      // 👉 MOSTRA APP
-      document.getElementById("loginScreen").style.display = "none";
-      document.getElementById("app").style.display = "block";
+  // 🔴 se NÃO estiver logado → mostra a tela de login DO INDEX (a nova)
+  if (!user) {
+    window.USER_ID = null;
+    document.getElementById("app").style.display = "none";
+    document.getElementById("loginScreen").style.display = "flex";
+    return;
+  }
 
-      document.getElementById("userName").innerText = user.email;
+  // 🔵 se estiver logado → entra no app
+  window.USER_ID = user.uid;
 
-      carregarCategorias();
-      carregarFixos();
-      renderCategorias();
-      renderFixos();
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "block";
 
-      state = { meses:{} };
-      mesAtual = window.getMes();
-      window.render();
+  document.getElementById("userName").innerText =
+    user.displayName || user.email;
 
-    }else{
-      // 👉 MOSTRA LOGIN
-      document.getElementById("loginScreen").style.display = "flex";
-      document.getElementById("app").style.display = "none";
-    }
-  });
+  carregarCategorias();
+  carregarFixos();
+  renderCategorias();
+  renderFixos();
+
+  // carrega estado salvo (se tiver)
+  try {
+    const raw = localStorage.getItem("gastos_pro");
+    if (raw) state = JSON.parse(raw) || { meses: {} };
+  } catch (e) {
+    state = { meses: {} };
+  }
+
+  mesAtual = window.getMes();
+  window.render();
 });
+
+}); // fecha DOMContentLoaded
 </script>
 
 </body>
 </html>
-
-
-
