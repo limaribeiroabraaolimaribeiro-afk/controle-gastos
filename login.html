@@ -1,288 +1,319 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Login — Controle de Gastos PRO</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Login - Controle de Gastos PRO</title>
 
-  <meta name="theme-color" content="#569cff">
+<meta name="theme-color" content="#569cff">
 
-  <style>
-    :root{
-      --bg1:#0b1020;
-      --bg2:#0e1a3a;
-      --card: rgba(255,255,255,.08);
-      --stroke: rgba(255,255,255,.14);
-      --text:#eaf0ff;
-      --muted: rgba(234,240,255,.7);
-      --accent:#569cff;
-      --accent2:#3ddc84;
-      --danger:#ff5c5c;
-      --radius:18px;
-    }
+<style>
+:root{
+  --bg1:#0b1020;
+  --bg2:#0a1b2f;
+  --card: rgba(255,255,255,.06);
+  --stroke: rgba(255,255,255,.12);
+  --text:#eaf0ff;
+  --muted: rgba(234,240,255,.7);
+  --accent:#569cff;
+  --shadow: 0 20px 60px rgba(0,0,0,.45);
+}
 
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--text);
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      background:
-        radial-gradient(1000px 600px at 20% 20%, rgba(86,156,255,.25), transparent 60%),
-        radial-gradient(900px 600px at 80% 30%, rgba(61,220,132,.18), transparent 60%),
-        linear-gradient(180deg, var(--bg2), var(--bg1));
-      padding:18px;
-    }
+*{ box-sizing:border-box; }
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:
+    radial-gradient(1200px 600px at 50% 20%, rgba(86,156,255,.25), transparent 60%),
+    linear-gradient(180deg, var(--bg2), var(--bg1));
+}
 
-    .shell{
-      width:min(420px, 100%);
-    }
+.card{
+  width:min(520px, 100%);
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 22px;
+  backdrop-filter: blur(10px);
+}
 
-    .brand{
-      text-align:center;
-      margin-bottom:14px;
-    }
+.brand{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  margin-bottom: 16px;
+  text-align:center;
+}
 
-    .logo{
-      width:56px;height:56px;
-      border-radius:16px;
-      margin:0 auto 10px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 12px 30px rgba(0,0,0,.35);
-      display:flex; align-items:center; justify-content:center;
-      font-weight:800;
-    }
+.logo{
+  width:68px;height:68px;
+  border-radius:18px;
+  display:grid; place-items:center;
+  background: linear-gradient(135deg, rgba(86,156,255,.9), rgba(66,220,180,.8));
+  box-shadow: 0 10px 25px rgba(0,0,0,.35);
+  font-weight:900;
+  font-size:22px;
+}
 
-    .brand h1{
-      margin:0;
-      font-size:22px;
-      letter-spacing:.2px;
-    }
-    .brand p{
-      margin:6px 0 0;
-      color:var(--muted);
-      font-size:13px;
-    }
+h1{ margin:0; font-size:28px; letter-spacing:.2px; }
+.sub{ margin:0; color:var(--muted); font-size:14px; }
 
-    .card{
-      background: var(--card);
-      border:1px solid var(--stroke);
-      border-radius: var(--radius);
-      padding:16px;
-      box-shadow: 0 18px 50px rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
-    }
+.group{
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,.12);
+}
 
-    .field{
-      margin-top:10px;
-    }
-    label{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      margin:0 0 6px;
-    }
-    input{
-      width:100%;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color:var(--text);
-      outline:none;
-    }
-    input:focus{
-      border-color: rgba(86,156,255,.55);
-      box-shadow: 0 0 0 4px rgba(86,156,255,.18);
-    }
+label{
+  display:block;
+  font-size:13px;
+  color: var(--muted);
+  margin-top: 10px;
+}
 
-    .row{
-      display:flex;
-      gap:10px;
-      margin-top:12px;
-    }
-    .row > *{ flex:1; }
+input{
+  width:100%;
+  margin-top: 6px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(10,16,32,.55);
+  color: var(--text);
+  outline: none;
+}
 
-    button{
-      width:100%;
-      padding:12px 12px;
-      border:0;
-      border-radius:14px;
-      cursor:pointer;
-      font-weight:700;
-      color:#fff;
-    }
-    .btn{
-      background: linear-gradient(135deg, var(--accent), #3f7dff);
-      box-shadow: 0 10px 26px rgba(86,156,255,.22);
-    }
-    .btn:active{ transform: translateY(1px); }
+input:focus{
+  border-color: rgba(86,156,255,.65);
+  box-shadow: 0 0 0 4px rgba(86,156,255,.15);
+}
 
-    .btnSecondary{
-      background: rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.16);
-      box-shadow:none;
-    }
+.row{
+  display:flex;
+  gap:12px;
+  margin-top: 16px;
+}
 
-    .divider{
-      display:flex; align-items:center; gap:10px;
-      margin:14px 0;
-      color:rgba(234,240,255,.5);
-      font-size:12px;
-    }
-    .divider:before, .divider:after{
-      content:"";
-      height:1px;
-      background: rgba(255,255,255,.14);
-      flex:1;
-    }
+.btn{
+  width:100%;
+  padding: 14px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+  font-weight: 700;
+  cursor:pointer;
+}
 
-    .google{
-      background: rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.16);
-      display:flex; align-items:center; justify-content:center; gap:10px;
-    }
-    .gDot{
-      width:10px;height:10px;border-radius:50%;
-      background: conic-gradient(from 180deg, #4285F4, #34A853, #FBBC05, #EA4335, #4285F4);
-    }
+.btn.primary{
+  background: var(--accent);
+  border-color: rgba(86,156,255,.9);
+}
 
-    .msg{
-      margin-top:12px;
-      font-size:12px;
-      color:var(--muted);
-      text-align:center;
-      min-height:16px;
-    }
+.sep{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin: 18px 0;
+  color: rgba(234,240,255,.55);
+  font-size: 12px;
+}
+.sep::before,.sep::after{
+  content:"";
+  height:1px; flex:1;
+  background: rgba(255,255,255,.12);
+}
 
-    .error{ color: var(--danger); }
-    .ok{ color: var(--accent2); }
+.google{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  background: rgba(255,255,255,.08);
+}
 
-    #debugBox{
-      margin-top:10px;
-      font-size:12px;
-      white-space:pre-wrap;
-      opacity:.85;
-      display:none;
-    }
-  </style>
+.google .dot{
+  width:14px;height:14px;border-radius:999px;
+  background: conic-gradient(red, orange, yellow, green, blue, purple, red);
+}
+
+.small{
+  margin-top: 10px;
+  text-align:center;
+  font-size: 12px;
+  color: rgba(234,240,255,.6);
+}
+
+#debugBox{
+  margin-top: 12px;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.12);
+  padding: 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  white-space: pre-wrap;
+  display:none;
+}
+</style>
 </head>
 
 <body>
-  <div class="shell">
-    <div class="brand">
-      <div class="logo">R$</div>
-      <h1>Controle de Gastos PRO</h1>
-      <p>Entre para acessar seu painel</p>
-    </div>
 
-    <div class="card">
-      <div class="field">
-        <label>E-mail</label>
-        <input id="email" type="email" placeholder="seuemail@gmail.com" autocomplete="email">
-      </div>
-
-      <div class="field">
-        <label>Senha</label>
-        <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password">
-      </div>
-
-      <div class="row">
-        <button class="btn" id="btnLoginEmail" onclick="loginEmail()">Entrar</button>
-        <button class="btnSecondary" id="btnCriarConta" onclick="registrarEmail()">Criar conta</button>
-      </div>
-
-      <div class="divider">ou</div>
-
-      <button class="google" id="btnLoginGoogle" onclick="loginGoogle()">
-        <span class="gDot"></span> Entrar com Google
-      </button>
-
-      <div class="msg" id="msg"></div>
-      <div id="debugBox"></div>
-    </div>
+<div class="card">
+  <div class="brand">
+    <div class="logo">R$</div>
+    <h1>Controle de Gastos PRO</h1>
+    <p class="sub">Entre para acessar seu painel</p>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <div class="group">
+    <label for="email">E-mail</label>
+    <input id="email" type="email" placeholder="seuemail@gmail.com" autocomplete="email"/>
 
-  <script>
-    function setMsg(text, cls){
-      const el = document.getElementById("msg");
-      el.className = "msg " + (cls||"");
-      el.textContent = text || "";
+    <label for="senha">Senha</label>
+    <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password"/>
+
+    <div class="row">
+      <button class="btn primary" id="btnLoginEmail">Entrar</button>
+      <button class="btn" id="btnCriarConta">Criar conta</button>
+    </div>
+
+    <div class="sep">OU</div>
+
+    <button class="btn google" id="btnLoginGoogle">
+      <span class="dot"></span>
+      Entrar com Google
+    </button>
+
+    <div class="small">Ao entrar, você concorda com o uso de autenticação do Firebase.</div>
+
+    <div id="debugBox"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+<script>
+function dbg(msg){
+  const box = document.getElementById("debugBox");
+  box.style.display = "block";
+  box.textContent = String(msg);
+}
+
+window.addEventListener("error", (e)=>{
+  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+});
+window.addEventListener("unhandledrejection", (e)=>{
+  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+});
+
+let auth = null;
+let provider = null;
+
+function initFirebase(){
+  if(!window.firebase){
+    dbg("Firebase não carregou (sem internet ou bloqueado).");
+    return false;
+  }
+
+  try{
+    if(!firebase.apps || !firebase.apps.length){
+      firebase.initializeApp({
+        apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+        authDomain:"controle-gastos-pro.firebaseapp.com",
+        projectId:"controle-gastos-pro"
+      });
     }
+  }catch(e){}
 
-    function dbg(msg){
-      const box = document.getElementById("debugBox");
-      box.style.display = "block";
-      box.textContent = String(msg);
+  auth = firebase.auth();
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+
+  provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+
+  return true;
+}
+
+async function finalizarRedirectSeTiver(){
+  try{
+    const res = await auth.getRedirectResult();
+    if(res && res.user){
+      location.replace("./index.html");
     }
+  }catch(e){
+    // só mostra se der erro
+    if(e && e.code) dbg("Redirect:\n" + e.code + " - " + e.message);
+  }
+}
 
-    // 🔥 SUA CONFIG (mantém a mesma que você já usa)
-    const firebaseConfig = {
-      apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-      authDomain:"controle-gastos-pro.firebaseapp.com",
-      projectId:"controle-gastos-pro"
-    };
+async function loginGoogle(){
+  try{
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    if(isMobile){
+      await auth.signInWithRedirect(provider);
+      return;
+    }
+    await auth.signInWithPopup(provider);
+    location.replace("./index.html");
+  }catch(e){
+    alert((e.code||"") + " - " + e.message);
+  }
+}
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
+function loginEmail(){
+  const email = (document.getElementById("email").value||"").trim();
+  const senha = (document.getElementById("senha").value||"").trim();
+  if(!email || !senha){ alert("Preencha email e senha"); return; }
 
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+  auth.signInWithEmailAndPassword(email, senha)
+    .then(()=> location.replace("./index.html"))
+    .catch(e=> alert((e.code||"")+" - "+e.message));
+}
 
-    // ✅ Finaliza redirect quando voltar do Google
-    auth.getRedirectResult().catch(()=>{});
+function criarConta(){
+  const email = (document.getElementById("email").value||"").trim();
+  const senha = (document.getElementById("senha").value||"").trim();
+  if(!email || !senha){ alert("Preencha email e senha"); return; }
+  if(senha.length < 6){ alert("A senha deve ter pelo menos 6 caracteres"); return; }
 
-    // ✅ Se já está logado, vai direto pro app
-    auth.onAuthStateChanged(user=>{
-      if(user){
-        window.location.href = "./index.html";
-      }
-    });
+  auth.createUserWithEmailAndPassword(email, senha)
+    .then(()=> {
+      alert("Conta criada com sucesso!");
+      location.replace("./index.html");
+    })
+    .catch(e=> alert((e.code||"")+" - "+e.message));
+}
 
-    window.loginEmail = function(){
-      const email = (document.getElementById("email").value||"").trim();
-      const senha = (document.getElementById("senha").value||"").trim();
-      if(!email || !senha){ setMsg("Preencha e-mail e senha.", "error"); return; }
+document.addEventListener("DOMContentLoaded", async ()=>{
+  const ok = initFirebase();
+  if(!ok) return;
 
-      setMsg("Entrando...", "");
-      auth.signInWithEmailAndPassword(email, senha)
-        .then(()=> setMsg("Ok! Abrindo...", "ok"))
-        .catch(e=> setMsg((e.code||"") + " - " + e.message, "error"));
-    };
+  // ✅ se já estiver logado, pula pro app
+  auth.onAuthStateChanged((user)=>{
+    if(user){
+      location.replace("./index.html");
+    }
+  });
 
-    window.registrarEmail = function(){
-      const email = (document.getElementById("email").value||"").trim();
-      const senha = (document.getElementById("senha").value||"").trim();
-      if(!email || !senha){ setMsg("Preencha e-mail e senha.", "error"); return; }
-      if(senha.length < 6){ setMsg("A senha precisa ter 6+ caracteres.", "error"); return; }
+  // ✅ finaliza redirect do Google (mobile)
+  await finalizarRedirectSeTiver();
 
-      setMsg("Criando conta...", "");
-      auth.createUserWithEmailAndPassword(email, senha)
-        .then(()=> setMsg("Conta criada! Abrindo...", "ok"))
-        .catch(e=> setMsg((e.code||"") + " - " + e.message, "error"));
-    };
+  document.getElementById("btnLoginEmail").addEventListener("click",(e)=>{ e.preventDefault(); loginEmail(); });
+  document.getElementById("btnCriarConta").addEventListener("click",(e)=>{ e.preventDefault(); criarConta(); });
+  document.getElementById("btnLoginGoogle").addEventListener("click",(e)=>{ e.preventDefault(); loginGoogle(); });
+});
+</script>
 
-    window.loginGoogle = async function(){
-      try{
-        setMsg("Abrindo Google...", "");
-        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-
-        if(isMobile){
-          await auth.signInWithRedirect(provider);
-        }else{
-          await auth.signInWithPopup(provider);
-        }
-      }catch(e){
-        setMsg((e.code||"") + " - " + e.message, "error");
-      }
-    };
-  </script>
 </body>
-  </html>
+</html>
