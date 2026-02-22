@@ -3,35 +3,272 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Login</title>
+  <title>Controle de Gastos PRO • Login</title>
+
   <style>
-    body{margin:0;font-family:system-ui;background:#0b1020;color:#eaf0ff}
-    .box{max-width:420px;margin:40px auto;padding:16px;background:#ffffff0f;border-radius:14px}
-    input,button{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:0}
-    input{background:#fff}
-    button{background:#569cff;color:#fff;font-weight:700}
-    .muted{opacity:.8;font-size:14px}
-    .row{display:flex;gap:8px}
-    .row button{width:50%}
+    :root{
+      --bg1:#070A14;
+      --bg2:#0B1020;
+      --card: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.14);
+      --text:#EAF0FF;
+      --muted: rgba(234,240,255,.72);
+      --accent:#5B8CFF;
+      --accent2:#38D6B3;
+      --danger:#FF5E73;
+      --ok:#2EE59D;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      min-height:100vh;
+      background:
+        radial-gradient(900px 500px at 20% 10%, rgba(91,140,255,.28), transparent 60%),
+        radial-gradient(700px 500px at 90% 30%, rgba(56,214,179,.18), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .wrap{
+      width: min(440px, 100%);
+      position:relative;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 22px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow:hidden;
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom: 12px;
+    }
+
+    .logo{
+      width:52px;height:52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(91,140,255,.95), rgba(56,214,179,.85));
+      display:grid;
+      place-items:center;
+      box-shadow: 0 12px 35px rgba(91,140,255,.22);
+      user-select:none;
+      flex:0 0 auto;
+    }
+    .logo span{
+      font-weight:900;
+      letter-spacing:.5px;
+      font-size: 18px;
+      color: #071021;
+    }
+
+    h1{
+      font-size: 20px;
+      line-height: 1.1;
+      margin:0;
+      letter-spacing:.2px;
+    }
+
+    .subtitle{
+      margin:4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .form{
+      margin-top: 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .field label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 6px 2px;
+      letter-spacing:.2px;
+    }
+
+    .input{
+      width:100%;
+      padding: 14px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(5,8,18,.55);
+      color: var(--text);
+      outline: none;
+      transition: .18s ease;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+    .input::placeholder{ color: rgba(234,240,255,.35); }
+    .input:focus{
+      border-color: rgba(91,140,255,.6);
+      box-shadow: 0 0 0 4px rgba(91,140,255,.16);
+      transform: translateY(-1px);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      margin-top: 2px;
+    }
+
+    .btn{
+      width:100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 13px 14px;
+      font-weight: 800;
+      letter-spacing:.2px;
+      cursor:pointer;
+      transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
+    }
+    .btn:active{ transform: translateY(1px) scale(.995); }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .btnPrimary{
+      background: linear-gradient(135deg, rgba(91,140,255,.98), rgba(91,140,255,.72));
+      color:white;
+      box-shadow: 0 14px 35px rgba(91,140,255,.22);
+    }
+    .btnGhost{
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+    .btnGoogle{
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.16);
+      margin-top: 6px;
+    }
+
+    .divider{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin: 10px 0 0;
+      color: rgba(234,240,255,.45);
+      font-size: 12px;
+    }
+    .divider::before,
+    .divider::after{
+      content:"";
+      height:1px;
+      flex:1;
+      background: rgba(255,255,255,.12);
+    }
+
+    .status{
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-height: 18px;
+      word-break: break-word;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;background: rgba(234,240,255,.35);
+      flex:0 0 auto;
+    }
+    .status.ok{ color: rgba(46,229,157,.95); }
+    .status.ok .dot{ background: var(--ok); }
+    .status.err{ color: rgba(255,94,115,.95); }
+    .status.err .dot{ background: var(--danger); }
+
+    .spinner{
+      width:16px;height:16px;border-radius:999px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: rgba(255,255,255,.95);
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin{ to{ transform: rotate(360deg);} }
+
+    .foot{
+      margin-top: 10px;
+      color: rgba(234,240,255,.45);
+      font-size: 12px;
+      text-align:center;
+    }
+
+    /* melhora em telas pequenas */
+    @media (max-width: 360px){
+      .card{ padding: 18px; }
+      .row{ flex-direction: column; }
+    }
   </style>
 </head>
+
 <body>
-  <div class="box">
-    <h2>Entrar</h2>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div class="logo"><span>R$</span></div>
+        <div>
+          <h1>Controle de Gastos PRO</h1>
+          <p class="subtitle">Entre para sincronizar seus dados com segurança</p>
+        </div>
+      </div>
 
-    <button id="btnGoogle">Continuar com Google</button>
+      <div class="form">
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input id="email" class="input" type="email" autocomplete="email" placeholder="seuemail@gmail.com"/>
+        </div>
 
-    <p class="muted">ou use e-mail e senha</p>
+        <div class="field">
+          <label for="senha">Senha</label>
+          <input id="senha" class="input" type="password" autocomplete="current-password" placeholder="Sua senha"/>
+        </div>
 
-    <input id="email" type="email" placeholder="seuemail@gmail.com"/>
-    <input id="senha" type="password" placeholder="sua senha"/>
+        <div class="row">
+          <button id="btnEntrar" class="btn btnPrimary">
+            <span id="txtEntrar">Entrar</span>
+            <span id="loadEntrar" style="display:none" class="spinner"></span>
+          </button>
+          <button id="btnCriar" class="btn btnGhost">Criar conta</button>
+        </div>
 
-    <div class="row">
-      <button id="btnEntrar">Entrar</button>
-      <button id="btnCriar">Criar conta</button>
+        <div class="divider">OU</div>
+
+        <button id="btnGoogle" class="btn btnGoogle">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.76 32.656 29.268 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.051 6.053 29.274 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+            <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 16.108 18.961 12 24 12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.051 6.053 29.274 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+            <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.197l-6.19-5.238C29.268 36 26.757 37 24 37c-5.246 0-9.718-3.328-11.273-7.955l-6.522 5.024C9.504 39.556 16.227 44 24 44z"/>
+            <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a11.99 11.99 0 0 1-4.084 5.565l.003-.002 6.19 5.238C36.971 40.205 44 36 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+          </svg>
+          Entrar com Google
+        </button>
+
+        <div id="status" class="status"><span class="dot"></span><span id="statusText">Deslogado</span></div>
+
+        <div class="foot">Ao entrar, você concorda em usar este app de forma responsável.</div>
+      </div>
     </div>
-
-    <p id="status" class="muted"></p>
   </div>
 
   <script type="module">
@@ -48,7 +285,7 @@
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // ✅ COLE AQUI o firebaseConfig do seu projeto (Firebase Console > Config do projeto > Seus apps)
+    // ✅ COLE AQUI o firebaseConfig do seu projeto
     const firebaseConfig = {
       apiKey: "SUA_API_KEY",
       authDomain: "controle-gastos-pro.firebaseapp.com",
@@ -61,7 +298,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // ✅ evita deslogar / mantém sessão
     await setPersistence(auth, browserLocalPersistence);
 
     const provider = new GoogleAuthProvider();
@@ -69,52 +305,80 @@
 
     const $ = (id) => document.getElementById(id);
 
-    // ✅ pega o resultado do redirect (OBRIGATÓRIO)
+    function setStatus(type, msg){
+      const el = $("status");
+      $("statusText").textContent = msg || "";
+      el.classList.remove("ok","err");
+      if(type) el.classList.add(type);
+    }
+
+    function setLoading(on){
+      $("btnEntrar").disabled = on;
+      $("btnCriar").disabled = on;
+      $("btnGoogle").disabled = on;
+      $("loadEntrar").style.display = on ? "inline-block" : "none";
+      $("txtEntrar").style.display = on ? "none" : "inline";
+    }
+
+    // ✅ Resultado do redirect
     try {
       const result = await getRedirectResult(auth);
       if (result?.user) {
+        setStatus("ok", "Login Google OK! Redirecionando…");
         location.href = "./index.html";
       }
     } catch (e) {
-      $("status").textContent = "Erro Google: " + (e?.message || e);
+      setStatus("err", "Erro Google: " + (e?.message || e));
       console.error(e);
     }
 
     $("btnGoogle").onclick = async () => {
       try {
+        setLoading(true);
+        setStatus(null, "Abrindo Google…");
         await signInWithRedirect(auth, provider);
       } catch (e) {
-        $("status").textContent = "Erro Google: " + (e?.message || e);
+        setLoading(false);
+        setStatus("err", "Erro Google: " + (e?.message || e));
         console.error(e);
       }
     };
 
     $("btnEntrar").onclick = async () => {
       try {
+        setLoading(true);
+        setStatus(null, "Entrando…");
         const email = $("email").value.trim();
         const senha = $("senha").value.trim();
         await signInWithEmailAndPassword(auth, email, senha);
+        setStatus("ok", "Login OK! Redirecionando…");
         location.href = "./index.html";
       } catch (e) {
-        $("status").textContent = "Erro login: " + (e?.message || e);
+        setLoading(false);
+        setStatus("err", "Erro login: " + (e?.message || e));
         console.error(e);
       }
     };
 
     $("btnCriar").onclick = async () => {
       try {
+        setLoading(true);
+        setStatus(null, "Criando conta…");
         const email = $("email").value.trim();
         const senha = $("senha").value.trim();
         await createUserWithEmailAndPassword(auth, email, senha);
+        setStatus("ok", "Conta criada! Redirecionando…");
         location.href = "./index.html";
       } catch (e) {
-        $("status").textContent = "Erro criar conta: " + (e?.message || e);
+        setLoading(false);
+        setStatus("err", "Erro criar conta: " + (e?.message || e));
         console.error(e);
       }
     };
 
     onAuthStateChanged(auth, (user) => {
-      $("status").textContent = user ? ("Logado: " + user.email) : "Deslogado";
+      setLoading(false);
+      setStatus(user ? "ok" : null, user ? ("Logado: " + user.email) : "Deslogado");
     });
   </script>
 </body>
