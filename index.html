@@ -465,23 +465,20 @@ window.simularCompleto = ()=>{
 };
 
 /* ===========================
-   ✅ INIT ÚNICO (COM FIX DO REDIRECT)
+   ✅ INIT ÚNICO (SEM BUG)
 =========================== */
 document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = initFirebase();
   if(!ok) return;
-  // ✅ Sempre finalizar o redirect do Google quando a página abrir
-  try{
-    await auth.getRedirectResult();
-  }catch(e){
-    // não trava o app; só mostra no debug
-    dbg("Redirect result:\n" + (e.code||"") + " - " + e.message);
-  }
 
-  // reforço de clique (não tira seu onclick)
-  document.getElementById("btnLoginEmail").addEventListener("click",(e)=>{e.preventDefault(); window.loginEmail();});
-  document.getElementById("btnCriarConta").addEventListener("click",(e)=>{e.preventDefault(); window.registrarEmail();});
-  document.getElementById("btnLoginGoogle").addEventListener("click",(e)=>{e.preventDefault(); window.loginGoogle();});
+  // 🔒 Esconde tudo até saber se está logado
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "none";
+
+  // eventos dos botões
+  document.getElementById("btnLoginEmail").addEventListener("click",(e)=>{e.preventDefault(); loginEmail();});
+  document.getElementById("btnCriarConta").addEventListener("click",(e)=>{e.preventDefault(); registrarEmail();});
+  document.getElementById("btnLoginGoogle").addEventListener("click",(e)=>{e.preventDefault(); loginGoogle();});
 
   document.getElementById("tipoSimulacao").addEventListener("change", function(){
     document.getElementById("areaCompra").style.display = this.value==="compra" ? "block" : "none";
@@ -493,49 +490,49 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     window.render();
   });
 
-  // ✅ FINALIZA REDIRECT (só se rodou redirect no desktop)
+  // ✅ FINALIZA LOGIN GOOGLE (só se tiver redirect)
   const pending = sessionStorage.getItem("PENDING_GOOGLE_REDIRECT");
+
   if(pending){
     try{
       await auth.getRedirectResult();
     }catch(e){
-      dbg("Redirect ERROR:\n" + (e.code||"") + " - " + e.message);
-    }finally{
-      sessionStorage.removeItem("PENDING_GOOGLE_REDIRECT");
+      dbg("Erro redirect: " + (e.code || "") + " - " + e.message);
     }
+    sessionStorage.removeItem("PENDING_GOOGLE_REDIRECT");
   }
 
-  // ✅ decide tela pelo estado real
+  // ✅ DECIDE QUAL TELA MOSTRAR
   auth.onAuthStateChanged(user=>{
+    window.USER_ID = user ? user.uid : null;
 
-  // 🔴 se não estiver logado → vai para login.html
-  if(!user){
-    window.location.href = "./login.html";
-    return;
-  }
+    if(user){
+      // 👉 MOSTRA APP
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("app").style.display = "block";
 
-  // 🔵 se estiver logado → entra no app
-  window.USER_ID = user.uid;
+      document.getElementById("userName").innerText = user.email;
 
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "block";
+      carregarCategorias();
+      carregarFixos();
+      renderCategorias();
+      renderFixos();
 
-  document.getElementById("userName").innerText =
-    user.displayName || user.email;
+      state = { meses:{} };
+      mesAtual = window.getMes();
+      window.render();
 
-  carregarCategorias();
-  carregarFixos();
-  renderCategorias();
-  renderFixos();
-
-  state = { meses:{} };
-  mesAtual = window.getMes();
-  window.render();
-});
+    }else{
+      // 👉 MOSTRA LOGIN
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("app").style.display = "none";
+    }
+  });
 });
 </script>
 
 </body>
 </html>
+
 
 
