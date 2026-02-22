@@ -61,7 +61,6 @@
       -webkit-backdrop-filter: blur(14px);
     }
 
-    /* topo igual ao print: ícone à esquerda + título/sub */
     .top{
       display:flex;
       gap:14px;
@@ -135,7 +134,6 @@
       box-shadow: 0 0 0 4px rgba(90,149,255,.14);
     }
 
-    /* olhinho (só visual, não mexe no Firebase) */
     .eyeBtn{
       position:absolute;
       right: 10px;
@@ -231,8 +229,13 @@
       line-height: 1.35;
     }
 
-    /* compatibilidade com seu id="status" antigo */
-    #status.muted{ color: var(--muted); }
+    /* ✅ GARANTE que os botões recebam clique (corrige “Entrar não funciona”) */
+    .btn, #btnEntrar, #btnCriar, #btnGoogle{
+      position: relative;
+      z-index: 50;
+      pointer-events: auto;
+      touch-action: manipulation;
+    }
   </style>
 </head>
 
@@ -262,7 +265,6 @@
         </div>
       </div>
 
-      <!-- IDs IGUAIS ao seu código -->
       <button id="btnEntrar" class="btn btnPrimary">Entrar</button>
       <button id="btnCriar" class="btn btnSecondary">Criar conta</button>
 
@@ -278,8 +280,7 @@
         Entrar com Google
       </button>
 
-      <!-- mantém id="status" do seu código -->
-      <div id="status" class="status muted">
+      <div id="status" class="status">
         <span class="dot"></span>
         <span id="statusText">Deslogado</span>
       </div>
@@ -288,7 +289,6 @@
     </section>
   </main>
 
-  <!-- ✅ ESTE SCRIPT É O MESMO QUE VOCÊ MANDOU (só acrescentei 3 linhas no final para o statusText e o olhinho) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
@@ -303,7 +303,7 @@
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // ✅ COLE AQUI o firebaseConfig do seu projeto (Firebase Console > Config do projeto > Seus apps)
+    // ✅ COLE AQUI seus dados reais do Firebase (não deixe "SUA_API_KEY")
     const firebaseConfig = {
       apiKey: "SUA_API_KEY",
       authDomain: "controle-gastos-pro.firebaseapp.com",
@@ -315,8 +315,6 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-
-    // ✅ evita deslogar / mantém sessão
     await setPersistence(auth, browserLocalPersistence);
 
     const provider = new GoogleAuthProvider();
@@ -331,60 +329,82 @@
         location.href = "./index.html";
       }
     } catch (e) {
-      $("status").textContent = "Erro Google: " + (e?.message || e);
+      $("statusText").textContent = "Erro Google: " + (e?.message || e);
       console.error(e);
     }
 
-    $("btnGoogle").onclick = async () => {
+    // ✅ Google
+    $("btnGoogle").addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       try {
         await signInWithRedirect(auth, provider);
-      } catch (e) {
-        $("status").textContent = "Erro Google: " + (e?.message || e);
-        console.error(e);
+      } catch (err) {
+        $("statusText").textContent = "Erro Google: " + (err?.message || err);
+        console.error(err);
       }
-    };
+    }, { passive:false });
 
-    $("btnEntrar").onclick = async () => {
+    // ✅ Entrar (corrigido para celular)
+    const doLogin = async (e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       try {
         const email = $("email").value.trim();
         const senha = $("senha").value.trim();
+
+        if (!email || !senha) {
+          $("statusText").textContent = "Preencha e-mail e senha.";
+          return;
+        }
+
         await signInWithEmailAndPassword(auth, email, senha);
         location.href = "./index.html";
-      } catch (e) {
-        $("status").textContent = "Erro login: " + (e?.message || e);
-        console.error(e);
+      } catch (err) {
+        $("statusText").textContent = "Erro login: " + (err?.message || err);
+        console.error(err);
       }
     };
 
-    $("btnCriar").onclick = async () => {
+    $("btnEntrar").addEventListener("click", doLogin, { passive:false });
+    $("btnEntrar").addEventListener("touchstart", doLogin, { passive:false });
+
+    // ✅ Criar conta
+    const doCreate = async (e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       try {
         const email = $("email").value.trim();
         const senha = $("senha").value.trim();
+
+        if (!email || !senha) {
+          $("statusText").textContent = "Preencha e-mail e senha.";
+          return;
+        }
+
         await createUserWithEmailAndPassword(auth, email, senha);
         location.href = "./index.html";
-      } catch (e) {
-        $("status").textContent = "Erro criar conta: " + (e?.message || e);
-        console.error(e);
+      } catch (err) {
+        $("statusText").textContent = "Erro criar conta: " + (err?.message || err);
+        console.error(err);
       }
     };
 
-    onAuthStateChanged(auth, (user) => {
-      $("status").textContent = user ? ("Logado: " + user.email) : "Deslogado";
+    $("btnCriar").addEventListener("click", doCreate, { passive:false });
+    $("btnCriar").addEventListener("touchstart", doCreate, { passive:false });
 
-      // ✅ só pra manter o texto dentro do layout novo (não altera login)
-      const statusText = document.getElementById("statusText");
-      if (statusText) statusText.textContent = user ? ("Logado: " + user.email) : "Deslogado";
+    onAuthStateChanged(auth, (user) => {
+      const msg = user ? ("Logado: " + user.email) : "Deslogado";
+      $("statusText").textContent = msg;
     });
 
-    // ✅ olhinho (só visual)
+    // 👁️ Mostrar/ocultar senha
     const btnEye = document.getElementById("btnEye");
     if (btnEye) {
-      btnEye.onclick = (e) => {
+      btnEye.addEventListener("click", (e) => {
         e.preventDefault();
         const s = document.getElementById("senha");
         if (!s) return;
         s.type = (s.type === "password") ? "text" : "password";
-      };
+      }, { passive:false });
     }
   </script>
 </body>
