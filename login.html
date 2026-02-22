@@ -3,36 +3,287 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Login</title>
+  <title>Controle de Gastos PRO • Login</title>
+
   <style>
-    body{margin:0;font-family:system-ui;background:#0b1020;color:#eaf0ff}
-    .box{max-width:420px;margin:40px auto;padding:16px;background:#ffffff0f;border-radius:14px}
-    input,button{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:0}
-    input{background:#fff}
-    button{background:#569cff;color:#fff;font-weight:700}
-    .muted{opacity:.8;font-size:14px}
-    .row{display:flex;gap:8px}
-    .row button{width:50%}
+    :root{
+      --bg1:#0a0f1f;
+      --bg2:#0b1020;
+
+      --panel: rgba(255,255,255,.10);
+      --panel2: rgba(255,255,255,.06);
+
+      --stroke: rgba(255,255,255,.16);
+      --stroke2: rgba(255,255,255,.10);
+
+      --text:#eaf0ff;
+      --muted: rgba(234,240,255,.62);
+      --muted2: rgba(234,240,255,.44);
+
+      --accent:#5a95ff;
+      --accentGlow: rgba(90,149,255,.22);
+
+      --danger:#ff5e73;
+      --ok:#2ee59d;
+
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+
+      --r1: 26px;
+      --r2: 22px;
+      --r3: 18px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      background:
+        radial-gradient(900px 520px at 30% 10%, rgba(90,149,255,.28), transparent 60%),
+        radial-gradient(700px 500px at 90% 35%, rgba(56,214,179,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    .shell{
+      width: min(460px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: var(--r1);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .top{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      padding: 6px 8px 10px;
+    }
+
+    .logo{
+      width:66px;height:66px;
+      border-radius:18px;
+      background: linear-gradient(135deg, rgba(90,149,255,.95), rgba(56,214,179,.88));
+      box-shadow: 0 14px 38px rgba(90,149,255,.25);
+      display:grid;
+      place-items:center;
+      user-select:none;
+      flex: 0 0 auto;
+    }
+    .logo span{
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: .6px;
+      color:#071021;
+    }
+
+    .brandTitle{
+      margin:0;
+      font-size: 28px;
+      line-height:1.08;
+      letter-spacing:.2px;
+    }
+    .brandSub{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height:1.2;
+    }
+
+    .card{
+      margin-top: 10px;
+      background: var(--panel2);
+      border: 1px solid var(--stroke2);
+      border-radius: var(--r2);
+      padding: 16px;
+    }
+
+    .field{ margin-bottom: 12px; }
+    .label{
+      display:block;
+      font-size: 15px;
+      color: var(--muted);
+      margin: 2px 0 8px 6px;
+      letter-spacing: .2px;
+    }
+
+    .inputWrap{ position:relative; }
+
+    input{
+      width:100%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(7,12,26,.55);
+      color: var(--text);
+      outline:none;
+      transition: .16s ease;
+      font-size: 16px;
+    }
+    input::placeholder{ color: rgba(234,240,255,.28); }
+    input:focus{
+      border-color: rgba(90,149,255,.55);
+      box-shadow: 0 0 0 4px rgba(90,149,255,.14);
+    }
+
+    .eyeBtn{
+      position:absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border:0;
+      background: transparent;
+      color: rgba(234,240,255,.65);
+      cursor:pointer;
+      padding: 8px;
+      border-radius: 12px;
+      user-select:none;
+    }
+    .eyeBtn:active{ transform: translateY(-50%) scale(.98); }
+
+    .btn{
+      width:100%;
+      padding: 14px 14px;
+      border-radius: 999px;
+      border: 0;
+      cursor:pointer;
+      font-weight: 800;
+      letter-spacing: .2px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      transition: transform .12s ease, opacity .12s ease;
+      user-select:none;
+    }
+    .btn:active{ transform: translateY(1px) scale(.995); }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .btnPrimary{
+      background: linear-gradient(135deg, rgba(90,149,255,.98), rgba(90,149,255,.72));
+      color:white;
+      box-shadow: 0 14px 35px var(--accentGlow);
+    }
+
+    .btnSecondary{
+      margin-top: 12px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(234,240,255,.92);
+    }
+
+    .divider{
+      display:flex;
+      align-items:center;
+      gap: 14px;
+      color: rgba(234,240,255,.45);
+      font-size: 13px;
+      margin: 14px 0 12px;
+    }
+    .divider::before,
+    .divider::after{
+      content:"";
+      height:1px;
+      flex:1;
+      background: rgba(255,255,255,.12);
+    }
+
+    .btnGoogle{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text);
+    }
+
+    .status{
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-height:18px;
+      word-break: break-word;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;background: rgba(234,240,255,.35);
+      flex:0 0 auto;
+    }
+
+    .hint{
+      text-align:center;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted2);
+      line-height: 1.35;
+    }
+
+    /* ✅ garante clique no mobile */
+    .btn, #btnEntrar, #btnCriar, #btnGoogle{
+      position: relative;
+      z-index: 50;
+      pointer-events: auto;
+      touch-action: manipulation;
+    }
   </style>
 </head>
+
 <body>
-  <div class="box">
-    <h2>Entrar</h2>
+  <main class="shell">
+    <header class="top">
+      <div class="logo"><span>R$</span></div>
+      <div>
+        <h1 class="brandTitle">Controle de Gastos<br/>PRO</h1>
+        <p class="brandSub">Entre para sincronizar seus dados<br/>com segurança</p>
+      </div>
+    </header>
 
-    <button id="btnGoogle">Continuar com Google</button>
+    <section class="card">
+      <div class="field">
+        <label class="label" for="email">E-mail</label>
+        <div class="inputWrap">
+          <input id="email" type="email" placeholder="seuemail@gmail.com"/>
+        </div>
+      </div>
 
-    <p class="muted">ou use e-mail e senha</p>
+      <div class="field">
+        <label class="label" for="senha">Senha</label>
+        <div class="inputWrap">
+          <input id="senha" type="password" placeholder="Sua senha"/>
+          <button class="eyeBtn" id="btnEye" aria-label="Mostrar senha" title="Mostrar/ocultar senha">👁️</button>
+        </div>
+      </div>
 
-    <input id="email" type="email" placeholder="seuemail@gmail.com"/>
-    <input id="senha" type="password" placeholder="sua senha"/>
+      <button id="btnEntrar" class="btn btnPrimary">Entrar</button>
+      <button id="btnCriar" class="btn btnSecondary">Criar conta</button>
 
-    <div class="row">
-      <button id="btnEntrar">Entrar</button>
-      <button id="btnCriar">Criar conta</button>
-    </div>
+      <div class="divider">OU</div>
 
-    <p id="status" class="muted"></p>
-  </div>
+      <button id="btnGoogle" class="btn btnGoogle">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.76 32.656 29.268 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.051 6.053 29.274 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+          <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 16.108 18.961 12 24 12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.051 6.053 29.274 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+          <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.197l-6.19-5.238C29.268 36 26.757 37 24 37c-5.246 0-9.718-3.328-11.273-7.955l-6.522 5.024C9.504 39.556 16.227 44 24 44z"/>
+          <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a11.99 11.99 0 0 1-4.084 5.565l.003-.002 6.19 5.238C36.971 40.205 44 36 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+        </svg>
+        Entrar com Google
+      </button>
+
+      <div class="status">
+        <span class="dot"></span>
+        <span id="statusText">Deslogado</span>
+      </div>
+
+      <p class="hint">Ao entrar, você concorda com o uso de autenticação do Firebase.</p>
+    </section>
+  </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -48,7 +299,7 @@
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // ✅ COLE AQUI o firebaseConfig do seu projeto (Firebase Console > Config do projeto > Seus apps)
+    // ✅ COLE AQUI seus dados REAIS do Firebase
     const firebaseConfig = {
       apiKey: "SUA_API_KEY",
       authDomain: "controle-gastos-pro.firebaseapp.com",
@@ -60,8 +311,6 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-
-    // ✅ evita deslogar / mantém sessão
     await setPersistence(auth, browserLocalPersistence);
 
     const provider = new GoogleAuthProvider();
@@ -69,53 +318,76 @@
 
     const $ = (id) => document.getElementById(id);
 
-    // ✅ pega o resultado do redirect (OBRIGATÓRIO)
+    const setMsg = (m) => { $("statusText").textContent = m; };
+
+    // ✅ pega o resultado do redirect do Google
     try {
       const result = await getRedirectResult(auth);
-      if (result?.user) {
-        location.href = "./index.html";
-      }
+      if (result?.user) location.href = "./index.html";
     } catch (e) {
-      $("status").textContent = "Erro Google: " + (e?.message || e);
+      setMsg("Erro Google: " + (e?.message || e));
       console.error(e);
     }
 
-    $("btnGoogle").onclick = async () => {
+    // ✅ Google
+    $("btnGoogle").addEventListener("click", async (e) => {
+      e.preventDefault(); e.stopPropagation();
       try {
         await signInWithRedirect(auth, provider);
-      } catch (e) {
-        $("status").textContent = "Erro Google: " + (e?.message || e);
-        console.error(e);
+      } catch (err) {
+        setMsg("Erro Google: " + (err?.message || err));
+        console.error(err);
       }
-    };
+    }, { passive:false });
 
-    $("btnEntrar").onclick = async () => {
+    // ✅ Entrar (corrigido mobile)
+    const doLogin = async (e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       try {
         const email = $("email").value.trim();
         const senha = $("senha").value.trim();
+        if (!email || !senha) return setMsg("Preencha e-mail e senha.");
         await signInWithEmailAndPassword(auth, email, senha);
         location.href = "./index.html";
-      } catch (e) {
-        $("status").textContent = "Erro login: " + (e?.message || e);
-        console.error(e);
+      } catch (err) {
+        setMsg("Erro login: " + (err?.message || err));
+        console.error(err);
       }
     };
+    $("btnEntrar").addEventListener("click", doLogin, { passive:false });
+    $("btnEntrar").addEventListener("touchstart", doLogin, { passive:false });
 
-    $("btnCriar").onclick = async () => {
+    // ✅ Criar conta (corrigido mobile)
+    const doCreate = async (e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       try {
         const email = $("email").value.trim();
         const senha = $("senha").value.trim();
+        if (!email || !senha) return setMsg("Preencha e-mail e senha.");
         await createUserWithEmailAndPassword(auth, email, senha);
         location.href = "./index.html";
-      } catch (e) {
-        $("status").textContent = "Erro criar conta: " + (e?.message || e);
-        console.error(e);
+      } catch (err) {
+        setMsg("Erro criar conta: " + (err?.message || err));
+        console.error(err);
       }
     };
+    $("btnCriar").addEventListener("click", doCreate, { passive:false });
+    $("btnCriar").addEventListener("touchstart", doCreate, { passive:false });
 
     onAuthStateChanged(auth, (user) => {
-      $("status").textContent = user ? ("Logado: " + user.email) : "Deslogado";
+      setMsg(user ? ("Logado: " + user.email) : "Deslogado");
     });
+
+    // 👁️ mostrar/ocultar senha
+    const btnEye = document.getElementById("btnEye");
+    if (btnEye) {
+      btnEye.addEventListener("click", (e) => {
+        e.preventDefault();
+        const s = document.getElementById("senha");
+        if (!s) return;
+        s.type = (s.type === "password") ? "text" : "password";
+      }, { passive:false });
+    }
   </script>
 </body>
 </html>
