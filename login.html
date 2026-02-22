@@ -18,7 +18,6 @@
   --accent:#569cff;
   --shadow: 0 20px 60px rgba(0,0,0,.45);
 }
-
 *{ box-sizing:border-box; }
 body{
   margin:0;
@@ -33,7 +32,6 @@ body{
     radial-gradient(1200px 600px at 50% 20%, rgba(86,156,255,.25), transparent 60%),
     linear-gradient(180deg, var(--bg2), var(--bg1));
 }
-
 .card{
   width:min(520px, 100%);
   background: var(--card);
@@ -43,7 +41,6 @@ body{
   padding: 22px;
   backdrop-filter: blur(10px);
 }
-
 .brand{
   display:flex;
   flex-direction:column;
@@ -52,7 +49,6 @@ body{
   margin-bottom: 16px;
   text-align:center;
 }
-
 .logo{
   width:68px;height:68px;
   border-radius:18px;
@@ -62,10 +58,8 @@ body{
   font-weight:900;
   font-size:22px;
 }
-
 h1{ margin:0; font-size:28px; letter-spacing:.2px; }
 .sub{ margin:0; color:var(--muted); font-size:14px; }
-
 .group{
   margin-top: 14px;
   padding: 16px;
@@ -73,14 +67,12 @@ h1{ margin:0; font-size:28px; letter-spacing:.2px; }
   border: 1px solid var(--stroke);
   background: rgba(0,0,0,.12);
 }
-
 label{
   display:block;
   font-size:13px;
   color: var(--muted);
   margin-top: 10px;
 }
-
 input{
   width:100%;
   margin-top: 6px;
@@ -91,18 +83,15 @@ input{
   color: var(--text);
   outline: none;
 }
-
 input:focus{
   border-color: rgba(86,156,255,.65);
   box-shadow: 0 0 0 4px rgba(86,156,255,.15);
 }
-
 .row{
   display:flex;
   gap:12px;
   margin-top: 16px;
 }
-
 .btn{
   width:100%;
   padding: 14px 14px;
@@ -113,12 +102,14 @@ input:focus{
   font-weight: 700;
   cursor:pointer;
 }
-
 .btn.primary{
   background: var(--accent);
   border-color: rgba(86,156,255,.9);
 }
-
+.btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
 .sep{
   display:flex;
   align-items:center;
@@ -132,7 +123,6 @@ input:focus{
   height:1px; flex:1;
   background: rgba(255,255,255,.12);
 }
-
 .google{
   display:flex;
   align-items:center;
@@ -140,19 +130,16 @@ input:focus{
   gap:10px;
   background: rgba(255,255,255,.08);
 }
-
 .google .dot{
   width:14px;height:14px;border-radius:999px;
   background: conic-gradient(red, orange, yellow, green, blue, purple, red);
 }
-
 .small{
   margin-top: 10px;
   text-align:center;
   font-size: 12px;
   color: rgba(234,240,255,.6);
 }
-
 #debugBox{
   margin-top: 12px;
   background: rgba(0,0,0,.55);
@@ -195,7 +182,6 @@ input:focus{
     </button>
 
     <div class="small">Ao entrar, você concorda com o uso de autenticação do Firebase.</div>
-
     <div id="debugBox"></div>
   </div>
 </div>
@@ -237,6 +223,7 @@ function initFirebase(){
   }catch(e){}
 
   auth = firebase.auth();
+  // ✅ mantém sessão no mobile/gh-pages
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 
   provider = new firebase.auth.GoogleAuthProvider();
@@ -245,28 +232,46 @@ function initFirebase(){
   return true;
 }
 
+// ✅ no mobile: quando volta do Google, isso finaliza e entra no app
 async function finalizarRedirectSeTiver(){
   try{
     const res = await auth.getRedirectResult();
     if(res && res.user){
       location.replace("./index.html");
+      return true;
     }
   }catch(e){
-    // só mostra se der erro
-    if(e && e.code) dbg("Redirect:\n" + e.code + " - " + e.message);
+    // se não tem redirect pendente, normalmente dá erro vazio — ignora.
+    if(e && e.code){
+      dbg("Redirect:\n" + e.code + " - " + e.message);
+    }
   }
+  return false;
+}
+
+function setLoading(isLoading){
+  const b1 = document.getElementById("btnLoginEmail");
+  const b2 = document.getElementById("btnCriarConta");
+  const b3 = document.getElementById("btnLoginGoogle");
+  b1.disabled = b2.disabled = b3.disabled = isLoading;
 }
 
 async function loginGoogle(){
   try{
+    setLoading(true);
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
     if(isMobile){
+      // ✅ redirect é o mais estável no celular
       await auth.signInWithRedirect(provider);
       return;
     }
+
+    // ✅ pc: popup
     await auth.signInWithPopup(provider);
     location.replace("./index.html");
   }catch(e){
+    setLoading(false);
     alert((e.code||"") + " - " + e.message);
   }
 }
@@ -276,9 +281,13 @@ function loginEmail(){
   const senha = (document.getElementById("senha").value||"").trim();
   if(!email || !senha){ alert("Preencha email e senha"); return; }
 
+  setLoading(true);
   auth.signInWithEmailAndPassword(email, senha)
     .then(()=> location.replace("./index.html"))
-    .catch(e=> alert((e.code||"")+" - "+e.message));
+    .catch(e=>{
+      setLoading(false);
+      alert((e.code||"") + " - " + e.message);
+    });
 }
 
 function criarConta(){
@@ -287,38 +296,31 @@ function criarConta(){
   if(!email || !senha){ alert("Preencha email e senha"); return; }
   if(senha.length < 6){ alert("A senha deve ter pelo menos 6 caracteres"); return; }
 
+  setLoading(true);
   auth.createUserWithEmailAndPassword(email, senha)
-    .then(()=> {
-      alert("Conta criada com sucesso!");
-      location.replace("./index.html");
-    })
-    .catch(e=> alert((e.code||"")+" - "+e.message));
-} 
-<script>
-async function finalizarRedirectSeTiver(){
-  try{
-    // ✅ finaliza o login por redirect (mobile)
-    await auth.getRedirectResult();
-  }catch(e){
-    // se não tiver redirect pendente, ignora
-    console.log("redirect:", e.code, e.message);
-  }
+    .then(()=> location.replace("./index.html"))
+    .catch(e=>{
+      setLoading(false);
+      alert((e.code||"") + " - " + e.message);
+    });
 }
-</script>
- document.addEventListener("DOMContentLoaded", async ()=>{
+
+document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = initFirebase();
   if(!ok) return;
 
-  // ✅ 1) FINALIZA O REDIRECT PRIMEIRO
-  await finalizarRedirectSeTiver();
+  // ✅ 1) tenta finalizar o redirect primeiro (se voltou do Google)
+  const entrouPeloRedirect = await finalizarRedirectSeTiver();
+  if(entrouPeloRedirect) return;
 
-  // ✅ 2) DEPOIS decide se já está logado
+  // ✅ 2) se já tem sessão, entra direto
   auth.onAuthStateChanged((user)=>{
     if(user){
       location.replace("./index.html");
     }
   });
 
+  // botões
   document.getElementById("btnLoginEmail").addEventListener("click", loginEmail);
   document.getElementById("btnCriarConta").addEventListener("click", criarConta);
   document.getElementById("btnLoginGoogle").addEventListener("click", loginGoogle);
