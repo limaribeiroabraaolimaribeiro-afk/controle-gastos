@@ -22,7 +22,7 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
 .success{color:#4CAF50}
 #chart,#chartEvolucao{width:100%;height:220px}
 .fab{ position:fixed; bottom:20px; right:20px; background:#4CAF50; color:white; border-radius:50%; width:55px; height:55px; font-size:28px; display:flex; align-items:center; justify-content:center; }
-.toggle{float:right;cursor:pointer}
+.toggle{float:right;cursor:pointer; margin-left:10px;}
 .small{opacity:.8;font-size:12px}
 .badge{ display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.12); margin-left:6px; font-size:12px; }
 .light .badge{background:rgba(0,0,0,.08);}
@@ -40,20 +40,7 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
 
 <body>
 
-<div id="loginScreen" style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;text-align:center">
-  <h2>Controle de Gastos PRO</h2>
-  <input id="email" type="email" placeholder="Seu e-mail">
-  <input id="senha" type="password" placeholder="Sua senha">
-
-  <!-- NÃO tirei nada: mantive onclick -->
-  <button id="btnLoginEmail" onclick="loginEmail()">Entrar com Email</button>
-  <button id="btnCriarConta" onclick="registrarEmail()">Criar conta</button>
-
-  <hr style="margin:10px 0;width:80%">
-
-  <button id="btnLoginGoogle" onclick="loginGoogle()">Entrar com Google</button>
-</div>
-
+<!-- ✅ APP (sem login aqui) -->
 <div id="app" style="display:none">
   <div class="wrap">
     <h1>
@@ -158,11 +145,10 @@ window.addEventListener("unhandledrejection", (e)=>{
 
 <script>
 /* ===========================
-   ✅ GLOBAIS (ONCLICK PRECISA DISSO)
+   ✅ GLOBAIS
 =========================== */
 const API = "https://api-rf1w.onrender.com";
 let auth = null;
-let provider = null;
 
 window.USER_ID = null;
 let state = { meses:{} };
@@ -208,60 +194,20 @@ function initFirebase(){
 
   auth = firebase.auth();
 
-  // ✅ persistência (não perde sessão ao voltar do Google)
+  // ✅ mantém sessão
   auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
-
-  provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
 
   return true;
 }
 
 /* ===========================
-   ✅ LOGIN/LOGOUT (mantém seus onclick)
+   ✅ LOGOUT
 =========================== */
-window.loginEmail = function(){
-  if(!auth){ alert("Firebase ainda não iniciou."); return; }
-  const email = (document.getElementById("email").value||"").trim();
-  const senha = (document.getElementById("senha").value||"").trim();
-  if(!email || !senha){ alert("Preencha email e senha"); return; }
-  auth.signInWithEmailAndPassword(email, senha).catch(e=>alert((e.code||"")+" - "+e.message));
-};
-
-window.registrarEmail = function(){
-  if(!auth){ alert("Firebase ainda não iniciou."); return; }
-  const email = (document.getElementById("email").value||"").trim();
-  const senha = (document.getElementById("senha").value||"").trim();
-  if(!email || !senha){ alert("Preencha email e senha"); return; }
-  if(senha.length < 6){ alert("A senha deve ter pelo menos 6 caracteres"); return; }
-  auth.createUserWithEmailAndPassword(email, senha)
-    .then(()=>alert("Conta criada com sucesso!"))
-    .catch(e=>alert((e.code||"")+" - "+e.message));
-};
-
-window.loginGoogle = async function(){
-  if(!auth){ alert("Firebase ainda não iniciou."); return; }
-
-  try{
-    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-
-    if(isMobile){
-      // ✅ no celular: redirect (evita popup-blocked)
-      await auth.signInWithRedirect(provider);
-      return;
-    }
-
-    // ✅ no PC: popup
-    await auth.signInWithPopup(provider);
-
-  }catch(e){
-    alert((e.code||"") + " - " + e.message);
-  }
-};
-
 window.logout = function(){
   if(!auth) return;
-  auth.signOut().catch(e=>alert((e.code||"")+" - "+e.message));
+  auth.signOut()
+    .then(()=> location.replace("./login.html"))
+    .catch(e=>alert((e.code||"")+" - "+e.message));
 };
 
 /* ===========================
@@ -436,6 +382,7 @@ window.render = ()=>{
     .catch(()=>paint());
 };
 
+/* ✅ simulador (mantive seu original; se quiser eu troco pela versão validada) */
 window.simularCompleto = ()=>{
   const tipo=document.getElementById("tipoSimulacao").value;
   const d=window.getDataMes();
@@ -465,23 +412,11 @@ window.simularCompleto = ()=>{
 };
 
 /* ===========================
-   ✅ INIT ÚNICO (COM FIX DO REDIRECT)
+   ✅ INIT
 =========================== */
-document.addEventListener("DOMContentLoaded", async ()=>{
+document.addEventListener("DOMContentLoaded", ()=>{
   const ok = initFirebase();
   if(!ok) return;
-  // ✅ Sempre finalizar o redirect do Google quando a página abrir
-  try{
-    await auth.getRedirectResult();
-  }catch(e){
-    // não trava o app; só mostra no debug
-    dbg("Redirect result:\n" + (e.code||"") + " - " + e.message);
-  }
-
-  // reforço de clique (não tira seu onclick)
-  document.getElementById("btnLoginEmail").addEventListener("click",(e)=>{e.preventDefault(); window.loginEmail();});
-  document.getElementById("btnCriarConta").addEventListener("click",(e)=>{e.preventDefault(); window.registrarEmail();});
-  document.getElementById("btnLoginGoogle").addEventListener("click",(e)=>{e.preventDefault(); window.loginGoogle();});
 
   document.getElementById("tipoSimulacao").addEventListener("change", function(){
     document.getElementById("areaCompra").style.display = this.value==="compra" ? "block" : "none";
@@ -493,56 +428,35 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     window.render();
   });
 
-  // ✅ FINALIZA REDIRECT (só se rodou redirect no desktop)
-  const pending = sessionStorage.getItem("PENDING_GOOGLE_REDIRECT");
-  if(pending){
-    try{
-      await auth.getRedirectResult();
-    }catch(e){
-      dbg("Redirect ERROR:\n" + (e.code||"") + " - " + e.message);
-    }finally{
-      sessionStorage.removeItem("PENDING_GOOGLE_REDIRECT");
-    }
-  }
-
   // ✅ decide tela pelo estado real
-auth.onAuthStateChanged(user => {
+  auth.onAuthStateChanged(user=>{
+    if(!user){
+      // 🔴 não logado → manda pro login.html
+      location.replace("./login.html");
+      return;
+    }
 
-  // 🔴 se NÃO estiver logado → mostra a tela de login DO INDEX (a nova)
-  if (!user) {
-    window.USER_ID = null;
-    document.getElementById("app").style.display = "none";
-    document.getElementById("loginScreen").style.display = "flex";
-    return;
-  }
+    // 🔵 logado → mostra app
+    window.USER_ID = user.uid;
 
-  // 🔵 se estiver logado → entra no app
-  window.USER_ID = user.uid;
+    document.getElementById("app").style.display = "block";
+    document.getElementById("userName").innerText = user.displayName || user.email;
 
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "block";
+    carregarCategorias();
+    carregarFixos();
+    renderCategorias();
+    renderFixos();
 
-  document.getElementById("userName").innerText =
-    user.displayName || user.email;
+    // carrega state local (se tiver)
+    try{
+      const raw = localStorage.getItem("gastos_pro");
+      if(raw) state = JSON.parse(raw) || { meses:{} };
+    }catch(e){ state = { meses:{} }; }
 
-  carregarCategorias();
-  carregarFixos();
-  renderCategorias();
-  renderFixos();
-
-  // carrega estado salvo (se tiver)
-  try {
-    const raw = localStorage.getItem("gastos_pro");
-    if (raw) state = JSON.parse(raw) || { meses: {} };
-  } catch (e) {
-    state = { meses: {} };
-  }
-
-  mesAtual = window.getMes();
-  window.render();
+    mesAtual = window.getMes();
+    window.render();
+  });
 });
-
-}); // fecha DOMContentLoaded
 </script>
 
 </body>
