@@ -1,328 +1,203 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Login - Controle de Gastos PRO</title>
-  <meta name="theme-color" content="#569cff">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Login - Controle de Gastos PRO</title>
 
-  <style>
-    :root{
-      --bg1:#0b1020;
-      --bg2:#0a1b2f;
-      --card: rgba(255,255,255,.06);
-      --stroke: rgba(255,255,255,.12);
-      --text:#eaf0ff;
-      --muted: rgba(234,240,255,.7);
-      --accent:#569cff;
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
-    }
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--text);
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:22px;
-      background:
-        radial-gradient(1200px 600px at 50% 20%, rgba(86,156,255,.25), transparent 60%),
-        linear-gradient(180deg, var(--bg2), var(--bg1));
-    }
-    .card{
-      width:min(520px, 100%);
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      padding: 22px;
-      backdrop-filter: blur(10px);
-    }
-    .brand{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:10px;
-      margin-bottom: 16px;
-      text-align:center;
-    }
-    .logo{
-      width:68px;height:68px;
-      border-radius:18px;
-      display:grid; place-items:center;
-      background: linear-gradient(135deg, rgba(86,156,255,.9), rgba(66,220,180,.8));
-      box-shadow: 0 10px 25px rgba(0,0,0,.35);
-      font-weight:900;
-      font-size:22px;
-    }
-    h1{ margin:0; font-size:28px; letter-spacing:.2px; }
-    .sub{ margin:0; color:var(--muted); font-size:14px; }
-    .group{
-      margin-top: 14px;
-      padding: 16px;
-      border-radius: 18px;
-      border: 1px solid var(--stroke);
-      background: rgba(0,0,0,.12);
-    }
-    label{
-      display:block;
-      font-size:13px;
-      color: var(--muted);
-      margin-top: 10px;
-    }
-    input{
-      width:100%;
-      margin-top: 6px;
-      padding: 14px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(10,16,32,.55);
-      color: var(--text);
-      outline: none;
-    }
-    input:focus{
-      border-color: rgba(86,156,255,.65);
-      box-shadow: 0 0 0 4px rgba(86,156,255,.15);
-    }
-    .row{
-      display:flex;
-      gap:12px;
-      margin-top: 16px;
-    }
-    .btn{
-      width:100%;
-      padding: 14px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      font-weight: 700;
-      cursor:pointer;
-    }
-    .btn.primary{
-      background: var(--accent);
-      border-color: rgba(86,156,255,.9);
-    }
-    .btn:disabled{ opacity:.6; cursor:not-allowed; }
-    .sep{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin: 18px 0;
-      color: rgba(234,240,255,.55);
-      font-size: 12px;
-    }
-    .sep::before,.sep::after{
-      content:"";
-      height:1px; flex:1;
-      background: rgba(255,255,255,.12);
-    }
-    .google{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      background: rgba(255,255,255,.08);
-    }
-    .google .dot{
-      width:14px;height:14px;border-radius:999px;
-      background: conic-gradient(red, orange, yellow, green, blue, purple, red);
-    }
-    .small{
-      margin-top: 10px;
-      text-align:center;
-      font-size: 12px;
-      color: rgba(234,240,255,.6);
-    }
-    #debugBox{
-      margin-top: 12px;
-      background: rgba(0,0,0,.55);
-      border: 1px solid rgba(255,255,255,.12);
-      padding: 10px;
-      border-radius: 14px;
-      font-size: 12px;
-      white-space: pre-wrap;
-      display:none;
-    }
-  </style>
+<meta name="theme-color" content="#569cff">
+
+<style>
+:root{
+  --bg1:#0b1020;
+  --bg2:#0a1b2f;
+  --card: rgba(255,255,255,.06);
+  --stroke: rgba(255,255,255,.12);
+  --text:#eaf0ff;
+  --muted: rgba(234,240,255,.7);
+  --accent:#569cff;
+  --shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+*{ box-sizing:border-box; }
+body{
+  margin:0;
+  font-family: system-ui;
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:
+    radial-gradient(1200px 600px at 50% 20%, rgba(86,156,255,.25), transparent 60%),
+    linear-gradient(180deg, var(--bg2), var(--bg1));
+}
+.card{
+  width:min(520px, 100%);
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  padding: 22px;
+  backdrop-filter: blur(10px);
+}
+.logo{
+  width:68px;height:68px;
+  border-radius:18px;
+  display:grid; place-items:center;
+  background: linear-gradient(135deg, rgba(86,156,255,.9), rgba(66,220,180,.8));
+  font-weight:900;
+  font-size:22px;
+  margin:auto;
+}
+h1{text-align:center;margin:10px 0}
+.group{margin-top:14px}
+input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.15);
+  background:#0f172a;
+  color:#fff;
+  margin-top:6px;
+}
+button{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:none;
+  margin-top:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.primary{background:#569cff;color:#fff}
+.google{background:#222;color:#fff}
+.sep{ text-align:center; margin:15px 0; opacity:.6}
+#debugBox{
+  margin-top:10px;
+  background:#000;
+  padding:10px;
+  border-radius:10px;
+  font-size:12px;
+  display:none;
+}
+</style>
 </head>
 
 <body>
-  <div class="card">
-    <div class="brand">
-      <div class="logo">R$</div>
-      <h1>Controle de Gastos PRO</h1>
-      <p class="sub">Entre para acessar seu painel</p>
-    </div>
 
-    <div class="group">
-      <label for="email">E-mail</label>
-      <input id="email" type="email" placeholder="seuemail@gmail.com" autocomplete="email"/>
+<div class="card">
+  <div class="logo">R$</div>
+  <h1>Controle de Gastos PRO</h1>
 
-      <label for="senha">Senha</label>
-      <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password"/>
+  <div class="group">
+    <input id="email" placeholder="E-mail">
+    <input id="senha" type="password" placeholder="Senha">
 
-      <div class="row">
-        <button class="btn primary" id="btnLoginEmail">Entrar</button>
-        <button class="btn" id="btnCriarConta">Criar conta</button>
-      </div>
+    <button class="primary" id="btnLoginEmail">Entrar</button>
+    <button id="btnCriarConta">Criar conta</button>
 
-      <div class="sep">OU</div>
+    <div class="sep">OU</div>
 
-      <button class="btn google" id="btnLoginGoogle">
-        <span class="dot"></span>
-        Entrar com Google
-      </button>
+    <button class="google" id="btnLoginGoogle">Entrar com Google</button>
 
-      <div class="small">Ao entrar, você concorda com o uso de autenticação do Firebase.</div>
-      <div id="debugBox"></div>
-    </div>
+    <div id="debugBox"></div>
   </div>
+</div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
-  <script>
-    function dbg(msg){
-      const box = document.getElementById("debugBox");
-      box.style.display = "block";
-      box.textContent = String(msg);
+<script>
+let auth, provider;
+
+function dbg(msg){
+  const box = document.getElementById("debugBox");
+  box.style.display = "block";
+  box.textContent = msg;
+}
+
+async function initFirebase(){
+  firebase.initializeApp({
+    apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+    authDomain:"controle-gastos-pro.firebaseapp.com",
+    projectId:"controle-gastos-pro"
+  });
+
+  auth = firebase.auth();
+
+  // mantém login no celular
+  await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+  provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+}
+
+// finaliza login Google (redirect)
+async function finalizarRedirect(){
+  try{
+    const result = await auth.getRedirectResult();
+    if(result.user){
+      location.replace("./index.html");
     }
-    window.addEventListener("error", (e)=>{
-      dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
-    });
-    window.addEventListener("unhandledrejection", (e)=>{
-      dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
-    });
+  }catch(e){
+    dbg(e.code + " - " + e.message);
+  }
+}
 
-    let auth = null;
-    let provider = null;
+// login email
+async function loginEmail(){
+  try{
+    const email = emailEl.value.trim();
+    const senha = senhaEl.value.trim();
+    await auth.signInWithEmailAndPassword(email, senha);
+    location.replace("./index.html");
+  }catch(e){
+    alert(e.message);
+  }
+}
 
-    async function initFirebase(){
-      if(!window.firebase){
-        dbg("Firebase não carregou (sem internet ou bloqueado).");
-        return false;
-      }
+// criar conta
+async function criarConta(){
+  try{
+    const email = emailEl.value.trim();
+    const senha = senhaEl.value.trim();
+    await auth.createUserWithEmailAndPassword(email, senha);
+    location.replace("./index.html");
+  }catch(e){
+    alert(e.message);
+  }
+}
 
-      try{
-        if(!firebase.apps || !firebase.apps.length){
-          firebase.initializeApp({
-            apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-            authDomain:"controle-gastos-pro.firebaseapp.com",
-            projectId:"controle-gastos-pro"
-          });
-        }
-      }catch(e){}
+// login google com fallback
+async function loginGoogle(){
+  try{
+    await auth.signInWithPopup(provider);
+    location.replace("./index.html");
+  }catch(e){
+    // fallback mobile
+    await auth.signInWithRedirect(provider);
+  }
+}
 
-      auth = firebase.auth();
+document.addEventListener("DOMContentLoaded", async ()=>{
+  await initFirebase();
 
-      // ✅ crucial: esperar persistência antes de qualquer checagem
-      try{
-        await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-      }catch(e){
-        dbg("Persistência:\n" + (e.code||"") + " - " + (e.message||e));
-      }
+  await finalizarRedirect();
 
-      provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
-
-      return true;
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      location.replace("./index.html");
     }
+  });
 
-    function setLoading(isLoading){
-      const b1 = document.getElementById("btnLoginEmail");
-      const b2 = document.getElementById("btnCriarConta");
-      const b3 = document.getElementById("btnLoginGoogle");
-      b1.disabled = b2.disabled = b3.disabled = isLoading;
-    }
+  window.emailEl = document.getElementById("email");
+  window.senhaEl = document.getElementById("senha");
 
-    async function finalizarRedirectSeTiver(){
-      try{
-        const res = await auth.getRedirectResult();
-        if(res && res.user){
-          location.replace("./index.html");
-          return true;
-        }
-      }catch(e){
-        // se não tinha redirect pendente, ignora
-        if(e && e.code){
-          dbg("Redirect:\n" + e.code + " - " + e.message);
-        }
-      }
-      return false;
-    }
+  document.getElementById("btnLoginEmail").onclick = loginEmail;
+  document.getElementById("btnCriarConta").onclick = criarConta;
+  document.getElementById("btnLoginGoogle").onclick = loginGoogle;
+});
+</script>
 
-    async function loginGoogle(){
-      try{
-        setLoading(true);
-        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-
-        if(isMobile){
-          // ✅ no celular, redirect é o mais estável no GH Pages
-          await auth.signInWithRedirect(provider);
-          return;
-        }
-
-        await auth.signInWithPopup(provider);
-        location.replace("./index.html");
-      }catch(e){
-        setLoading(false);
-        alert((e.code||"") + " - " + e.message);
-      }
-    }
-
-    async function loginEmail(){
-      const email = (document.getElementById("email").value||"").trim();
-      const senha = (document.getElementById("senha").value||"").trim();
-      if(!email || !senha){ alert("Preencha email e senha"); return; }
-
-      try{
-        setLoading(true);
-        await auth.signInWithEmailAndPassword(email, senha);
-        location.replace("./index.html");
-      }catch(e){
-        setLoading(false);
-        alert((e.code||"") + " - " + e.message);
-      }
-    }
-
-    async function criarConta(){
-      const email = (document.getElementById("email").value||"").trim();
-      const senha = (document.getElementById("senha").value||"").trim();
-      if(!email || !senha){ alert("Preencha email e senha"); return; }
-      if(senha.length < 6){ alert("A senha deve ter pelo menos 6 caracteres"); return; }
-
-      try{
-        setLoading(true);
-        await auth.createUserWithEmailAndPassword(email, senha);
-        location.replace("./index.html");
-      }catch(e){
-        setLoading(false);
-        alert((e.code||"") + " - " + e.message);
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", async ()=>{
-      const ok = await initFirebase();
-      if(!ok) return;
-
-      // ✅ 1) se voltou do Google (redirect), finaliza e entra
-      const entrou = await finalizarRedirectSeTiver();
-      if(entrou) return;
-
-      // ✅ 2) se já tá logado, entra direto (sem “piscar” login)
-      auth.onAuthStateChanged((user)=>{
-        if(user){
-          location.replace("./index.html");
-        }
-      });
-
-      document.getElementById("btnLoginEmail").addEventListener("click", loginEmail);
-      document.getElementById("btnCriarConta").addEventListener("click", criarConta);
-      document.getElementById("btnLoginGoogle").addEventListener("click", loginGoogle);
-    });
-  </script>
 </body>
 </html>
