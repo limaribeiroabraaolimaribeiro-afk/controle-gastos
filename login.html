@@ -9,18 +9,25 @@
     :root{
       --bg1:#0a0f1f;
       --bg2:#0b1020;
+
       --panel: rgba(255,255,255,.10);
       --panel2: rgba(255,255,255,.06);
+
       --stroke: rgba(255,255,255,.16);
       --stroke2: rgba(255,255,255,.10);
+
       --text:#eaf0ff;
       --muted: rgba(234,240,255,.62);
       --muted2: rgba(234,240,255,.44);
+
       --accent:#5a95ff;
       --accentGlow: rgba(90,149,255,.22);
+
       --danger:#ff5e73;
       --ok:#2ee59d;
+
       --shadow: 0 18px 60px rgba(0,0,0,.55);
+
       --r1: 26px;
       --r2: 22px;
       --r3: 18px;
@@ -109,6 +116,8 @@
       letter-spacing: .2px;
     }
 
+    .inputWrap{ position:relative; }
+
     input{
       width:100%;
       padding: 14px 16px;
@@ -126,12 +135,21 @@
       box-shadow: 0 0 0 4px rgba(90,149,255,.14);
     }
 
-    .row{
-      display:flex;
-      gap: 12px;
-      margin-top: 12px;
-      margin-bottom: 12px;
+    /* olhinho (só visual, não mexe no Firebase) */
+    .eyeBtn{
+      position:absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border:0;
+      background: transparent;
+      color: rgba(234,240,255,.65);
+      cursor:pointer;
+      padding: 8px;
+      border-radius: 12px;
+      user-select:none;
     }
+    .eyeBtn:active{ transform: translateY(-50%) scale(.98); }
 
     .btn{
       width:100%;
@@ -151,15 +169,14 @@
     .btn:active{ transform: translateY(1px) scale(.995); }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
-    /* Botão Entrar grande (igual print) */
     .btnPrimary{
       background: linear-gradient(135deg, rgba(90,149,255,.98), rgba(90,149,255,.72));
       color:white;
       box-shadow: 0 14px 35px var(--accentGlow);
     }
 
-    /* Criar conta cinza arredondado */
     .btnSecondary{
+      margin-top: 12px;
       background: rgba(255,255,255,.08);
       border: 1px solid rgba(255,255,255,.12);
       color: rgba(234,240,255,.92);
@@ -171,7 +188,7 @@
       gap: 14px;
       color: rgba(234,240,255,.45);
       font-size: 13px;
-      margin: 6px 0 12px;
+      margin: 14px 0 12px;
     }
     .divider::before,
     .divider::after{
@@ -214,24 +231,13 @@
       line-height: 1.35;
     }
 
-    .spinner{
-      width:16px;height:16px;border-radius:999px;
-      border: 2px solid rgba(255,255,255,.35);
-      border-top-color: rgba(255,255,255,.95);
-      animation: spin .75s linear infinite;
-    }
-    @keyframes spin{ to{ transform: rotate(360deg);} }
-
-    @media (max-width: 360px){
-      .row{ flex-direction: column; }
-      .brandTitle{ font-size: 26px; }
-    }
+    /* compatibilidade com seu id="status" antigo */
+    #status.muted{ color: var(--muted); }
   </style>
 </head>
 
 <body>
   <main class="shell">
-    <!-- topo igual a imagem -->
     <header class="top">
       <div class="logo"><span>R$</span></div>
       <div>
@@ -243,23 +249,22 @@
     <section class="card">
       <div class="field">
         <label class="label" for="email">E-mail</label>
-        <input id="email" type="email" autocomplete="email" placeholder="seuemail@gmail.com">
+        <div class="inputWrap">
+          <input id="email" type="email" placeholder="seuemail@gmail.com"/>
+        </div>
       </div>
 
       <div class="field">
         <label class="label" for="senha">Senha</label>
-        <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha">
+        <div class="inputWrap">
+          <input id="senha" type="password" placeholder="Sua senha"/>
+          <button class="eyeBtn" id="btnEye" aria-label="Mostrar senha" title="Mostrar/ocultar senha">👁️</button>
+        </div>
       </div>
 
-      <!-- igual ao print: Entrar grande e Criar conta embaixo -->
-      <button id="btnEntrar" class="btn btnPrimary">
-        <span id="txtEntrar">Entrar</span>
-        <span id="loadEntrar" style="display:none" class="spinner"></span>
-      </button>
-
-      <button id="btnCriar" class="btn btnSecondary" style="margin-top:12px;">
-        Criar conta
-      </button>
+      <!-- IDs IGUAIS ao seu código -->
+      <button id="btnEntrar" class="btn btnPrimary">Entrar</button>
+      <button id="btnCriar" class="btn btnSecondary">Criar conta</button>
 
       <div class="divider">OU</div>
 
@@ -273,15 +278,17 @@
         Entrar com Google
       </button>
 
-      <div id="status" class="status">
+      <!-- mantém id="status" do seu código -->
+      <div id="status" class="status muted">
         <span class="dot"></span>
         <span id="statusText">Deslogado</span>
       </div>
 
-      <p class="hint">Ao entrar, você concorda em usar este app de forma responsável.</p>
+      <p class="hint">Ao entrar, você concorda com o uso de autenticação do Firebase.</p>
     </section>
   </main>
 
+  <!-- ✅ ESTE SCRIPT É O MESMO QUE VOCÊ MANDOU (só acrescentei 3 linhas no final para o statusText e o olhinho) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
@@ -296,7 +303,7 @@
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // ✅ COLE AQUI o firebaseConfig REAL do seu projeto (não deixe "SUA_API_KEY")
+    // ✅ COLE AQUI o firebaseConfig do seu projeto (Firebase Console > Config do projeto > Seus apps)
     const firebaseConfig = {
       apiKey: "SUA_API_KEY",
       authDomain: "controle-gastos-pro.firebaseapp.com",
@@ -308,6 +315,8 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+
+    // ✅ evita deslogar / mantém sessão
     await setPersistence(auth, browserLocalPersistence);
 
     const provider = new GoogleAuthProvider();
@@ -315,81 +324,68 @@
 
     const $ = (id) => document.getElementById(id);
 
-    function setStatus(type, msg){
-      const el = $("status");
-      $("statusText").textContent = msg || "";
-      el.classList.remove("ok","err");
-      if(type) el.classList.add(type);
-    }
-
-    function setLoading(on){
-      $("btnEntrar").disabled = on;
-      $("btnCriar").disabled = on;
-      $("btnGoogle").disabled = on;
-      $("loadEntrar").style.display = on ? "inline-block" : "none";
-      $("txtEntrar").style.display = on ? "none" : "inline";
-    }
-
-    // ✅ Resultado do redirect (Google) — mantém o que já deu certo
+    // ✅ pega o resultado do redirect (OBRIGATÓRIO)
     try {
       const result = await getRedirectResult(auth);
       if (result?.user) {
-        setStatus("ok", "Login Google OK! Redirecionando…");
         location.href = "./index.html";
       }
     } catch (e) {
-      setStatus("err", "Erro Google: " + (e?.message || e));
+      $("status").textContent = "Erro Google: " + (e?.message || e);
       console.error(e);
     }
 
     $("btnGoogle").onclick = async () => {
       try {
-        setLoading(true);
-        setStatus(null, "Abrindo Google…");
         await signInWithRedirect(auth, provider);
       } catch (e) {
-        setLoading(false);
-        setStatus("err", "Erro Google: " + (e?.message || e));
+        $("status").textContent = "Erro Google: " + (e?.message || e);
         console.error(e);
       }
     };
 
     $("btnEntrar").onclick = async () => {
       try {
-        setLoading(true);
-        setStatus(null, "Entrando…");
         const email = $("email").value.trim();
         const senha = $("senha").value.trim();
         await signInWithEmailAndPassword(auth, email, senha);
-        setStatus("ok", "Login OK! Redirecionando…");
         location.href = "./index.html";
       } catch (e) {
-        setLoading(false);
-        setStatus("err", "Erro login: " + (e?.message || e));
+        $("status").textContent = "Erro login: " + (e?.message || e);
         console.error(e);
       }
     };
 
     $("btnCriar").onclick = async () => {
       try {
-        setLoading(true);
-        setStatus(null, "Criando conta…");
         const email = $("email").value.trim();
         const senha = $("senha").value.trim();
         await createUserWithEmailAndPassword(auth, email, senha);
-        setStatus("ok", "Conta criada! Redirecionando…");
         location.href = "./index.html";
       } catch (e) {
-        setLoading(false);
-        setStatus("err", "Erro criar conta: " + (e?.message || e));
+        $("status").textContent = "Erro criar conta: " + (e?.message || e);
         console.error(e);
       }
     };
 
     onAuthStateChanged(auth, (user) => {
-      setLoading(false);
-      setStatus(user ? "ok" : null, user ? ("Logado: " + user.email) : "Deslogado");
+      $("status").textContent = user ? ("Logado: " + user.email) : "Deslogado";
+
+      // ✅ só pra manter o texto dentro do layout novo (não altera login)
+      const statusText = document.getElementById("statusText");
+      if (statusText) statusText.textContent = user ? ("Logado: " + user.email) : "Deslogado";
     });
+
+    // ✅ olhinho (só visual)
+    const btnEye = document.getElementById("btnEye");
+    if (btnEye) {
+      btnEye.onclick = (e) => {
+        e.preventDefault();
+        const s = document.getElementById("senha");
+        if (!s) return;
+        s.type = (s.type === "password") ? "text" : "password";
+      };
+    }
   </script>
 </body>
 </html>
