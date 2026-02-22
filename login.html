@@ -293,25 +293,35 @@ function criarConta(){
       location.replace("./index.html");
     })
     .catch(e=> alert((e.code||"")+" - "+e.message));
+} 
+<script>
+async function finalizarRedirectSeTiver(){
+  try{
+    // ✅ finaliza o login por redirect (mobile)
+    await auth.getRedirectResult();
+  }catch(e){
+    // se não tiver redirect pendente, ignora
+    console.log("redirect:", e.code, e.message);
+  }
 }
-
-document.addEventListener("DOMContentLoaded", async ()=>{
+</script>
+ document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = initFirebase();
   if(!ok) return;
 
-  // ✅ se já estiver logado, pula pro app
+  // ✅ 1) FINALIZA O REDIRECT PRIMEIRO
+  await finalizarRedirectSeTiver();
+
+  // ✅ 2) DEPOIS decide se já está logado
   auth.onAuthStateChanged((user)=>{
     if(user){
       location.replace("./index.html");
     }
   });
 
-  // ✅ finaliza redirect do Google (mobile)
-  await finalizarRedirectSeTiver();
-
-  document.getElementById("btnLoginEmail").addEventListener("click",(e)=>{ e.preventDefault(); loginEmail(); });
-  document.getElementById("btnCriarConta").addEventListener("click",(e)=>{ e.preventDefault(); criarConta(); });
-  document.getElementById("btnLoginGoogle").addEventListener("click",(e)=>{ e.preventDefault(); loginGoogle(); });
+  document.getElementById("btnLoginEmail").addEventListener("click", loginEmail);
+  document.getElementById("btnCriarConta").addEventListener("click", criarConta);
+  document.getElementById("btnLoginGoogle").addEventListener("click", loginGoogle);
 });
 </script>
 
