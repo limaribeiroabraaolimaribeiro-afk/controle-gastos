@@ -507,25 +507,35 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
   // ✅ decide tela pelo estado real
   auth.onAuthStateChanged(user=>{
-    window.USER_ID = user ? user.uid : null;
 
-    document.getElementById("loginScreen").style.display = user ? "none" : "flex";
-    document.getElementById("app").style.display = user ? "block" : "none";
+  // 🔴 se não estiver logado → vai para login.html
+  if(!user){
+    window.location.href = "./login.html";
+    return;
+  }
 
-    if(user){
-      document.getElementById("userName").innerText = user.displayName || user.email;
-      carregarCategorias();
-      carregarFixos();
-      renderCategorias();
-      renderFixos();
-      state = { meses:{} };
-      mesAtual = window.getMes();
-      window.render();
-    }
-  });
+  // 🔵 se estiver logado → entra no app
+  window.USER_ID = user.uid;
+
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  document.getElementById("userName").innerText =
+    user.displayName || user.email;
+
+  carregarCategorias();
+  carregarFixos();
+  renderCategorias();
+  renderFixos();
+
+  state = { meses:{} };
+  mesAtual = window.getMes();
+  window.render();
+});
 });
 </script>
 
 </body>
 </html>
+
 
