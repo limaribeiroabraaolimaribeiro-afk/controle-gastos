@@ -9,15 +9,15 @@
     :root{
       --bg1:#0a0f1f;
       --bg2:#0b1020;
-      --panel: rgba(255,255,255,.08);
+      --panel: rgba(255,255,255,.10);
       --panel2: rgba(255,255,255,.06);
       --stroke: rgba(255,255,255,.16);
       --stroke2: rgba(255,255,255,.10);
       --text:#eaf0ff;
-      --muted: rgba(234,240,255,.65);
-      --muted2: rgba(234,240,255,.45);
+      --muted: rgba(234,240,255,.62);
+      --muted2: rgba(234,240,255,.44);
       --accent:#5a95ff;
-      --accent2:#38d6b3;
+      --accentGlow: rgba(90,149,255,.22);
       --danger:#ff5e73;
       --ok:#2ee59d;
       --shadow: 0 18px 60px rgba(0,0,0,.55);
@@ -39,63 +39,61 @@
       padding: 18px;
       background:
         radial-gradient(900px 520px at 30% 10%, rgba(90,149,255,.28), transparent 60%),
-        radial-gradient(700px 500px at 90% 35%, rgba(56,214,179,.16), transparent 55%),
+        radial-gradient(700px 500px at 90% 35%, rgba(56,214,179,.14), transparent 55%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
     }
 
     .shell{
-      width: min(430px, 100%);
+      width: min(460px, 100%);
       background: var(--panel);
       border: 1px solid var(--stroke);
       border-radius: var(--r1);
       box-shadow: var(--shadow);
-      padding: 22px 18px 18px;
+      padding: 18px;
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
     }
 
-    .brand{
+    /* topo igual ao print: ícone à esquerda + título/sub */
+    .top{
       display:flex;
-      flex-direction:column;
+      gap:14px;
       align-items:center;
-      text-align:center;
-      gap: 10px;
-      margin-top: 6px;
-      margin-bottom: 14px;
+      padding: 6px 8px 10px;
     }
 
     .logo{
-      width: 66px;
-      height: 66px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(90,149,255,.95), rgba(56,214,179,.90));
+      width:66px;height:66px;
+      border-radius:18px;
+      background: linear-gradient(135deg, rgba(90,149,255,.95), rgba(56,214,179,.88));
       box-shadow: 0 14px 38px rgba(90,149,255,.25);
       display:grid;
       place-items:center;
       user-select:none;
+      flex: 0 0 auto;
     }
     .logo span{
       font-weight: 900;
       font-size: 22px;
       letter-spacing: .6px;
-      color: #071021;
+      color:#071021;
     }
 
-    .title{
+    .brandTitle{
       margin:0;
-      font-size: 34px;
-      line-height: 1.08;
-      letter-spacing: .2px;
+      font-size: 28px;
+      line-height:1.08;
+      letter-spacing:.2px;
     }
-
-    .subtitle{
-      margin:0;
-      font-size: 15px;
+    .brandSub{
+      margin:6px 0 0;
       color: var(--muted);
+      font-size: 15px;
+      line-height:1.2;
     }
 
     .card{
-      margin-top: 14px;
+      margin-top: 10px;
       background: var(--panel2);
       border: 1px solid var(--stroke2);
       border-radius: var(--r2);
@@ -105,19 +103,15 @@
     .field{ margin-bottom: 12px; }
     .label{
       display:block;
-      font-size: 14px;
+      font-size: 15px;
       color: var(--muted);
       margin: 2px 0 8px 6px;
       letter-spacing: .2px;
     }
 
-    .inputWrap{
-      position:relative;
-    }
-
     input{
       width:100%;
-      padding: 14px 14px;
+      padding: 14px 16px;
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(7,12,26,.55);
@@ -126,36 +120,21 @@
       transition: .16s ease;
       font-size: 16px;
     }
-    input::placeholder{ color: rgba(234,240,255,.32); }
+    input::placeholder{ color: rgba(234,240,255,.28); }
     input:focus{
       border-color: rgba(90,149,255,.55);
       box-shadow: 0 0 0 4px rgba(90,149,255,.14);
     }
 
-    /* botão de mostrar senha */
-    .eyeBtn{
-      position:absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      border:0;
-      background: transparent;
-      color: rgba(234,240,255,.65);
-      cursor:pointer;
-      padding: 8px;
-      border-radius: 12px;
-    }
-    .eyeBtn:active{ transform: translateY(-50%) scale(.98); }
-
     .row{
       display:flex;
       gap: 12px;
-      margin-top: 10px;
+      margin-top: 12px;
       margin-bottom: 12px;
     }
 
     .btn{
-      width: 100%;
+      width:100%;
       padding: 14px 14px;
       border-radius: 999px;
       border: 0;
@@ -166,18 +145,20 @@
       align-items:center;
       justify-content:center;
       gap: 10px;
-      transition: transform .12s ease, opacity .12s ease, filter .12s ease;
+      transition: transform .12s ease, opacity .12s ease;
       user-select:none;
     }
     .btn:active{ transform: translateY(1px) scale(.995); }
     .btn:disabled{ opacity:.6; cursor:not-allowed; }
 
+    /* Botão Entrar grande (igual print) */
     .btnPrimary{
       background: linear-gradient(135deg, rgba(90,149,255,.98), rgba(90,149,255,.72));
       color:white;
-      box-shadow: 0 14px 35px rgba(90,149,255,.22);
+      box-shadow: 0 14px 35px var(--accentGlow);
     }
 
+    /* Criar conta cinza arredondado */
     .btnSecondary{
       background: rgba(255,255,255,.08);
       border: 1px solid rgba(255,255,255,.12);
@@ -187,10 +168,10 @@
     .divider{
       display:flex;
       align-items:center;
-      gap: 12px;
+      gap: 14px;
       color: rgba(234,240,255,.45);
       font-size: 13px;
-      margin: 8px 0 12px;
+      margin: 6px 0 12px;
     }
     .divider::before,
     .divider::after{
@@ -204,14 +185,6 @@
       background: rgba(255,255,255,.08);
       border: 1px solid rgba(255,255,255,.14);
       color: var(--text);
-    }
-
-    .hint{
-      text-align:center;
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--muted2);
-      line-height: 1.35;
     }
 
     .status{
@@ -233,6 +206,14 @@
     .status.err{ color: rgba(255,94,115,.95); }
     .status.err .dot{ background: var(--danger); }
 
+    .hint{
+      text-align:center;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted2);
+      line-height: 1.35;
+    }
+
     .spinner{
       width:16px;height:16px;border-radius:999px;
       border: 2px solid rgba(255,255,255,.35);
@@ -242,43 +223,43 @@
     @keyframes spin{ to{ transform: rotate(360deg);} }
 
     @media (max-width: 360px){
-      .title{ font-size: 30px; }
       .row{ flex-direction: column; }
+      .brandTitle{ font-size: 26px; }
     }
   </style>
 </head>
 
 <body>
   <main class="shell">
-    <header class="brand">
+    <!-- topo igual a imagem -->
+    <header class="top">
       <div class="logo"><span>R$</span></div>
-      <h1 class="title">Controle de Gastos<br/>PRO</h1>
-      <p class="subtitle">Entre para acessar seu painel</p>
+      <div>
+        <h1 class="brandTitle">Controle de Gastos<br/>PRO</h1>
+        <p class="brandSub">Entre para sincronizar seus dados<br/>com segurança</p>
+      </div>
     </header>
 
     <section class="card">
       <div class="field">
         <label class="label" for="email">E-mail</label>
-        <div class="inputWrap">
-          <input id="email" type="email" autocomplete="email" placeholder="seuemail@gmail.com">
-        </div>
+        <input id="email" type="email" autocomplete="email" placeholder="seuemail@gmail.com">
       </div>
 
       <div class="field">
         <label class="label" for="senha">Senha</label>
-        <div class="inputWrap">
-          <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha">
-          <button class="eyeBtn" id="btnEye" aria-label="Mostrar senha" title="Mostrar/ocultar senha">👁️</button>
-        </div>
+        <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha">
       </div>
 
-      <div class="row">
-        <button id="btnEntrar" class="btn btnPrimary">
-          <span id="txtEntrar">Entrar</span>
-          <span id="loadEntrar" style="display:none" class="spinner"></span>
-        </button>
-        <button id="btnCriar" class="btn btnSecondary">Criar conta</button>
-      </div>
+      <!-- igual ao print: Entrar grande e Criar conta embaixo -->
+      <button id="btnEntrar" class="btn btnPrimary">
+        <span id="txtEntrar">Entrar</span>
+        <span id="loadEntrar" style="display:none" class="spinner"></span>
+      </button>
+
+      <button id="btnCriar" class="btn btnSecondary" style="margin-top:12px;">
+        Criar conta
+      </button>
 
       <div class="divider">OU</div>
 
@@ -297,7 +278,7 @@
         <span id="statusText">Deslogado</span>
       </div>
 
-      <p class="hint">Ao entrar, você concorda com o uso de autenticação do Firebase.</p>
+      <p class="hint">Ao entrar, você concorda em usar este app de forma responsável.</p>
     </section>
   </main>
 
@@ -315,7 +296,7 @@
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // ✅ COLE AQUI o firebaseConfig do seu projeto
+    // ✅ COLE AQUI o firebaseConfig REAL do seu projeto (não deixe "SUA_API_KEY")
     const firebaseConfig = {
       apiKey: "SUA_API_KEY",
       authDomain: "controle-gastos-pro.firebaseapp.com",
@@ -349,14 +330,7 @@
       $("txtEntrar").style.display = on ? "none" : "inline";
     }
 
-    // 👁️ Mostrar/ocultar senha
-    $("btnEye").onclick = (e) => {
-      e.preventDefault();
-      const s = $("senha");
-      s.type = (s.type === "password") ? "text" : "password";
-    };
-
-    // ✅ Resultado do redirect (Google)
+    // ✅ Resultado do redirect (Google) — mantém o que já deu certo
     try {
       const result = await getRedirectResult(auth);
       if (result?.user) {
