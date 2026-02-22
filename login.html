@@ -1,203 +1,121 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Login - Controle de Gastos PRO</title>
-
-<meta name="theme-color" content="#569cff">
-
-<style>
-:root{
-  --bg1:#0b1020;
-  --bg2:#0a1b2f;
-  --card: rgba(255,255,255,.06);
-  --stroke: rgba(255,255,255,.12);
-  --text:#eaf0ff;
-  --muted: rgba(234,240,255,.7);
-  --accent:#569cff;
-  --shadow: 0 20px 60px rgba(0,0,0,.45);
-}
-*{ box-sizing:border-box; }
-body{
-  margin:0;
-  font-family: system-ui;
-  color:var(--text);
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:22px;
-  background:
-    radial-gradient(1200px 600px at 50% 20%, rgba(86,156,255,.25), transparent 60%),
-    linear-gradient(180deg, var(--bg2), var(--bg1));
-}
-.card{
-  width:min(520px, 100%);
-  background: var(--card);
-  border: 1px solid var(--stroke);
-  border-radius: 22px;
-  padding: 22px;
-  backdrop-filter: blur(10px);
-}
-.logo{
-  width:68px;height:68px;
-  border-radius:18px;
-  display:grid; place-items:center;
-  background: linear-gradient(135deg, rgba(86,156,255,.9), rgba(66,220,180,.8));
-  font-weight:900;
-  font-size:22px;
-  margin:auto;
-}
-h1{text-align:center;margin:10px 0}
-.group{margin-top:14px}
-input{
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.15);
-  background:#0f172a;
-  color:#fff;
-  margin-top:6px;
-}
-button{
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  border:none;
-  margin-top:10px;
-  font-weight:bold;
-  cursor:pointer;
-}
-.primary{background:#569cff;color:#fff}
-.google{background:#222;color:#fff}
-.sep{ text-align:center; margin:15px 0; opacity:.6}
-#debugBox{
-  margin-top:10px;
-  background:#000;
-  padding:10px;
-  border-radius:10px;
-  font-size:12px;
-  display:none;
-}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Login</title>
+  <style>
+    body{margin:0;font-family:system-ui;background:#0b1020;color:#eaf0ff}
+    .box{max-width:420px;margin:40px auto;padding:16px;background:#ffffff0f;border-radius:14px}
+    input,button{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:0}
+    input{background:#fff}
+    button{background:#569cff;color:#fff;font-weight:700}
+    .muted{opacity:.8;font-size:14px}
+    .row{display:flex;gap:8px}
+    .row button{width:50%}
+  </style>
 </head>
-
 <body>
+  <div class="box">
+    <h2>Entrar</h2>
 
-<div class="card">
-  <div class="logo">R$</div>
-  <h1>Controle de Gastos PRO</h1>
+    <button id="btnGoogle">Continuar com Google</button>
 
-  <div class="group">
-    <input id="email" placeholder="E-mail">
-    <input id="senha" type="password" placeholder="Senha">
+    <p class="muted">ou use e-mail e senha</p>
 
-    <button class="primary" id="btnLoginEmail">Entrar</button>
-    <button id="btnCriarConta">Criar conta</button>
+    <input id="email" type="email" placeholder="seuemail@gmail.com"/>
+    <input id="senha" type="password" placeholder="sua senha"/>
 
-    <div class="sep">OU</div>
+    <div class="row">
+      <button id="btnEntrar">Entrar</button>
+      <button id="btnCriar">Criar conta</button>
+    </div>
 
-    <button class="google" id="btnLoginGoogle">Entrar com Google</button>
-
-    <div id="debugBox"></div>
+    <p id="status" class="muted"></p>
   </div>
-</div>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      setPersistence,
+      browserLocalPersistence,
+      GoogleAuthProvider,
+      signInWithRedirect,
+      getRedirectResult,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-<script>
-let auth, provider;
+    // ✅ COLE AQUI o firebaseConfig do seu projeto (Firebase Console > Config do projeto > Seus apps)
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "controle-gastos-pro.firebaseapp.com",
+      projectId: "controle-gastos-pro",
+      storageBucket: "controle-gastos-pro.appspot.com",
+      messagingSenderId: "SEU_SENDER_ID",
+      appId: "SEU_APP_ID",
+    };
 
-function dbg(msg){
-  const box = document.getElementById("debugBox");
-  box.style.display = "block";
-  box.textContent = msg;
-}
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-async function initFirebase(){
-  firebase.initializeApp({
-    apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-    authDomain:"controle-gastos-pro.firebaseapp.com",
-    projectId:"controle-gastos-pro"
-  });
+    // ✅ evita deslogar / mantém sessão
+    await setPersistence(auth, browserLocalPersistence);
 
-  auth = firebase.auth();
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
 
-  // mantém login no celular
-  await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    const $ = (id) => document.getElementById(id);
 
-  provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
-}
-
-// finaliza login Google (redirect)
-async function finalizarRedirect(){
-  try{
-    const result = await auth.getRedirectResult();
-    if(result.user){
-      location.replace("./index.html");
+    // ✅ pega o resultado do redirect (OBRIGATÓRIO)
+    try {
+      const result = await getRedirectResult(auth);
+      if (result?.user) {
+        location.href = "./index.html";
+      }
+    } catch (e) {
+      $("status").textContent = "Erro Google: " + (e?.message || e);
+      console.error(e);
     }
-  }catch(e){
-    dbg(e.code + " - " + e.message);
-  }
-}
 
-// login email
-async function loginEmail(){
-  try{
-    const email = emailEl.value.trim();
-    const senha = senhaEl.value.trim();
-    await auth.signInWithEmailAndPassword(email, senha);
-    location.replace("./index.html");
-  }catch(e){
-    alert(e.message);
-  }
-}
+    $("btnGoogle").onclick = async () => {
+      try {
+        await signInWithRedirect(auth, provider);
+      } catch (e) {
+        $("status").textContent = "Erro Google: " + (e?.message || e);
+        console.error(e);
+      }
+    };
 
-// criar conta
-async function criarConta(){
-  try{
-    const email = emailEl.value.trim();
-    const senha = senhaEl.value.trim();
-    await auth.createUserWithEmailAndPassword(email, senha);
-    location.replace("./index.html");
-  }catch(e){
-    alert(e.message);
-  }
-}
+    $("btnEntrar").onclick = async () => {
+      try {
+        const email = $("email").value.trim();
+        const senha = $("senha").value.trim();
+        await signInWithEmailAndPassword(auth, email, senha);
+        location.href = "./index.html";
+      } catch (e) {
+        $("status").textContent = "Erro login: " + (e?.message || e);
+        console.error(e);
+      }
+    };
 
-// login google com fallback
-async function loginGoogle(){
-  try{
-    await auth.signInWithPopup(provider);
-    location.replace("./index.html");
-  }catch(e){
-    // fallback mobile
-    await auth.signInWithRedirect(provider);
-  }
-}
+    $("btnCriar").onclick = async () => {
+      try {
+        const email = $("email").value.trim();
+        const senha = $("senha").value.trim();
+        await createUserWithEmailAndPassword(auth, email, senha);
+        location.href = "./index.html";
+      } catch (e) {
+        $("status").textContent = "Erro criar conta: " + (e?.message || e);
+        console.error(e);
+      }
+    };
 
-document.addEventListener("DOMContentLoaded", async ()=>{
-  await initFirebase();
-
-  await finalizarRedirect();
-
-  auth.onAuthStateChanged(user=>{
-    if(user){
-      location.replace("./index.html");
-    }
-  });
-
-  window.emailEl = document.getElementById("email");
-  window.senhaEl = document.getElementById("senha");
-
-  document.getElementById("btnLoginEmail").onclick = loginEmail;
-  document.getElementById("btnCriarConta").onclick = criarConta;
-  document.getElementById("btnLoginGoogle").onclick = loginGoogle;
-});
-</script>
-
+    onAuthStateChanged(auth, (user) => {
+      $("status").textContent = user ? ("Logado: " + user.email) : "Deslogado";
+    });
+  </script>
 </body>
 </html>
