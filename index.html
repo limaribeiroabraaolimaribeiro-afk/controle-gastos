@@ -36,7 +36,7 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
   font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
 
-/* ✅ tela simples de carregamento */
+/* tela simples de carregamento */
 #loading{
   display:flex;
   align-items:center;
@@ -58,7 +58,7 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
   </div>
 </div>
 
-<!-- ✅ APP (sem login aqui) -->
+<!-- ✅ APP -->
 <div id="app" style="display:none">
   <div class="wrap">
     <h1>
@@ -162,9 +162,6 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
 <script>
-/* ===========================
-   ✅ GLOBAIS
-=========================== */
 const API = "https://api-rf1w.onrender.com";
 let auth = null;
 
@@ -200,9 +197,6 @@ function showLoading(){
   document.getElementById("loading").style.display = "flex";
 }
 
-/* ===========================
-   ✅ FIREBASE INIT (AGORA async)
-=========================== */
 async function initFirebase(){
   if(!window.firebase){
     dbg("Firebase não carregou (sem internet ou bloqueado).");
@@ -221,20 +215,16 @@ async function initFirebase(){
 
   auth = firebase.auth();
 
-  // ✅ IMPORTANTÍSSIMO: aguarda a persistência concluir antes de checar estado
+  // ✅ aguarda persistência antes do onAuthStateChanged
   try{
     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   }catch(e){
-    // se falhar, não trava
     dbg("Persistência:\n" + (e.code||"") + " - " + (e.message||e));
   }
 
   return true;
 }
 
-/* ===========================
-   ✅ LOGOUT
-=========================== */
 window.logout = function(){
   if(!auth) return;
   auth.signOut()
@@ -242,9 +232,6 @@ window.logout = function(){
     .catch(e=>alert((e.code||"")+" - "+e.message));
 };
 
-/* ===========================
-   ✅ RESTO DO APP
-=========================== */
 function salvarCategorias(){ localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias)); }
 function carregarCategorias(){
   const raw = localStorage.getItem("categorias_" + window.USER_ID);
@@ -283,6 +270,7 @@ window.getDataMes = ()=>{
   }
   return state.meses[mesAtual];
 };
+
 function detectarCategoria(desc){
   const txt=(desc||"").toLowerCase();
   for(const r of regras){ if(txt.includes(r.palavra)) return r.categoria; }
@@ -290,7 +278,6 @@ function detectarCategoria(desc){
 }
 
 window.addCategoria = ()=>{
-  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   const input=document.getElementById("novaCategoria");
   const nome=(input.value||"").trim();
   if(!nome) return;
@@ -304,7 +291,6 @@ function renderCategorias(){
 }
 
 window.addFixo = ()=>{
-  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   const desc=(document.getElementById("descFixo").value||"").trim();
   const valor=Number(document.getElementById("valorFixo").value);
   const categoria=document.getElementById("categoriaFixo").value||"Outros";
@@ -324,7 +310,6 @@ function renderFixos(){
 }
 
 window.abrirAdd = ()=>{
-  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   mesAtual = window.getMes();
   const d = window.getDataMes();
   const desc = prompt("Descrição");
@@ -342,7 +327,6 @@ window.del = (i)=>{
   window.render();
 };
 window.saveSettings = ()=>{
-  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   mesAtual=window.getMes();
   const d=window.getDataMes();
   d.salary=Number(document.getElementById("salary").value);
@@ -389,7 +373,6 @@ function paint(){
   drawEvolucao();
 }
 window.render = ()=>{
-  if(!window.USER_ID) return;
   mesAtual=window.getMes();
   const d=window.getDataMes();
   paint();
@@ -408,6 +391,7 @@ window.render = ()=>{
       for(const f of fixos){ const obj={...f,isFixo:true}; const k=keyItem(obj); if(!seen.has(k)){merged.push(obj); seen.add(k);} }
       for(const it of apiItems){ const k=keyItem(it); if(!seen.has(k)){merged.push(it); seen.add(k);} }
       d.items=merged;
+
       localStorage.setItem("gastos_pro", JSON.stringify(state));
       paint();
     })
@@ -425,6 +409,16 @@ window.simularCompleto = ()=>{
     const valor=Number(document.getElementById("valorSimulacao").value);
     const parcelas=Number(document.getElementById("parcelasSimulacao").value);
     const juros=Number(document.getElementById("jurosSimulacao").value)/100;
+
+    if(!valor || !parcelas || parcelas<=0){ out.innerHTML="Preencha valor e parcelas."; return; }
+    if(juros<=0){
+      const parcela = valor / parcelas;
+      const sobra = salario - gastos - parcela;
+      const resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
+      out.innerHTML = `Parcela: R$ ${parcela.toFixed(2)}<br>Total pago: R$ ${valor.toFixed(2)}<br>Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>${resultado}`;
+      return;
+    }
+
     const parcela = valor * ( juros / (1 - Math.pow(1+juros, -parcelas)) );
     const total = parcela * parcelas;
     const jurosTotal = total - valor;
@@ -435,16 +429,16 @@ window.simularCompleto = ()=>{
     const valor=Number(document.getElementById("valorInvestimento").value);
     const meses=Number(document.getElementById("mesesInvestimento").value);
     const perc=Number(document.getElementById("percentualInvest").value)/100;
-    const taxaCDI=0.012;
+
+    if(!valor || !meses || meses<=0){ out.innerHTML="Preencha valor e meses."; return; }
+
+    const taxaCDI=0.012; // estimativa
     const total=valor*(1+(taxaCDI*perc))**meses;
     const lucro=total-valor;
     out.innerHTML = `Valor final: R$ ${total.toFixed(2)}<br>Lucro: R$ ${lucro.toFixed(2)}`;
   }
 };
 
-/* ===========================
-   ✅ INIT (corrigido anti-loop)
-=========================== */
 document.addEventListener("DOMContentLoaded", async ()=>{
   showLoading();
 
@@ -461,21 +455,14 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     window.render();
   });
 
-  // ✅ decide tela pelo estado real (com “delay” anti-falso-null)
-  auth.onAuthStateChanged(async (user)=>{
+  // ✅ única fonte de verdade: onAuthStateChanged
+  auth.onAuthStateChanged((user)=>{
     if(!user){
-      // espera um pouco e confere de novo (evita loop no mobile)
-      await new Promise(r=>setTimeout(r, 700));
-      const again = auth.currentUser;
-      if(!again){
-        location.replace("./login.html");
-        return;
-      }
-      user = again;
+      location.replace("./login.html");
+      return;
     }
 
     window.USER_ID = user.uid;
-
     document.getElementById("userName").innerText = user.displayName || user.email;
 
     carregarCategorias();
@@ -496,4 +483,4 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 </script>
 
 </body>
-  </html>
+</html>
