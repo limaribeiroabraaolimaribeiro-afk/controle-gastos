@@ -59,6 +59,7 @@ body{
 }
 h1{ margin:0; font-size:28px; letter-spacing:.2px; }
 .sub{ margin:0; color:var(--muted); font-size:14px; }
+
 .group{
   margin-top: 14px;
   padding: 16px;
@@ -106,6 +107,7 @@ input:focus{
   border-color: rgba(86,156,255,.9);
 }
 .btn:disabled{ opacity:.6; cursor:not-allowed; }
+
 .sep{
   display:flex;
   align-items:center;
@@ -136,6 +138,12 @@ input:focus{
   font-size: 12px;
   color: rgba(234,240,255,.6);
 }
+#status{
+  margin-top: 10px;
+  text-align:center;
+  font-size: 12px;
+  color: rgba(234,240,255,.8);
+}
 #debugBox{
   margin-top: 12px;
   background: rgba(0,0,0,.55);
@@ -150,7 +158,6 @@ input:focus{
 </head>
 
 <body>
-
 <div class="card">
   <div class="brand">
     <div class="logo">R$</div>
@@ -177,8 +184,9 @@ input:focus{
       Entrar com Google
     </button>
 
-    <div class="small" id="statusLinha">● Deslogado</div>
+    <div id="status">● Deslogado</div>
     <div class="small">Ao entrar, você concorda em usar este app de forma responsável.</div>
+
     <div id="debugBox"></div>
   </div>
 </div>
@@ -192,65 +200,47 @@ function dbg(msg){
   box.style.display = "block";
   box.textContent = String(msg);
 }
-
-window.addEventListener("error", (e)=>{
-  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
-});
-window.addEventListener("unhandledrejection", (e)=>{
-  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
-});
-
-const FIREBASE_CONFIG = {
-  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-  authDomain:"controle-gastos-pro.firebaseapp.com",
-  projectId:"controle-gastos-pro"
-};
+function setStatus(txt){ document.getElementById("status").textContent = txt; }
 
 let auth = null;
 let provider = null;
 
-function setLoading(isLoading){
-  const b1 = document.getElementById("btnLoginEmail");
-  const b2 = document.getElementById("btnCriarConta");
-  const b3 = document.getElementById("btnLoginGoogle");
-  b1.disabled = b2.disabled = b3.disabled = isLoading;
-}
-
-async function initFirebase(){
-  if(!window.firebase){
-    dbg("Firebase não carregou (sem internet ou bloqueio).");
+function initFirebase(){
+  try{
+    if(!firebase.apps || !firebase.apps.length){
+      firebase.initializeApp({
+        apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+        authDomain:"controle-gastos-pro.firebaseapp.com",
+        projectId:"controle-gastos-pro"
+      });
+    }
+    auth = firebase.auth();
+    provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    return true;
+  }catch(e){
+    dbg("Firebase init falhou:\n" + (e.message||e));
     return false;
   }
-
-  if(!firebase.apps || !firebase.apps.length){
-    firebase.initializeApp(FIREBASE_CONFIG);
-  }
-
-  auth = firebase.auth();
-
-  // ✅ importante: aguardar persistência antes de checar sessão
-  try{
-    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-  }catch(e){
-    dbg("Persistência:\n" + (e.code||"") + " - " + (e.message||e));
-  }
-
-  provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt:"select_account" });
-
-  return true;
 }
 
-// ✅ no mobile: quando volta do Google, isso finaliza e entra no app
+function setLoading(isLoading){
+  ["btnLoginEmail","btnCriarConta","btnLoginGoogle"].forEach(id=>{
+    document.getElementById(id).disabled = isLoading;
+  });
+}
+
 async function finalizarRedirectSeTiver(){
+  // IMPORTANTÍSSIMO: no mobile, isso finaliza o login
   try{
     const res = await auth.getRedirectResult();
     if(res && res.user){
+      // já logou
       location.replace("./index.html");
       return true;
     }
   }catch(e){
-    // se houver erro real, mostra
+    // se der erro real, mostra
     if(e && e.code){
       dbg("Redirect:\n" + e.code + " - " + e.message);
     }
@@ -261,15 +251,15 @@ async function finalizarRedirectSeTiver(){
 async function loginGoogle(){
   try{
     setLoading(true);
-
-    // mobile: redirect é o mais estável
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+    // No celular, redirect é o mais estável
     if(isMobile){
       await auth.signInWithRedirect(provider);
-      return; // volta pra cá depois do google
+      return;
     }
 
-    // desktop: popup
+    // No desktop, popup é ok
     await auth.signInWithPopup(provider);
     location.replace("./index.html");
   }catch(e){
@@ -288,7 +278,7 @@ function loginEmail(){
     .then(()=> location.replace("./index.html"))
     .catch(e=>{
       setLoading(false);
-      alert((e.code||"") + " - " + e.message);
+      alert((e.code||"")+" - "+e.message);
     });
 }
 
@@ -303,24 +293,33 @@ function criarConta(){
     .then(()=> location.replace("./index.html"))
     .catch(e=>{
       setLoading(false);
-      alert((e.code||"") + " - " + e.message);
+      alert((e.code||"")+" - "+e.message);
     });
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
-  const ok = await initFirebase();
+  const ok = initFirebase();
   if(!ok) return;
 
-  // ✅ 1) tenta finalizar o redirect primeiro (quando voltou do Google)
-  const entrou = await finalizarRedirectSeTiver();
-  if(entrou) return;
+  // ✅ 1) garante persistência antes de checar estado/redirect
+  try{
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  }catch(e){
+    // não bloqueia, mas ajuda no debug
+    dbg("Persistência:\n" + (e.code||"") + " - " + (e.message||e));
+  }
 
-  // ✅ 2) se já tem sessão, entra direto
+  // ✅ 2) tenta finalizar redirect (se voltou do Google)
+  const entrouPeloRedirect = await finalizarRedirectSeTiver();
+  if(entrouPeloRedirect) return;
+
+  // ✅ 3) se já está logado, entra direto
   auth.onAuthStateChanged((user)=>{
-    document.getElementById("statusLinha").textContent = user ? "● Logado" : "● Deslogado";
     if(user){
+      setStatus("● Logado");
       location.replace("./index.html");
     }else{
+      setStatus("● Deslogado");
       setLoading(false);
     }
   });
@@ -330,6 +329,5 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("btnLoginGoogle").addEventListener("click", loginGoogle);
 });
 </script>
-
 </body>
 </html>
