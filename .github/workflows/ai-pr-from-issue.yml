@@ -1,4 +1,4 @@
-name:  PR from Issue
+name: AI PR from Issue
 
 on:
   issues:
