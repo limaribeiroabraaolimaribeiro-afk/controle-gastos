@@ -129,6 +129,23 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
       <div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
     </div>
 
+    <!-- ✅ ADICIONADO: CARD IA (Ollama) -->
+    <div class="card" id="iaCard">
+      <h3>🤖 IA (Ollama)</h3>
+
+      <label>Pergunta</label>
+      <input id="iaPrompt" placeholder="Digite sua pergunta...">
+
+      <button onclick="iaPerguntar()">Perguntar</button>
+
+      <div id="iaResposta" class="small" style="margin-top:10px; white-space:pre-wrap;"></div>
+
+      <div class="small" style="margin-top:8px; opacity:.8">
+        Status: <span id="iaStatus">Aguardando...</span>
+      </div>
+    </div>
+    <!-- ✅ FIM DO CARD IA -->
+
     <div class="kpis" id="kpis"></div>
 
     <div class="card"><canvas id="chart"></canvas></div>
@@ -158,6 +175,9 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+<!-- ✅ ADICIONADO: carrega URL do tunnel (config.js) -->
+<script src="./config.js"></script>
 
 <script>
 const FIREBASE_CONFIG = {
@@ -437,6 +457,70 @@ window.simularCompleto = ()=>{
   }
 };
 
+// ===============================
+// ✅ ADICIONADO: IA via Cloudflare Tunnel (Ollama)
+// ===============================
+function getIaBase(){
+  return (window.API_BASE_URL || "").replace(/\/$/, "");
+}
+
+async function iaHealth(){
+  try{
+    const base = getIaBase();
+    if(!base) throw new Error("API_BASE_URL não definido no config.js");
+    const r = await fetch(base + "/");
+    const j = await r.json();
+    const el = document.getElementById("iaStatus");
+    if(el) el.textContent = (j && j.message) ? j.message : "Online ✅";
+  }catch(e){
+    const msg = (e && e.message) ? e.message : String(e);
+    const el = document.getElementById("iaStatus");
+    if(el) el.textContent = "Offline: " + msg;
+  }
+}
+
+window.iaPerguntar = async function(){
+  const promptEl = document.getElementById("iaPrompt");
+  const outEl = document.getElementById("iaResposta");
+  const statusEl = document.getElementById("iaStatus");
+
+  const prompt = (promptEl.value || "").trim();
+  if(!prompt){
+    outEl.textContent = "Digite uma pergunta.";
+    return;
+  }
+
+  try{
+    outEl.textContent = "Pensando...";
+    if(statusEl) statusEl.textContent = "Consultando IA...";
+
+    const base = getIaBase();
+    if(!base) throw new Error("API_BASE_URL não definido no config.js");
+
+    const url = base + "/api/chat";
+
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "llama3.2:3b",
+        prompt
+      })
+    });
+
+    const data = await resp.json();
+    outEl.textContent = data.response || JSON.stringify(data, null, 2);
+    if(statusEl) statusEl.textContent = "Online ✅";
+  }catch(e){
+    const msg = (e && e.message) ? e.message : String(e);
+    outEl.textContent = "Erro: " + msg;
+    if(statusEl) statusEl.textContent = "Erro ❌";
+  }
+};
+// ===============================
+// ✅ FIM IA
+// ===============================
+
 document.addEventListener("DOMContentLoaded", async ()=>{
   showLoading();
 
@@ -458,6 +542,11 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     mesAtual = window.getMes();
     window.render();
   });
+
+  // ✅ ADICIONADO: checa status IA quando abrir
+  setTimeout(()=>{ 
+    if(document.getElementById("iaStatus")) iaHealth();
+  }, 1200);
 
   // ✅ evita “disparar 2x”
   const unsub = auth.onAuthStateChanged(async (user)=>{
