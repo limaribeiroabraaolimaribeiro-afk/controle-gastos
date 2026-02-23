@@ -1,4 +1,4 @@
-name: AI PR from Issue
+name:  PR from Issue
 
 on:
   issues:
@@ -38,4 +38,3 @@ jobs:
           REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/ai_issue_to_pr.mjs
-teste
