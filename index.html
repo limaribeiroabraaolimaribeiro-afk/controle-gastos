@@ -207,8 +207,13 @@ async function initFirebase(){
     return false;
   }
 
-  if(!firebase.apps || !firebase.apps.length){
-    firebase.initializeApp(FIREBASE_CONFIG);
+  // ✅ evita inicializar 2x (muito comum em mobile)
+  try{
+    if(!firebase.apps || !firebase.apps.length){
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+  }catch(e){
+    // se já estava inicializado, ignora
   }
 
   auth = firebase.auth();
@@ -249,7 +254,12 @@ window.abrirConfig = ()=>{
   const box = document.getElementById("configBox");
   box.style.display = box.style.display==="none" ? "block" : "none";
 };
-window.getMes = ()=> (document.getElementById("month").value || new Date().toISOString().slice(0,7));
+
+window.getMes = ()=>{
+  const el = document.getElementById("month");
+  const v = el && el.value ? el.value : new Date().toISOString().slice(0,7);
+  return v;
+};
 
 function keyItem(i){ return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`; }
 function garantirFixosNoMes(d){
@@ -433,6 +443,12 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = await initFirebase();
   if(!ok) return;
 
+  // ✅ seta mês padrão no input (evita vazio em alguns celulares)
+  const monthEl = document.getElementById("month");
+  if(monthEl && !monthEl.value){
+    monthEl.value = new Date().toISOString().slice(0,7);
+  }
+
   document.getElementById("tipoSimulacao").addEventListener("change", function(){
     document.getElementById("areaCompra").style.display = this.value==="compra" ? "block" : "none";
     document.getElementById("areaInvestimento").style.display = this.value==="investimento" ? "block" : "none";
@@ -443,10 +459,11 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     window.render();
   });
 
-  // ✅ anti-loop: espera estado REAL do Firebase
-  auth.onAuthStateChanged(async (user)=>{
+  // ✅ evita “disparar 2x”
+  const unsub = auth.onAuthStateChanged(async (user)=>{
+    unsub && unsub();
+
     if(!user){
-      // espera 1s e confere de novo (mobile)
       await new Promise(r=>setTimeout(r, 1000));
       user = auth.currentUser;
     }
