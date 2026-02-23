@@ -100,7 +100,7 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
       <button onclick="saveSettings()">Salvar</button>
     </div>
 
-    <!-- ✅ SIMULADOR NOVO (ADICIONADO) -->
+    <!-- ✅ SIMULADOR COMPLETO (CORRIGIDO) -->
     <div class="card">
       <h3>🧠 Simulador de Investimentos (Completo)</h3>
 
@@ -192,7 +192,9 @@ window.addEventListener("error", (e)=>{
   dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
 });
 window.addEventListener("unhandledrejection", (e)=>{
-  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message)
+    ? (e.reason.code + " - " + e.reason.message)
+    : String(e.reason)));
 });
 </script>
 
@@ -248,13 +250,14 @@ async function initFirebase(){
     return false;
   }
 
-  if(!firebase.apps || !firebase.apps.length){
-    firebase.initializeApp(FIREBASE_CONFIG);
-  }
+  try{
+    if(!firebase.apps || !firebase.apps.length){
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+  }catch(e){}
 
   auth = firebase.auth();
 
-  // ✅ aguarda persistência antes de validar estado
   try{
     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   }catch(e){
@@ -309,6 +312,7 @@ window.getDataMes = ()=>{
   }
   return state.meses[mesAtual];
 };
+
 function detectarCategoria(desc){
   const txt=(desc||"").toLowerCase();
   for(const r of regras){ if(txt.includes(r.palavra)) return r.categoria; }
@@ -324,6 +328,7 @@ window.addCategoria = ()=>{
   categorias.push(nome); input.value="";
   salvarCategorias(); renderCategorias();
 };
+
 function renderCategorias(){
   document.getElementById("listaCategorias").innerHTML = categorias.map(c=><div>• ${c}</div>).join("");
   document.getElementById("categoriaFixo").innerHTML = categorias.map(c=><option value="${c}">${c}</option>).join("");
@@ -342,6 +347,7 @@ window.addFixo = ()=>{
   garantirFixosNoMes(window.getDataMes());
   window.render();
 };
+
 function renderFixos(){
   const div=document.getElementById("listaFixos");
   div.innerHTML = fixos.length
@@ -358,42 +364,59 @@ window.abrirAdd = ()=>{
   if(!desc || isNaN(valor)) return;
   const categoria = detectarCategoria(desc);
   d.items.push({ desc, amount:valor, category:categoria, isFixo:false });
-  fetch(API+"/addGasto",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,desc,amount:valor,category:categoria})}).catch(()=>{});
+  fetch(API+"/addGasto",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,desc,amount:valor,category:categoria})
+  }).catch(()=>{});
   window.render();
 };
+
 window.del = (i)=>{
   mesAtual=window.getMes();
   const d=window.getDataMes();
   d.items.splice(i,1);
   window.render();
 };
+
 window.saveSettings = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   mesAtual=window.getMes();
   const d=window.getDataMes();
   d.salary=Number(document.getElementById("salary").value);
   d.meta=Number(document.getElementById("meta").value);
-  fetch(API+"/salvarMes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,salary:d.salary,meta:d.meta})}).catch(()=>{});
+  fetch(API+"/salvarMes",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,salary:d.salary,meta:d.meta})
+  }).catch(()=>{});
   window.render();
 };
 
 function drawChart(items){
-  const mapa={}; items.forEach(i=>{ const cat=i.category||"Outros"; mapa[cat]=(mapa[cat]||0)+Number(i.amount||0); });
+  const mapa={};
+  items.forEach(i=>{
+    const cat=i.category||"Outros";
+    mapa[cat]=(mapa[cat]||0)+Number(i.amount||0);
+  });
   const labels=Object.keys(mapa), valores=Object.values(mapa);
   if(grafico) grafico.destroy();
   grafico=new Chart(document.getElementById("chart"),{type:"doughnut",data:{labels,datasets:[{data:valores}]}} );
 }
+
 function drawEvolucao(){
   const meses=Object.keys(state.meses).sort();
   const valores=meses.map(m=>(state.meses[m].items||[]).reduce((a,b)=>a+Number(b.amount||0),0));
   if(graficoEvolucao) graficoEvolucao.destroy();
   graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{type:"line",data:{labels:meses,datasets:[{data:valores}]}} );
 }
+
 function paint(){
   const d=window.getDataMes();
   document.getElementById("salary").value=Number(d.salary||0);
   document.getElementById("month").value=mesAtual;
   document.getElementById("meta").value=d.meta||"";
+
   const total=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
   const sobra=Number(d.salary||0)-total;
 
@@ -403,6 +426,7 @@ function paint(){
     <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
     <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
   `;
+
   document.getElementById("list").innerHTML=(d.items||[]).map((i,idx)=>`
     <tr>
       <td>${i.desc}${i.isFixo?` <span class="badge">Fixo</span>`:""} <span class="badge">${i.category||"Outros"}</span></td>
@@ -414,6 +438,7 @@ function paint(){
   drawChart(d.items||[]);
   drawEvolucao();
 }
+
 window.render = ()=>{
   if(!window.USER_ID) return;
   mesAtual=window.getMes();
@@ -424,15 +449,30 @@ window.render = ()=>{
     .then(r=>r.json())
     .then(data=>{
       const apiItems = Array.isArray(data)
-        ? data.filter(x=>x && x.desc).map(x=>({desc:x.desc,amount:Number(x.amount||0),category:x.category||detectarCategoria(x.desc),isFixo:false}))
+        ? data.filter(x=>x && x.desc).map(x=>({
+            desc:x.desc,
+            amount:Number(x.amount||0),
+            category:x.category||detectarCategoria(x.desc),
+            isFixo:false
+          }))
         : [];
+
       if(Array.isArray(data) && data.length){
         d.salary=Number(data[0].salary||d.salary||0);
         d.meta=Number(data[0].meta||d.meta||0);
       }
+
       const merged=[], seen=new Set();
-      for(const f of fixos){ const obj={...f,isFixo:true}; const k=keyItem(obj); if(!seen.has(k)){merged.push(obj); seen.add(k);} }
-      for(const it of apiItems){ const k=keyItem(it); if(!seen.has(k)){merged.push(it); seen.add(k);} }
+      for(const f of fixos){
+        const obj={...f,isFixo:true};
+        const k=keyItem(obj);
+        if(!seen.has(k)){merged.push(obj); seen.add(k);}
+      }
+      for(const it of apiItems){
+        const k=keyItem(it);
+        if(!seen.has(k)){merged.push(it); seen.add(k);}
+      }
+
       d.items=merged;
       localStorage.setItem("gastos_pro", JSON.stringify(state));
       paint();
@@ -441,33 +481,37 @@ window.render = ()=>{
 };
 
 
-
-
 /* ==========================================================
-   ✅ SIMULADOR NOVO (COMPLETO) — ADICIONADO
+   ✅ SIMULADOR DE INVESTIMENTOS COMPLETO (CORRIGIDO)
 ========================================================== */
+
 function clampNum(v, def=0){
   v = Number(v);
   return Number.isFinite(v) ? v : def;
 }
+
 function formatBRL(n){
   return "R$ " + Number(n||0).toFixed(2).replace(".", ",");
 }
+
 function anualParaMensalEfetivo(taxaAnual){
   const r = taxaAnual/100;
   return Math.pow(1+r, 1/12) - 1;
 }
+
 function aliquotaIR(dias){
   if(dias <= 180) return 0.225;
   if(dias <= 360) return 0.20;
   if(dias <= 720) return 0.175;
   return 0.15;
 }
+
 function iofAprox(dias){
   if(dias >= 30) return 0;
   if(dias <= 0) return 0.96;
   return (30 - dias) / 30 * 0.96;
 }
+
 function simularComAporte(inicial, aporteMensal, meses, taxaMensal){
   let saldo = inicial;
   for(let m=1; m<=meses; m++){
@@ -478,7 +522,45 @@ function simularComAporte(inicial, aporteMensal, meses, taxaMensal){
   return { final: saldo, investido, lucroBruto };
 }
 
+function atualizarCamposInvestimento(){
+  const tipo = document.getElementById("invTipo").value;
+
+  const boxCDI = document.getElementById("boxCDI");
+  const boxPrefixado = document.getElementById("boxPrefixado");
+  const boxIPCA = document.getElementById("boxIPCA");
+  const boxFundo = document.getElementById("boxFundo");
+  const boxRV = document.getElementById("boxRV");
+
+  // default
+  boxCDI.style.display = "none";
+  boxPrefixado.style.display = "none";
+  boxIPCA.style.display = "none";
+  boxFundo.style.display = "none";
+  boxRV.style.display = "none";
+
+  if(tipo === "poupanca" || tipo === "tesouro_selic" || tipo === "cdb" || tipo === "lci_lca" || tipo === "fundo_di"){
+    boxCDI.style.display = "block";
+  }
+
+  if(tipo === "prefixado"){
+    boxPrefixado.style.display = "block";
+  }
+
+  if(tipo === "ipca_plus"){
+    boxIPCA.style.display = "block";
+  }
+
+  if(tipo === "fundo_di"){
+    boxFundo.style.display = "block";
+  }
+
+  if(tipo === "renda_variavel"){
+    boxRV.style.display = "block";
+  }
+}
+
 window.simularInvestimentos = function(){
+
   const tipo = document.getElementById("invTipo").value;
 
   const inicial = Math.max(0, clampNum(document.getElementById("invInicial").value, 0));
@@ -503,160 +585,102 @@ window.simularInvestimentos = function(){
     det.innerHTML = "";
     return;
   }
+
   if(meses <= 0){
     out.innerHTML = "Informe pelo menos 1 mês.";
     det.innerHTML = "";
     return;
   }
 
-  const cdiAnual = Math.max(0, clampNum(document.getElementById("invCDI")?.value, 0));
-  const percCDI = Math.max(0, clampNum(document.getElementById("invPercCDI")?.value, 100));
-  const taxaPrefixadoAnual = Math.max(0, clampNum(document.getElementById("invPrefixado")?.value, 0));
-  const ipcaAnual = Math.max(0, clampNum(document.getElementById("invIPCA")?.value, 0));
-  const taxaRealAnual = clampNum(document.getElementById("invReal")?.value, 0);
-  const taxaAdm = Math.max(0, clampNum(document.getElementById("invAdm")?.value, 0));
-  const rvAnual = clampNum(document.getElementById("invRV")?.value, 0);
+  const cdiAnual = clampNum(document.getElementById("invCDI").value, 10);
+  const percCDI = clampNum(document.getElementById("invPercCDI").value, 100);
+  const taxaPrefixadoAnual = clampNum(document.getElementById("invPrefixado").value, 0);
+  const ipcaAnual = clampNum(document.getElementById("invIPCA").value, 0);
+  const taxaRealAnual = clampNum(document.getElementById("invReal").value, 0);
+  const taxaAdm = clampNum(document.getElementById("invAdm").value, 0);
+  const rvAnual = clampNum(document.getElementById("invRV").value, 0);
 
   let taxaMensal = 0;
-  let isRendaFixaTributavel = false;
-  let isIsentoIR = false;
+  let ir = 0;
+  let isentoIR = false;
+
+  // ===== TIPOS DE INVESTIMENTO =====
 
   if(tipo === "poupanca"){
-    if(cdiAnual > 0){
-      const aproxAnual = cdiAnual * 0.70;
-      taxaMensal = anualParaMensalEfetivo(aproxAnual);
-    }else{
-      taxaMensal = 0.005;
-    }
-    isIsentoIR = true;
+    taxaMensal = anualParaMensalEfetivo(cdiAnual * 0.70);
+    isentoIR = true;
   }
 
   if(tipo === "tesouro_selic"){
-    const base = (cdiAnual > 0 ? cdiAnual : 10);
-    taxaMensal = anualParaMensalEfetivo(base);
-    isRendaFixaTributavel = true;
+    taxaMensal = anualParaMensalEfetivo(cdiAnual);
+    ir = aliquotaIR(diasTotais);
   }
 
   if(tipo === "cdb"){
-    const base = (cdiAnual > 0 ? cdiAnual : 10);
-    const efetiva = base * (percCDI/100);
-    taxaMensal = anualParaMensalEfetivo(efetiva);
-    isRendaFixaTributavel = true;
+    taxaMensal = anualParaMensalEfetivo(cdiAnual * (percCDI/100));
+    ir = aliquotaIR(diasTotais);
   }
 
   if(tipo === "lci_lca"){
-    const base = (cdiAnual > 0 ? cdiAnual : 10);
-    const efetiva = base * (percCDI/100);
-    taxaMensal = anualParaMensalEfetivo(efetiva);
-    isIsentoIR = true;
+    taxaMensal = anualParaMensalEfetivo(cdiAnual * (percCDI/100));
+    isentoIR = true;
   }
 
   if(tipo === "fundo_di"){
-    const base = (cdiAnual > 0 ? cdiAnual : 10);
-    const efetiva = base * (percCDI/100);
-    const efetivaLiquida = Math.max(0, efetiva - taxaAdm);
-    taxaMensal = anualParaMensalEfetivo(efetivaLiquida);
-    isRendaFixaTributavel = true;
+    const taxaBruta = anualParaMensalEfetivo(cdiAnual * (percCDI/100));
+    const taxaAdmMensal = anualParaMensalEfetivo(taxaAdm);
+    taxaMensal = taxaBruta - taxaAdmMensal;
+    ir = aliquotaIR(diasTotais);
   }
 
   if(tipo === "prefixado"){
-    const base = (taxaPrefixadoAnual > 0 ? taxaPrefixadoAnual : 10);
-    taxaMensal = anualParaMensalEfetivo(base);
-    isRendaFixaTributavel = true;
+    taxaMensal = anualParaMensalEfetivo(taxaPrefixadoAnual);
+    ir = aliquotaIR(diasTotais);
   }
 
   if(tipo === "ipca_plus"){
-    const ip = ipcaAnual/100;
-    const rr = taxaRealAnual/100;
-    const anual = (1+ip)*(1+rr)-1;
-    taxaMensal = Math.pow(1+anual, 1/12)-1;
-    isRendaFixaTributavel = true;
+    const taxaTotal = ipcaAnual + taxaRealAnual;
+    taxaMensal = anualParaMensalEfetivo(taxaTotal);
+    ir = aliquotaIR(diasTotais);
   }
 
   if(tipo === "renda_variavel"){
     taxaMensal = anualParaMensalEfetivo(rvAnual);
-    isRendaFixaTributavel = false;
+    ir = 0.15;
   }
+
+  // ===== SIMULAÇÃO =====
 
   const sim = simularComAporte(inicial, aporte, meses, taxaMensal);
 
   let lucroLiquido = sim.lucroBruto;
-  let impostosTxt = "";
 
-  if(isRendaFixaTributavel){
-    const aliq = aliquotaIR(diasTotais);
-    let ir = Math.max(0, sim.lucroBruto) * aliq;
-
-    let iof = 0;
-    if(aplicarIOF && diasTotais < 30){
-      iof = Math.max(0, sim.lucroBruto) * iofAprox(diasTotais);
-    }
-
-    lucroLiquido = sim.lucroBruto - ir - iof;
-
-    impostosTxt =
-      IR aprox (${(aliq*100).toFixed(1)}%): ${formatBRL(ir)}
-      + (iof > 0 ? <br>IOF aprox: ${formatBRL(iof)} : "");
-  }else if(isIsentoIR){
-    impostosTxt = "Isento de IR (aprox).";
-  }else{
-    impostosTxt = "Sem IR calculado (depende do tipo/realização do lucro).";
+  if(!isentoIR){
+    const imposto = sim.lucroBruto * ir;
+    lucroLiquido -= imposto;
   }
 
-  const finalLiquido = sim.investido + lucroLiquido;
+  if(aplicarIOF && diasTotais < 30){
+    const iof = sim.lucroBruto * iofAprox(diasTotais);
+    lucroLiquido -= iof;
+  }
+
+  const valorFinal = sim.investido + lucroLiquido;
 
   out.innerHTML =
-    Valor final (aprox): <b>${formatBRL(finalLiquido)}</b><br> +
-    Total investido: <b>${formatBRL(sim.investido)}</b><br> +
-    Lucro (aprox): <b>${formatBRL(lucroLiquido)}</b>;
+    "Valor final: " + formatBRL(valorFinal) +
+    "<br>Investido: " + formatBRL(sim.investido) +
+    "<br>Lucro líquido: " + formatBRL(lucroLiquido);
 
   det.innerHTML =
-    Taxa mensal usada: ${(taxaMensal*100).toFixed(3)}%<br> +
-    Prazo: ${meses} mês(es) (${diasTotais} dias aprox)<br> +
-    ${impostosTxt};
+    "Rentabilidade mensal (aprox.): " + (taxaMensal*100).toFixed(2) + "%" +
+    "<br>Tempo: " + meses + " meses" +
+    (diasExtra ? (" e " + diasExtra + " dias") : "");
 };
 
-// ✅ mantém compatibilidade: se algum lugar ainda chamar simularCompleto(), ele funciona.
-window.simularCompleto = function(){
-  window.simularInvestimentos();
-};
-
-function updateInvestBoxes(){
-  const sel = document.getElementById("invTipo");
-  if(!sel) return;
-
-  const t = sel.value;
-  const boxCDI = document.getElementById("boxCDI");
-  const boxPrefix = document.getElementById("boxPrefixado");
-  const boxIPCA = document.getElementById("boxIPCA");
-  const boxFundo = document.getElementById("boxFundo");
-  const boxRV = document.getElementById("boxRV");
-
-  boxCDI.style.display = "none";
-  boxPrefix.style.display = "none";
-  boxIPCA.style.display = "none";
-  boxFundo.style.display = "none";
-  boxRV.style.display = "none";
-
-  if(t === "poupanca" || t === "tesouro_selic" || t === "cdb" || t === "lci_lca" || t === "fundo_di"){
-    boxCDI.style.display = "block";
-  }
-  if(t === "prefixado"){
-    boxPrefix.style.display = "block";
-  }
-  if(t === "ipca_plus"){
-    boxIPCA.style.display = "block";
-  }
-  if(t === "fundo_di"){
-    boxFundo.style.display = "block";
-  }
-  if(t === "renda_variavel"){
-    boxRV.style.display = "block";
-  }
-}
 
 /* ===========================
-   ✅ INIT
+   ✅ INIT (anti-loop)
 =========================== */
 document.addEventListener("DOMContentLoaded", async ()=>{
   showLoading();
@@ -664,36 +688,18 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = await initFirebase();
   if(!ok) return;
 
-  // ✅ listeners antigos (se existir elemento)
-  const tipoSim = document.getElementById("tipoSimulacao");
-  if(tipoSim){
-    tipoSim.addEventListener("change", function(){
-      const a = document.getElementById("areaCompra");
-      const b = document.getElementById("areaInvestimento");
-      if(a) a.style.display = this.value==="compra" ? "block" : "none";
-      if(b) b.style.display = this.value==="investimento" ? "block" : "none";
-    });
-  }
+  // campos do simulador (mostrar/esconder)
+  document.getElementById("invTipo").addEventListener("change", atualizarCamposInvestimento);
+  atualizarCamposInvestimento();
 
-  const month = document.getElementById("month");
-  if(month){
-    month.addEventListener("change", ()=>{
-      mesAtual = window.getMes();
-      window.render();
-    });
-  }
+  document.getElementById("month").addEventListener("change", ()=>{
+    mesAtual = window.getMes();
+    window.render();
+  });
 
-  // ✅ init do simulador novo
-  const invTipo = document.getElementById("invTipo");
-  if(invTipo){
-    invTipo.addEventListener("change", updateInvestBoxes);
-    updateInvestBoxes();
-  }
-
-  // ✅ anti-loop: espera estado REAL do Firebase
   auth.onAuthStateChanged(async (user)=>{
     if(!user){
-      await new Promise(r=>setTimeout(r, 1000));
+      await new Promise(r=>setTimeout(r, 800));
       user = auth.currentUser;
     }
 
@@ -713,7 +719,9 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     try{
       const raw = localStorage.getItem("gastos_pro");
       if(raw) state = JSON.parse(raw) || { meses:{} };
-    }catch(e){ state = { meses:{} }; }
+    }catch(e){
+      state = { meses:{} };
+    }
 
     mesAtual = window.getMes();
     showApp();
