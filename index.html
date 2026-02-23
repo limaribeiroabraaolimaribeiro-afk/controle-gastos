@@ -15,7 +15,8 @@ body{ margin:0; background:var(--bg); color:var(--text); font-family:system-ui; 
 .wrap{max-width:980px;margin:auto;padding:16px}
 .card{ background:var(--card); border-radius:12px; padding:14px; margin-bottom:12px; }
 h1{font-size:20px;margin:0 0 10px}
-input,select,button{ width:100%; padding:10px; border-radius:10px; border:none; margin-top:5px; }
+input,select,button,textarea{ width:100%; padding:10px; border-radius:10px; border:none; margin-top:5px; box-sizing:border-box; }
+textarea{ min-height:90px; resize:vertical; }
 button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manipulation; }
 .kpis{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
 .kpi{ background:var(--card); padding:10px; border-radius:10px; }
@@ -23,12 +24,14 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
 #chart,#chartEvolucao{width:100%;height:220px}
 .fab{ position:fixed; bottom:20px; right:20px; background:#4CAF50; color:white; border-radius:50%; width:55px; height:55px; font-size:28px; display:flex; align-items:center; justify-content:center; }
 .toggle{float:right;cursor:pointer; margin-left:10px;}
-.small{opacity:.8;font-size:12px}
+.small{opacity:.85;font-size:12px}
 .badge{ display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.12); margin-left:6px; font-size:12px; }
 .light .badge{background:rgba(0,0,0,.08);}
 .row{ display:flex; gap:8px; align-items:center; }
 .row > * {flex:1}
 .row .mini {flex:0 0 auto; width:auto; padding:8px 10px; border-radius:10px;}
+hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
+.light hr{border-top:1px solid rgba(0,0,0,.08)}
 
 #debugBox{
   position:fixed; left:12px; right:12px; bottom:12px;
@@ -44,6 +47,15 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
   text-align:center;
   padding:24px;
   opacity:.9;
+}
+
+.linkbtn{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.18);
+}
+.light .linkbtn{
+  border:1px solid rgba(0,0,0,.18);
+  color:var(--text);
 }
 </style>
 </head>
@@ -68,7 +80,20 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
     <div id="configBox" class="card" style="display:none">
       <h3>⚙️ Configurações</h3>
       <b id="userName"></b><br><br>
+
+      <!-- ✅ Login Google direto -->
+      <button class="linkbtn" onclick="googleLogin()">Entrar / Trocar conta (Google)</button>
       <button onclick="logout()">Sair da conta</button>
+      <div class="small" style="margin-top:8px;opacity:.8">
+        Dica: se o popup não abrir no celular, o login será por redirecionamento automático.
+      </div>
+    </div>
+
+    <!-- ✅ HISTÓRICO DE MESES -->
+    <div class="card">
+      <h3>🗓️ Histórico de meses</h3>
+      <div class="small">Toque em um mês para abrir.</div>
+      <div id="listaMeses" class="small" style="margin-top:8px"></div>
     </div>
 
     <div class="card">
@@ -87,6 +112,9 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
       <select id="categoriaFixo"></select>
       <button onclick="addFixo()">Adicionar gasto fixo</button>
       <div id="listaFixos" class="small" style="margin-top:8px"></div>
+      <div class="small" style="margin-top:6px;opacity:.75">
+        Dica: o botão ❌ remove o gasto fixo para não entrar nos próximos meses.
+      </div>
     </div>
 
     <div class="card">
@@ -96,45 +124,93 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
       <input id="month" type="month">
       <label>Meta</label>
       <input id="meta" type="number">
+
+      <!-- ✅ ANOTAÇÕES DO MÊS (vai para histórico) -->
+      <label>Anotações do mês</label>
+      <textarea id="notes" placeholder="Ex: meta de cortar delivery, juntar para reserva, etc..."></textarea>
+
       <button onclick="saveSettings()">Salvar</button>
+      <div class="small" style="margin-top:6px;opacity:.8">
+        Ao salvar, salário/meta/anotações ficam guardados no histórico do mês.
+      </div>
     </div>
 
+    <!-- ✅ SIMULADOR DE INVESTIMENTOS (COM MAIS OPÇÕES) -->
     <div class="card">
-      <h3>🧠 Simulador Financeiro</h3>
-      <label>Tipo</label>
-      <select id="tipoSimulacao">
-        <option value="compra">Compra / Empréstimo</option>
-        <option value="investimento">Investimento</option>
+      <h3>🧠 Simulador de Investimentos (Mais opções)</h3>
+
+      <label>Tipo de investimento</label>
+      <select id="invTipo" onchange="atualizarCamposInvestimento()">
+        <option value="poupanca">Poupança</option>
+        <option value="tesouro_selic">Tesouro Selic</option>
+        <option value="cdb">CDB (CDI %)</option>
+        <option value="lci_lca">LCI/LCA (CDI % — isento IR)</option>
+        <option value="fundo_di">Fundo DI (CDI % - taxa adm)</option>
+        <option value="prefixado">Prefixado (% ao ano)</option>
+        <option value="ipca_plus">Tesouro IPCA+ (IPCA + taxa real)</option>
+        <option value="renda_variavel">Renda Variável (média % ao ano)</option>
       </select>
 
-      <div id="areaCompra">
-        <label>Valor total</label>
-        <input id="valorSimulacao" type="number">
-        <label>Parcelas</label>
-        <input id="parcelasSimulacao" type="number">
-        <label>Juros mensal (%)</label>
-        <input id="jurosSimulacao" type="number">
+      <label>Valor inicial (R$)</label>
+      <input id="invInicial" type="number" placeholder="Ex: 1000">
+
+      <label>Aporte mensal (R$) (opcional)</label>
+      <input id="invAporte" type="number" placeholder="Ex: 200">
+
+      <label>Tempo</label>
+      <div class="row">
+        <input id="invMeses" type="number" placeholder="Meses (ex: 24)">
+        <input id="invDias" type="number" placeholder="Dias (opcional)">
       </div>
 
-      <div id="areaInvestimento" style="display:none">
-        <label>Valor a investir</label>
-        <input id="valorInvestimento" type="number">
-        <label>Meses</label>
-        <input id="mesesInvestimento" type="number">
-        <label>% do CDI</label>
-        <input id="percentualInvest" type="number">
+      <div id="boxCDI" style="margin-top:10px">
+        <label>CDI (% ao ano)</label>
+        <input id="invCDI" type="number" placeholder="Ex: 10.65">
+        <label>Percentual do CDI (%)</label>
+        <input id="invPercCDI" type="number" placeholder="Ex: 110">
       </div>
 
-      <button onclick="simularCompleto()">Calcular</button>
-      <div id="resultadoSimulacao" style="margin-top:10px;font-weight:bold"></div>
+      <div id="boxPrefixado" style="display:none;margin-top:10px">
+        <label>Taxa prefixada (% ao ano)</label>
+        <input id="invPrefixado" type="number" placeholder="Ex: 12">
+      </div>
+
+      <div id="boxIPCA" style="display:none;margin-top:10px">
+        <label>IPCA (% ao ano)</label>
+        <input id="invIPCA" type="number" placeholder="Ex: 4.5">
+        <label>Taxa real (% ao ano)</label>
+        <input id="invReal" type="number" placeholder="Ex: 5.5">
+      </div>
+
+      <div id="boxFundo" style="display:none;margin-top:10px">
+        <label>Taxa de administração (% ao ano)</label>
+        <input id="invAdm" type="number" placeholder="Ex: 1.0">
+      </div>
+
+      <div id="boxRV" style="display:none;margin-top:10px">
+        <label>Retorno médio (% ao ano)</label>
+        <input id="invRV" type="number" placeholder="Ex: 15">
+      </div>
+
+      <div style="margin-top:10px">
+        <label>
+          <input id="invAplicarIOF" type="checkbox" style="width:auto;transform:scale(1.1);margin-right:8px">
+          Aplicar IOF (se resgatar antes de 30 dias) — estimativa
+        </label>
+      </div>
+
+      <button onclick="simularInvestimentos()">Calcular</button>
+
+      <div id="resultadoInv" style="margin-top:10px;font-weight:bold"></div>
+      <div id="detalhesInv" class="small" style="margin-top:8px"></div>
     </div>
 
-    <!-- ✅ ADICIONADO: CARD IA (Ollama) -->
+    <!-- ✅ CARD IA (Ollama) -->
     <div class="card" id="iaCard">
       <h3>🤖 IA (Ollama)</h3>
 
       <label>Pergunta</label>
-      <input id="iaPrompt" placeholder="Digite sua pergunta...">
+      <input id="iaPrompt" placeholder="Ex: com meus gastos, onde devo investir este mês?">
 
       <button onclick="iaPerguntar()">Perguntar</button>
 
@@ -143,8 +219,10 @@ button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manip
       <div class="small" style="margin-top:8px; opacity:.8">
         Status: <span id="iaStatus">Aguardando...</span>
       </div>
+      <div class="small" style="margin-top:6px;opacity:.75">
+        A IA usa automaticamente seu salário, gastos, categorias e anotações do mês para responder.
+      </div>
     </div>
-    <!-- ✅ FIM DO CARD IA -->
 
     <div class="kpis" id="kpis"></div>
 
@@ -176,7 +254,7 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
-<!-- ✅ ADICIONADO: carrega URL do tunnel (config.js) -->
+<!-- ✅ carrega URL do tunnel (config.js) -->
 <script src="./config.js"></script>
 
 <script>
@@ -227,18 +305,14 @@ async function initFirebase(){
     return false;
   }
 
-  // ✅ evita inicializar 2x (muito comum em mobile)
   try{
     if(!firebase.apps || !firebase.apps.length){
       firebase.initializeApp(FIREBASE_CONFIG);
     }
-  }catch(e){
-    // se já estava inicializado, ignora
-  }
+  }catch(e){}
 
   auth = firebase.auth();
 
-  // ✅ aguarda persistência antes de validar estado
   try{
     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   }catch(e){
@@ -253,6 +327,19 @@ window.logout = function(){
   auth.signOut()
     .then(()=> location.replace("./login.html"))
     .catch(e=>alert((e.code||"")+" - "+e.message));
+};
+
+// ✅ Login Google (funciona melhor no celular com redirect)
+window.googleLogin = async function(){
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    // em mobile, redirect é mais confiável
+    await auth.signInWithRedirect(provider);
+  }catch(e){
+    alert((e.code||"")+" - "+e.message);
+  }
 };
 
 function salvarCategorias(){ localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias)); }
@@ -282,6 +369,7 @@ window.getMes = ()=>{
 };
 
 function keyItem(i){ return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`; }
+
 function garantirFixosNoMes(d){
   const set = new Set((d.items||[]).map(keyItem));
   for(const f of fixos){
@@ -290,14 +378,22 @@ function garantirFixosNoMes(d){
     if(!set.has(k)){ d.items.unshift(obj); set.add(k); }
   }
 }
+
 window.getDataMes = ()=>{
   if(!state.meses[mesAtual]){
-    state.meses[mesAtual]={ salary:0, items:fixos.map(f=>({ ...f, isFixo:true })), meta:0 };
+    state.meses[mesAtual] = {
+      salary: 0,
+      items: fixos.map(f=>({ ...f, isFixo:true })),
+      meta: 0,
+      notes: ""
+    };
   }else{
     garantirFixosNoMes(state.meses[mesAtual]);
+    if(typeof state.meses[mesAtual].notes !== "string") state.meses[mesAtual].notes = "";
   }
   return state.meses[mesAtual];
 };
+
 function detectarCategoria(desc){
   const txt=(desc||"").toLowerCase();
   for(const r of regras){ if(txt.includes(r.palavra)) return r.categoria; }
@@ -313,6 +409,7 @@ window.addCategoria = ()=>{
   categorias.push(nome); input.value="";
   salvarCategorias(); renderCategorias();
 };
+
 function renderCategorias(){
   document.getElementById("listaCategorias").innerHTML = categorias.map(c=>`<div>• ${c}</div>`).join("");
   document.getElementById("categoriaFixo").innerHTML = categorias.map(c=>`<option value="${c}">${c}</option>`).join("");
@@ -324,18 +421,49 @@ window.addFixo = ()=>{
   const valor=Number(document.getElementById("valorFixo").value);
   const categoria=document.getElementById("categoriaFixo").value||"Outros";
   if(!desc || !valor || valor<=0){ alert("Preencha descrição e valor (maior que 0)."); return; }
+
   fixos.push({ desc, amount:valor, category:categoria, isFixo:true });
   document.getElementById("descFixo").value="";
   document.getElementById("valorFixo").value="";
+
   salvarFixos(); renderFixos();
   garantirFixosNoMes(window.getDataMes());
+  salvarTudoLocal();
   window.render();
 };
+
+// ✅ remover gasto fixo (botão ❌)
+window.removerFixo = function(idx){
+  if(idx<0 || idx>=fixos.length) return;
+  if(!confirm("Remover este gasto fixo? (ele não vai entrar nos próximos meses)")) return;
+
+  const alvo = fixos[idx];
+  fixos.splice(idx, 1);
+  salvarFixos();
+  renderFixos();
+
+  // remove também do mês atual (se estiver na lista)
+  const d = window.getDataMes();
+  d.items = (d.items||[]).filter(it => !(it.isFixo && keyItem(it) === keyItem(alvo)));
+  salvarTudoLocal();
+  window.render();
+};
+
 function renderFixos(){
   const div=document.getElementById("listaFixos");
-  div.innerHTML = fixos.length
-    ? fixos.map(f=>`<div>• ${f.desc} — R$ ${Number(f.amount).toFixed(2)} <span class="badge">${f.category}</span></div>`).join("")
-    : "<div>Nenhum gasto fixo cadastrado.</div>";
+  if(!fixos.length){
+    div.innerHTML = "<div>Nenhum gasto fixo cadastrado.</div>";
+    return;
+  }
+  div.innerHTML = fixos.map((f,idx)=>`
+    <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+      <div style="flex:1">
+        • ${f.desc} — R$ ${Number(f.amount).toFixed(2)}
+        <span class="badge">${f.category}</span>
+      </div>
+      <button class="mini" style="background:#d9534f" onclick="removerFixo(${idx})">❌</button>
+    </div>
+  `).join("");
 }
 
 window.abrirAdd = ()=>{
@@ -347,24 +475,63 @@ window.abrirAdd = ()=>{
   if(!desc || isNaN(valor)) return;
   const categoria = detectarCategoria(desc);
   d.items.push({ desc, amount:valor, category:categoria, isFixo:false });
-  fetch(API+"/addGasto",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,desc,amount:valor,category:categoria})}).catch(()=>{});
+
+  fetch(API+"/addGasto",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,desc,amount:valor,category:categoria})
+  }).catch(()=>{});
+
+  salvarTudoLocal();
   window.render();
 };
+
+// ✅ botão X agora remove fixo de verdade quando clicar em cima do fixo
 window.del = (i)=>{
   mesAtual=window.getMes();
   const d=window.getDataMes();
+  const item = d.items[i];
+  if(!item) return;
+
+  // se for fixo: remove também da lista de fixos
+  if(item.isFixo){
+    const k = keyItem(item);
+    fixos = fixos.filter(f => keyItem(f) !== k);
+    salvarFixos();
+    renderFixos();
+  }
+
   d.items.splice(i,1);
+  salvarTudoLocal();
   window.render();
 };
+
+// ✅ salvar salário/meta/notas no histórico do mês
 window.saveSettings = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   mesAtual=window.getMes();
   const d=window.getDataMes();
   d.salary=Number(document.getElementById("salary").value);
   d.meta=Number(document.getElementById("meta").value);
-  fetch(API+"/salvarMes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,salary:d.salary,meta:d.meta})}).catch(()=>{});
+  d.notes=String(document.getElementById("notes").value || "");
+
+  // mantém no histórico local
+  salvarTudoLocal();
+  renderListaMeses();
+
+  // mantém API (se existir endpoint; se não existir, não quebra)
+  fetch(API+"/salvarMes",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,salary:d.salary,meta:d.meta,notes:d.notes})
+  }).catch(()=>{});
+
   window.render();
 };
+
+function salvarTudoLocal(){
+  localStorage.setItem("gastos_pro", JSON.stringify(state));
+}
 
 function drawChart(items){
   const mapa={}; items.forEach(i=>{ const cat=i.category||"Outros"; mapa[cat]=(mapa[cat]||0)+Number(i.amount||0); });
@@ -372,17 +539,22 @@ function drawChart(items){
   if(grafico) grafico.destroy();
   grafico=new Chart(document.getElementById("chart"),{type:"doughnut",data:{labels,datasets:[{data:valores}]}} );
 }
+
 function drawEvolucao(){
   const meses=Object.keys(state.meses).sort();
   const valores=meses.map(m=>(state.meses[m].items||[]).reduce((a,b)=>a+Number(b.amount||0),0));
   if(graficoEvolucao) graficoEvolucao.destroy();
   graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{type:"line",data:{labels:meses,datasets:[{data:valores}]}} );
 }
+
 function paint(){
   const d=window.getDataMes();
+
   document.getElementById("salary").value=Number(d.salary||0);
   document.getElementById("month").value=mesAtual;
   document.getElementById("meta").value=d.meta||"";
+  document.getElementById("notes").value = d.notes || "";
+
   const total=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
   const sobra=Number(d.salary||0)-total;
 
@@ -392,9 +564,14 @@ function paint(){
     <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
     <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
   `;
+
   document.getElementById("list").innerHTML=(d.items||[]).map((i,idx)=>`
     <tr>
-      <td>${i.desc}${i.isFixo?` <span class="badge">Fixo</span>`:""} <span class="badge">${i.category||"Outros"}</span></td>
+      <td>
+        ${i.desc}
+        ${i.isFixo?` <span class="badge">Fixo</span>`:""}
+        <span class="badge">${i.category||"Outros"}</span>
+      </td>
       <td>R$ ${Number(i.amount||0).toFixed(2)}</td>
       <td><button onclick="del(${idx})">X</button></td>
     </tr>
@@ -403,11 +580,47 @@ function paint(){
   drawChart(d.items||[]);
   drawEvolucao();
 }
+
+// ✅ lista meses (histórico)
+function renderListaMeses(){
+  const el = document.getElementById("listaMeses");
+  const meses = Object.keys(state.meses||{}).sort().reverse();
+  if(!meses.length){
+    el.innerHTML = "<div>Nenhum mês salvo ainda.</div>";
+    return;
+  }
+  el.innerHTML = meses.map(m=>{
+    const d = state.meses[m] || {};
+    const total = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+    const sal = Number(d.salary||0);
+    const sobra = sal - total;
+    const tag = (m===mesAtual) ? `<span class="badge">Atual</span>` : "";
+    return `
+      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 0">
+        <div style="flex:1">
+          <b>${m}</b> ${tag}<br>
+          <span class="small">Salário R$ ${sal.toFixed(2)} • Gasto R$ ${total.toFixed(2)} • Sobra R$ ${sobra.toFixed(2)}</span>
+        </div>
+        <button class="mini" onclick="abrirMes('${m}')">Abrir</button>
+      </div>
+      <hr>
+    `;
+  }).join("");
+}
+
+window.abrirMes = function(m){
+  const monthEl = document.getElementById("month");
+  if(monthEl) monthEl.value = m;
+  mesAtual = m;
+  window.render();
+};
+
 window.render = ()=>{
   if(!window.USER_ID) return;
-  mesAtual=window.getMes();
-  const d=window.getDataMes();
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
   paint();
+  renderListaMeses();
 
   fetch(API+"/mes/"+window.USER_ID+"/"+mesAtual)
     .then(r=>r.json())
@@ -415,53 +628,264 @@ window.render = ()=>{
       const apiItems = Array.isArray(data)
         ? data.filter(x=>x && x.desc).map(x=>({desc:x.desc,amount:Number(x.amount||0),category:x.category||detectarCategoria(x.desc),isFixo:false}))
         : [];
+
       if(Array.isArray(data) && data.length){
-        d.salary=Number(data[0].salary||d.salary||0);
-        d.meta=Number(data[0].meta||d.meta||0);
+        d.salary = Number(data[0].salary||d.salary||0);
+        d.meta   = Number(data[0].meta||d.meta||0);
+        if(typeof data[0].notes === "string") d.notes = data[0].notes;
       }
+
       const merged=[], seen=new Set();
-      for(const f of fixos){ const obj={...f,isFixo:true}; const k=keyItem(obj); if(!seen.has(k)){merged.push(obj); seen.add(k);} }
-      for(const it of apiItems){ const k=keyItem(it); if(!seen.has(k)){merged.push(it); seen.add(k);} }
-      d.items=merged;
-      localStorage.setItem("gastos_pro", JSON.stringify(state));
+
+      // fixos primeiro
+      for(const f of fixos){
+        const obj={...f,isFixo:true};
+        const k=keyItem(obj);
+        if(!seen.has(k)){merged.push(obj); seen.add(k);}
+      }
+
+      // depois itens da API
+      for(const it of apiItems){
+        const k=keyItem(it);
+        if(!seen.has(k)){merged.push(it); seen.add(k);}
+      }
+
+      d.items = merged;
+
+      salvarTudoLocal();
       paint();
+      renderListaMeses();
     })
-    .catch(()=>paint());
+    .catch(()=>{
+      salvarTudoLocal();
+      paint();
+      renderListaMeses();
+    });
 };
 
-window.simularCompleto = ()=>{
-  const tipo=document.getElementById("tipoSimulacao").value;
-  const d=window.getDataMes();
-  const gastos=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-  const salario=Number(d.salary||0);
-  const out=document.getElementById("resultadoSimulacao");
-
-  if(tipo==="compra"){
-    const valor=Number(document.getElementById("valorSimulacao").value);
-    const parcelas=Number(document.getElementById("parcelasSimulacao").value);
-    const juros=Number(document.getElementById("jurosSimulacao").value)/100;
-    const parcela = valor * ( juros / (1 - Math.pow(1+juros, -parcelas)) );
-    const total = parcela * parcelas;
-    const jurosTotal = total - valor;
-    const sobra = salario - gastos - parcela;
-    const resultado = sobra>salario*0.3 ? "🟢 Vale a pena" : sobra>0 ? "🟡 Cuidado" : "🔴 Não recomendado";
-    out.innerHTML = `Parcela real: R$ ${parcela.toFixed(2)}<br>Total pago: R$ ${total.toFixed(2)}<br>Juros pagos: R$ ${jurosTotal.toFixed(2)}<br>Sobra após pagar: R$ ${sobra.toFixed(2)}<br><br>${resultado}`;
-  }else{
-    const valor=Number(document.getElementById("valorInvestimento").value);
-    const meses=Number(document.getElementById("mesesInvestimento").value);
-    const perc=Number(document.getElementById("percentualInvest").value)/100;
-    const taxaCDI=0.012;
-    const total=valor*(1+(taxaCDI*perc))**meses;
-    const lucro=total-valor;
-    out.innerHTML = `Valor final: R$ ${total.toFixed(2)}<br>Lucro: R$ ${lucro.toFixed(2)}`;
+/* ==========================================================
+   ✅ SIMULADOR DE INVESTIMENTOS (MAIS OPÇÕES)
+========================================================== */
+function clampNum(v, def=0){
+  v = Number(v);
+  return Number.isFinite(v) ? v : def;
+}
+function formatBRL(n){
+  return "R$ " + Number(n||0).toFixed(2).replace(".", ",");
+}
+function anualParaMensalEfetivo(taxaAnual){
+  const r = taxaAnual/100;
+  return Math.pow(1+r, 1/12) - 1;
+}
+function aliquotaIR(dias){
+  if(dias <= 180) return 0.225;
+  if(dias <= 360) return 0.20;
+  if(dias <= 720) return 0.175;
+  return 0.15;
+}
+function iofAprox(dias){
+  if(dias >= 30) return 0;
+  if(dias <= 0) return 0.96;
+  return (30 - dias) / 30 * 0.96;
+}
+function simularComAporte(inicial, aporteMensal, meses, taxaMensal){
+  let saldo = inicial;
+  for(let m=1; m<=meses; m++){
+    saldo = saldo * (1 + taxaMensal) + aporteMensal;
   }
+  const investido = inicial + aporteMensal * meses;
+  const lucroBruto = saldo - investido;
+  return { final: saldo, investido, lucroBruto };
+}
+function atualizarCamposInvestimento(){
+  const tipo = document.getElementById("invTipo").value;
+  const boxCDI = document.getElementById("boxCDI");
+  const boxPrefixado = document.getElementById("boxPrefixado");
+  const boxIPCA = document.getElementById("boxIPCA");
+  const boxFundo = document.getElementById("boxFundo");
+  const boxRV = document.getElementById("boxRV");
+
+  boxCDI.style.display = "none";
+  boxPrefixado.style.display = "none";
+  boxIPCA.style.display = "none";
+  boxFundo.style.display = "none";
+  boxRV.style.display = "none";
+
+  if(tipo === "poupanca" || tipo === "tesouro_selic" || tipo === "cdb" || tipo === "lci_lca" || tipo === "fundo_di"){
+    boxCDI.style.display = "block";
+  }
+  if(tipo === "prefixado"){ boxPrefixado.style.display = "block"; }
+  if(tipo === "ipca_plus"){ boxIPCA.style.display = "block"; }
+  if(tipo === "fundo_di"){ boxFundo.style.display = "block"; }
+  if(tipo === "renda_variavel"){ boxRV.style.display = "block"; }
+}
+window.simularInvestimentos = function(){
+  const tipo = document.getElementById("invTipo").value;
+
+  const inicial = Math.max(0, clampNum(document.getElementById("invInicial").value, 0));
+  const aporte  = Math.max(0, clampNum(document.getElementById("invAporte").value, 0));
+  let meses     = Math.max(0, Math.floor(clampNum(document.getElementById("invMeses").value, 0)));
+  let diasExtra = Math.max(0, Math.floor(clampNum(document.getElementById("invDias").value, 0)));
+
+  if(meses === 0 && diasExtra > 0){
+    meses = Math.floor(diasExtra / 30);
+    diasExtra = diasExtra % 30;
+  }
+
+  const diasTotais = meses*30 + diasExtra;
+  const aplicarIOF = !!document.getElementById("invAplicarIOF").checked;
+
+  const out = document.getElementById("resultadoInv");
+  const det = document.getElementById("detalhesInv");
+
+  if(inicial <= 0 && aporte <= 0){
+    out.textContent = "Informe um valor inicial ou um aporte mensal.";
+    det.textContent = "";
+    return;
+  }
+  if(meses <= 0 && diasExtra <= 0){
+    out.textContent = "Informe o tempo (meses ou dias).";
+    det.textContent = "";
+    return;
+  }
+
+  // taxa mensal
+  let taxaMensal = 0;
+  let textoTaxa = "";
+
+  if(tipo === "poupanca"){
+    // aproximação simples: 70% CDI ao ano (depende da Selic)
+    const cdi = clampNum(document.getElementById("invCDI").value, 10.5);
+    const anual = cdi * 0.70;
+    taxaMensal = anualParaMensalEfetivo(anual);
+    textoTaxa = `Poupança (aprox. 70% do CDI): ~${anual.toFixed(2)}% a.a.`;
+  }
+
+  if(tipo === "tesouro_selic"){
+    const cdi = clampNum(document.getElementById("invCDI").value, 10.5);
+    taxaMensal = anualParaMensalEfetivo(cdi);
+    textoTaxa = `Tesouro Selic (aprox CDI): ${cdi.toFixed(2)}% a.a.`;
+  }
+
+  if(tipo === "cdb" || tipo === "lci_lca" || tipo === "fundo_di"){
+    const cdi = clampNum(document.getElementById("invCDI").value, 10.5);
+    const perc = clampNum(document.getElementById("invPercCDI").value, 100);
+    let anual = cdi * (perc/100);
+
+    if(tipo === "fundo_di"){
+      const adm = clampNum(document.getElementById("invAdm").value, 1.0);
+      anual = Math.max(0, anual - adm);
+      textoTaxa = `Fundo DI: CDI ${cdi.toFixed(2)}% * ${perc.toFixed(0)}% - adm ${adm.toFixed(2)}% ≈ ${anual.toFixed(2)}% a.a.`;
+    }else if(tipo === "lci_lca"){
+      textoTaxa = `LCI/LCA: CDI ${cdi.toFixed(2)}% * ${perc.toFixed(0)}% ≈ ${anual.toFixed(2)}% a.a. (isento IR)`;
+    }else{
+      textoTaxa = `CDB: CDI ${cdi.toFixed(2)}% * ${perc.toFixed(0)}% ≈ ${anual.toFixed(2)}% a.a.`;
+    }
+
+    taxaMensal = anualParaMensalEfetivo(anual);
+  }
+
+  if(tipo === "prefixado"){
+    const anual = clampNum(document.getElementById("invPrefixado").value, 12);
+    taxaMensal = anualParaMensalEfetivo(anual);
+    textoTaxa = `Prefixado: ${anual.toFixed(2)}% a.a.`;
+  }
+
+  if(tipo === "ipca_plus"){
+    const ipca = clampNum(document.getElementById("invIPCA").value, 4.5);
+    const real = clampNum(document.getElementById("invReal").value, 5.5);
+    const anual = ( (1+ipca/100) * (1+real/100) - 1 ) * 100;
+    taxaMensal = anualParaMensalEfetivo(anual);
+    textoTaxa = `IPCA+ (aprox): IPCA ${ipca.toFixed(2)}% + real ${real.toFixed(2)}% ≈ ${anual.toFixed(2)}% a.a.`;
+  }
+
+  if(tipo === "renda_variavel"){
+    const anual = clampNum(document.getElementById("invRV").value, 15);
+    taxaMensal = anualParaMensalEfetivo(anual);
+    textoTaxa = `Renda variável (média): ${anual.toFixed(2)}% a.a.`;
+  }
+
+  // simula (meses inteiros)
+  const res = simularComAporte(inicial, aporte, meses, taxaMensal);
+
+  // ajuste por dias extras (juros proporcional aproximado)
+  let final = res.final;
+  if(diasExtra > 0){
+    final = final * (1 + taxaMensal * (diasExtra/30));
+  }
+
+  const investido = inicial + aporte * meses;
+  let lucroBruto = final - investido;
+
+  // impostos (aprox)
+  let imposto = 0;
+  let iof = 0;
+
+  const temIR = (tipo === "cdb" || tipo === "tesouro_selic" || tipo === "fundo_di" || tipo === "prefixado" || tipo === "ipca_plus");
+  const isentoIR = (tipo === "lci_lca" || tipo === "poupanca" || tipo === "renda_variavel"); // RV tem impostos próprios, aqui simplificando
+
+  if(temIR){
+    const aliq = aliquotaIR(diasTotais);
+    imposto = Math.max(0, lucroBruto) * aliq;
+  }else if(!isentoIR && tipo === "renda_variavel"){
+    imposto = 0; // simplificado
+  }
+
+  if(aplicarIOF){
+    const fator = iofAprox(diasTotais);
+    iof = Math.max(0, lucroBruto) * fator;
+  }
+
+  const lucroLiquido = lucroBruto - imposto - iof;
+
+  out.textContent = `Final: ${formatBRL(final)} • Lucro líquido: ${formatBRL(lucroLiquido)}`;
+  det.textContent =
+    `${textoTaxa}\n` +
+    `Investido: ${formatBRL(investido)}\n` +
+    `Lucro bruto: ${formatBRL(lucroBruto)}\n` +
+    `IR (estimado): ${formatBRL(imposto)}\n` +
+    `IOF (estimado): ${formatBRL(iof)}\n` +
+    `Período: ~${diasTotais} dias`;
 };
 
-// ===============================
-// ✅ ADICIONADO: IA via Cloudflare Tunnel (Ollama)
-// ===============================
+/* ==========================================================
+   ✅ IA (Ollama) COM CONTEXTO DO SEU MÊS
+========================================================== */
 function getIaBase(){
   return (window.API_BASE_URL || "").replace(/\/$/, "");
+}
+
+function resumoDoMesParaIA(){
+  const d = window.getDataMes();
+  const items = d.items || [];
+  const total = items.reduce((a,b)=>a+Number(b.amount||0),0);
+  const sobra = Number(d.salary||0) - total;
+
+  // total por categoria
+  const porCat = {};
+  for(const it of items){
+    const c = it.category || "Outros";
+    porCat[c] = (porCat[c] || 0) + Number(it.amount||0);
+  }
+
+  const topCats = Object.entries(porCat)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,6)
+    .map(([c,v])=>`${c}: R$ ${v.toFixed(2)}`)
+    .join(", ");
+
+  const fixosTotal = items.filter(x=>x.isFixo).reduce((a,b)=>a+Number(b.amount||0),0);
+
+  return `
+MÊS: ${mesAtual}
+SALÁRIO: R$ ${Number(d.salary||0).toFixed(2)}
+META: R$ ${Number(d.meta||0).toFixed(2)}
+GASTO TOTAL: R$ ${total.toFixed(2)}
+GASTO FIXO TOTAL: R$ ${fixosTotal.toFixed(2)}
+SOBRA: R$ ${sobra.toFixed(2)}
+TOP CATEGORIAS: ${topCats || "sem dados"}
+ANOTAÇÕES: ${(d.notes||"").trim() || "(vazio)"}
+  `.trim();
 }
 
 async function iaHealth(){
@@ -484,8 +908,8 @@ window.iaPerguntar = async function(){
   const outEl = document.getElementById("iaResposta");
   const statusEl = document.getElementById("iaStatus");
 
-  const prompt = (promptEl.value || "").trim();
-  if(!prompt){
+  const pergunta = (promptEl.value || "").trim();
+  if(!pergunta){
     outEl.textContent = "Digite uma pergunta.";
     return;
   }
@@ -499,12 +923,27 @@ window.iaPerguntar = async function(){
 
     const url = base + "/api/chat";
 
+    const contexto = resumoDoMesParaIA();
+
+    const promptFinal =
+`Você é um consultor financeiro pessoal. Use os dados abaixo para responder de forma prática.
+- Se eu perguntar sobre investimento, sugira 1 a 3 opções coerentes com minha SOBRA e perfil conservador por padrão.
+- Se a SOBRA estiver negativa, explique como ajustar gastos antes de investir.
+- Responda em português, direto, com passos.
+
+DADOS DO USUÁRIO:
+${contexto}
+
+PERGUNTA:
+${pergunta}
+`;
+
     const resp = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "llama3.2:3b",
-        prompt
+        prompt: promptFinal
       })
     });
 
@@ -517,47 +956,40 @@ window.iaPerguntar = async function(){
     if(statusEl) statusEl.textContent = "Erro ❌";
   }
 };
-// ===============================
-// ✅ FIM IA
-// ===============================
 
+/* ==========================================================
+   ✅ INIT
+========================================================== */
 document.addEventListener("DOMContentLoaded", async ()=>{
   showLoading();
 
   const ok = await initFirebase();
   if(!ok) return;
 
-  // ✅ seta mês padrão no input (evita vazio em alguns celulares)
+  // mês padrão
   const monthEl = document.getElementById("month");
   if(monthEl && !monthEl.value){
     monthEl.value = new Date().toISOString().slice(0,7);
   }
 
-  document.getElementById("tipoSimulacao").addEventListener("change", function(){
-    document.getElementById("areaCompra").style.display = this.value==="compra" ? "block" : "none";
-    document.getElementById("areaInvestimento").style.display = this.value==="investimento" ? "block" : "none";
-  });
+  // investimento: mostra campos corretos
+  atualizarCamposInvestimento();
 
   document.getElementById("month").addEventListener("change", ()=>{
     mesAtual = window.getMes();
     window.render();
   });
 
-  // ✅ ADICIONADO: checa status IA quando abrir
-  setTimeout(()=>{ 
-    if(document.getElementById("iaStatus")) iaHealth();
-  }, 1200);
+  // tenta pegar resultado do redirect do Google (se teve login)
+  try{
+    await auth.getRedirectResult();
+  }catch(e){}
 
-  // ✅ evita “disparar 2x”
   const unsub = auth.onAuthStateChanged(async (user)=>{
     unsub && unsub();
 
     if(!user){
-      await new Promise(r=>setTimeout(r, 1000));
-      user = auth.currentUser;
-    }
-
-    if(!user){
+      // se não tiver logado, manda pro login.html (como você já fazia)
       location.replace("./login.html");
       return;
     }
@@ -578,6 +1010,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     mesAtual = window.getMes();
     showApp();
     window.render();
+    iaHealth();
   });
 });
 </script>
