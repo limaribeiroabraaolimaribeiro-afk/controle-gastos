@@ -86,24 +86,15 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 }
 
 /* Histórico bonito */
-.histHeader{
-  padding:18px 16px 8px;
-}
+.histHeader{ padding:18px 16px 8px; }
 .histHero{
   background:linear-gradient(135deg, rgba(86,156,255,.25), rgba(76,175,80,.18));
   border:1px solid rgba(255,255,255,.12);
   border-radius:18px;
   padding:14px;
 }
-.light .histHero{
-  border:1px solid rgba(0,0,0,.10);
-}
-.histGrid{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap:10px;
-  margin-top:12px;
-}
+.light .histHero{ border:1px solid rgba(0,0,0,.10); }
+.histGrid{ display:grid; grid-template-columns: 1fr; gap:10px; margin-top:12px; }
 .histItem{
   background:var(--card);
   border-radius:16px;
@@ -118,9 +109,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 .histLeft{ flex:1; }
 .histMonth{ font-weight:900; font-size:14px; }
 .histMeta{ margin-top:4px; }
-.histNums{
-  display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;
-}
+.histNums{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
 .pill{
   display:inline-flex; gap:6px; align-items:center;
   padding:6px 10px; border-radius:999px;
@@ -129,10 +118,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 }
 .light .pill{ background:rgba(0,0,0,.06); }
 .pill b{ font-weight:800; }
-.histBtn{
-  width:auto; padding:10px 12px;
-  border-radius:14px;
-}
+.histBtn{ width:auto; padding:10px 12px; border-radius:14px; }
 </style>
 </head>
 
@@ -154,7 +140,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
     </h1>
 
-    <!-- ✅ CONFIG + HISTÓRICO agora fica AQUI -->
+    <!-- ✅ CONFIG + HISTÓRICO -->
     <div id="configBox" class="card" style="display:none">
       <h3>⚙️ Configurações</h3>
       <b id="userName"></b>
@@ -208,9 +194,9 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       </div>
     </div>
 
-    <!-- ✅ SIMULADOR (mantido) -->
+    <!-- ✅ SIMULADOR INVESTIMENTOS -->
     <div class="card">
-      <h3>🧠 Simulador de Investimentos (Mais opções)</h3>
+      <h3>📈 Simulador de Investimentos (Mais opções)</h3>
 
       <label>Tipo de investimento</label>
       <select id="invTipo" onchange="atualizarCamposInvestimento()">
@@ -276,6 +262,42 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 
       <div id="resultadoInv" style="margin-top:10px;font-weight:bold"></div>
       <div id="detalhesInv" class="small" style="margin-top:8px"></div>
+    </div>
+
+    <!-- ✅ SIMULADOR EMPRÉSTIMO/COMPRA -->
+    <div class="card">
+      <h3>💳 Simulador de Empréstimo / Compra</h3>
+
+      <label>Tipo</label>
+      <select id="empTipo" onchange="empToggleCampos()">
+        <option value="financiamento">Financiamento (Price)</option>
+        <option value="juros_simples">Juros simples</option>
+      </select>
+
+      <label>Valor emprestado / valor da compra (R$)</label>
+      <input id="empValor" type="number" placeholder="Ex: 5000">
+
+      <label>Parcelas</label>
+      <input id="empParcelas" type="number" placeholder="Ex: 12">
+
+      <label>Juros ao mês (%)</label>
+      <input id="empJuros" type="number" placeholder="Ex: 3">
+
+      <div id="empCamposExtras" style="margin-top:10px">
+        <label>Entrada (R$) (opcional)</label>
+        <input id="empEntrada" type="number" placeholder="Ex: 1000">
+        <label>Tarifa / taxa fixa (R$) (opcional)</label>
+        <input id="empTarifa" type="number" placeholder="Ex: 50">
+      </div>
+
+      <button onclick="simularEmprestimo()">Calcular</button>
+
+      <div id="resultadoEmp" style="margin-top:10px;font-weight:bold"></div>
+      <div id="detalhesEmp" class="small" style="margin-top:8px; white-space:pre-wrap;"></div>
+
+      <div class="small" style="margin-top:8px;opacity:.8">
+        Dica: o app compara a parcela com sua sobra atual (Salário - Gastos).
+      </div>
     </div>
 
     <!-- ✅ IA -->
@@ -398,9 +420,7 @@ function showLoading(){
   document.getElementById("screenHistory").classList.remove("show");
   document.getElementById("loading").style.display = "flex";
 }
-function hideLoading(){
-  document.getElementById("loading").style.display = "none";
-}
+function hideLoading(){ document.getElementById("loading").style.display = "none"; }
 function showMain(){
   hideLoading();
   document.getElementById("screenHistory").classList.remove("show");
@@ -416,31 +436,24 @@ window.abrirHistorico = function(){
   renderListaMeses();
   showHistory();
 };
-
-window.voltarDaTelaHistorico = function(){
-  showMain();
-};
+window.voltarDaTelaHistorico = function(){ showMain(); };
 
 async function initFirebase(){
   if(!window.firebase){
     dbg("Firebase não carregou (sem internet ou bloqueio).");
     return false;
   }
-
   try{
     if(!firebase.apps || !firebase.apps.length){
       firebase.initializeApp(FIREBASE_CONFIG);
     }
   }catch(e){}
-
   auth = firebase.auth();
-
   try{
     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   }catch(e){
     dbg("Persistência:\n" + (e.code||"") + " - " + (e.message||e));
   }
-
   return true;
 }
 
@@ -476,7 +489,6 @@ function carregarFixos(){
 }
 
 window.toggleTheme = ()=> document.body.classList.toggle("light");
-
 window.abrirConfig = ()=>{
   const box = document.getElementById("configBox");
   box.style.display = box.style.display==="none" ? "block" : "none";
@@ -489,7 +501,6 @@ window.getMes = ()=>{
 };
 
 function keyItem(i){ return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`; }
-
 function garantirFixosNoMes(d){
   const set = new Set((d.items||[]).map(keyItem));
   for(const f of fixos){
@@ -641,9 +652,7 @@ window.saveSettings = ()=>{
   window.render();
 };
 
-function salvarTudoLocal(){
-  localStorage.setItem("gastos_pro", JSON.stringify(state));
-}
+function salvarTudoLocal(){ localStorage.setItem("gastos_pro", JSON.stringify(state)); }
 
 function drawChart(items){
   const mapa={}; items.forEach(i=>{ const cat=i.category||"Outros"; mapa[cat]=(mapa[cat]||0)+Number(i.amount||0); });
@@ -651,14 +660,12 @@ function drawChart(items){
   if(grafico) grafico.destroy();
   grafico=new Chart(document.getElementById("chart"),{type:"doughnut",data:{labels,datasets:[{data:valores}]}} );
 }
-
 function drawEvolucao(){
   const meses=Object.keys(state.meses).sort();
   const valores=meses.map(m=>(state.meses[m].items||[]).reduce((a,b)=>a+Number(b.amount||0),0));
   if(graficoEvolucao) graficoEvolucao.destroy();
   graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{type:"line",data:{labels:meses,datasets:[{data:valores}]}} );
 }
-
 function paint(){
   const d=window.getDataMes();
 
@@ -691,14 +698,21 @@ function paint(){
 
   drawChart(d.items||[]);
   drawEvolucao();
+
+  // ✅ atualiza “referência” do simulador de empréstimo (sobra atual)
+  const ref = document.getElementById("detalhesEmp");
+  if(ref){
+    // não sobrescreve se usuário já calculou; só se vazio
+    if(!ref.textContent.trim()){
+      ref.textContent = `Sobra atual (Salário - Gastos): R$ ${sobra.toFixed(2)}`;
+    }
+  }
 }
 
 /* =========================
-   ✅ HISTÓRICO (TELA BONITA)
+   ✅ HISTÓRICO
 ========================= */
-function formatBRL(n){
-  return "R$ " + Number(n||0).toFixed(2).replace(".", ",");
-}
+function formatBRL(n){ return "R$ " + Number(n||0).toFixed(2).replace(".", ","); }
 function renderListaMeses(){
   const el = document.getElementById("listaMeses");
   const meses = Object.keys(state.meses||{}).sort().reverse();
@@ -706,18 +720,14 @@ function renderListaMeses(){
     el.innerHTML = `<div class="card"><div class="small">Nenhum mês salvo ainda.</div></div>`;
     return;
   }
-
   el.innerHTML = meses.map(m=>{
     const d = state.meses[m] || {};
     const total = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
     const sal = Number(d.salary||0);
     const sobra = sal - total;
-
     const isAtual = (m === mesAtual);
     const tag = isAtual ? `<span class="badge">Atual</span>` : ``;
-
     const corSobra = sobra >= 0 ? "var(--ok)" : "var(--danger)";
-
     return `
       <div class="histItem">
         <div class="histLeft">
@@ -734,14 +744,12 @@ function renderListaMeses(){
     `;
   }).join("");
 }
-
 window.abrirMesDoHistorico = function(m){
   const monthEl = document.getElementById("month");
   if(monthEl) monthEl.value = m;
   mesAtual = m;
   window.render();
   showMain();
-  // fecha config se estava aberto
   const box = document.getElementById("configBox");
   if(box) box.style.display = "none";
 };
@@ -766,47 +774,33 @@ window.render = ()=>{
       }
 
       const merged=[], seen=new Set();
-
       for(const f of fixos){
         const obj={...f,isFixo:true};
         const k=keyItem(obj);
         if(!seen.has(k)){merged.push(obj); seen.add(k);}
       }
-
       for(const it of apiItems){
         const k=keyItem(it);
         if(!seen.has(k)){merged.push(it); seen.add(k);}
       }
-
       d.items = merged;
 
       salvarTudoLocal();
       paint();
-      // se estiver na tela de histórico, atualiza lista também
-      if(document.getElementById("screenHistory").classList.contains("show")){
-        renderListaMeses();
-      }
+      if(document.getElementById("screenHistory").classList.contains("show")) renderListaMeses();
     })
     .catch(()=>{
       salvarTudoLocal();
       paint();
-      if(document.getElementById("screenHistory").classList.contains("show")){
-        renderListaMeses();
-      }
+      if(document.getElementById("screenHistory").classList.contains("show")) renderListaMeses();
     });
 };
 
 /* ==========================================================
-   ✅ SIMULADOR DE INVESTIMENTOS (MESMO DO SEU)
+   ✅ SIMULADOR INVESTIMENTOS
 ========================================================== */
-function clampNum(v, def=0){
-  v = Number(v);
-  return Number.isFinite(v) ? v : def;
-}
-function anualParaMensalEfetivo(taxaAnual){
-  const r = taxaAnual/100;
-  return Math.pow(1+r, 1/12) - 1;
-}
+function clampNum(v, def=0){ v = Number(v); return Number.isFinite(v) ? v : def; }
+function anualParaMensalEfetivo(taxaAnual){ const r = taxaAnual/100; return Math.pow(1+r, 1/12) - 1; }
 function aliquotaIR(dias){
   if(dias <= 180) return 0.225;
   if(dias <= 360) return 0.20;
@@ -974,11 +968,104 @@ window.simularInvestimentos = function(){
 };
 
 /* ==========================================================
+   ✅ SIMULADOR EMPRÉSTIMO / COMPRA
+========================================================== */
+function empToggleCampos(){
+  // hoje só muda o texto da explicação, mas deixei pronto caso você queira esconder/mostrar
+  const tipo = document.getElementById("empTipo").value;
+  const extras = document.getElementById("empCamposExtras");
+  extras.style.display = "block";
+}
+function empCalcPrice(valor, jurosMensal, n){
+  // Price: PMT = PV * i / (1 - (1+i)^-n)
+  if(n <= 0) return 0;
+  if(jurosMensal <= 0) return valor / n;
+  const i = jurosMensal;
+  return valor * ( i / (1 - Math.pow(1+i, -n)) );
+}
+function empCalcJurosSimples(valor, jurosMensal, n){
+  // Juros simples: total = PV*(1+i*n) ; parcela = total/n
+  if(n <= 0) return { total: 0, parcela: 0 };
+  const total = valor * (1 + jurosMensal * n);
+  return { total, parcela: total / n };
+}
+function empFormat(n){
+  return "R$ " + Number(n||0).toFixed(2).replace(".", ",");
+}
+window.simularEmprestimo = function(){
+  const tipo = document.getElementById("empTipo").value;
+
+  const valorBruto = Math.max(0, clampNum(document.getElementById("empValor").value, 0));
+  const entrada = Math.max(0, clampNum(document.getElementById("empEntrada").value, 0));
+  const tarifa = Math.max(0, clampNum(document.getElementById("empTarifa").value, 0));
+  const parcelas = Math.max(1, Math.floor(clampNum(document.getElementById("empParcelas").value, 0)));
+  const juros = Math.max(0, clampNum(document.getElementById("empJuros").value, 0)) / 100;
+
+  const out = document.getElementById("resultadoEmp");
+  const det = document.getElementById("detalhesEmp");
+
+  if(valorBruto <= 0){
+    out.textContent = "Informe o valor.";
+    det.textContent = "";
+    return;
+  }
+  if(parcelas <= 0){
+    out.textContent = "Informe as parcelas.";
+    det.textContent = "";
+    return;
+  }
+
+  const pv = Math.max(0, valorBruto - entrada) + tarifa;
+
+  let parcela = 0;
+  let total = 0;
+  let jurosTotal = 0;
+
+  if(tipo === "financiamento"){
+    parcela = empCalcPrice(pv, juros, parcelas);
+    total = parcela * parcelas;
+    jurosTotal = total - pv;
+  }else{
+    const r = empCalcJurosSimples(pv, juros, parcelas);
+    parcela = r.parcela;
+    total = r.total;
+    jurosTotal = total - pv;
+  }
+
+  // compara com sobra do mês
+  const d = window.getDataMes();
+  const gastos = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+  const salario = Number(d.salary||0);
+  const sobra = salario - gastos;
+  const sobraPosParcela = sobra - parcela;
+
+  let sinal = "🟡";
+  let msg = "Cuidado";
+  if(sobraPosParcela >= salario*0.3){ sinal = "🟢"; msg = "Dá pra pagar com folga"; }
+  else if(sobraPosParcela > 0){ sinal = "🟡"; msg = "Dá pra pagar, mas aperta"; }
+  else { sinal = "🔴"; msg = "Não recomendado (fica negativo)"; }
+
+  out.textContent = `${sinal} Parcela: ${empFormat(parcela)} • Total: ${empFormat(total)}`;
+
+  det.textContent =
+`Tipo: ${tipo === "financiamento" ? "Financiamento (Price)" : "Juros simples"}
+Valor informado: ${empFormat(valorBruto)}
+Entrada: ${empFormat(entrada)}
+Tarifa/taxa fixa: ${empFormat(tarifa)}
+Valor financiado (PV): ${empFormat(pv)}
+Juros a.m.: ${(juros*100).toFixed(2)}%
+Parcelas: ${parcelas}
+Juros pagos (estimado): ${empFormat(jurosTotal)}
+
+Sobra atual (Salário - Gastos): ${empFormat(sobra)}
+Sobra após parcela: ${empFormat(sobraPosParcela)}
+Análise: ${msg}`;
+};
+
+/* ==========================================================
    ✅ IA (Ollama)
 ========================================================== */
-function getIaBase(){
-  return (window.API_BASE_URL || "").replace(/\/$/, "");
-}
+function getIaBase(){ return (window.API_BASE_URL || "").replace(/\/$/, ""); }
 function resumoDoMesParaIA(){
   const d = window.getDataMes();
   const items = d.items || [];
@@ -1078,7 +1165,7 @@ ${pergunta}
 };
 
 /* =========================
-   ✅ INIT / RENDER
+   ✅ INIT
 ========================= */
 document.addEventListener("DOMContentLoaded", async ()=>{
   showLoading();
@@ -1092,6 +1179,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }
 
   atualizarCamposInvestimento();
+  empToggleCampos();
 
   document.getElementById("month").addEventListener("change", ()=>{
     mesAtual = window.getMes();
