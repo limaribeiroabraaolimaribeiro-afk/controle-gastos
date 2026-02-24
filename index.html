@@ -9,36 +9,43 @@
 <meta name="theme-color" content="#569cff">
 
 <style>
-:root{ --bg:#0b1020; --card:#ffffff0f; --text:#eaf0ff; --accent:#569cff; }
+:root{ --bg:#0b1020; --card:#ffffff0f; --text:#eaf0ff; --accent:#569cff; --danger:#d9534f; --ok:#4CAF50; }
 .light{ --bg:#f4f6ff; --card:#ffffff; --text:#111; }
+*{box-sizing:border-box}
 body{ margin:0; background:var(--bg); color:var(--text); font-family:system-ui; }
 .wrap{max-width:980px;margin:auto;padding:16px}
-.card{ background:var(--card); border-radius:12px; padding:14px; margin-bottom:12px; }
+.card{ background:var(--card); border-radius:14px; padding:14px; margin-bottom:12px; }
 h1{font-size:20px;margin:0 0 10px}
-input,select,button,textarea{ width:100%; padding:10px; border-radius:10px; border:none; margin-top:5px; box-sizing:border-box; }
+h3{margin:0 0 10px}
+input,select,button,textarea{ width:100%; padding:10px; border-radius:12px; border:none; margin-top:6px; }
 textarea{ min-height:90px; resize:vertical; }
 button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manipulation; }
+button.ghost{ background:transparent; border:1px solid rgba(255,255,255,.18); color:var(--text); }
+.light button.ghost{ border:1px solid rgba(0,0,0,.18); }
+button.danger{ background:var(--danger); }
 .kpis{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-.kpi{ background:var(--card); padding:10px; border-radius:10px; }
-.success{color:#4CAF50}
+.kpi{ background:var(--card); padding:10px; border-radius:12px; }
+.success{color:var(--ok)}
 #chart,#chartEvolucao{width:100%;height:220px}
-.fab{ position:fixed; bottom:20px; right:20px; background:#4CAF50; color:white; border-radius:50%; width:55px; height:55px; font-size:28px; display:flex; align-items:center; justify-content:center; }
+.fab{ position:fixed; bottom:20px; right:20px; background:var(--ok); color:white; border-radius:50%; width:55px; height:55px; font-size:28px; display:flex; align-items:center; justify-content:center; }
 .toggle{float:right;cursor:pointer; margin-left:10px;}
 .small{opacity:.85;font-size:12px}
 .badge{ display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.12); margin-left:6px; font-size:12px; }
 .light .badge{background:rgba(0,0,0,.08);}
 .row{ display:flex; gap:8px; align-items:center; }
 .row > * {flex:1}
-.row .mini {flex:0 0 auto; width:auto; padding:8px 10px; border-radius:10px;}
+.row .mini {flex:0 0 auto; width:auto; padding:8px 10px; border-radius:12px;}
 hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 .light hr{border-top:1px solid rgba(0,0,0,.08)}
 
+/* DEBUG */
 #debugBox{
   position:fixed; left:12px; right:12px; bottom:12px;
   background:rgba(0,0,0,.75); color:#fff; padding:10px; border-radius:12px;
   font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
 
+/* LOADING */
 #loading{
   display:flex;
   align-items:center;
@@ -49,13 +56,82 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   opacity:.9;
 }
 
-.linkbtn{
-  background:transparent;
-  border:1px solid rgba(255,255,255,.18);
+/* =========================
+   ✅ TELAS (APP / HISTÓRICO)
+========================= */
+.screen{ display:none; min-height:100vh; }
+.screen.show{ display:block; }
+
+/* Topbar */
+.topbar{
+  position:sticky; top:0; z-index:20;
+  background:linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0));
+  backdrop-filter: blur(10px);
 }
-.light .linkbtn{
-  border:1px solid rgba(0,0,0,.18);
+.light .topbar{
+  background:linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));
+}
+.topbar-inner{
+  max-width:980px; margin:auto; padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.topbar-title{ font-weight:800; font-size:16px; }
+.iconbtn{
+  width:auto; padding:8px 10px; border-radius:12px;
+  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.12);
   color:var(--text);
+}
+.light .iconbtn{
+  background:rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.10);
+}
+
+/* Histórico bonito */
+.histHeader{
+  padding:18px 16px 8px;
+}
+.histHero{
+  background:linear-gradient(135deg, rgba(86,156,255,.25), rgba(76,175,80,.18));
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  padding:14px;
+}
+.light .histHero{
+  border:1px solid rgba(0,0,0,.10);
+}
+.histGrid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+.histItem{
+  background:var(--card);
+  border-radius:16px;
+  padding:12px;
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  justify-content:space-between;
+  border:1px solid rgba(255,255,255,.08);
+}
+.light .histItem{ border:1px solid rgba(0,0,0,.08); }
+.histLeft{ flex:1; }
+.histMonth{ font-weight:900; font-size:14px; }
+.histMeta{ margin-top:4px; }
+.histNums{
+  display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;
+}
+.pill{
+  display:inline-flex; gap:6px; align-items:center;
+  padding:6px 10px; border-radius:999px;
+  background:rgba(255,255,255,.10);
+  font-size:12px;
+}
+.light .pill{ background:rgba(0,0,0,.06); }
+.pill b{ font-weight:800; }
+.histBtn{
+  width:auto; padding:10px 12px;
+  border-radius:14px;
 }
 </style>
 </head>
@@ -69,7 +145,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   </div>
 </div>
 
-<div id="app" style="display:none">
+<!-- ✅ TELA PRINCIPAL -->
+<div id="screenMain" class="screen">
   <div class="wrap">
     <h1>
       Controle de Gastos PRO
@@ -77,23 +154,21 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
     </h1>
 
+    <!-- ✅ CONFIG + HISTÓRICO agora fica AQUI -->
     <div id="configBox" class="card" style="display:none">
       <h3>⚙️ Configurações</h3>
-      <b id="userName"></b><br><br>
+      <b id="userName"></b>
 
-      <!-- ✅ Login Google direto -->
-      <button class="linkbtn" onclick="googleLogin()">Entrar / Trocar conta (Google)</button>
-      <button onclick="logout()">Sair da conta</button>
-      <div class="small" style="margin-top:8px;opacity:.8">
-        Dica: se o popup não abrir no celular, o login será por redirecionamento automático.
+      <div style="margin-top:10px" class="row">
+        <button class="ghost" onclick="abrirHistorico()">📅 Histórico de meses</button>
+        <button class="ghost mini" onclick="googleLogin()">Google</button>
       </div>
-    </div>
 
-    <!-- ✅ HISTÓRICO DE MESES -->
-    <div class="card">
-      <h3>🗓️ Histórico de meses</h3>
-      <div class="small">Toque em um mês para abrir.</div>
-      <div id="listaMeses" class="small" style="margin-top:8px"></div>
+      <button style="margin-top:10px" onclick="logout()">Sair da conta</button>
+
+      <div class="small" style="margin-top:8px;opacity:.8">
+        Dica: se o popup não abrir no celular, o login usa redirecionamento.
+      </div>
     </div>
 
     <div class="card">
@@ -124,10 +199,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       <input id="month" type="month">
       <label>Meta</label>
       <input id="meta" type="number">
-
-      <!-- ✅ ANOTAÇÕES DO MÊS (vai para histórico) -->
       <label>Anotações do mês</label>
-      <textarea id="notes" placeholder="Ex: meta de cortar delivery, juntar para reserva, etc..."></textarea>
+      <textarea id="notes" placeholder="Ex: meta de cortar delivery, juntar para reserva..."></textarea>
 
       <button onclick="saveSettings()">Salvar</button>
       <div class="small" style="margin-top:6px;opacity:.8">
@@ -135,7 +208,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       </div>
     </div>
 
-    <!-- ✅ SIMULADOR DE INVESTIMENTOS (COM MAIS OPÇÕES) -->
+    <!-- ✅ SIMULADOR (mantido) -->
     <div class="card">
       <h3>🧠 Simulador de Investimentos (Mais opções)</h3>
 
@@ -205,7 +278,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       <div id="detalhesInv" class="small" style="margin-top:8px"></div>
     </div>
 
-    <!-- ✅ CARD IA (Ollama) -->
+    <!-- ✅ IA -->
     <div class="card" id="iaCard">
       <h3>🤖 IA (Ollama)</h3>
 
@@ -234,6 +307,35 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   <div class="fab" onclick="abrirAdd()">+</div>
 </div>
 
+<!-- ✅ TELA HISTÓRICO (separada, com voltar) -->
+<div id="screenHistory" class="screen">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="iconbtn" onclick="voltarDaTelaHistorico()">← Voltar</button>
+      <div class="topbar-title">📅 Histórico de meses</div>
+      <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="histHeader">
+      <div class="histHero">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div>
+            <div style="font-weight:900;font-size:16px">Seu histórico financeiro</div>
+            <div class="small" style="opacity:.85;margin-top:4px">
+              Toque em <b>Abrir</b> para carregar um mês no app.
+            </div>
+          </div>
+          <div class="badge">Controle de Gastos PRO</div>
+        </div>
+      </div>
+
+      <div class="histGrid" id="listaMeses"></div>
+    </div>
+  </div>
+</div>
+
 <div id="debugBox"></div>
 
 <script>
@@ -253,8 +355,6 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-
-<!-- ✅ carrega URL do tunnel (config.js) -->
 <script src="./config.js"></script>
 
 <script>
@@ -290,14 +390,36 @@ let mesAtual = new Date().toISOString().slice(0,7);
 let grafico = null;
 let graficoEvolucao = null;
 
-function showApp(){
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("app").style.display = "block";
-}
+/* =========================
+   ✅ TELA / NAVEGAÇÃO
+========================= */
 function showLoading(){
-  document.getElementById("app").style.display = "none";
+  document.getElementById("screenMain").classList.remove("show");
+  document.getElementById("screenHistory").classList.remove("show");
   document.getElementById("loading").style.display = "flex";
 }
+function hideLoading(){
+  document.getElementById("loading").style.display = "none";
+}
+function showMain(){
+  hideLoading();
+  document.getElementById("screenHistory").classList.remove("show");
+  document.getElementById("screenMain").classList.add("show");
+}
+function showHistory(){
+  hideLoading();
+  document.getElementById("screenMain").classList.remove("show");
+  document.getElementById("screenHistory").classList.add("show");
+}
+
+window.abrirHistorico = function(){
+  renderListaMeses();
+  showHistory();
+};
+
+window.voltarDaTelaHistorico = function(){
+  showMain();
+};
 
 async function initFirebase(){
   if(!window.firebase){
@@ -329,13 +451,10 @@ window.logout = function(){
     .catch(e=>alert((e.code||"")+" - "+e.message));
 };
 
-// ✅ Login Google (funciona melhor no celular com redirect)
 window.googleLogin = async function(){
   try{
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
-
-    // em mobile, redirect é mais confiável
     await auth.signInWithRedirect(provider);
   }catch(e){
     alert((e.code||"")+" - "+e.message);
@@ -357,6 +476,7 @@ function carregarFixos(){
 }
 
 window.toggleTheme = ()=> document.body.classList.toggle("light");
+
 window.abrirConfig = ()=>{
   const box = document.getElementById("configBox");
   box.style.display = box.style.display==="none" ? "block" : "none";
@@ -432,7 +552,6 @@ window.addFixo = ()=>{
   window.render();
 };
 
-// ✅ remover gasto fixo (botão ❌)
 window.removerFixo = function(idx){
   if(idx<0 || idx>=fixos.length) return;
   if(!confirm("Remover este gasto fixo? (ele não vai entrar nos próximos meses)")) return;
@@ -442,7 +561,6 @@ window.removerFixo = function(idx){
   salvarFixos();
   renderFixos();
 
-  // remove também do mês atual (se estiver na lista)
   const d = window.getDataMes();
   d.items = (d.items||[]).filter(it => !(it.isFixo && keyItem(it) === keyItem(alvo)));
   salvarTudoLocal();
@@ -461,7 +579,7 @@ function renderFixos(){
         • ${f.desc} — R$ ${Number(f.amount).toFixed(2)}
         <span class="badge">${f.category}</span>
       </div>
-      <button class="mini" style="background:#d9534f" onclick="removerFixo(${idx})">❌</button>
+      <button class="mini danger" onclick="removerFixo(${idx})">❌</button>
     </div>
   `).join("");
 }
@@ -486,14 +604,12 @@ window.abrirAdd = ()=>{
   window.render();
 };
 
-// ✅ botão X agora remove fixo de verdade quando clicar em cima do fixo
 window.del = (i)=>{
   mesAtual=window.getMes();
   const d=window.getDataMes();
   const item = d.items[i];
   if(!item) return;
 
-  // se for fixo: remove também da lista de fixos
   if(item.isFixo){
     const k = keyItem(item);
     fixos = fixos.filter(f => keyItem(f) !== k);
@@ -506,7 +622,6 @@ window.del = (i)=>{
   window.render();
 };
 
-// ✅ salvar salário/meta/notas no histórico do mês
 window.saveSettings = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   mesAtual=window.getMes();
@@ -515,11 +630,8 @@ window.saveSettings = ()=>{
   d.meta=Number(document.getElementById("meta").value);
   d.notes=String(document.getElementById("notes").value || "");
 
-  // mantém no histórico local
   salvarTudoLocal();
-  renderListaMeses();
 
-  // mantém API (se existir endpoint; se não existir, não quebra)
   fetch(API+"/salvarMes",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -581,38 +693,57 @@ function paint(){
   drawEvolucao();
 }
 
-// ✅ lista meses (histórico)
+/* =========================
+   ✅ HISTÓRICO (TELA BONITA)
+========================= */
+function formatBRL(n){
+  return "R$ " + Number(n||0).toFixed(2).replace(".", ",");
+}
 function renderListaMeses(){
   const el = document.getElementById("listaMeses");
   const meses = Object.keys(state.meses||{}).sort().reverse();
   if(!meses.length){
-    el.innerHTML = "<div>Nenhum mês salvo ainda.</div>";
+    el.innerHTML = `<div class="card"><div class="small">Nenhum mês salvo ainda.</div></div>`;
     return;
   }
+
   el.innerHTML = meses.map(m=>{
     const d = state.meses[m] || {};
     const total = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
     const sal = Number(d.salary||0);
     const sobra = sal - total;
-    const tag = (m===mesAtual) ? `<span class="badge">Atual</span>` : "";
+
+    const isAtual = (m === mesAtual);
+    const tag = isAtual ? `<span class="badge">Atual</span>` : ``;
+
+    const corSobra = sobra >= 0 ? "var(--ok)" : "var(--danger)";
+
     return `
-      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;padding:6px 0">
-        <div style="flex:1">
-          <b>${m}</b> ${tag}<br>
-          <span class="small">Salário R$ ${sal.toFixed(2)} • Gasto R$ ${total.toFixed(2)} • Sobra R$ ${sobra.toFixed(2)}</span>
+      <div class="histItem">
+        <div class="histLeft">
+          <div class="histMonth">${m} ${tag}</div>
+          <div class="small histMeta">${(d.notes||"").trim() ? (d.notes||"").trim().slice(0,90) + ((d.notes||"").trim().length>90?"…":"") : "Sem anotações."}</div>
+          <div class="histNums">
+            <span class="pill">💰 <b>${formatBRL(sal)}</b></span>
+            <span class="pill">🧾 <b>${formatBRL(total)}</b></span>
+            <span class="pill">✅ <b style="color:${corSobra}">${formatBRL(sobra)}</b></span>
+          </div>
         </div>
-        <button class="mini" onclick="abrirMes('${m}')">Abrir</button>
+        <button class="histBtn" onclick="abrirMesDoHistorico('${m}')">Abrir</button>
       </div>
-      <hr>
     `;
   }).join("");
 }
 
-window.abrirMes = function(m){
+window.abrirMesDoHistorico = function(m){
   const monthEl = document.getElementById("month");
   if(monthEl) monthEl.value = m;
   mesAtual = m;
   window.render();
+  showMain();
+  // fecha config se estava aberto
+  const box = document.getElementById("configBox");
+  if(box) box.style.display = "none";
 };
 
 window.render = ()=>{
@@ -620,7 +751,6 @@ window.render = ()=>{
   mesAtual = window.getMes();
   const d = window.getDataMes();
   paint();
-  renderListaMeses();
 
   fetch(API+"/mes/"+window.USER_ID+"/"+mesAtual)
     .then(r=>r.json())
@@ -637,14 +767,12 @@ window.render = ()=>{
 
       const merged=[], seen=new Set();
 
-      // fixos primeiro
       for(const f of fixos){
         const obj={...f,isFixo:true};
         const k=keyItem(obj);
         if(!seen.has(k)){merged.push(obj); seen.add(k);}
       }
 
-      // depois itens da API
       for(const it of apiItems){
         const k=keyItem(it);
         if(!seen.has(k)){merged.push(it); seen.add(k);}
@@ -654,24 +782,26 @@ window.render = ()=>{
 
       salvarTudoLocal();
       paint();
-      renderListaMeses();
+      // se estiver na tela de histórico, atualiza lista também
+      if(document.getElementById("screenHistory").classList.contains("show")){
+        renderListaMeses();
+      }
     })
     .catch(()=>{
       salvarTudoLocal();
       paint();
-      renderListaMeses();
+      if(document.getElementById("screenHistory").classList.contains("show")){
+        renderListaMeses();
+      }
     });
 };
 
 /* ==========================================================
-   ✅ SIMULADOR DE INVESTIMENTOS (MAIS OPÇÕES)
+   ✅ SIMULADOR DE INVESTIMENTOS (MESMO DO SEU)
 ========================================================== */
 function clampNum(v, def=0){
   v = Number(v);
   return Number.isFinite(v) ? v : def;
-}
-function formatBRL(n){
-  return "R$ " + Number(n||0).toFixed(2).replace(".", ",");
 }
 function anualParaMensalEfetivo(taxaAnual){
   const r = taxaAnual/100;
@@ -749,12 +879,10 @@ window.simularInvestimentos = function(){
     return;
   }
 
-  // taxa mensal
   let taxaMensal = 0;
   let textoTaxa = "";
 
   if(tipo === "poupanca"){
-    // aproximação simples: 70% CDI ao ano (depende da Selic)
     const cdi = clampNum(document.getElementById("invCDI").value, 10.5);
     const anual = cdi * 0.70;
     taxaMensal = anualParaMensalEfetivo(anual);
@@ -805,10 +933,8 @@ window.simularInvestimentos = function(){
     textoTaxa = `Renda variável (média): ${anual.toFixed(2)}% a.a.`;
   }
 
-  // simula (meses inteiros)
   const res = simularComAporte(inicial, aporte, meses, taxaMensal);
 
-  // ajuste por dias extras (juros proporcional aproximado)
   let final = res.final;
   if(diasExtra > 0){
     final = final * (1 + taxaMensal * (diasExtra/30));
@@ -817,18 +943,17 @@ window.simularInvestimentos = function(){
   const investido = inicial + aporte * meses;
   let lucroBruto = final - investido;
 
-  // impostos (aprox)
   let imposto = 0;
   let iof = 0;
 
   const temIR = (tipo === "cdb" || tipo === "tesouro_selic" || tipo === "fundo_di" || tipo === "prefixado" || tipo === "ipca_plus");
-  const isentoIR = (tipo === "lci_lca" || tipo === "poupanca" || tipo === "renda_variavel"); // RV tem impostos próprios, aqui simplificando
+  const isentoIR = (tipo === "lci_lca" || tipo === "poupanca" || tipo === "renda_variavel");
 
   if(temIR){
     const aliq = aliquotaIR(diasTotais);
     imposto = Math.max(0, lucroBruto) * aliq;
   }else if(!isentoIR && tipo === "renda_variavel"){
-    imposto = 0; // simplificado
+    imposto = 0;
   }
 
   if(aplicarIOF){
@@ -849,19 +974,17 @@ window.simularInvestimentos = function(){
 };
 
 /* ==========================================================
-   ✅ IA (Ollama) COM CONTEXTO DO SEU MÊS
+   ✅ IA (Ollama)
 ========================================================== */
 function getIaBase(){
   return (window.API_BASE_URL || "").replace(/\/$/, "");
 }
-
 function resumoDoMesParaIA(){
   const d = window.getDataMes();
   const items = d.items || [];
   const total = items.reduce((a,b)=>a+Number(b.amount||0),0);
   const sobra = Number(d.salary||0) - total;
 
-  // total por categoria
   const porCat = {};
   for(const it of items){
     const c = it.category || "Outros";
@@ -887,7 +1010,6 @@ TOP CATEGORIAS: ${topCats || "sem dados"}
 ANOTAÇÕES: ${(d.notes||"").trim() || "(vazio)"}
   `.trim();
 }
-
 async function iaHealth(){
   try{
     const base = getIaBase();
@@ -902,7 +1024,6 @@ async function iaHealth(){
     if(el) el.textContent = "Offline: " + msg;
   }
 }
-
 window.iaPerguntar = async function(){
   const promptEl = document.getElementById("iaPrompt");
   const outEl = document.getElementById("iaResposta");
@@ -922,7 +1043,6 @@ window.iaPerguntar = async function(){
     if(!base) throw new Error("API_BASE_URL não definido no config.js");
 
     const url = base + "/api/chat";
-
     const contexto = resumoDoMesParaIA();
 
     const promptFinal =
@@ -957,22 +1077,20 @@ ${pergunta}
   }
 };
 
-/* ==========================================================
-   ✅ INIT
-========================================================== */
+/* =========================
+   ✅ INIT / RENDER
+========================= */
 document.addEventListener("DOMContentLoaded", async ()=>{
   showLoading();
 
   const ok = await initFirebase();
   if(!ok) return;
 
-  // mês padrão
   const monthEl = document.getElementById("month");
   if(monthEl && !monthEl.value){
     monthEl.value = new Date().toISOString().slice(0,7);
   }
 
-  // investimento: mostra campos corretos
   atualizarCamposInvestimento();
 
   document.getElementById("month").addEventListener("change", ()=>{
@@ -980,16 +1098,12 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     window.render();
   });
 
-  // tenta pegar resultado do redirect do Google (se teve login)
-  try{
-    await auth.getRedirectResult();
-  }catch(e){}
+  try{ await auth.getRedirectResult(); }catch(e){}
 
   const unsub = auth.onAuthStateChanged(async (user)=>{
     unsub && unsub();
 
     if(!user){
-      // se não tiver logado, manda pro login.html (como você já fazia)
       location.replace("./login.html");
       return;
     }
@@ -1008,7 +1122,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     }catch(e){ state = { meses:{} }; }
 
     mesAtual = window.getMes();
-    showApp();
+
+    showMain();
     window.render();
     iaHealth();
   });
