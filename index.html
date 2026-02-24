@@ -223,7 +223,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 }
 .fab:active{ transform: translateY(1px) scale(.99); }
 
-/* ✅ Botão IA PRO (melhorado) */
+/* ✅ Botão IA PRO */
 .fab-ai{
   position:fixed;
   right:20px;
@@ -371,7 +371,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   color:#111;
 }
 
-/* ✅ Guardados: lista bonita + X */
+/* ✅ Guardados */
 .savedList{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
 .savedItem{
   display:flex; gap:10px; align-items:center; justify-content:space-between;
@@ -385,6 +385,47 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 .savedItem .t1{ font-weight:1000; }
 .savedItem .t2{ font-size:12px; opacity:.85; margin-top:3px; }
 
+/* =========================================
+   ✅ Modal "Preencha descrição" (substitui prompt)
+========================================= */
+.miniModal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  z-index:99998;
+  padding:16px;
+}
+.miniModal.show{ display:flex; align-items:flex-end; justify-content:center; }
+.miniCard{
+  width:min(560px, 100%);
+  background: rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:20px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow:hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+}
+.light .miniCard{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.10);
+}
+.miniTop{
+  padding:14px 14px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.light .miniTop{ border-bottom:1px solid rgba(0,0,0,.08); }
+.miniTitle{ font-weight:1000; }
+.miniBody{ padding:14px; }
+.miniActions{
+  padding:12px 14px;
+  display:flex; gap:10px;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+.light .miniActions{ border-top:1px solid rgba(0,0,0,.08); }
+.miniActions button{ margin-top:0; }
+.miniHint{ font-size:12px; opacity:.85; margin-top:8px; }
 </style>
 </head>
 
@@ -442,7 +483,6 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
         <button class="mini" onclick="addSaved()">Adicionar</button>
       </div>
 
-      <!-- ✅ Lista de guardados com X -->
       <div id="savedList" class="savedList"></div>
 
       <div class="row" style="margin-top:10px">
@@ -462,12 +502,10 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
     <div class="card"><table id="list"></table></div>
   </div>
 
-  <!-- ✅ IA PRO -->
   <div class="fab-ai" title="IA PRO" onclick="abrirChatIA()">
     <div class="txt"><b>IA</b><br>PRO</div>
   </div>
 
-  <!-- ✅ BOTÃO + -->
   <div class="fab" onclick="abrirAdd()">+</div>
 </div>
 
@@ -748,6 +786,25 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   </div>
 </div>
 
+<!-- ✅ MODAL: Preencha descrição (substitui prompt e não mostra domínio) -->
+<div id="descModal" class="miniModal" onclick="fecharDescClickFora(event)">
+  <div class="miniCard" onclick="event.stopPropagation()">
+    <div class="miniTop">
+      <div class="miniTitle" id="descTitle">Preencha a descrição</div>
+      <button class="modalClose" onclick="fecharDescModal()">✕</button>
+    </div>
+    <div class="miniBody">
+      <div class="small" id="descSubtitle" style="opacity:.9">Informe uma descrição do gasto.</div>
+      <input id="descInput" placeholder="Ex: Mercado, Uber, Internet..." autocomplete="off">
+      <div class="miniHint" id="descHint">Dica: escreva algo curto e fácil de identificar.</div>
+    </div>
+    <div class="miniActions">
+      <button class="ghost" onclick="fecharDescModal()">Cancelar</button>
+      <button onclick="confirmarDescModal()">Continuar</button>
+    </div>
+  </div>
+</div>
+
 <div id="debugBox"></div>
 
 <script>
@@ -803,8 +860,7 @@ let grafico = null;
 let graficoEvolucao = null;
 
 /* =========================
-   ✅ Navegação (CORRIGIDA)
-   - Sempre volta para Início
+   ✅ Navegação
 ========================= */
 function hideLoading(){ document.getElementById("loading").style.display="none"; }
 function showLoading(){
@@ -817,7 +873,7 @@ function showScreen(id){
   document.getElementById(id).classList.add("show");
 }
 window.irPara = function(id){ showScreen(id); };
-window.voltarTela = function(){ showScreen("screenMain"); }; // ✅ sempre volta pro início
+window.voltarTela = function(){ showScreen("screenMain"); };
 window.abrirMenu = function(){ showScreen("screenMenu"); };
 window.abrirHistorico = function(){ renderListaMeses(); showScreen("screenHistory"); };
 
@@ -932,6 +988,60 @@ function detectarCategoria(desc){
 }
 
 /* =========================
+   ✅ Modal de descrição (sem domínio)
+========================= */
+let _descResolve = null;
+window.abrirDescModal = function({
+  title="Preencha a descrição",
+  subtitle="Informe uma descrição.",
+  placeholder="Ex: Mercado, Uber, Internet...",
+  hint="Dica: escreva algo curto e fácil de identificar.",
+  defaultValue=""
+} = {}){
+  const modal = document.getElementById("descModal");
+  document.getElementById("descTitle").textContent = title;
+  document.getElementById("descSubtitle").textContent = subtitle;
+  const inp = document.getElementById("descInput");
+  inp.placeholder = placeholder;
+  inp.value = defaultValue || "";
+  document.getElementById("descHint").textContent = hint;
+
+  modal.classList.add("show");
+  setTimeout(()=> inp.focus(), 50);
+
+  return new Promise((resolve)=>{ _descResolve = resolve; });
+};
+
+window.fecharDescModal = function(){
+  document.getElementById("descModal").classList.remove("show");
+  if(_descResolve){ _descResolve(null); _descResolve = null; }
+};
+
+window.confirmarDescModal = function(){
+  const v = (document.getElementById("descInput").value || "").trim();
+  document.getElementById("descModal").classList.remove("show");
+  if(_descResolve){ _descResolve(v || null); _descResolve = null; }
+};
+
+window.fecharDescClickFora = function(ev){
+  if(ev.target && ev.target.id === "descModal") fecharDescModal();
+};
+
+document.addEventListener("keydown", (e)=>{
+  const dmodal = document.getElementById("descModal");
+  if(dmodal.classList.contains("show")){
+    if(e.key === "Escape") fecharDescModal();
+    if(e.key === "Enter"){
+      const active = document.activeElement;
+      if(active && active.id === "descInput"){
+        e.preventDefault();
+        confirmarDescModal();
+      }
+    }
+  }
+});
+
+/* =========================
    ✅ Categorias
 ========================= */
 window.addCategoria = ()=>{
@@ -955,20 +1065,44 @@ function renderCategorias(){
 ========================= */
 window.addFixo = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
-  const desc=(document.getElementById("descFixo").value||"").trim();
-  const valor=Number(document.getElementById("valorFixo").value);
-  const categoria=document.getElementById("categoriaFixo").value||"Outros";
-  if(!desc || !valor || valor<=0){ alert("Preencha descrição e valor (maior que 0)."); return; }
 
-  fixos.push({ desc, amount:valor, category:categoria, isFixo:true });
+  // ✅ usa modal bonito em vez de prompt, sem domínio
+  abrirDescModal({
+    title: "Gasto fixo",
+    subtitle: "Preencha a descrição do gasto fixo.",
+    placeholder: "Ex: Aluguel, Internet, Luz...",
+    hint: "Depois você informa o valor e a categoria."
+  }).then(desc=>{
+    if(!desc) return;
 
-  document.getElementById("descFixo").value="";
-  document.getElementById("valorFixo").value="";
+    const valor=Number(document.getElementById("valorFixo").value);
+    const categoria=document.getElementById("categoriaFixo").value||"Outros";
 
-  salvarFixos(); renderFixos();
-  garantirFixosNoMes(window.getDataMes());
-  salvarTudoLocal();
-  window.render();
+    // se o usuário não preencheu o valor ainda, pede com modal também
+    if(!valor || valor<=0){
+      abrirDescModal({
+        title: "Valor do gasto fixo",
+        subtitle: "Digite o valor (apenas números).",
+        placeholder: "Ex: 750",
+        hint: "Use ponto ou vírgula (ex: 750 ou 750,50)."
+      }).then(vtxt=>{
+        const vnum = Number(String(vtxt||"").replace(",", "."));
+        if(!vnum || vnum<=0){ alert("Preencha um valor maior que 0."); return; }
+        fixos.push({ desc, amount:vnum, category:categoria, isFixo:true });
+        salvarFixos(); renderFixos();
+        garantirFixosNoMes(window.getDataMes());
+        salvarTudoLocal();
+        window.render();
+      });
+      return;
+    }
+
+    fixos.push({ desc, amount:valor, category:categoria, isFixo:true });
+    salvarFixos(); renderFixos();
+    garantirFixosNoMes(window.getDataMes());
+    salvarTudoLocal();
+    window.render();
+  });
 };
 
 window.removerFixo = function(idx){
@@ -1004,7 +1138,7 @@ function renderFixos(){
 }
 
 /* =========================
-   ✅ Guardado (adicionar / remover com X)
+   ✅ Guardado
 ========================= */
 function fmtBRL(n){ return "R$ " + Number(n||0).toFixed(2).replace(".", ","); }
 
@@ -1061,7 +1195,7 @@ function renderSavedList(){
 }
 
 /* =========================
-   ✅ Salvar (salário/meta/anotações)
+   ✅ Salvar
 ========================= */
 window.saveSettings = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
@@ -1086,15 +1220,34 @@ window.saveSettings = ()=>{
 };
 
 /* =========================
-   ✅ Gastos do mês (+)
+   ✅ Gastos do mês (+)  (✅ agora sem prompt)
 ========================= */
-window.abrirAdd = ()=>{
+window.abrirAdd = async ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   mesAtual = window.getMes();
   const d = window.getDataMes();
-  const desc = prompt("Descrição");
-  const valor = parseFloat(prompt("Valor"));
-  if(!desc || isNaN(valor)) return;
+
+  // 1) descrição
+  const desc = await abrirDescModal({
+    title: "Novo gasto",
+    subtitle: "Preencha a descrição do gasto.",
+    placeholder: "Ex: Mercado, Padaria, Gasolina...",
+    hint: "Depois você informa o valor."
+  });
+  if(!desc) return;
+
+  // 2) valor
+  const valTxt = await abrirDescModal({
+    title: "Valor do gasto",
+    subtitle: "Digite o valor (apenas números).",
+    placeholder: "Ex: 35,90",
+    hint: "Use vírgula ou ponto."
+  });
+  if(!valTxt) return;
+
+  const valor = Number(String(valTxt).replace(",", "."));
+  if(!valor || valor <= 0){ alert("Valor inválido."); return; }
+
   const categoria = detectarCategoria(desc);
   d.items.push({ desc, amount:valor, category:categoria, isFixo:false });
 
@@ -1218,7 +1371,7 @@ window.render = ()=>{
 };
 
 /* =========================
-   ✅ Histórico (simples e compatível)
+   ✅ Histórico
 ========================= */
 function renderListaMeses(){
   const el = document.getElementById("listaMeses");
@@ -1258,7 +1411,7 @@ window.abrirMesDoHistorico = function(m){
 };
 
 /* ==========================================================
-   ✅ SIMULADOR INVESTIMENTOS
+   ✅ SIMULADORES
 ========================================================== */
 function clampNum(v, def=0){ v = Number(v); return Number.isFinite(v) ? v : def; }
 function anualParaMensalEfetivo(taxaAnual){ const r = taxaAnual/100; return Math.pow(1+r, 1/12) - 1; }
@@ -1304,6 +1457,8 @@ function atualizarCamposInvestimento(){
   if(tipo === "fundo_di" && boxFundo) boxFundo.style.display = "block";
   if(tipo === "renda_variavel" && boxRV) boxRV.style.display = "block";
 }
+window.atualizarCamposInvestimento = atualizarCamposInvestimento;
+
 window.simularInvestimentos = function(){
   const tipo = document.getElementById("invTipo").value;
 
@@ -1425,9 +1580,6 @@ window.simularInvestimentos = function(){
     `Período: ~${diasTotais} dias`;
 };
 
-/* ==========================================================
-   ✅ SIMULADOR EMPRÉSTIMO / COMPRA
-========================================================== */
 function empCalcPrice(valor, jurosMensal, n){
   if(n <= 0) return 0;
   if(jurosMensal <= 0) return valor / n;
