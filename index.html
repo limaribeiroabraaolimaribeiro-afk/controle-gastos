@@ -17,7 +17,8 @@
   --muted:rgba(234,240,255,.72);
   --accent:#569cff;
   --accent2:rgba(86,156,255,.18);
-  --ok:#4CAF50;
+  --ok:#35d07f;
+  --warn:#ffca5a;
   --shadow: 0 18px 60px rgba(0,0,0,.45);
   --stroke: rgba(255,255,255,.12);
   --stroke2: rgba(255,255,255,.08);
@@ -36,29 +37,95 @@
 }
 
 *{box-sizing:border-box}
-body{ margin:0; background:var(--bg); color:var(--text); font-family:system-ui; }
+body{
+  margin:0;
+  background:
+    radial-gradient(900px 520px at 30% 10%, rgba(86,156,255,.18), transparent 60%),
+    radial-gradient(700px 500px at 90% 35%, rgba(53,208,127,.10), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+}
 .wrap{max-width:980px;margin:auto;padding:16px}
-.card{ background:var(--card); border:1px solid var(--stroke2); border-radius:var(--r1); padding:14px; margin-bottom:12px; box-shadow: 0 0 0 rgba(0,0,0,0); }
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+  border:1px solid var(--stroke2);
+  border-radius:var(--r1);
+  padding:14px;
+  margin-bottom:12px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.20);
+}
+.light .card{
+  background:#fff;
+  box-shadow: 0 10px 24px rgba(0,0,0,.08);
+}
 h1{font-size:20px;margin:0 0 10px}
 h3{margin:0 0 10px}
-input,select,button,textarea{ width:100%; padding:10px; border-radius:12px; border:none; margin-top:6px; }
+input,select,button,textarea{
+  width:100%;
+  padding:11px 12px;
+  border-radius:14px;
+  border:1px solid transparent;
+  margin-top:6px;
+  background:rgba(7,12,26,.52);
+  color:var(--text);
+  outline:none;
+}
+.light input,.light select,.light textarea{
+  background:rgba(0,0,0,.04);
+  color:#111;
+  border:1px solid rgba(0,0,0,.06);
+}
 textarea{ min-height:90px; resize:vertical; }
-button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manipulation; font-weight:800; }
-button.ghost{ background:transparent; border:1px solid var(--stroke); color:var(--text); }
-button.soft{ background:var(--accent2); border:1px solid rgba(86,156,255,.25); color:var(--text); }
-.light button.soft{ border:1px solid rgba(86,156,255,.20); }
+input:focus,select:focus,textarea:focus{
+  border-color: rgba(86,156,255,.55);
+  box-shadow: 0 0 0 4px rgba(86,156,255,.14);
+}
+button{
+  background:linear-gradient(135deg, rgba(86,156,255,.98), rgba(86,156,255,.70));
+  color:#fff;
+  cursor:pointer;
+  touch-action:manipulation;
+  font-weight:900;
+  border:0;
+}
+button:active{ transform: translateY(1px) scale(.995); }
+button.ghost{
+  background:transparent;
+  border:1px solid var(--stroke);
+  color:var(--text);
+}
+.light button.ghost{ color:#111; border:1px solid rgba(0,0,0,.12); }
+button.soft{
+  background:rgba(86,156,255,.14);
+  border:1px solid rgba(86,156,255,.25);
+  color:var(--text);
+}
+.light button.soft{ color:#111; background:rgba(86,156,255,.10); border:1px solid rgba(86,156,255,.18); }
+
 .kpis{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-.kpi{ background:var(--card); padding:10px; border-radius:12px; border:1px solid var(--stroke2); }
-.success{color:var(--ok)}
+.kpi{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke2);
+  border-radius:16px;
+  padding:12px;
+}
+.light .kpi{ background:rgba(0,0,0,.03); border:1px solid rgba(0,0,0,.06); }
+.success{color:var(--ok); font-weight:900;}
 #chart,#chartEvolucao{width:100%;height:220px}
-.fab{ position:fixed; bottom:20px; right:20px; background:var(--ok); color:white; border-radius:50%; width:55px; height:55px; font-size:28px; display:flex; align-items:center; justify-content:center; user-select:none;}
-.fab:active{ transform: translateY(1px) scale(.99); }
 .small{opacity:.86;font-size:12px}
-.badge{ display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.12); margin-left:6px; font-size:12px; }
+.badge{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  margin-left:6px;
+  font-size:12px;
+}
 .light .badge{background:rgba(0,0,0,.08);}
-.row{ display:flex; gap:8px; align-items:center; }
+.row{ display:flex; gap:10px; align-items:center; }
 .row > * {flex:1}
-.row .mini {flex:0 0 auto; width:auto; padding:8px 10px; border-radius:12px;}
+.row .mini {flex:0 0 auto; width:auto; padding:9px 12px; border-radius:14px; }
 hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 .light hr{border-top:1px solid rgba(0,0,0,.08)}
 
@@ -89,122 +156,102 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 .topbar{
   position:sticky; top:0; z-index:20;
   background:linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .light .topbar{
-  background:linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));
+  background:linear-gradient(to bottom, rgba(255,255,255,.80), rgba(255,255,255,0));
 }
 .topbar-inner{
   max-width:980px; margin:auto; padding:14px 16px;
   display:flex; align-items:center; justify-content:space-between; gap:10px;
 }
-.topbar-title{ font-weight:900; font-size:16px; letter-spacing:.2px; }
+.topbar-title{ font-weight:950; font-size:15px; letter-spacing:.2px; }
 .iconbtn{
-  width:auto; padding:8px 10px; border-radius:12px;
+  width:auto; padding:9px 12px; border-radius:14px;
   background:rgba(255,255,255,.10);
   border:1px solid var(--stroke);
   color:var(--text);
-  font-weight:800;
+  font-weight:900;
 }
 .light .iconbtn{
   background:rgba(0,0,0,.04);
+  border:1px solid rgba(0,0,0,.10);
+  color:#111;
 }
+
 .pillBtn{
-  width:auto;
-  padding:10px 12px;
-  border-radius:14px;
+  width:100%;
+  padding:12px 14px;
+  border-radius:18px;
   background:rgba(255,255,255,.08);
   border:1px solid var(--stroke);
   color:var(--text);
-  font-weight:900;
+  font-weight:950;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
 }
+.light .pillBtn{ background:rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.10); color:#111; }
 .pillBtn span{ opacity:.9; }
-.light .pillBtn{ background:rgba(0,0,0,.04); }
+
 .hero{
-  background:linear-gradient(135deg, rgba(86,156,255,.22), rgba(76,175,80,.12));
+  background:linear-gradient(135deg, rgba(86,156,255,.20), rgba(53,208,127,.10));
   border:1px solid var(--stroke);
   border-radius:18px;
   padding:14px;
   box-shadow: var(--shadow);
 }
-.heroTitle{ font-weight:900; font-size:16px; }
+.heroTitle{ font-weight:950; font-size:16px; }
 .heroSub{ margin-top:6px; color:var(--muted); font-size:12px; line-height:1.35; }
 
-/* LISTA HISTÓRICO */
-.histGrid{ display:grid; grid-template-columns:1fr; gap:10px; margin-top:12px; }
-.histItem{
-  background:var(--card);
-  border:1px solid var(--stroke2);
-  border-radius:16px;
-  padding:12px;
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-  justify-content:space-between;
-}
-.histMonth{ font-weight:900; font-size:14px; }
-.histNums{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
-.pill{
-  display:inline-flex; gap:6px; align-items:center;
-  padding:6px 10px; border-radius:999px;
-  background:rgba(255,255,255,.10);
-  font-size:12px;
-}
-.light .pill{ background:rgba(0,0,0,.06); }
-.pill b{ font-weight:900; }
-.histBtn{ width:auto; padding:10px 12px; border-radius:14px; }
-
 /* =========================
-   ✅ MENU SIMULADORES (colapsável dentro da tela simuladores)
+   ✅ FABs
 ========================= */
-.menuCard{
-  background:linear-gradient(135deg, rgba(86,156,255,.18), rgba(255,255,255,.06));
-  border:1px solid var(--stroke);
+.fab{
+  position:fixed; bottom:20px; right:20px;
+  background:linear-gradient(135deg, rgba(53,208,127,.98), rgba(53,208,127,.70));
+  color:white;
+  border-radius:50%;
+  width:58px; height:58px;
+  font-size:30px;
+  display:flex; align-items:center; justify-content:center;
+  user-select:none;
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow: 0 18px 36px rgba(53,208,127,.18);
 }
-.menuHeader{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-.menuTitle{
-  font-weight:900;
-  display:flex; align-items:center; gap:10px;
-}
-.chev{
-  width:auto;
-  padding:8px 10px;
-  border-radius:12px;
-  background:rgba(255,255,255,.10);
-  border:1px solid var(--stroke);
-  color:var(--text);
-  font-weight:900;
-}
-.light .chev{ background:rgba(0,0,0,.04); }
-.collapsed{ display:none; }
+.fab:active{ transform: translateY(1px) scale(.99); }
 
-/* =========================
-   ✅ BOLINHA IA (acima do +)
-========================= */
+/* ✅ Botão IA PRO (melhorado) */
 .fab-ai{
   position:fixed;
   right:20px;
-  bottom:88px;
-  width:55px;
-  height:55px;
+  bottom:92px;
+  width:58px;
+  height:58px;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
   user-select:none;
-  background: rgba(86,156,255,.95);
+  background: linear-gradient(135deg, rgba(86,156,255,.98), rgba(86,156,255,.70));
   color:#fff;
-  font-size:22px;
-  box-shadow: 0 14px 30px rgba(86,156,255,.22);
   border: 1px solid rgba(255,255,255,.16);
+  box-shadow: 0 18px 36px rgba(86,156,255,.20);
+}
+.fab-ai .txt{
+  font-weight:1000;
+  letter-spacing:.4px;
+  font-size:13px;
+  line-height:1;
+  transform: translateY(-1px);
+}
+.fab-ai .txt b{
+  font-weight:1000;
+  font-size:14px;
+  letter-spacing:.6px;
 }
 .fab-ai:active{ transform: translateY(1px) scale(.99); }
 
@@ -222,7 +269,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   max-height: 82vh;
   background: rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.14);
-  border-radius:18px;
+  border-radius:20px;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   overflow:hidden;
@@ -245,31 +292,24 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 .light .modalTop{ border-bottom:1px solid rgba(0,0,0,.08); }
 .modalTitle{
   display:flex; align-items:center; gap:10px;
-  font-weight:900;
+  font-weight:1000;
 }
 .modalClose{
   width:auto;
   padding:8px 10px;
-  border-radius:12px;
+  border-radius:14px;
   background:rgba(255,255,255,.10);
   border:1px solid rgba(255,255,255,.12);
   color:var(--text);
-  font-weight:900;
+  font-weight:1000;
 }
 .light .modalClose{
   background:rgba(0,0,0,.05);
   border:1px solid rgba(0,0,0,.10);
   color:#111;
 }
-.modalBody{
-  padding:12px;
-  overflow:auto;
-}
-.chat{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
+.modalBody{ padding:12px; overflow:auto; }
+.chat{ display:flex; flex-direction:column; gap:10px; }
 .bubble{
   max-width:85%;
   padding:10px 12px;
@@ -306,8 +346,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 .chatFoot button{
   width:auto;
   padding:10px 14px;
-  border-radius:14px;
-  font-weight:900;
+  border-radius:16px;
+  font-weight:1000;
 }
 .statusLine{
   padding:0 12px 12px;
@@ -315,26 +355,36 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   opacity:.85;
 }
 
-/* ✅ Botão X (remover) - agora pequeno e azul */
+/* ✅ X pequeno azul (remover) */
 .btnX{
-  width:34px;
-  height:34px;
-  padding:0;
-  border-radius:12px;
-  background:rgba(86,156,255,.18);
-  border:1px solid rgba(86,156,255,.30);
+  width:34px; height:34px; padding:0;
+  border-radius:14px;
+  background:rgba(86,156,255,.16);
+  border:1px solid rgba(86,156,255,.28);
   color:var(--text);
-  font-weight:900;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+  font-weight:1000;
+  display:inline-flex; align-items:center; justify-content:center;
 }
-.btnX:active{ transform: translateY(1px) scale(.99); }
 .light .btnX{
-  background:rgba(86,156,255,.12);
-  border:1px solid rgba(86,156,255,.22);
+  background:rgba(86,156,255,.10);
+  border:1px solid rgba(86,156,255,.20);
   color:#111;
 }
+
+/* ✅ Guardados: lista bonita + X */
+.savedList{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+.savedItem{
+  display:flex; gap:10px; align-items:center; justify-content:space-between;
+  padding:10px 12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke2);
+}
+.light .savedItem{ background:rgba(0,0,0,.03); border:1px solid rgba(0,0,0,.06); }
+.savedItem .left{ flex:1; }
+.savedItem .t1{ font-weight:1000; }
+.savedItem .t2{ font-size:12px; opacity:.85; margin-top:3px; }
+
 </style>
 </head>
 
@@ -342,25 +392,25 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 
 <div id="loading">
   <div>
-    <div style="font-size:18px;font-weight:900">Carregando...</div>
+    <div style="font-size:18px;font-weight:1000">Carregando...</div>
     <div style="opacity:.8;margin-top:6px">Validando login</div>
   </div>
 </div>
 
-<!-- ✅ TELA PRINCIPAL (resumida) -->
+<!-- ✅ TELA PRINCIPAL -->
 <div id="screenMain" class="screen">
   <div class="wrap">
     <h1>
       Controle de Gastos PRO
       <span class="row" style="display:inline-flex;gap:8px;float:right">
-        <button class="iconbtn" style="padding:6px 10px" onclick="abrirMenu()">☰ Menu</button>
-        <button class="iconbtn" style="padding:6px 10px" onclick="toggleTheme()">🌙/☀️</button>
+        <button class="iconbtn" style="padding:8px 12px" onclick="abrirMenu()">☰ Menu</button>
+        <button class="iconbtn" style="padding:8px 12px" onclick="toggleTheme()">🌙/☀️</button>
       </span>
     </h1>
 
     <div class="card hero">
       <div class="heroTitle">Resumo do mês</div>
-      <div class="heroSub">Aqui fica só o essencial. Para editar, use o <b>Menu</b>.</div>
+      <div class="heroSub">Aqui fica só o essencial. Para editar categorias, fixos e simuladores, use o <b>Menu</b>.</div>
 
       <div style="margin-top:10px" class="row">
         <div>
@@ -379,10 +429,21 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
           <input id="meta" type="number" placeholder="0">
         </div>
         <div>
-          <div class="small">Guardado (mês)</div>
+          <div class="small">Guardado (adicionar)</div>
           <input id="savedValue" type="number" placeholder="0">
         </div>
       </div>
+
+      <div class="row" style="margin-top:8px">
+        <div>
+          <div class="small">Descrição do guardado (opcional)</div>
+          <input id="savedDesc" placeholder="Ex: Reserva, CDB, Tesouro...">
+        </div>
+        <button class="mini" onclick="addSaved()">Adicionar</button>
+      </div>
+
+      <!-- ✅ Lista de guardados com X -->
+      <div id="savedList" class="savedList"></div>
 
       <div class="row" style="margin-top:10px">
         <button onclick="saveSettings()">Salvar</button>
@@ -390,7 +451,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       </div>
 
       <div class="small" style="margin-top:8px;opacity:.85">
-        Dica: toque na bolinha 🤖 para conversar com a IA sobre seus números.
+        Dica: toque em <b>IA PRO</b> para analisar seu mês e sugerir investimentos.
       </div>
     </div>
 
@@ -401,10 +462,12 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
     <div class="card"><table id="list"></table></div>
   </div>
 
-  <!-- ✅ BOLINHA IA (acima do +) -->
-  <div class="fab-ai" title="IA" onclick="abrirChatIA()">🤖</div>
+  <!-- ✅ IA PRO -->
+  <div class="fab-ai" title="IA PRO" onclick="abrirChatIA()">
+    <div class="txt"><b>IA</b><br>PRO</div>
+  </div>
 
-  <!-- ✅ BOTÃO + VERDE -->
+  <!-- ✅ BOTÃO + -->
   <div class="fab" onclick="abrirAdd()">+</div>
 </div>
 
@@ -412,7 +475,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 <div id="screenMenu" class="screen">
   <div class="topbar">
     <div class="topbar-inner">
-      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <button class="iconbtn" onclick="voltarTela()">← Início</button>
       <div class="topbar-title">☰ Menu</div>
       <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
     </div>
@@ -420,8 +483,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 
   <div class="wrap">
     <div class="card hero" style="box-shadow:none">
-      <div class="heroTitle">Bem-vindo</div>
-      <div class="heroSub">Escolha uma área. Cada uma abre uma tela com botão de voltar.</div>
+      <div class="heroTitle">Painel</div>
+      <div class="heroSub">Cada item abre uma tela própria com botão de voltar para o <b>Início</b>.</div>
     </div>
 
     <button class="pillBtn" onclick="irPara('screenConfig')">⚙️ Configurações <span>›</span></button>
@@ -429,7 +492,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
     <button class="pillBtn" onclick="irPara('screenCats')">📂 Minhas categorias <span>›</span></button>
     <button class="pillBtn" onclick="irPara('screenFixos')">📌 Gastos fixos <span>›</span></button>
 
-    <div style="margin-top:12px" class="small">Você pode voltar a qualquer momento.</div>
+    <div style="margin-top:12px" class="small">Você pode sempre voltar para o início.</div>
   </div>
 </div>
 
@@ -437,7 +500,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 <div id="screenConfig" class="screen">
   <div class="topbar">
     <div class="topbar-inner">
-      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <button class="iconbtn" onclick="voltarTela()">← Início</button>
       <div class="topbar-title">⚙️ Configurações</div>
       <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
     </div>
@@ -445,7 +508,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   <div class="wrap">
     <div class="card hero" style="box-shadow:none">
       <div class="heroTitle" id="userName">Conta</div>
-      <div class="heroSub">Login, tema e atalhos.</div>
+      <div class="heroSub">Login, tema e anotações.</div>
     </div>
 
     <div class="card">
@@ -459,8 +522,6 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
     <div class="card">
       <h3>📝 Anotações do mês</h3>
       <textarea id="notes" placeholder="Ex: reduzir delivery, juntar para reserva..."></textarea>
-      <label>Descrição do guardado (opcional)</label>
-      <input id="savedDesc" placeholder="Ex: Reserva, CDB, Tesouro...">
       <button onclick="saveSettings()">Salvar</button>
     </div>
   </div>
@@ -470,8 +531,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 <div id="screenHistory" class="screen">
   <div class="topbar">
     <div class="topbar-inner">
-      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
-      <div class="topbar-title">📅 Histórico de meses</div>
+      <button class="iconbtn" onclick="voltarTela()">← Início</button>
+      <div class="topbar-title">📅 Histórico</div>
       <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
     </div>
   </div>
@@ -480,7 +541,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       <div class="heroTitle">Seu histórico financeiro</div>
       <div class="heroSub">Toque em <b>Abrir</b> para carregar um mês no app.</div>
     </div>
-    <div class="histGrid" id="listaMeses"></div>
+    <div id="listaMeses"></div>
   </div>
 </div>
 
@@ -488,8 +549,8 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 <div id="screenCats" class="screen">
   <div class="topbar">
     <div class="topbar-inner">
-      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
-      <div class="topbar-title">📂 Minhas Categorias</div>
+      <button class="iconbtn" onclick="voltarTela()">← Início</button>
+      <div class="topbar-title">📂 Categorias</div>
       <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
     </div>
   </div>
@@ -513,7 +574,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 <div id="screenFixos" class="screen">
   <div class="topbar">
     <div class="topbar-inner">
-      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <button class="iconbtn" onclick="voltarTela()">← Início</button>
       <div class="topbar-title">📌 Gastos Fixos</div>
       <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
     </div>
@@ -542,7 +603,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 <div id="screenSim" class="screen">
   <div class="topbar">
     <div class="topbar-inner">
-      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <button class="iconbtn" onclick="voltarTela()">← Início</button>
       <div class="topbar-title">📌 Simuladores</div>
       <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
     </div>
@@ -554,12 +615,12 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       <div class="heroSub">Investimento e empréstimo com base no seu mês atual.</div>
     </div>
 
-    <div class="card menuCard">
-      <div class="menuHeader">
-        <div class="menuTitle">📈 Investimentos</div>
-        <button class="chev" onclick="toggleBox('boxInv','invIcon')"><span id="invIcon">▼</span></button>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div style="font-weight:1000">📈 Investimentos</div>
+        <button class="mini soft" onclick="toggleBox('boxInv','invIcon')"><span id="invIcon">Abrir</span></button>
       </div>
-      <div id="boxInv" class="collapsed" style="margin-top:10px">
+      <div id="boxInv" style="display:none;margin-top:10px">
         <label>Tipo de investimento</label>
         <select id="invTipo" onchange="atualizarCamposInvestimento()">
           <option value="poupanca">Poupança</option>
@@ -622,24 +683,24 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 
         <button onclick="simularInvestimentos()">Calcular</button>
 
-        <div id="resultadoInv" style="margin-top:10px;font-weight:900"></div>
-        <div id="detalhesInv" class="small" style="margin-top:8px"></div>
+        <div id="resultadoInv" style="margin-top:10px;font-weight:1000"></div>
+        <div id="detalhesInv" class="small" style="margin-top:8px;white-space:pre-wrap"></div>
       </div>
     </div>
 
-    <div class="card menuCard">
-      <div class="menuHeader">
-        <div class="menuTitle">💳 Empréstimo / Compra</div>
-        <button class="chev" onclick="toggleBox('boxEmp','empIcon')"><span id="empIcon">▼</span></button>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div style="font-weight:1000">💳 Empréstimo / Compra</div>
+        <button class="mini soft" onclick="toggleBox('boxEmp','empIcon')"><span id="empIcon">Abrir</span></button>
       </div>
-      <div id="boxEmp" class="collapsed" style="margin-top:10px">
+      <div id="boxEmp" style="display:none;margin-top:10px">
         <label>Tipo</label>
         <select id="empTipo">
           <option value="financiamento">Financiamento (Price)</option>
           <option value="juros_simples">Juros simples</option>
         </select>
 
-        <label>Valor emprestado / valor da compra (R$)</label>
+        <label>Valor (R$)</label>
         <input id="empValor" type="number" placeholder="Ex: 5000">
 
         <label>Parcelas</label>
@@ -656,7 +717,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 
         <button onclick="simularEmprestimo()">Calcular</button>
 
-        <div id="resultadoEmp" style="margin-top:10px;font-weight:900"></div>
+        <div id="resultadoEmp" style="margin-top:10px;font-weight:1000"></div>
         <div id="detalhesEmp" class="small" style="margin-top:8px;white-space:pre-wrap;"></div>
       </div>
     </div>
@@ -668,20 +729,20 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 <div id="iaModal" class="modal" onclick="fecharChatIAClickFora(event)">
   <div class="modalCard" role="dialog" aria-modal="true" onclick="event.stopPropagation()">
     <div class="modalTop">
-      <div class="modalTitle">🤖 Assistente • IA</div>
+      <div class="modalTitle">🤖 IA PRO • Consultor</div>
       <button class="modalClose" onclick="fecharChatIA()">✕</button>
     </div>
 
     <div class="modalBody" id="iaChatScroll">
       <div class="chat" id="iaChat">
-        <div class="bubble ai">Oi! Me pergunte algo sobre seus gastos, salário, guardado/investido e investimento. 🙂</div>
+        <div class="bubble ai">Oi! Eu sou a <b>IA PRO</b>. Me pergunte algo sobre seus gastos, salário e melhor investimento. 🙂</div>
       </div>
     </div>
 
     <div class="statusLine">Status: <span id="iaStatus">Aguardando...</span></div>
 
     <div class="chatFoot">
-      <input id="iaPrompt" placeholder="Digite sua pergunta... (ex: melhor investimento com minha sobra?)">
+      <input id="iaPrompt" placeholder="Digite sua pergunta...">
       <button onclick="iaEnviar()">Enviar</button>
     </div>
   </div>
@@ -742,47 +803,38 @@ let grafico = null;
 let graficoEvolucao = null;
 
 /* =========================
-   ✅ Navegação de telas
+   ✅ Navegação (CORRIGIDA)
+   - Sempre volta para Início
 ========================= */
-let telaAnterior = "screenMain";
-
 function hideLoading(){ document.getElementById("loading").style.display="none"; }
 function showLoading(){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("show"));
   document.getElementById("loading").style.display="flex";
 }
 function showScreen(id){
+  document.getElementById("loading").style.display="none";
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("show"));
   document.getElementById(id).classList.add("show");
 }
-window.irPara = function(id){
-  const atual = document.querySelector(".screen.show");
-  telaAnterior = atual ? atual.id : "screenMain";
-  showScreen(id);
-};
-window.voltarTela = function(){ showScreen(telaAnterior || "screenMain"); };
-window.abrirMenu = function(){ irPara("screenMenu"); };
-window.abrirHistorico = function(){ renderListaMeses(); irPara("screenHistory"); };
-
-window.toggleBox = function(boxId, iconId){
-  const box = document.getElementById(boxId);
-  const icon = document.getElementById(iconId);
-  if(!box) return;
-  const aberto = !box.classList.contains("collapsed");
-  if(aberto){
-    box.classList.add("collapsed");
-    if(icon) icon.textContent = "▼";
-  }else{
-    box.classList.remove("collapsed");
-    if(icon) icon.textContent = "▲";
-    box.scrollIntoView({behavior:"smooth", block:"start"});
-  }
-};
+window.irPara = function(id){ showScreen(id); };
+window.voltarTela = function(){ showScreen("screenMain"); }; // ✅ sempre volta pro início
+window.abrirMenu = function(){ showScreen("screenMenu"); };
+window.abrirHistorico = function(){ renderListaMeses(); showScreen("screenHistory"); };
 
 /* =========================
-   ✅ Tema / config
+   ✅ UI helpers
 ========================= */
 window.toggleTheme = ()=> document.body.classList.toggle("light");
+
+window.toggleBox = function(boxId, labelId){
+  const box = document.getElementById(boxId);
+  const lab = document.getElementById(labelId);
+  if(!box) return;
+  const aberto = box.style.display !== "none";
+  box.style.display = aberto ? "none" : "block";
+  if(lab) lab.textContent = aberto ? "Abrir" : "Fechar";
+  if(!aberto) box.scrollIntoView({behavior:"smooth", block:"start"});
+};
 
 /* =========================
    ✅ Firebase / Auth
@@ -952,7 +1004,64 @@ function renderFixos(){
 }
 
 /* =========================
-   ✅ Guardado / notas / salvar
+   ✅ Guardado (adicionar / remover com X)
+========================= */
+function fmtBRL(n){ return "R$ " + Number(n||0).toFixed(2).replace(".", ","); }
+
+window.addSaved = function(){
+  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
+
+  const v = Number(document.getElementById("savedValue").value);
+  const desc = String(document.getElementById("savedDesc").value||"").trim();
+
+  if(!v || v <= 0){ alert("Digite um valor maior que 0."); return; }
+
+  d.saved = Array.isArray(d.saved) ? d.saved : [];
+  d.saved.push({ valor: v, desc, data: new Date().toISOString().slice(0,10) });
+
+  document.getElementById("savedValue").value = "";
+  document.getElementById("savedDesc").value = "";
+
+  salvarTudoLocal();
+  renderSavedList();
+  window.render();
+};
+
+window.removerSaved = function(idx){
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
+  if(!Array.isArray(d.saved)) d.saved = [];
+  if(idx<0 || idx>=d.saved.length) return;
+  d.saved.splice(idx, 1);
+  salvarTudoLocal();
+  renderSavedList();
+  window.render();
+};
+
+function renderSavedList(){
+  const el = document.getElementById("savedList");
+  if(!el) return;
+  const d = window.getDataMes();
+  const arr = Array.isArray(d.saved) ? d.saved : [];
+  if(!arr.length){
+    el.innerHTML = `<div class="small" style="opacity:.85">Nenhum guardado registrado neste mês.</div>`;
+    return;
+  }
+  el.innerHTML = arr.map((s,idx)=>`
+    <div class="savedItem">
+      <div class="left">
+        <div class="t1">🏦 ${fmtBRL(s.valor)} ${s.desc ? `<span class="badge">${s.desc}</span>` : ""}</div>
+        <div class="t2">Data: ${s.data || "-"}</div>
+      </div>
+      <button class="btnX" title="Remover" onclick="removerSaved(${idx})">✕</button>
+    </div>
+  `).join("");
+}
+
+/* =========================
+   ✅ Salvar (salário/meta/anotações)
 ========================= */
 window.saveSettings = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
@@ -964,18 +1073,6 @@ window.saveSettings = ()=>{
 
   const notesEl = document.getElementById("notes");
   if(notesEl) d.notes = String(notesEl.value || "");
-
-  const descEl = document.getElementById("savedDesc");
-  const desc = descEl ? String(descEl.value || "").trim() : "";
-
-  // ✅ adiciona guardado no mês (se preencheu)
-  const savedV = Number(document.getElementById("savedValue").value);
-  if(savedV && savedV > 0){
-    if(!Array.isArray(d.saved)) d.saved = [];
-    d.saved.push({ valor: savedV, desc, data: new Date().toISOString().slice(0,10) });
-    document.getElementById("savedValue").value = "";
-    if(descEl) descEl.value = "";
-  }
 
   salvarTudoLocal();
 
@@ -1031,8 +1128,6 @@ window.del = (i)=>{
 /* =========================
    ✅ Render / gráficos
 ========================= */
-function formatBRL(n){ return "R$ " + Number(n||0).toFixed(2).replace(".", ","); }
-
 function drawChart(items){
   const mapa={}; items.forEach(i=>{ const cat=i.category||"Outros"; mapa[cat]=(mapa[cat]||0)+Number(i.amount||0); });
   const labels=Object.keys(mapa), valores=Object.values(mapa);
@@ -1052,29 +1147,33 @@ function paint(){
   document.getElementById("month").value  = mesAtual;
   document.getElementById("meta").value   = d.meta||"";
 
+  const notesEl = document.getElementById("notes");
+  if(notesEl && typeof d.notes === "string") notesEl.value = d.notes;
+
   const total=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
   const sobra=Number(d.salary||0)-total;
 
   const savedTotal = (Array.isArray(d.saved) ? d.saved : []).reduce((a,b)=>a+Number(b.valor||0),0);
 
   document.getElementById("kpis").innerHTML=`
-    <div class="kpi">Salário<br><b>${formatBRL(d.salary||0)}</b></div>
-    <div class="kpi">Gasto<br><b>${formatBRL(total)}</b></div>
-    <div class="kpi">Sobra<br><b>${formatBRL(sobra)}</b></div>
-    <div class="kpi">Guardado<br><b>${formatBRL(savedTotal)}</b></div>
-    <div class="success">Você economizou ${formatBRL(sobra)}</div>
+    <div class="kpi">Salário<br><b>${fmtBRL(d.salary||0)}</b></div>
+    <div class="kpi">Gasto<br><b>${fmtBRL(total)}</b></div>
+    <div class="kpi">Sobra<br><b>${fmtBRL(sobra)}</b></div>
+    <div class="kpi">Guardado<br><b>${fmtBRL(savedTotal)}</b></div>
+    <div class="success">Você economizou ${fmtBRL(sobra)}</div>
   `;
 
   document.getElementById("list").innerHTML=(d.items||[]).map((i,idx)=>`
     <tr>
       <td>${i.desc}${i.isFixo?` <span class="badge">Fixo</span>`:""} <span class="badge">${i.category||"Outros"}</span></td>
-      <td>${formatBRL(i.amount||0)}</td>
+      <td>${fmtBRL(i.amount||0)}</td>
       <td><button onclick="del(${idx})">X</button></td>
     </tr>
   `).join("");
 
   drawChart(d.items||[]);
   drawEvolucao();
+  renderSavedList();
 }
 
 window.render = ()=>{
@@ -1111,17 +1210,15 @@ window.render = ()=>{
 
       salvarTudoLocal();
       paint();
-      if(document.getElementById("screenHistory").classList.contains("show")) renderListaMeses();
     })
     .catch(()=>{
       salvarTudoLocal();
       paint();
-      if(document.getElementById("screenHistory").classList.contains("show")) renderListaMeses();
     });
 };
 
 /* =========================
-   ✅ Histórico
+   ✅ Histórico (simples e compatível)
 ========================= */
 function renderListaMeses(){
   const el = document.getElementById("listaMeses");
@@ -1138,18 +1235,16 @@ function renderListaMeses(){
     const savedTotal = (Array.isArray(d.saved) ? d.saved : []).reduce((a,b)=>a+Number(b.valor||0),0);
 
     return `
-      <div class="histItem">
-        <div style="flex:1">
-          <div class="histMonth">${m}</div>
-          <div class="small" style="margin-top:4px;opacity:.85">${(d.notes||"").trim() ? (d.notes||"").trim().slice(0,90) + ((d.notes||"").trim().length>90?"…":"") : "Sem anotações."}</div>
-          <div class="histNums">
-            <span class="pill">💰 <b>${formatBRL(sal)}</b></span>
-            <span class="pill">🧾 <b>${formatBRL(total)}</b></span>
-            <span class="pill">✅ <b>${formatBRL(sobra)}</b></span>
-            <span class="pill">🏦 <b>${formatBRL(savedTotal)}</b></span>
-          </div>
+      <div class="card" style="margin-bottom:10px">
+        <div style="font-weight:1000">${m}</div>
+        <div class="small" style="margin-top:6px;opacity:.85">${(d.notes||"").trim()? (d.notes||"").trim().slice(0,90)+( (d.notes||"").trim().length>90?"…":"") : "Sem anotações."}</div>
+        <div class="small" style="margin-top:10px">
+          💰 <b>${fmtBRL(sal)}</b> • 🧾 <b>${fmtBRL(total)}</b> • ✅ <b>${fmtBRL(sobra)}</b> • 🏦 <b>${fmtBRL(savedTotal)}</b>
         </div>
-        <button class="histBtn" onclick="abrirMesDoHistorico('${m}')">Abrir</button>
+        <div style="margin-top:10px" class="row">
+          <button class="mini" onclick="abrirMesDoHistorico('${m}')">Abrir</button>
+          <button class="mini ghost" onclick="voltarTela()">Voltar</button>
+        </div>
       </div>
     `;
   }).join("");
@@ -1163,7 +1258,7 @@ window.abrirMesDoHistorico = function(m){
 };
 
 /* ==========================================================
-   ✅ SIMULADOR INVESTIMENTOS (mesmo do seu)
+   ✅ SIMULADOR INVESTIMENTOS
 ========================================================== */
 function clampNum(v, def=0){ v = Number(v); return Number.isFinite(v) ? v : def; }
 function anualParaMensalEfetivo(taxaAnual){ const r = taxaAnual/100; return Math.pow(1+r, 1/12) - 1; }
@@ -1294,8 +1389,8 @@ window.simularInvestimentos = function(){
   }
 
   const res = simularComAporte(inicial, aporte, meses, taxaMensal);
-
   let final = res.final;
+
   if(diasExtra > 0){
     final = final * (1 + taxaMensal * (diasExtra/30));
   }
@@ -1307,13 +1402,10 @@ window.simularInvestimentos = function(){
   let iof = 0;
 
   const temIR = (tipo === "cdb" || tipo === "tesouro_selic" || tipo === "fundo_di" || tipo === "prefixado" || tipo === "ipca_plus");
-  const isentoIR = (tipo === "lci_lca" || tipo === "poupanca" || tipo === "renda_variavel");
 
   if(temIR){
     const aliq = aliquotaIR(diasTotais);
     imposto = Math.max(0, lucroBruto) * aliq;
-  }else if(!isentoIR && tipo === "renda_variavel"){
-    imposto = 0;
   }
 
   if(aplicarIOF){
@@ -1323,13 +1415,13 @@ window.simularInvestimentos = function(){
 
   const lucroLiquido = lucroBruto - imposto - iof;
 
-  out.textContent = `Final: ${formatBRL(final)} • Lucro líquido: ${formatBRL(lucroLiquido)}`;
+  out.textContent = `Final: ${fmtBRL(final)} • Lucro líquido: ${fmtBRL(lucroLiquido)}`;
   det.textContent =
     `${textoTaxa}\n` +
-    `Investido: ${formatBRL(investido)}\n` +
-    `Lucro bruto: ${formatBRL(lucroBruto)}\n` +
-    `IR (estimado): ${formatBRL(imposto)}\n` +
-    `IOF (estimado): ${formatBRL(iof)}\n` +
+    `Investido: ${fmtBRL(investido)}\n` +
+    `Lucro bruto: ${fmtBRL(lucroBruto)}\n` +
+    `IR (estimado): ${fmtBRL(imposto)}\n` +
+    `IOF (estimado): ${fmtBRL(iof)}\n` +
     `Período: ~${diasTotais} dias`;
 };
 
@@ -1347,8 +1439,6 @@ function empCalcJurosSimples(valor, jurosMensal, n){
   const total = valor * (1 + jurosMensal * n);
   return { total, parcela: total / n };
 }
-function empFormat(n){ return "R$ " + Number(n||0).toFixed(2).replace(".", ","); }
-
 window.simularEmprestimo = function(){
   const tipo = document.getElementById("empTipo").value;
 
@@ -1369,9 +1459,7 @@ window.simularEmprestimo = function(){
 
   const pv = Math.max(0, valorBruto - entrada) + tarifa;
 
-  let parcela = 0;
-  let total = 0;
-  let jurosTotal = 0;
+  let parcela = 0, total = 0, jurosTotal = 0;
 
   if(tipo === "financiamento"){
     parcela = empCalcPrice(pv, juros, parcelas);
@@ -1390,31 +1478,29 @@ window.simularEmprestimo = function(){
   const sobra = salario - gastos;
   const sobraPosParcela = sobra - parcela;
 
-  let sinal = "🟡";
-  let msg = "Cuidado";
-  if(sobraPosParcela >= salario*0.3){ sinal = "🟢"; msg = "Dá pra pagar com folga"; }
-  else if(sobraPosParcela > 0){ sinal = "🟡"; msg = "Dá pra pagar, mas aperta"; }
-  else { sinal = "🔴"; msg = "Não recomendado (fica negativo)"; }
+  let sinal = "🟡", msg = "Cuidado";
+  if(sobraPosParcela >= salario*0.3){ sinal="🟢"; msg="Dá pra pagar com folga"; }
+  else if(sobraPosParcela > 0){ sinal="🟡"; msg="Dá pra pagar, mas aperta"; }
+  else { sinal="🔴"; msg="Não recomendado (fica negativo)"; }
 
-  out.textContent = `${sinal} Parcela: ${empFormat(parcela)} • Total: ${empFormat(total)}`;
-
+  out.textContent = `${sinal} Parcela: ${fmtBRL(parcela)} • Total: ${fmtBRL(total)}`;
   det.textContent =
 `Tipo: ${tipo === "financiamento" ? "Financiamento (Price)" : "Juros simples"}
-Valor informado: ${empFormat(valorBruto)}
-Entrada: ${empFormat(entrada)}
-Tarifa/taxa fixa: ${empFormat(tarifa)}
-Valor financiado (PV): ${empFormat(pv)}
+Valor informado: ${fmtBRL(valorBruto)}
+Entrada: ${fmtBRL(entrada)}
+Tarifa/taxa fixa: ${fmtBRL(tarifa)}
+Valor financiado (PV): ${fmtBRL(pv)}
 Juros a.m.: ${(juros*100).toFixed(2)}%
 Parcelas: ${parcelas}
-Juros pagos (estimado): ${empFormat(jurosTotal)}
+Juros pagos (estimado): ${fmtBRL(jurosTotal)}
 
-Sobra atual (Salário - Gastos): ${empFormat(sobra)}
-Sobra após parcela: ${empFormat(sobraPosParcela)}
+Sobra atual (Salário - Gastos): ${fmtBRL(sobra)}
+Sobra após parcela: ${fmtBRL(sobraPosParcela)}
 Análise: ${msg}`;
 };
 
 /* ==========================================================
-   ✅ CHAT IA (modal)
+   ✅ CHAT IA
 ========================================================== */
 function getIaBase(){ return (window.API_BASE_URL || "").replace(/\/$/, ""); }
 
@@ -1545,7 +1631,7 @@ document.addEventListener("keydown", (e)=>{
 });
 
 /* =========================
-   ✅ INIT / AUTH + Render
+   ✅ Init
 ========================= */
 document.addEventListener("DOMContentLoaded", async ()=>{
   showLoading();
