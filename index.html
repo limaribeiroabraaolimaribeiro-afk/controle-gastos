@@ -145,6 +145,138 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 }
 .light .chev{ background:rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.10); }
 .collapsed{ display:none; }
+
+/* =========================
+   ✅ BOLINHA IA (acima do +)
+========================= */
+.fab-ai{
+  position:fixed;
+  right:20px;
+  bottom:88px; /* acima do botão verde */
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  background: rgba(86,156,255,.95);
+  color:#fff;
+  font-size:22px;
+  box-shadow: 0 14px 30px rgba(86,156,255,.22);
+  border: 1px solid rgba(255,255,255,.16);
+}
+.fab-ai:active{ transform: translateY(1px) scale(.99); }
+
+/* ✅ Modal do chat IA */
+.modal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  z-index:99999;
+  padding:16px;
+}
+.modal.show{ display:flex; align-items:flex-end; justify-content:center; }
+.modalCard{
+  width:min(760px, 100%);
+  max-height: 82vh;
+  background: rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow:hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  display:flex;
+  flex-direction:column;
+}
+.modalTop{
+  padding:12px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.modalTitle{
+  display:flex; align-items:center; gap:10px;
+  font-weight:900;
+}
+.modalClose{
+  width:auto;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+  color:var(--text);
+}
+.modalBody{
+  padding:12px;
+  overflow:auto;
+}
+.chat{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.bubble{
+  max-width:85%;
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.06);
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.bubble.user{
+  align-self:flex-end;
+  background:rgba(86,156,255,.20);
+  border:1px solid rgba(86,156,255,.35);
+}
+.bubble.ai{
+  align-self:flex-start;
+  background:rgba(255,255,255,.06);
+}
+.chatFoot{
+  padding:12px;
+  border-top:1px solid rgba(255,255,255,.10);
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.chatFoot input{
+  margin-top:0;
+}
+.chatFoot button{
+  width:auto;
+  padding:10px 14px;
+  border-radius:14px;
+  font-weight:800;
+}
+.statusLine{
+  padding:0 12px 12px;
+  font-size:12px;
+  opacity:.85;
+}
+.light .modalCard{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.10);
+}
+.light .modalClose{
+  background:rgba(0,0,0,.05);
+  border:1px solid rgba(0,0,0,.10);
+  color:#111;
+}
+.light .bubble{
+  background:rgba(0,0,0,.04);
+  border:1px solid rgba(0,0,0,.08);
+  color:#111;
+}
+.light .bubble.user{
+  background:rgba(86,156,255,.16);
+  border:1px solid rgba(86,156,255,.28);
+}
 </style>
 </head>
 
@@ -341,26 +473,6 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       </div>
 
     </div>
-    <!-- ✅ FIM DO MENU -->
-
-    <!-- ✅ IA -->
-    <div class="card" id="iaCard">
-      <h3>🤖 IA (Ollama)</h3>
-
-      <label>Pergunta</label>
-      <input id="iaPrompt" placeholder="Ex: com meus gastos, onde devo investir este mês?">
-
-      <button onclick="iaPerguntar()">Perguntar</button>
-
-      <div id="iaResposta" class="small" style="margin-top:10px; white-space:pre-wrap;"></div>
-
-      <div class="small" style="margin-top:8px; opacity:.8">
-        Status: <span id="iaStatus">Aguardando...</span>
-      </div>
-      <div class="small" style="margin-top:6px;opacity:.75">
-        A IA usa automaticamente seu salário, gastos, categorias e anotações do mês para responder.
-      </div>
-    </div>
 
     <div class="kpis" id="kpis"></div>
 
@@ -369,10 +481,14 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
     <div class="card"><table id="list"></table></div>
   </div>
 
+  <!-- ✅ BOLINHA IA (acima do +) -->
+  <div class="fab-ai" title="IA" onclick="abrirChatIA()">🤖</div>
+
+  <!-- ✅ BOTÃO + VERDE -->
   <div class="fab" onclick="abrirAdd()">+</div>
 </div>
 
-<!-- ✅ TELA HISTÓRICO (separada, com voltar) -->
+<!-- ✅ TELA HISTÓRICO -->
 <div id="screenHistory" class="screen">
   <div class="topbar">
     <div class="topbar-inner">
@@ -397,6 +513,29 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       </div>
 
       <div class="histGrid" id="listaMeses"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ MODAL CHAT IA -->
+<div id="iaModal" class="modal" onclick="fecharChatIAClickFora(event)">
+  <div class="modalCard" role="dialog" aria-modal="true" onclick="event.stopPropagation()">
+    <div class="modalTop">
+      <div class="modalTitle">🤖 Assistente • IA</div>
+      <button class="modalClose" onclick="fecharChatIA()">✕</button>
+    </div>
+
+    <div class="modalBody" id="iaChatScroll">
+      <div class="chat" id="iaChat">
+        <div class="bubble ai">Oi! Me pergunte algo sobre seus gastos, salário e investimento. 🙂</div>
+      </div>
+    </div>
+
+    <div class="statusLine">Status: <span id="iaStatus">Aguardando...</span></div>
+
+    <div class="chatFoot">
+      <input id="iaPrompt" placeholder="Digite sua pergunta... (ex: melhor investimento com minha sobra?)">
+      <button onclick="iaEnviar()">Enviar</button>
     </div>
   </div>
 </div>
@@ -469,7 +608,6 @@ window.toggleMenuSim = function(){
   }else{
     box.classList.remove("collapsed");
     if(icon) icon.textContent = "▲";
-    // rola suavemente para o começo do menu
     box.scrollIntoView({ behavior:"smooth", block:"start" });
   }
 };
@@ -1053,11 +1191,6 @@ window.simularEmprestimo = function(){
     det.textContent = "";
     return;
   }
-  if(parcelas <= 0){
-    out.textContent = "Informe as parcelas.";
-    det.textContent = "";
-    return;
-  }
 
   const pv = Math.max(0, valorBruto - entrada) + tarifa;
 
@@ -1106,7 +1239,7 @@ Análise: ${msg}`;
 };
 
 /* ==========================================================
-   ✅ IA (Ollama)
+   ✅ CHAT IA (modal)
 ========================================================== */
 function getIaBase(){ return (window.API_BASE_URL || "").replace(/\/$/, ""); }
 function resumoDoMesParaIA(){
@@ -1120,7 +1253,6 @@ function resumoDoMesParaIA(){
     const c = it.category || "Outros";
     porCat[c] = (porCat[c] || 0) + Number(it.amount||0);
   }
-
   const topCats = Object.entries(porCat)
     .sort((a,b)=>b[1]-a[1])
     .slice(0,6)
@@ -1140,6 +1272,7 @@ TOP CATEGORIAS: ${topCats || "sem dados"}
 ANOTAÇÕES: ${(d.notes||"").trim() || "(vazio)"}
   `.trim();
 }
+
 async function iaHealth(){
   try{
     const base = getIaBase();
@@ -1154,19 +1287,50 @@ async function iaHealth(){
     if(el) el.textContent = "Offline: " + msg;
   }
 }
-window.iaPerguntar = async function(){
-  const promptEl = document.getElementById("iaPrompt");
-  const outEl = document.getElementById("iaResposta");
-  const statusEl = document.getElementById("iaStatus");
 
-  const pergunta = (promptEl.value || "").trim();
-  if(!pergunta){
-    outEl.textContent = "Digite uma pergunta.";
-    return;
+function chatAdd(role, text){
+  const chat = document.getElementById("iaChat");
+  const div = document.createElement("div");
+  div.className = "bubble " + (role === "user" ? "user" : "ai");
+  div.textContent = text;
+  chat.appendChild(div);
+
+  // rola pro fim
+  const sc = document.getElementById("iaChatScroll");
+  sc.scrollTop = sc.scrollHeight;
+}
+
+window.abrirChatIA = function(){
+  const modal = document.getElementById("iaModal");
+  modal.classList.add("show");
+  setTimeout(()=>{
+    const inp = document.getElementById("iaPrompt");
+    inp && inp.focus();
+  }, 50);
+  iaHealth();
+};
+
+window.fecharChatIA = function(){
+  document.getElementById("iaModal").classList.remove("show");
+};
+
+window.fecharChatIAClickFora = function(ev){
+  // se clicar no fundo do modal, fecha
+  if(ev.target && ev.target.id === "iaModal"){
+    fecharChatIA();
   }
+};
+
+window.iaEnviar = async function(){
+  const promptEl = document.getElementById("iaPrompt");
+  const statusEl = document.getElementById("iaStatus");
+  const pergunta = (promptEl.value || "").trim();
+  if(!pergunta) return;
+
+  chatAdd("user", pergunta);
+  promptEl.value = "";
 
   try{
-    outEl.textContent = "Pensando...";
     if(statusEl) statusEl.textContent = "Consultando IA...";
 
     const base = getIaBase();
@@ -1198,14 +1362,31 @@ ${pergunta}
     });
 
     const data = await resp.json();
-    outEl.textContent = data.response || JSON.stringify(data, null, 2);
+    const txt = data.response || JSON.stringify(data, null, 2);
+    chatAdd("ai", txt);
     if(statusEl) statusEl.textContent = "Online ✅";
   }catch(e){
     const msg = (e && e.message) ? e.message : String(e);
-    outEl.textContent = "Erro: " + msg;
+    chatAdd("ai", "Erro: " + msg);
     if(statusEl) statusEl.textContent = "Erro ❌";
   }
 };
+
+// enviar com Enter
+document.addEventListener("keydown", (e)=>{
+  const modal = document.getElementById("iaModal");
+  if(!modal.classList.contains("show")) return;
+  if(e.key === "Enter"){
+    const active = document.activeElement;
+    if(active && active.id === "iaPrompt"){
+      e.preventDefault();
+      iaEnviar();
+    }
+  }
+});
+/* ==========================================================
+   ✅ FIM CHAT IA
+========================================================== */
 
 /* =========================
    ✅ INIT
