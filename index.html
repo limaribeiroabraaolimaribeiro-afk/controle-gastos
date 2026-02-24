@@ -66,6 +66,7 @@ h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
 .row{display:flex;gap:10px;align-items:center}
 .row > *{flex:1}
 .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .grid1{display:grid;grid-template-columns:1fr;gap:12px}
 .btn{
   appearance:none;border:0;cursor:pointer;
@@ -78,6 +79,7 @@ h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
 }
 .btn.primary{background: linear-gradient(135deg, rgba(86,156,255,.95), rgba(86,156,255,.70)); border-color: rgba(86,156,255,.35)}
 .btn.good{background: linear-gradient(135deg, rgba(57,217,138,.95), rgba(57,217,138,.70)); border-color: rgba(57,217,138,.35)}
+.btn.warn{background: linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,209,102,.70)); border-color: rgba(255,209,102,.35); color:#281a00}
 .btn.ghost{background: transparent}
 .btn.mini{padding:9px 10px;border-radius:12px;font-size:13px}
 .btn.icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0;border-radius:16px}
@@ -101,6 +103,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   border:1px solid var(--stroke);
   font-size:12px;color:var(--muted);
 }
+.badge.good{color:var(--good); border-color: rgba(57,217,138,.35); background: rgba(57,217,138,.10)}
+.badge.warn{color:var(--warn); border-color: rgba(255,209,102,.35); background: rgba(255,209,102,.10)}
 .kpi{
   background: rgba(255,255,255,.06);
   border:1px solid var(--stroke);
@@ -132,15 +136,9 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   background: rgba(255,255,255,.06);
   border:1px solid var(--stroke);
 }
-.list td{
-  padding:12px;
-}
-.list tr td:first-child{
-  border-top-left-radius:16px;border-bottom-left-radius:16px;
-}
-.list tr td:last-child{
-  border-top-right-radius:16px;border-bottom-right-radius:16px;
-}
+.list td{padding:12px}
+.list tr td:first-child{border-top-left-radius:16px;border-bottom-left-radius:16px}
+.list tr td:last-child{border-top-right-radius:16px;border-bottom-right-radius:16px}
 
 .fabWrap{
   position:fixed;
@@ -176,17 +174,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   line-height:1.05;
   text-align:center;
 }
-.fab.ai span{
-  display:block;
-  font-weight:950;
-  font-size:13px;
-}
-.fab.ai em{
-  font-style:normal;
-  font-weight:900;
-  font-size:11px;
-  opacity:.9;
-}
+.fab.ai span{display:block;font-weight:950;font-size:13px}
+.fab.ai em{font-style:normal;font-weight:900;font-size:11px;opacity:.9}
 
 .overlay{
   position:fixed;inset:0;
@@ -231,9 +220,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 }
 .screen{display:none}
 .screen.active{display:block}
-.backRow{
-  display:flex;align-items:center;gap:10px;margin-bottom:12px;
-}
+.backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .backBtn{
   display:flex;align-items:center;gap:8px;
   border-radius:16px;
@@ -282,14 +269,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   margin: 8px 0;
   border:1px solid var(--stroke);
 }
-.bubble.me{
-  margin-left:auto;
-  background: rgba(86,156,255,.18);
-}
-.bubble.bot{
-  margin-right:auto;
-  background: rgba(255,255,255,.08);
-}
+.bubble.me{margin-left:auto;background: rgba(86,156,255,.18)}
+.bubble.bot{margin-right:auto;background: rgba(255,255,255,.08)}
 .chatComposer{display:flex;gap:10px;margin-top:12px}
 .chatComposer input{flex:1}
 
@@ -405,6 +386,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
       <div class="card" style="margin-top:12px">
         <h3>Lista do mês</h3>
+        <div class="small" style="margin-bottom:10px">Toque em <b>Pendente/Pago</b> para marcar se você já pagou.</div>
         <table class="list" id="list"></table>
       </div>
     </div>
@@ -421,6 +403,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <button class="btn" onclick="openScreen('screen-simulators')">🧠 Simuladores</button>
         <button class="btn" onclick="openScreen('screen-categories')">📂 Minhas Categorias</button>
         <button class="btn" onclick="openScreen('screen-fixos')">📌 Gastos Fixos</button>
+        <button class="btn" onclick="openScreen('screen-investfixos')">📈 Investimentos Fixos</button>
       </div>
 
       <div class="hr"></div>
@@ -500,6 +483,62 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
         <div class="hr"></div>
         <div id="listaFixos" class="small"></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: INVESTIMENTOS FIXOS -->
+    <div class="screen" id="screen-investfixos">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+        <div style="font-weight:900">Investimentos Fixos</div>
+      </div>
+
+      <div class="card">
+        <h3>Como funciona</h3>
+        <div class="small">
+          Você cadastra um investimento fixo (ex.: CDB, Tesouro, Ações) e o valor mensal.
+          Esse valor aparece em <b>todos os meses</b> como um item fixo “Juntar”.
+          Você marca <b>Pendente/Pago</b> todo mês para controlar se já investiu.
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>Adicionar investimento fixo</h3>
+
+        <label>Nome (ex.: Reserva, CDB Banco X)</label>
+        <input id="invNome" placeholder="Ex: Reserva">
+
+        <div class="grid2" style="margin-top:10px">
+          <div>
+            <label>Tipo (ex.: CDB, Tesouro, Ações)</label>
+            <input id="invTipo" placeholder="Ex: CDB 110% CDI">
+          </div>
+          <div>
+            <label>Valor mensal (R$)</label>
+            <input id="invMensal" type="number" placeholder="Ex: 300">
+          </div>
+        </div>
+
+        <div class="grid2" style="margin-top:10px">
+          <div>
+            <label>Objetivo (R$) (ex.: 10.000)</label>
+            <input id="invObjetivo" type="number" placeholder="Ex: 10000">
+          </div>
+          <div>
+            <label>Em quantos meses?</label>
+            <input id="invMeses" type="number" placeholder="Ex: 12">
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:10px">
+          <div style="font-weight:900">Resumo automático</div>
+          <div class="small" id="invResumo">Preencha para ver o resumo.</div>
+        </div>
+
+        <button class="btn primary" style="margin-top:10px" onclick="addInvestFixo()">Adicionar</button>
+
+        <div class="hr"></div>
+        <div id="listaInvestFixos" class="small"></div>
       </div>
     </div>
 
@@ -725,7 +764,9 @@ let auth = null;
 let USER = null;      // firebase user
 let USER_ID = null;   // uid
 
-const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Outros"];
+// ✅ inclui "Investimentos" como categoria padrão
+const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
+
 let regras = [
   {palavra:"aluguel", categoria:"Casa"},
   {palavra:"luz", categoria:"Casa"},
@@ -736,11 +777,17 @@ let regras = [
   {palavra:"gasolina", categoria:"Transporte"},
   {palavra:"uber", categoria:"Transporte"},
   {palavra:"ração", categoria:"Pets"},
-  {palavra:"pet", categoria:"Pets"}
+  {palavra:"pet", categoria:"Pets"},
+  {palavra:"cdb", categoria:"Investimentos"},
+  {palavra:"tesouro", categoria:"Investimentos"},
+  {palavra:"invest", categoria:"Investimentos"}
 ];
 
 let categorias = [...DEFAULT_CATEGORIAS];
 let fixos = []; // {desc, amount, category, isFixo:true}
+
+// ✅ investimentos fixos
+let investFixos = []; // {id, nome, tipo, mensal, objetivo, meses}
 
 let state = { meses:{} }; // { "2026-02": {salary, meta, items[], saved[] } }
 let mesAtual = new Date().toISOString().slice(0,7);
@@ -748,7 +795,7 @@ let mesAtual = new Date().toISOString().slice(0,7);
 let grafico = null;
 let graficoEvolucao = null;
 
-// ✅ controle de navegação (corrige “voltar”)
+// ✅ controle de navegação
 let lastNonHistoryScreen = "screen-home";
 
 /* =========================
@@ -789,7 +836,6 @@ function openHistory(){
   showScreen("screen-history");
 }
 function goBackFromHistory(){
-  // ✅ volta sempre pra tela anterior (menu/config/home)
   showScreen(lastNonHistoryScreen || "screen-home");
 }
 
@@ -807,12 +853,17 @@ function closeModal(id){
   if(o) o.style.display="none";
 }
 
+function uid(){
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
 /* =========================
    STORAGE KEYS
 ========================= */
 function kMes(){ return "gastos_pro_state_" + USER_ID; }
 function kCat(){ return "categorias_" + USER_ID; }
 function kFix(){ return "fixos_" + USER_ID; }
+function kInv(){ return "inv_fixos_" + USER_ID; }
 
 /* =========================
    DATA
@@ -827,6 +878,8 @@ function loadAll(){
     const raw = localStorage.getItem(kCat());
     categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
     if(!Array.isArray(categorias) || !categorias.length) categorias=[...DEFAULT_CATEGORIAS];
+    // garante Investimentos na lista
+    if(!categorias.some(c=>String(c).toLowerCase()==="investimentos")) categorias.splice(categorias.length-1,0,"Investimentos");
   }catch(e){ categorias=[...DEFAULT_CATEGORIAS]; }
 
   try{
@@ -836,6 +889,12 @@ function loadAll(){
     fixos = fixos.map(f=>({ ...f, isFixo:true }));
   }catch(e){ fixos=[]; }
 
+  try{
+    const raw = localStorage.getItem(kInv());
+    investFixos = raw ? JSON.parse(raw) : [];
+    if(!Array.isArray(investFixos)) investFixos=[];
+  }catch(e){ investFixos=[]; }
+
   if(!state || typeof state!=="object") state = { meses:{} };
   if(!state.meses || typeof state.meses!=="object") state.meses = {};
 }
@@ -844,10 +903,13 @@ function saveAll(){
   localStorage.setItem(kMes(), JSON.stringify(state));
   localStorage.setItem(kCat(), JSON.stringify(categorias));
   localStorage.setItem(kFix(), JSON.stringify(fixos));
+  localStorage.setItem(kInv(), JSON.stringify(investFixos));
 }
 
+// ✅ chave do item (inclui invId para não conflitar)
 function keyItem(i){
-  return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`;
+  const inv = i && i.invId ? `|inv:${i.invId}` : "";
+  return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}|${i.isInvestFixo?1:0}${inv}`;
 }
 function detectarCategoria(desc){
   const txt=(desc||"").toLowerCase();
@@ -857,25 +919,53 @@ function detectarCategoria(desc){
   return "Outros";
 }
 
+function ensureItemDefaults(it){
+  if(!it) return it;
+  if(typeof it.paid !== "boolean") it.paid = false; // ✅ pendente/pago
+  return it;
+}
+
 function getDataMes(m){
   const mm = m || mesAtual;
   if(!state.meses[mm]){
     state.meses[mm] = { salary:0, meta:0, items:[], saved:[] };
   }
   const d = state.meses[mm];
+  if(!Array.isArray(d.items)) d.items=[];
+  if(!Array.isArray(d.saved)) d.saved=[];
+
+  // normaliza paid
+  d.items = d.items.map(ensureItemDefaults);
 
   // garante fixos no mês
-  const set = new Set((d.items||[]).map(keyItem));
+  let set = new Set((d.items||[]).map(keyItem));
   for(const f of fixos){
-    const obj = { ...f, isFixo:true };
+    const obj = ensureItemDefaults({ ...f, isFixo:true, isInvestFixo:false });
     const k = keyItem(obj);
     if(!set.has(k)){
       d.items.unshift(obj);
       set.add(k);
     }
   }
-  if(!Array.isArray(d.saved)) d.saved=[];
-  if(!Array.isArray(d.items)) d.items=[];
+
+  // ✅ garante investimentos fixos no mês (aparecem em todos os meses)
+  for(const inv of investFixos){
+    const desc = `Juntar: ${inv.nome} (${inv.tipo})`;
+    const obj = ensureItemDefaults({
+      desc,
+      amount: Number(inv.mensal||0),
+      category: "Investimentos",
+      isFixo: true,
+      isInvestFixo: true,
+      invId: inv.id
+    });
+    const k = keyItem(obj);
+    if(!set.has(k)){
+      d.items.unshift(obj);
+      set.add(k);
+    }
+  }
+
   return d;
 }
 
@@ -883,17 +973,16 @@ function getDataMes(m){
    UI BUILDERS
 ========================= */
 
-/* ✅ AJUSTE 1: MESES = TODOS (passado + futuro) */
+// ✅ MESES = passado + futuro
 function buildMonthSelect(){
   const sel = document.getElementById("monthSelect");
   if(!sel) return;
 
   const monthsSet = new Set(Object.keys(state.meses||{}));
 
-  // 10 anos pra trás e 10 anos pra frente (240 meses cada lado)
   const now = new Date();
-  const PAST = 120;   // 120 = 10 anos
-  const FUTURE = 120; // 120 = 10 anos
+  const PAST = 120;   // 10 anos
+  const FUTURE = 120; // 10 anos
 
   for(let i=0;i<=PAST;i++){
     const dt = new Date(now.getFullYear(), now.getMonth()-i, 1);
@@ -955,6 +1044,42 @@ function renderFixos(){
       <button class="btn icon mini" title="Remover" onclick="removeFixo(${idx})">✕</button>
     </div>
   `).join("");
+}
+
+function renderInvestFixos(){
+  const div = document.getElementById("listaInvestFixos");
+  if(!div) return;
+
+  if(!investFixos.length){
+    div.innerHTML = "<div class='small'>Nenhum investimento fixo cadastrado.</div>";
+    return;
+  }
+
+  div.innerHTML = investFixos.map((inv,idx)=>{
+    const meses = Number(inv.meses||12) || 12;
+    const mensal = Number(inv.mensal||0);
+    const objetivo = Number(inv.objetivo||0);
+
+    const totalPlanejado = mensal * meses;
+    const falta = objetivo ? (objetivo - totalPlanejado) : 0;
+
+    return `
+      <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-weight:950">📌 ${escapeHtml(inv.nome)} <span class="badge">${escapeHtml(inv.tipo)}</span></div>
+          <div class="small" style="margin-top:6px">
+            Mensal: <b>${money(mensal)}</b> • Meses: <b>${meses}</b>
+            ${objetivo ? ` • Objetivo: <b>${money(objetivo)}</b>` : ``}
+          </div>
+          <div class="small">
+            Planejado: <b>${money(totalPlanejado)}</b>
+            ${objetivo ? (falta>0 ? ` • Falta: <b class="warnText">${money(falta)}</b>` : ` • Meta batida: <b class="successText">${money(Math.abs(falta))}</b>`) : ``}
+          </div>
+        </div>
+        <button class="btn icon mini" title="Remover" onclick="removeInvestFixo(${idx})">✕</button>
+      </div>
+    `;
+  }).join("");
 }
 
 function renderSaved(){
@@ -1054,7 +1179,7 @@ function addFixo(){
     const d = getDataMes(m);
     const k = keyItem({desc, amount:valor, category:categoria, isFixo:true});
     const set = new Set(d.items.map(keyItem));
-    if(!set.has(k)) d.items.unshift({desc, amount:valor, category:categoria, isFixo:true});
+    if(!set.has(k)) d.items.unshift(ensureItemDefaults({desc, amount:valor, category:categoria, isFixo:true}));
   }
 
   saveAll();
@@ -1071,7 +1196,7 @@ function removeFixo(idx){
   for(const m of Object.keys(state.meses||{})){
     const d = getDataMes(m);
     d.items = (d.items||[]).filter(it=>{
-      if(!it.isFixo) return true;
+      if(!it.isFixo || it.isInvestFixo) return true;
       return !(String(it.desc||"").toLowerCase()===String(f.desc||"").toLowerCase()
             && Number(it.amount||0)===Number(f.amount||0)
             && String(it.category||"")===String(f.category||""));
@@ -1081,6 +1206,110 @@ function removeFixo(idx){
   saveAll();
   renderFixos();
   render();
+}
+
+/* ✅ INVESTIMENTOS FIXOS */
+function updateInvResumo(){
+  const nome = (document.getElementById("invNome").value||"").trim();
+  const tipo = (document.getElementById("invTipo").value||"").trim();
+  const mensal = Number(document.getElementById("invMensal").value||0);
+  const objetivo = Number(document.getElementById("invObjetivo").value||0);
+  const meses = Number(document.getElementById("invMeses").value||0) || 12;
+
+  const out = document.getElementById("invResumo");
+  if(!out) return;
+
+  if(!nome || !tipo || !mensal){
+    out.textContent = "Preencha Nome, Tipo e Valor mensal.";
+    return;
+  }
+
+  const totalPlanejado = mensal * meses;
+  let linha = `Você vai juntar ${money(mensal)} por mês durante ${meses} meses = ${money(totalPlanejado)}.`;
+  if(objetivo){
+    const falta = objetivo - totalPlanejado;
+    linha += falta>0
+      ? ` Para chegar em ${money(objetivo)}, faltariam ${money(falta)} (sem contar juros).`
+      : ` Você passaria da meta de ${money(objetivo)} em ${money(Math.abs(falta))} (sem contar juros).`;
+  }
+  out.textContent = linha;
+}
+
+function addInvestFixo(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+
+  const nome = (document.getElementById("invNome").value||"").trim();
+  const tipo = (document.getElementById("invTipo").value||"").trim();
+  const mensal = Number(document.getElementById("invMensal").value||0);
+  const objetivo = Number(document.getElementById("invObjetivo").value||0);
+  const meses = Number(document.getElementById("invMeses").value||0) || 12;
+
+  if(!nome || !tipo || !mensal || mensal<=0){
+    alert("Preencha Nome, Tipo e Valor mensal (maior que 0).");
+    return;
+  }
+
+  const inv = { id: uid(), nome, tipo, mensal, objetivo: objetivo||0, meses };
+  investFixos.push(inv);
+
+  // limpa inputs
+  document.getElementById("invNome").value="";
+  document.getElementById("invTipo").value="";
+  document.getElementById("invMensal").value="";
+  document.getElementById("invObjetivo").value="";
+  document.getElementById("invMeses").value="12";
+  updateInvResumo();
+
+  // injeta nos meses existentes também
+  for(const m of Object.keys(state.meses||{})){
+    const d = getDataMes(m);
+    const desc = `Juntar: ${inv.nome} (${inv.tipo})`;
+    const obj = ensureItemDefaults({
+      desc,
+      amount: Number(inv.mensal||0),
+      category: "Investimentos",
+      isFixo: true,
+      isInvestFixo: true,
+      invId: inv.id
+    });
+    const set = new Set(d.items.map(keyItem));
+    const k = keyItem(obj);
+    if(!set.has(k)) d.items.unshift(obj);
+  }
+
+  saveAll();
+  renderInvestFixos();
+  render();
+}
+
+function removeInvestFixo(idx){
+  if(idx<0 || idx>=investFixos.length) return;
+  const inv = investFixos[idx];
+  investFixos.splice(idx,1);
+
+  // remove de todos os meses
+  for(const m of Object.keys(state.meses||{})){
+    const d = getDataMes(m);
+    d.items = (d.items||[]).filter(it=>{
+      if(!it.isInvestFixo) return true;
+      return String(it.invId||"") !== String(inv.id||"");
+    });
+  }
+
+  saveAll();
+  renderInvestFixos();
+  render();
+}
+
+/* ✅ pendente/pago */
+function togglePaid(idx){
+  const d = getDataMes(mesAtual);
+  const it = d.items[idx];
+  if(!it) return;
+  it.paid = !it.paid;
+  saveAll();
+  renderList();
+  renderKPIs();
 }
 
 function addSaved(){
@@ -1147,34 +1376,35 @@ function delItem(idx){
   render();
 }
 
-/* ✅ AJUSTE 2: X DA TELA PRINCIPAL remove certo (fixo x gasto normal) */
+// ✅ X inteligente: se for investimento fixo, remove o cadastro (e todos os meses)
 function delItemSmart(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
   if(!it) return;
 
+  if(it.isInvestFixo){
+    const invIdx = investFixos.findIndex(x=>String(x.id)===String(it.invId));
+    if(invIdx>=0){ removeInvestFixo(invIdx); return; }
+    delItem(idx);
+    return;
+  }
+
   if(it.isFixo){
-    // acha no array fixos e remove pelo removeFixo (já remove de todos os meses)
     const fIdx = fixos.findIndex(f =>
       String(f.desc||"").toLowerCase()===String(it.desc||"").toLowerCase()
       && Number(f.amount||0)===Number(it.amount||0)
       && String(f.category||"")===String(it.category||"")
     );
-    if(fIdx >= 0){
-      removeFixo(fIdx);
-      return;
-    }
-    // se por algum motivo não achou no cadastro, remove só do mês
+    if(fIdx >= 0){ removeFixo(fIdx); return; }
     delItem(idx);
     return;
   }
 
-  // gasto normal
   delItem(idx);
 }
 
 /* =========================
-   ADD EXPENSE MODAL (NO prompt())
+   ADD EXPENSE MODAL
 ========================= */
 function openAddExpense(){
   if(!USER_ID){ alert("Faça login primeiro"); return; }
@@ -1195,7 +1425,7 @@ function confirmAddExpense(){
   if(cat==="Outros" && sug!=="Outros") cat=sug;
 
   const d = getDataMes(mesAtual);
-  d.items.push({ desc, amount, category: cat, isFixo:false });
+  d.items.push(ensureItemDefaults({ desc, amount, category: cat, isFixo:false, isInvestFixo:false }));
   saveAll();
 
   fetch(API+"/addGasto",{
@@ -1255,21 +1485,34 @@ function renderList(){
     return;
   }
 
-  table.innerHTML = d.items.map((i,idx)=>`
-    <tr>
-      <td>
-        <div style="font-weight:900">
-          ${escapeHtml(i.desc||"")}
-          ${i.isFixo ? ` <span class="badge">Fixo</span>` : ``}
-          <span class="badge">${escapeHtml(i.category||"Outros")}</span>
-        </div>
-        <div class="small">${money(i.amount||0)}</div>
-      </td>
-      <td style="width:64px;text-align:right">
-        <button class="btn icon mini" onclick="delItemSmart(${idx})" title="Remover">✕</button>
-      </td>
-    </tr>
-  `).join("");
+  table.innerHTML = d.items.map((i,idx)=>{
+    const paid = !!i.paid;
+    const statusBadge = paid ? `<span class="badge good">Pago</span>` : `<span class="badge warn">Pendente</span>`;
+    const fixBadge = i.isInvestFixo ? `<span class="badge">Juntar</span>` : (i.isFixo ? `<span class="badge">Fixo</span>` : ``);
+
+    const btnPaidClass = paid ? "good" : "warn";
+    const btnPaidText = paid ? "✅ Pago" : "⏳ Pendente";
+
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:900">
+            ${escapeHtml(i.desc||"")}
+            ${fixBadge}
+            <span class="badge">${escapeHtml(i.category||"Outros")}</span>
+            ${statusBadge}
+          </div>
+          <div class="small">${money(i.amount||0)}</div>
+          <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn ${btnPaidClass} mini" onclick="togglePaid(${idx})" title="Marcar como pago/pendente">${btnPaidText}</button>
+          </div>
+        </td>
+        <td style="width:64px;text-align:right">
+          <button class="btn icon mini" onclick="delItemSmart(${idx})" title="Remover">✕</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
 }
 
 function renderKPIs(){
@@ -1314,30 +1557,52 @@ function render(){
 
       const apiItems = data
         .filter(x=>x && x.desc)
-        .map(x=>({
+        .map(x=>ensureItemDefaults({
           desc: x.desc,
           amount: Number(x.amount||0),
           category: x.category || detectarCategoria(x.desc),
-          isFixo: false
+          isFixo: false,
+          isInvestFixo:false
         }));
 
       const merged=[], seen=new Set();
-      for(const f of fixos){
-        const obj={...f,isFixo:true};
+
+      // investimentos fixos (sempre)
+      for(const inv of investFixos){
+        const obj = ensureItemDefaults({
+          desc: `Juntar: ${inv.nome} (${inv.tipo})`,
+          amount: Number(inv.mensal||0),
+          category: "Investimentos",
+          isFixo: true,
+          isInvestFixo: true,
+          invId: inv.id
+        });
         const k=keyItem(obj);
         if(!seen.has(k)){ merged.push(obj); seen.add(k); }
       }
+
+      // fixos normais
+      for(const f of fixos){
+        const obj=ensureItemDefaults({ ...f, isFixo:true, isInvestFixo:false });
+        const k=keyItem(obj);
+        if(!seen.has(k)){ merged.push(obj); seen.add(k); }
+      }
+
+      // itens locais do mês (não fixos)
       for(const it of (d.items||[])){
         if(it.isFixo) continue;
-        const k=keyItem(it);
-        if(!seen.has(k)){ merged.push(it); seen.add(k); }
+        const obj = ensureItemDefaults(it);
+        const k=keyItem(obj);
+        if(!seen.has(k)){ merged.push(obj); seen.add(k); }
       }
+
+      // itens vindos da API
       for(const it of apiItems){
         const k=keyItem(it);
         if(!seen.has(k)){ merged.push(it); seen.add(k); }
       }
 
-      d.items = merged;
+      d.items = merged.map(ensureItemDefaults);
       saveAll();
       renderKPIs();
       renderSaved();
@@ -1465,7 +1730,7 @@ function simularEmprestimo(){
 }
 
 /* =========================
-   IA (chat) - robusto
+   IA (chat)
 ========================= */
 function getIaBase(){
   const v = (window.API_BASE_URL || "").trim();
@@ -1603,10 +1868,8 @@ async function initFirebase(){
   auth.onAuthStateChanged((u)=>{
     USER = u || null;
 
-    // ✅ NÃO muda seu login.html: se não tiver logado, manda pra ele
     if(!USER){
       USER_ID = null;
-      // evita loop em alguns casos
       setTimeout(()=> location.replace("./login.html"), 50);
       return;
     }
@@ -1622,9 +1885,11 @@ async function initFirebase(){
     buildMonthSelect();
     renderCategorias();
     renderFixos();
+    renderInvestFixos();
     updateInvestUI();
+    updateInvResumo();
 
-    // listeners (coloca só 1x)
+    // listeners (1x)
     const tipoSel = document.getElementById("tipoSimulacao");
     if(tipoSel && !tipoSel.dataset.bound){
       tipoSel.addEventListener("change", ()=>{
@@ -1634,11 +1899,22 @@ async function initFirebase(){
       });
       tipoSel.dataset.bound = "1";
     }
+
     const investSel = document.getElementById("investTipo");
     if(investSel && !investSel.dataset.bound){
       investSel.addEventListener("change", updateInvestUI);
       investSel.dataset.bound = "1";
     }
+
+    // resumo investimentos fixos (inputs)
+    const bindInvResumo = (id)=>{
+      const el = document.getElementById(id);
+      if(el && !el.dataset.bound){
+        el.addEventListener("input", updateInvResumo);
+        el.dataset.bound="1";
+      }
+    };
+    ["invNome","invTipo","invMensal","invObjetivo","invMeses"].forEach(bindInvResumo);
 
     if(!mesAtual) mesAtual = new Date().toISOString().slice(0,7);
     const sel = document.getElementById("monthSelect");
@@ -1657,7 +1933,6 @@ async function loginGoogle(){
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
 
-    // popup no desktop, redirect no mobile (fallback)
     try{
       await auth.signInWithPopup(provider);
     }catch(e){
@@ -1670,7 +1945,6 @@ async function loginGoogle(){
   }
 }
 
-// ✅ SAIR: sempre volta pro login.html (o seu bonito)
 async function logout(){
   try{
     if(auth) await auth.signOut();
@@ -1698,9 +1972,9 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = await initFirebase();
   if(!ok) return;
 
-  // preenche selects que dependem de categorias (vai atualizar após login também)
   renderCategorias();
   updateInvestUI();
+  updateInvResumo();
 });
 </script>
 </body>
