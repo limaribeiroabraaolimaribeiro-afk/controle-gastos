@@ -882,16 +882,28 @@ function getDataMes(m){
 /* =========================
    UI BUILDERS
 ========================= */
+
+/* ✅ AJUSTE 1: MESES = TODOS (passado + futuro) */
 function buildMonthSelect(){
   const sel = document.getElementById("monthSelect");
   if(!sel) return;
 
   const monthsSet = new Set(Object.keys(state.meses||{}));
+
+  // 10 anos pra trás e 10 anos pra frente (240 meses cada lado)
   const now = new Date();
-  for(let i=0;i<18;i++){
+  const PAST = 120;   // 120 = 10 anos
+  const FUTURE = 120; // 120 = 10 anos
+
+  for(let i=0;i<=PAST;i++){
     const dt = new Date(now.getFullYear(), now.getMonth()-i, 1);
     monthsSet.add(dt.toISOString().slice(0,7));
   }
+  for(let i=1;i<=FUTURE;i++){
+    const dt = new Date(now.getFullYear(), now.getMonth()+i, 1);
+    monthsSet.add(dt.toISOString().slice(0,7));
+  }
+
   const months = Array.from(monthsSet).sort().reverse();
 
   sel.innerHTML = months.map(m=>{
@@ -901,7 +913,11 @@ function buildMonthSelect(){
     return `<option value="${m}">${label}</option>`;
   }).join("");
 
+  if(!months.includes(mesAtual)){
+    mesAtual = new Date().toISOString().slice(0,7);
+  }
   sel.value = mesAtual;
+
   sel.onchange = ()=>{
     mesAtual = sel.value;
     render();
@@ -1131,6 +1147,32 @@ function delItem(idx){
   render();
 }
 
+/* ✅ AJUSTE 2: X DA TELA PRINCIPAL remove certo (fixo x gasto normal) */
+function delItemSmart(idx){
+  const d = getDataMes(mesAtual);
+  const it = d.items[idx];
+  if(!it) return;
+
+  if(it.isFixo){
+    // acha no array fixos e remove pelo removeFixo (já remove de todos os meses)
+    const fIdx = fixos.findIndex(f =>
+      String(f.desc||"").toLowerCase()===String(it.desc||"").toLowerCase()
+      && Number(f.amount||0)===Number(it.amount||0)
+      && String(f.category||"")===String(it.category||"")
+    );
+    if(fIdx >= 0){
+      removeFixo(fIdx);
+      return;
+    }
+    // se por algum motivo não achou no cadastro, remove só do mês
+    delItem(idx);
+    return;
+  }
+
+  // gasto normal
+  delItem(idx);
+}
+
 /* =========================
    ADD EXPENSE MODAL (NO prompt())
 ========================= */
@@ -1224,7 +1266,7 @@ function renderList(){
         <div class="small">${money(i.amount||0)}</div>
       </td>
       <td style="width:64px;text-align:right">
-        <button class="btn icon mini" onclick="delItem(${idx})" title="Remover">✕</button>
+        <button class="btn icon mini" onclick="delItemSmart(${idx})" title="Remover">✕</button>
       </td>
     </tr>
   `).join("");
