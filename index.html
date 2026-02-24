@@ -152,7 +152,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 .fab-ai{
   position:fixed;
   right:20px;
-  bottom:88px; /* acima do botão verde */
+  bottom:88px;
   width:55px;
   height:55px;
   border-radius:50%;
@@ -245,9 +245,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   gap:8px;
   align-items:center;
 }
-.chatFoot input{
-  margin-top:0;
-}
+.chatFoot input{ margin-top:0; }
 .chatFoot button{
   width:auto;
   padding:10px 14px;
@@ -336,19 +334,41 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       </div>
     </div>
 
+    <!-- ✅ SALÁRIO / META / ANOTAÇÕES / DINHEIRO GUARDADO -->
     <div class="card">
       <label>Salário</label>
       <input id="salary" type="number">
+
       <label>Mês</label>
       <input id="month" type="month">
+
       <label>Meta</label>
       <input id="meta" type="number">
+
       <label>Anotações do mês</label>
       <textarea id="notes" placeholder="Ex: meta de cortar delivery, juntar para reserva..."></textarea>
 
-      <button onclick="saveSettings()">Salvar</button>
+      <hr>
+
+      <h3 style="margin-top:0">🏦 Dinheiro guardado / investido</h3>
+      <div class="small" style="margin-top:-6px;opacity:.85">
+        Ex: “Guardei 1000” ou “Investi 1000 no banco”.
+      </div>
+
+      <label>Valor guardado no mês (R$)</label>
+      <input id="savedValue" type="number" placeholder="Ex: 1000">
+
+      <label>Descrição (opcional)</label>
+      <input id="savedDesc" placeholder="Ex: Reserva, CDB 110%, Tesouro Selic...">
+
+      <button onclick="addGuardado()">Adicionar ao mês</button>
+
+      <div id="listaGuardado" class="small" style="margin-top:10px"></div>
+
+      <button style="margin-top:10px" onclick="saveSettings()">Salvar</button>
+
       <div class="small" style="margin-top:6px;opacity:.8">
-        Ao salvar, salário/meta/anotações ficam guardados no histórico do mês.
+        Ao salvar, salário/meta/anotações e o dinheiro guardado ficam no histórico do mês.
       </div>
     </div>
 
@@ -527,7 +547,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 
     <div class="modalBody" id="iaChatScroll">
       <div class="chat" id="iaChat">
-        <div class="bubble ai">Oi! Me pergunte algo sobre seus gastos, salário e investimento. 🙂</div>
+        <div class="bubble ai">Oi! Me pergunte algo sobre seus gastos, salário, guardado/investido e investimento. 🙂</div>
       </div>
     </div>
 
@@ -716,11 +736,13 @@ window.getDataMes = ()=>{
       salary: 0,
       items: fixos.map(f=>({ ...f, isFixo:true })),
       meta: 0,
-      notes: ""
+      notes: "",
+      saved: [] // ✅ NOVO: lista de dinheiro guardado/investido
     };
   }else{
     garantirFixosNoMes(state.meses[mesAtual]);
     if(typeof state.meses[mesAtual].notes !== "string") state.meses[mesAtual].notes = "";
+    if(!Array.isArray(state.meses[mesAtual].saved)) state.meses[mesAtual].saved = [];
   }
   return state.meses[mesAtual];
 };
@@ -833,6 +855,64 @@ window.del = (i)=>{
   window.render();
 };
 
+/* =========================
+   ✅ NOVO: Dinheiro guardado
+========================= */
+function renderGuardado(){
+  const d = window.getDataMes();
+  const el = document.getElementById("listaGuardado");
+  const saved = Array.isArray(d.saved) ? d.saved : [];
+  if(!saved.length){
+    el.innerHTML = "<div>Nenhuma anotação de dinheiro guardado neste mês.</div>";
+    return;
+  }
+  const total = saved.reduce((a,b)=>a+Number(b.valor||0),0);
+  el.innerHTML = `
+    <div style="margin-bottom:8px"><b>Total guardado:</b> R$ ${total.toFixed(2)}</div>
+    ${saved.map((s,idx)=>`
+      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="flex:1">
+          • R$ ${Number(s.valor||0).toFixed(2)}
+          ${s.desc ? `<span class="badge">${String(s.desc).replace(/</g,"&lt;")}</span>` : ""}
+          <span class="badge">${s.data || ""}</span>
+        </div>
+        <button class="mini danger" onclick="removerGuardado(${idx})">❌</button>
+      </div>
+    `).join("")}
+  `;
+}
+window.addGuardado = function(){
+  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
+  const v = Number(document.getElementById("savedValue").value);
+  const desc = (document.getElementById("savedDesc").value || "").trim();
+  if(!v || v <= 0){ alert("Digite um valor guardado maior que 0."); return; }
+
+  const d = window.getDataMes();
+  if(!Array.isArray(d.saved)) d.saved = [];
+  d.saved.push({
+    valor: v,
+    desc,
+    data: new Date().toISOString().slice(0,10)
+  });
+
+  document.getElementById("savedValue").value = "";
+  document.getElementById("savedDesc").value = "";
+
+  salvarTudoLocal();
+  renderGuardado();
+  window.render();
+};
+window.removerGuardado = function(idx){
+  const d = window.getDataMes();
+  if(!Array.isArray(d.saved)) d.saved = [];
+  if(idx<0 || idx>=d.saved.length) return;
+  if(!confirm("Remover este item guardado?")) return;
+  d.saved.splice(idx,1);
+  salvarTudoLocal();
+  renderGuardado();
+  window.render();
+};
+
 window.saveSettings = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   mesAtual=window.getMes();
@@ -846,7 +926,7 @@ window.saveSettings = ()=>{
   fetch(API+"/salvarMes",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,salary:d.salary,meta:d.meta,notes:d.notes})
+    body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,salary:d.salary,meta:d.meta,notes:d.notes, saved:d.saved})
   }).catch(()=>{});
 
   window.render();
@@ -874,13 +954,19 @@ function paint(){
   document.getElementById("meta").value=d.meta||"";
   document.getElementById("notes").value = d.notes || "";
 
+  renderGuardado();
+
   const total=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
   const sobra=Number(d.salary||0)-total;
+
+  // ✅ soma guardado no KPI (informativo)
+  const savedTotal = (Array.isArray(d.saved) ? d.saved : []).reduce((a,b)=>a+Number(b.valor||0),0);
 
   document.getElementById("kpis").innerHTML=`
     <div class="kpi">Salário<br><b>R$ ${Number(d.salary||0).toFixed(2)}</b></div>
     <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
     <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
+    <div class="kpi">Guardado<br><b>R$ ${savedTotal.toFixed(2)}</b></div>
     <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
   `;
 
@@ -916,6 +1002,8 @@ function renderListaMeses(){
     const total = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
     const sal = Number(d.salary||0);
     const sobra = sal - total;
+    const savedTotal = (Array.isArray(d.saved) ? d.saved : []).reduce((a,b)=>a+Number(b.valor||0),0);
+
     const isAtual = (m === mesAtual);
     const tag = isAtual ? `<span class="badge">Atual</span>` : ``;
     const corSobra = sobra >= 0 ? "var(--ok)" : "var(--danger)";
@@ -928,6 +1016,7 @@ function renderListaMeses(){
             <span class="pill">💰 <b>${formatBRL(sal)}</b></span>
             <span class="pill">🧾 <b>${formatBRL(total)}</b></span>
             <span class="pill">✅ <b style="color:${corSobra}">${formatBRL(sobra)}</b></span>
+            <span class="pill">🏦 <b>${formatBRL(savedTotal)}</b></span>
           </div>
         </div>
         <button class="histBtn" onclick="abrirMesDoHistorico('${m}')">Abrir</button>
@@ -962,6 +1051,9 @@ window.render = ()=>{
         d.salary = Number(data[0].salary||d.salary||0);
         d.meta   = Number(data[0].meta||d.meta||0);
         if(typeof data[0].notes === "string") d.notes = data[0].notes;
+
+        // ✅ se sua API não devolver saved, a gente mantém o local
+        if(Array.isArray(data[0].saved)) d.saved = data[0].saved;
       }
 
       const merged=[], seen=new Set();
@@ -1248,6 +1340,12 @@ function resumoDoMesParaIA(){
   const total = items.reduce((a,b)=>a+Number(b.amount||0),0);
   const sobra = Number(d.salary||0) - total;
 
+  const savedTotal = (Array.isArray(d.saved) ? d.saved : []).reduce((a,b)=>a+Number(b.valor||0),0);
+  const savedList = (Array.isArray(d.saved) ? d.saved : [])
+    .slice(-8)
+    .map(s=>`- R$ ${Number(s.valor||0).toFixed(2)} (${s.desc||"sem desc"}) em ${s.data||""}`)
+    .join("\n");
+
   const porCat = {};
   for(const it of items){
     const c = it.category || "Outros";
@@ -1267,7 +1365,10 @@ SALÁRIO: R$ ${Number(d.salary||0).toFixed(2)}
 META: R$ ${Number(d.meta||0).toFixed(2)}
 GASTO TOTAL: R$ ${total.toFixed(2)}
 GASTO FIXO TOTAL: R$ ${fixosTotal.toFixed(2)}
-SOBRA: R$ ${sobra.toFixed(2)}
+SOBRA (SALÁRIO - GASTOS): R$ ${sobra.toFixed(2)}
+DINHEIRO GUARDADO/INVESTIDO NO MÊS: R$ ${savedTotal.toFixed(2)}
+DETALHES GUARDADO:
+${savedList || "(sem lançamentos de guardado)"}
 TOP CATEGORIAS: ${topCats || "sem dados"}
 ANOTAÇÕES: ${(d.notes||"").trim() || "(vazio)"}
   `.trim();
@@ -1294,8 +1395,6 @@ function chatAdd(role, text){
   div.className = "bubble " + (role === "user" ? "user" : "ai");
   div.textContent = text;
   chat.appendChild(div);
-
-  // rola pro fim
   const sc = document.getElementById("iaChatScroll");
   sc.scrollTop = sc.scrollHeight;
 }
@@ -1315,7 +1414,6 @@ window.fecharChatIA = function(){
 };
 
 window.fecharChatIAClickFora = function(ev){
-  // se clicar no fundo do modal, fecha
   if(ev.target && ev.target.id === "iaModal"){
     fecharChatIA();
   }
@@ -1341,8 +1439,9 @@ window.iaEnviar = async function(){
 
     const promptFinal =
 `Você é um consultor financeiro pessoal. Use os dados abaixo para responder de forma prática.
-- Se eu perguntar sobre investimento, sugira 1 a 3 opções coerentes com minha SOBRA e perfil conservador por padrão.
+- Se eu perguntar sobre investimento, sugira 1 a 3 opções coerentes com minha SOBRA e meu DINHEIRO GUARDADO, perfil conservador por padrão.
 - Se a SOBRA estiver negativa, explique como ajustar gastos antes de investir.
+- Considere que "DINHEIRO GUARDADO" é o que eu consegui separar no mês.
 - Responda em português, direto, com passos.
 
 DADOS DO USUÁRIO:
@@ -1372,7 +1471,6 @@ ${pergunta}
   }
 };
 
-// enviar com Enter
 document.addEventListener("keydown", (e)=>{
   const modal = document.getElementById("iaModal");
   if(!modal.classList.contains("show")) return;
