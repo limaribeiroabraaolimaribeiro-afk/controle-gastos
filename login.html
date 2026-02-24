@@ -107,6 +107,34 @@ input:focus{
   border-color: rgba(86,156,255,.9);
 }
 .btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+.sep{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:14px 0 10px;
+  color: rgba(234,240,255,.55);
+  font-size:12px;
+}
+.sep::before,.sep::after{
+  content:"";
+  height:1px;
+  flex:1;
+  background: rgba(255,255,255,.10);
+}
+
+.btn.google{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  background: rgba(255,255,255,.10);
+}
+.gIcon{
+  width:18px;height:18px;
+  display:inline-block;
+}
+
 .small{
   margin-top: 10px;
   text-align:center;
@@ -147,6 +175,19 @@ input:focus{
       <button class="btn" id="btnCriarConta">Criar conta</button>
     </div>
 
+    <div class="sep">ou</div>
+
+    <!-- ✅ NOVO: Google -->
+    <button class="btn google" id="btnGoogle">
+      <svg class="gIcon" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.72 1.22 9.23 3.62l6.9-6.9C35.9 2.38 30.3 0 24 0 14.62 0 6.51 5.38 2.56 13.22l8.02 6.23C12.49 13.04 17.76 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.1 24.5c0-1.57-.14-3.08-.4-4.5H24v8.5h12.4c-.54 2.9-2.16 5.36-4.6 7.02l7.08 5.5C43.1 36.94 46.1 31.2 46.1 24.5z"/>
+        <path fill="#FBBC05" d="M10.58 28.55a14.5 14.5 0 0 1 0-9.1l-8.02-6.23A23.97 23.97 0 0 0 0 24c0 3.87.92 7.54 2.56 10.78l8.02-6.23z"/>
+        <path fill="#34A853" d="M24 48c6.3 0 11.6-2.08 15.47-5.64l-7.08-5.5c-1.96 1.32-4.47 2.1-8.39 2.1-6.24 0-11.51-3.54-13.42-8.95l-8.02 6.23C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Entrar com Google
+    </button>
+
     <div class="small">A senha deve ter pelo menos 6 caracteres.</div>
     <div id="debugBox"></div>
   </div>
@@ -180,7 +221,8 @@ let auth = null;
 function setLoading(isLoading){
   const b1 = document.getElementById("btnLoginEmail");
   const b2 = document.getElementById("btnCriarConta");
-  b1.disabled = b2.disabled = isLoading;
+  const b3 = document.getElementById("btnGoogle");
+  b1.disabled = b2.disabled = b3.disabled = isLoading;
 }
 
 async function initFirebase(){
@@ -197,7 +239,7 @@ async function initFirebase(){
 
   auth = firebase.auth();
 
-  // ✅ garante sessão persistente
+  // ✅ sessão persistente
   try{
     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   }catch(e){
@@ -236,9 +278,50 @@ function criarConta(){
     });
 }
 
+// ✅ Google com seletor de conta
+async function loginGoogle(){
+  try{
+    setLoading(true);
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    // força o “escolher conta” sempre
+    provider.setCustomParameters({
+      prompt: "select_account"
+    });
+
+    // em mobile, popup pode falhar -> fallback para redirect
+    try{
+      await auth.signInWithPopup(provider);
+      location.replace("./index.html");
+    }catch(e){
+      // se o popup for bloqueado, usa redirect
+      if(String(e.code||"").includes("popup") || String(e.message||"").toLowerCase().includes("popup")){
+        await auth.signInWithRedirect(provider);
+      }else{
+        throw e;
+      }
+    }
+  }catch(e){
+    setLoading(false);
+    alert((e.code||"") + " - " + e.message);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = await initFirebase();
   if(!ok) return;
+
+  // ✅ se voltar de redirect do google
+  try{
+    const res = await auth.getRedirectResult();
+    if(res && res.user){
+      location.replace("./index.html");
+      return;
+    }
+  }catch(e){
+    // não bloqueia a tela
+  }
 
   // ✅ se já estiver logado, entra direto
   auth.onAuthStateChanged((user)=>{
@@ -251,6 +334,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
   document.getElementById("btnLoginEmail").addEventListener("click", loginEmail);
   document.getElementById("btnCriarConta").addEventListener("click", criarConta);
+  document.getElementById("btnGoogle").addEventListener("click", loginGoogle);
 });
 </script>
 
