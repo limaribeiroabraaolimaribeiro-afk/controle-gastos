@@ -9,27 +9,51 @@
 <meta name="theme-color" content="#569cff">
 
 <style>
-:root{ --bg:#0b1020; --card:#ffffff0f; --text:#eaf0ff; --accent:#569cff; --danger:#d9534f; --ok:#4CAF50; }
-.light{ --bg:#f4f6ff; --card:#ffffff; --text:#111; }
+:root{
+  --bg:#0b1020;
+  --card:#ffffff0f;
+  --card2:#ffffff12;
+  --text:#eaf0ff;
+  --muted:rgba(234,240,255,.72);
+  --accent:#569cff;
+  --accent2:rgba(86,156,255,.18);
+  --ok:#4CAF50;
+  --shadow: 0 18px 60px rgba(0,0,0,.45);
+  --stroke: rgba(255,255,255,.12);
+  --stroke2: rgba(255,255,255,.08);
+  --r1:18px;
+  --r2:14px;
+}
+.light{
+  --bg:#f4f6ff;
+  --card:#ffffff;
+  --card2:#ffffff;
+  --text:#111;
+  --muted:rgba(0,0,0,.60);
+  --stroke: rgba(0,0,0,.10);
+  --stroke2: rgba(0,0,0,.06);
+  --shadow: 0 18px 60px rgba(0,0,0,.12);
+}
+
 *{box-sizing:border-box}
 body{ margin:0; background:var(--bg); color:var(--text); font-family:system-ui; }
 .wrap{max-width:980px;margin:auto;padding:16px}
-.card{ background:var(--card); border-radius:14px; padding:14px; margin-bottom:12px; }
+.card{ background:var(--card); border:1px solid var(--stroke2); border-radius:var(--r1); padding:14px; margin-bottom:12px; box-shadow: 0 0 0 rgba(0,0,0,0); }
 h1{font-size:20px;margin:0 0 10px}
 h3{margin:0 0 10px}
 input,select,button,textarea{ width:100%; padding:10px; border-radius:12px; border:none; margin-top:6px; }
 textarea{ min-height:90px; resize:vertical; }
-button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manipulation; }
-button.ghost{ background:transparent; border:1px solid rgba(255,255,255,.18); color:var(--text); }
-.light button.ghost{ border:1px solid rgba(0,0,0,.18); }
-button.danger{ background:var(--danger); }
+button{ background:var(--accent); color:#fff; cursor:pointer; touch-action:manipulation; font-weight:800; }
+button.ghost{ background:transparent; border:1px solid var(--stroke); color:var(--text); }
+button.soft{ background:var(--accent2); border:1px solid rgba(86,156,255,.25); color:var(--text); }
+.light button.soft{ border:1px solid rgba(86,156,255,.20); }
 .kpis{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-.kpi{ background:var(--card); padding:10px; border-radius:12px; }
+.kpi{ background:var(--card); padding:10px; border-radius:12px; border:1px solid var(--stroke2); }
 .success{color:var(--ok)}
 #chart,#chartEvolucao{width:100%;height:220px}
-.fab{ position:fixed; bottom:20px; right:20px; background:var(--ok); color:white; border-radius:50%; width:55px; height:55px; font-size:28px; display:flex; align-items:center; justify-content:center; }
-.toggle{float:right;cursor:pointer; margin-left:10px;}
-.small{opacity:.85;font-size:12px}
+.fab{ position:fixed; bottom:20px; right:20px; background:var(--ok); color:white; border-radius:50%; width:55px; height:55px; font-size:28px; display:flex; align-items:center; justify-content:center; user-select:none;}
+.fab:active{ transform: translateY(1px) scale(.99); }
+.small{opacity:.86;font-size:12px}
 .badge{ display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.12); margin-left:6px; font-size:12px; }
 .light .badge{background:rgba(0,0,0,.08);}
 .row{ display:flex; gap:8px; align-items:center; }
@@ -57,16 +81,16 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 }
 
 /* =========================
-   ✅ TELAS (APP / HISTÓRICO)
+   ✅ TELAS
 ========================= */
 .screen{ display:none; min-height:100vh; }
 .screen.show{ display:block; }
 
-/* Topbar */
 .topbar{
   position:sticky; top:0; z-index:20;
   background:linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0));
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .light .topbar{
   background:linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));
@@ -75,40 +99,55 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   max-width:980px; margin:auto; padding:14px 16px;
   display:flex; align-items:center; justify-content:space-between; gap:10px;
 }
-.topbar-title{ font-weight:800; font-size:16px; }
+.topbar-title{ font-weight:900; font-size:16px; letter-spacing:.2px; }
 .iconbtn{
   width:auto; padding:8px 10px; border-radius:12px;
-  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.10);
+  border:1px solid var(--stroke);
   color:var(--text);
+  font-weight:800;
 }
 .light .iconbtn{
-  background:rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.10);
+  background:rgba(0,0,0,.04);
 }
-
-/* Histórico bonito */
-.histHeader{ padding:18px 16px 8px; }
-.histHero{
-  background:linear-gradient(135deg, rgba(86,156,255,.25), rgba(76,175,80,.18));
-  border:1px solid rgba(255,255,255,.12);
+.pillBtn{
+  width:auto;
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--stroke);
+  color:var(--text);
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.pillBtn span{ opacity:.9; }
+.light .pillBtn{ background:rgba(0,0,0,.04); }
+.hero{
+  background:linear-gradient(135deg, rgba(86,156,255,.22), rgba(76,175,80,.12));
+  border:1px solid var(--stroke);
   border-radius:18px;
   padding:14px;
+  box-shadow: var(--shadow);
 }
-.light .histHero{ border:1px solid rgba(0,0,0,.10); }
-.histGrid{ display:grid; grid-template-columns: 1fr; gap:10px; margin-top:12px; }
+.heroTitle{ font-weight:900; font-size:16px; }
+.heroSub{ margin-top:6px; color:var(--muted); font-size:12px; line-height:1.35; }
+
+/* LISTA HISTÓRICO */
+.histGrid{ display:grid; grid-template-columns:1fr; gap:10px; margin-top:12px; }
 .histItem{
   background:var(--card);
+  border:1px solid var(--stroke2);
   border-radius:16px;
   padding:12px;
   display:flex;
   gap:10px;
   align-items:flex-start;
   justify-content:space-between;
-  border:1px solid rgba(255,255,255,.08);
 }
-.light .histItem{ border:1px solid rgba(0,0,0,.08); }
-.histLeft{ flex:1; }
 .histMonth{ font-weight:900; font-size:14px; }
-.histMeta{ margin-top:4px; }
 .histNums{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
 .pill{
   display:inline-flex; gap:6px; align-items:center;
@@ -117,17 +156,16 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   font-size:12px;
 }
 .light .pill{ background:rgba(0,0,0,.06); }
-.pill b{ font-weight:800; }
+.pill b{ font-weight:900; }
 .histBtn{ width:auto; padding:10px 12px; border-radius:14px; }
 
 /* =========================
-   ✅ MENU SIMULADORES (colapsável)
+   ✅ MENU SIMULADORES (colapsável dentro da tela simuladores)
 ========================= */
 .menuCard{
   background:linear-gradient(135deg, rgba(86,156,255,.18), rgba(255,255,255,.06));
-  border:1px solid rgba(255,255,255,.10);
+  border:1px solid var(--stroke);
 }
-.light .menuCard{ border:1px solid rgba(0,0,0,.10); }
 .menuHeader{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
 }
@@ -140,10 +178,11 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   padding:8px 10px;
   border-radius:12px;
   background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.12);
+  border:1px solid var(--stroke);
   color:var(--text);
+  font-weight:900;
 }
-.light .chev{ background:rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.10); }
+.light .chev{ background:rgba(0,0,0,.04); }
 .collapsed{ display:none; }
 
 /* =========================
@@ -191,6 +230,10 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   display:flex;
   flex-direction:column;
 }
+.light .modalCard{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.10);
+}
 .modalTop{
   padding:12px 12px;
   display:flex;
@@ -199,6 +242,7 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   gap:10px;
   border-bottom:1px solid rgba(255,255,255,.10);
 }
+.light .modalTop{ border-bottom:1px solid rgba(0,0,0,.08); }
 .modalTitle{
   display:flex; align-items:center; gap:10px;
   font-weight:900;
@@ -210,6 +254,12 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   background:rgba(255,255,255,.10);
   border:1px solid rgba(255,255,255,.12);
   color:var(--text);
+  font-weight:900;
+}
+.light .modalClose{
+  background:rgba(0,0,0,.05);
+  border:1px solid rgba(0,0,0,.10);
+  color:#111;
 }
 .modalBody{
   padding:12px;
@@ -229,15 +279,21 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   white-space:pre-wrap;
   word-break:break-word;
 }
+.light .bubble{
+  background:rgba(0,0,0,.04);
+  border:1px solid rgba(0,0,0,.08);
+  color:#111;
+}
 .bubble.user{
   align-self:flex-end;
   background:rgba(86,156,255,.20);
   border:1px solid rgba(86,156,255,.35);
 }
-.bubble.ai{
-  align-self:flex-start;
-  background:rgba(255,255,255,.06);
+.light .bubble.user{
+  background:rgba(86,156,255,.16);
+  border:1px solid rgba(86,156,255,.28);
 }
+.bubble.ai{ align-self:flex-start; }
 .chatFoot{
   padding:12px;
   border-top:1px solid rgba(255,255,255,.10);
@@ -245,35 +301,39 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
   gap:8px;
   align-items:center;
 }
+.light .chatFoot{ border-top:1px solid rgba(0,0,0,.08); }
 .chatFoot input{ margin-top:0; }
 .chatFoot button{
   width:auto;
   padding:10px 14px;
   border-radius:14px;
-  font-weight:800;
+  font-weight:900;
 }
 .statusLine{
   padding:0 12px 12px;
   font-size:12px;
   opacity:.85;
 }
-.light .modalCard{
-  background:#fff;
-  border:1px solid rgba(0,0,0,.10);
+
+/* ✅ Botão X (remover) - agora pequeno e azul */
+.btnX{
+  width:34px;
+  height:34px;
+  padding:0;
+  border-radius:12px;
+  background:rgba(86,156,255,.18);
+  border:1px solid rgba(86,156,255,.30);
+  color:var(--text);
+  font-weight:900;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
-.light .modalClose{
-  background:rgba(0,0,0,.05);
-  border:1px solid rgba(0,0,0,.10);
+.btnX:active{ transform: translateY(1px) scale(.99); }
+.light .btnX{
+  background:rgba(86,156,255,.12);
+  border:1px solid rgba(86,156,255,.22);
   color:#111;
-}
-.light .bubble{
-  background:rgba(0,0,0,.04);
-  border:1px solid rgba(0,0,0,.08);
-  color:#111;
-}
-.light .bubble.user{
-  background:rgba(86,156,255,.16);
-  border:1px solid rgba(86,156,255,.28);
 }
 </style>
 </head>
@@ -282,114 +342,224 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 
 <div id="loading">
   <div>
-    <div style="font-size:18px;font-weight:700">Carregando...</div>
+    <div style="font-size:18px;font-weight:900">Carregando...</div>
     <div style="opacity:.8;margin-top:6px">Validando login</div>
   </div>
 </div>
 
-<!-- ✅ TELA PRINCIPAL -->
+<!-- ✅ TELA PRINCIPAL (resumida) -->
 <div id="screenMain" class="screen">
   <div class="wrap">
     <h1>
       Controle de Gastos PRO
-      <span class="toggle" onclick="abrirConfig()">⚙️</span>
-      <span class="toggle" onclick="toggleTheme()">🌙/☀️</span>
+      <span class="row" style="display:inline-flex;gap:8px;float:right">
+        <button class="iconbtn" style="padding:6px 10px" onclick="abrirMenu()">☰ Menu</button>
+        <button class="iconbtn" style="padding:6px 10px" onclick="toggleTheme()">🌙/☀️</button>
+      </span>
     </h1>
 
-    <!-- ✅ CONFIG + HISTÓRICO -->
-    <div id="configBox" class="card" style="display:none">
-      <h3>⚙️ Configurações</h3>
-      <b id="userName"></b>
+    <div class="card hero">
+      <div class="heroTitle">Resumo do mês</div>
+      <div class="heroSub">Aqui fica só o essencial. Para editar, use o <b>Menu</b>.</div>
 
       <div style="margin-top:10px" class="row">
-        <button class="ghost" onclick="abrirHistorico()">📅 Histórico de meses</button>
-        <button class="ghost mini" onclick="googleLogin()">Google</button>
+        <div>
+          <div class="small">Mês</div>
+          <input id="month" type="month">
+        </div>
+        <div>
+          <div class="small">Salário</div>
+          <input id="salary" type="number" placeholder="0">
+        </div>
       </div>
 
-      <button style="margin-top:10px" onclick="logout()">Sair da conta</button>
+      <div class="row" style="margin-top:8px">
+        <div>
+          <div class="small">Meta</div>
+          <input id="meta" type="number" placeholder="0">
+        </div>
+        <div>
+          <div class="small">Guardado (mês)</div>
+          <input id="savedValue" type="number" placeholder="0">
+        </div>
+      </div>
 
-      <div class="small" style="margin-top:8px;opacity:.8">
-        Dica: se o popup não abrir no celular, o login usa redirecionamento.
+      <div class="row" style="margin-top:10px">
+        <button onclick="saveSettings()">Salvar</button>
+        <button class="ghost" onclick="abrirHistorico()">📅 Histórico</button>
+      </div>
+
+      <div class="small" style="margin-top:8px;opacity:.85">
+        Dica: toque na bolinha 🤖 para conversar com a IA sobre seus números.
+      </div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="card"><canvas id="chart"></canvas></div>
+    <div class="card"><h3>Evolução</h3><canvas id="chartEvolucao"></canvas></div>
+    <div class="card"><table id="list"></table></div>
+  </div>
+
+  <!-- ✅ BOLINHA IA (acima do +) -->
+  <div class="fab-ai" title="IA" onclick="abrirChatIA()">🤖</div>
+
+  <!-- ✅ BOTÃO + VERDE -->
+  <div class="fab" onclick="abrirAdd()">+</div>
+</div>
+
+<!-- ✅ TELA MENU -->
+<div id="screenMenu" class="screen">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <div class="topbar-title">☰ Menu</div>
+      <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="card hero" style="box-shadow:none">
+      <div class="heroTitle">Bem-vindo</div>
+      <div class="heroSub">Escolha uma área. Cada uma abre uma tela com botão de voltar.</div>
+    </div>
+
+    <button class="pillBtn" onclick="irPara('screenConfig')">⚙️ Configurações <span>›</span></button>
+    <button class="pillBtn" onclick="irPara('screenSim')">📌 Simuladores <span>›</span></button>
+    <button class="pillBtn" onclick="irPara('screenCats')">📂 Minhas categorias <span>›</span></button>
+    <button class="pillBtn" onclick="irPara('screenFixos')">📌 Gastos fixos <span>›</span></button>
+
+    <div style="margin-top:12px" class="small">Você pode voltar a qualquer momento.</div>
+  </div>
+</div>
+
+<!-- ✅ TELA CONFIG -->
+<div id="screenConfig" class="screen">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <div class="topbar-title">⚙️ Configurações</div>
+      <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="card hero" style="box-shadow:none">
+      <div class="heroTitle" id="userName">Conta</div>
+      <div class="heroSub">Login, tema e atalhos.</div>
+    </div>
+
+    <div class="card">
+      <button class="ghost" onclick="googleLogin()">Continuar com Google</button>
+      <button style="margin-top:10px" onclick="logout()">Sair da conta</button>
+      <div class="small" style="margin-top:10px;opacity:.85">
+        Se o popup não abrir no celular, o login usa redirecionamento automaticamente.
       </div>
     </div>
 
     <div class="card">
-      <h3>📂 Minhas Categorias</h3>
+      <h3>📝 Anotações do mês</h3>
+      <textarea id="notes" placeholder="Ex: reduzir delivery, juntar para reserva..."></textarea>
+      <label>Descrição do guardado (opcional)</label>
+      <input id="savedDesc" placeholder="Ex: Reserva, CDB, Tesouro...">
+      <button onclick="saveSettings()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ TELA HISTÓRICO -->
+<div id="screenHistory" class="screen">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <div class="topbar-title">📅 Histórico de meses</div>
+      <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="card hero" style="box-shadow:none">
+      <div class="heroTitle">Seu histórico financeiro</div>
+      <div class="heroSub">Toque em <b>Abrir</b> para carregar um mês no app.</div>
+    </div>
+    <div class="histGrid" id="listaMeses"></div>
+  </div>
+</div>
+
+<!-- ✅ TELA CATEGORIAS -->
+<div id="screenCats" class="screen">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <div class="topbar-title">📂 Minhas Categorias</div>
+      <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="card hero" style="box-shadow:none">
+      <div class="heroTitle">Organize seus gastos</div>
+      <div class="heroSub">Crie categorias e use nos lançamentos.</div>
+    </div>
+
+    <div class="card">
       <div class="row">
         <input id="novaCategoria" placeholder="Nome da categoria">
         <button class="mini" onclick="addCategoria()">Adicionar</button>
       </div>
-      <div id="listaCategorias" class="small" style="margin-top:8px"></div>
+      <div id="listaCategorias" class="small" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ TELA FIXOS -->
+<div id="screenFixos" class="screen">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <div class="topbar-title">📌 Gastos Fixos</div>
+      <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="card hero" style="box-shadow:none">
+      <div class="heroTitle">Prioridades do mês</div>
+      <div class="heroSub">Fixos entram automaticamente em todos os meses.</div>
     </div>
 
     <div class="card">
-      <h3>📌 Gastos Fixos (Prioridades)</h3>
       <input id="descFixo" placeholder="Descrição (ex: Aluguel)">
       <input id="valorFixo" type="number" placeholder="Valor (ex: 750)">
       <select id="categoriaFixo"></select>
       <button onclick="addFixo()">Adicionar gasto fixo</button>
-      <div id="listaFixos" class="small" style="margin-top:8px"></div>
-      <div class="small" style="margin-top:6px;opacity:.75">
-        Dica: o botão ❌ remove o gasto fixo para não entrar nos próximos meses.
+
+      <div id="listaFixos" class="small" style="margin-top:10px"></div>
+      <div class="small" style="margin-top:8px;opacity:.85">
+        O botão X remove o fixo para não entrar nos próximos meses.
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- ✅ SALÁRIO / META / ANOTAÇÕES / DINHEIRO GUARDADO -->
-    <div class="card">
-      <label>Salário</label>
-      <input id="salary" type="number">
+<!-- ✅ TELA SIMULADORES -->
+<div id="screenSim" class="screen">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <button class="iconbtn" onclick="voltarTela()">← Voltar</button>
+      <div class="topbar-title">📌 Simuladores</div>
+      <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
+    </div>
+  </div>
 
-      <label>Mês</label>
-      <input id="month" type="month">
-
-      <label>Meta</label>
-      <input id="meta" type="number">
-
-      <label>Anotações do mês</label>
-      <textarea id="notes" placeholder="Ex: meta de cortar delivery, juntar para reserva..."></textarea>
-
-      <hr>
-
-      <h3 style="margin-top:0">🏦 Dinheiro guardado / investido</h3>
-      <div class="small" style="margin-top:-6px;opacity:.85">
-        Ex: “Guardei 1000” ou “Investi 1000 no banco”.
-      </div>
-
-      <label>Valor guardado no mês (R$)</label>
-      <input id="savedValue" type="number" placeholder="Ex: 1000">
-
-      <label>Descrição (opcional)</label>
-      <input id="savedDesc" placeholder="Ex: Reserva, CDB 110%, Tesouro Selic...">
-
-      <button onclick="addGuardado()">Adicionar ao mês</button>
-
-      <div id="listaGuardado" class="small" style="margin-top:10px"></div>
-
-      <button style="margin-top:10px" onclick="saveSettings()">Salvar</button>
-
-      <div class="small" style="margin-top:6px;opacity:.8">
-        Ao salvar, salário/meta/anotações e o dinheiro guardado ficam no histórico do mês.
-      </div>
+  <div class="wrap">
+    <div class="card hero" style="box-shadow:none">
+      <div class="heroTitle">Simule antes de decidir</div>
+      <div class="heroSub">Investimento e empréstimo com base no seu mês atual.</div>
     </div>
 
-    <!-- ✅ MENU (colapsa / expande) -->
     <div class="card menuCard">
       <div class="menuHeader">
-        <div class="menuTitle">📌 Menu de Simuladores</div>
-        <button class="chev" onclick="toggleMenuSim()"><span id="menuSimIcon">▼</span></button>
+        <div class="menuTitle">📈 Investimentos</div>
+        <button class="chev" onclick="toggleBox('boxInv','invIcon')"><span id="invIcon">▼</span></button>
       </div>
-      <div class="small" style="margin-top:6px;opacity:.85">
-        Abra para ver <b>Investimento</b> e <b>Empréstimo/Compra</b>.
-      </div>
-    </div>
-
-    <!-- ✅ CONTEÚDO DO MENU (fica escondido por padrão) -->
-    <div id="menuSimConteudo" class="collapsed">
-
-      <!-- ✅ SIMULADOR INVESTIMENTOS -->
-      <div class="card">
-        <h3>📈 Simulador de Investimentos (Mais opções)</h3>
-
+      <div id="boxInv" class="collapsed" style="margin-top:10px">
         <label>Tipo de investimento</label>
         <select id="invTipo" onchange="atualizarCamposInvestimento()">
           <option value="poupanca">Poupança</option>
@@ -452,14 +622,17 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 
         <button onclick="simularInvestimentos()">Calcular</button>
 
-        <div id="resultadoInv" style="margin-top:10px;font-weight:bold"></div>
+        <div id="resultadoInv" style="margin-top:10px;font-weight:900"></div>
         <div id="detalhesInv" class="small" style="margin-top:8px"></div>
       </div>
+    </div>
 
-      <!-- ✅ SIMULADOR EMPRÉSTIMO/COMPRA -->
-      <div class="card">
-        <h3>💳 Simulador de Empréstimo / Compra</h3>
-
+    <div class="card menuCard">
+      <div class="menuHeader">
+        <div class="menuTitle">💳 Empréstimo / Compra</div>
+        <button class="chev" onclick="toggleBox('boxEmp','empIcon')"><span id="empIcon">▼</span></button>
+      </div>
+      <div id="boxEmp" class="collapsed" style="margin-top:10px">
         <label>Tipo</label>
         <select id="empTipo">
           <option value="financiamento">Financiamento (Price)</option>
@@ -475,65 +648,19 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
         <label>Juros ao mês (%)</label>
         <input id="empJuros" type="number" placeholder="Ex: 3">
 
-        <div id="empCamposExtras" style="margin-top:10px">
-          <label>Entrada (R$) (opcional)</label>
-          <input id="empEntrada" type="number" placeholder="Ex: 1000">
-          <label>Tarifa / taxa fixa (R$) (opcional)</label>
-          <input id="empTarifa" type="number" placeholder="Ex: 50">
-        </div>
+        <label>Entrada (R$) (opcional)</label>
+        <input id="empEntrada" type="number" placeholder="Ex: 1000">
+
+        <label>Tarifa / taxa fixa (R$) (opcional)</label>
+        <input id="empTarifa" type="number" placeholder="Ex: 50">
 
         <button onclick="simularEmprestimo()">Calcular</button>
 
-        <div id="resultadoEmp" style="margin-top:10px;font-weight:bold"></div>
-        <div id="detalhesEmp" class="small" style="margin-top:8px; white-space:pre-wrap;"></div>
-
-        <div class="small" style="margin-top:8px;opacity:.8">
-          Dica: o app compara a parcela com sua sobra atual (Salário - Gastos).
-        </div>
+        <div id="resultadoEmp" style="margin-top:10px;font-weight:900"></div>
+        <div id="detalhesEmp" class="small" style="margin-top:8px;white-space:pre-wrap;"></div>
       </div>
-
     </div>
 
-    <div class="kpis" id="kpis"></div>
-
-    <div class="card"><canvas id="chart"></canvas></div>
-    <div class="card"><h3>Evolução</h3><canvas id="chartEvolucao"></canvas></div>
-    <div class="card"><table id="list"></table></div>
-  </div>
-
-  <!-- ✅ BOLINHA IA (acima do +) -->
-  <div class="fab-ai" title="IA" onclick="abrirChatIA()">🤖</div>
-
-  <!-- ✅ BOTÃO + VERDE -->
-  <div class="fab" onclick="abrirAdd()">+</div>
-</div>
-
-<!-- ✅ TELA HISTÓRICO -->
-<div id="screenHistory" class="screen">
-  <div class="topbar">
-    <div class="topbar-inner">
-      <button class="iconbtn" onclick="voltarDaTelaHistorico()">← Voltar</button>
-      <div class="topbar-title">📅 Histórico de meses</div>
-      <button class="iconbtn" onclick="toggleTheme()">🌙/☀️</button>
-    </div>
-  </div>
-
-  <div class="wrap">
-    <div class="histHeader">
-      <div class="histHero">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-          <div>
-            <div style="font-weight:900;font-size:16px">Seu histórico financeiro</div>
-            <div class="small" style="opacity:.85;margin-top:4px">
-              Toque em <b>Abrir</b> para carregar um mês no app.
-            </div>
-          </div>
-          <div class="badge">Controle de Gastos PRO</div>
-        </div>
-      </div>
-
-      <div class="histGrid" id="listaMeses"></div>
-    </div>
   </div>
 </div>
 
@@ -615,49 +742,51 @@ let grafico = null;
 let graficoEvolucao = null;
 
 /* =========================
-   ✅ MENU (colapsável)
+   ✅ Navegação de telas
 ========================= */
-window.toggleMenuSim = function(){
-  const box = document.getElementById("menuSimConteudo");
-  const icon = document.getElementById("menuSimIcon");
-  const aberto = box && !box.classList.contains("collapsed");
+let telaAnterior = "screenMain";
+
+function hideLoading(){ document.getElementById("loading").style.display="none"; }
+function showLoading(){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("show"));
+  document.getElementById("loading").style.display="flex";
+}
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("show"));
+  document.getElementById(id).classList.add("show");
+}
+window.irPara = function(id){
+  const atual = document.querySelector(".screen.show");
+  telaAnterior = atual ? atual.id : "screenMain";
+  showScreen(id);
+};
+window.voltarTela = function(){ showScreen(telaAnterior || "screenMain"); };
+window.abrirMenu = function(){ irPara("screenMenu"); };
+window.abrirHistorico = function(){ renderListaMeses(); irPara("screenHistory"); };
+
+window.toggleBox = function(boxId, iconId){
+  const box = document.getElementById(boxId);
+  const icon = document.getElementById(iconId);
   if(!box) return;
+  const aberto = !box.classList.contains("collapsed");
   if(aberto){
     box.classList.add("collapsed");
     if(icon) icon.textContent = "▼";
   }else{
     box.classList.remove("collapsed");
     if(icon) icon.textContent = "▲";
-    box.scrollIntoView({ behavior:"smooth", block:"start" });
+    box.scrollIntoView({behavior:"smooth", block:"start"});
   }
 };
 
 /* =========================
-   ✅ TELA / NAVEGAÇÃO
+   ✅ Tema / config
 ========================= */
-function showLoading(){
-  document.getElementById("screenMain").classList.remove("show");
-  document.getElementById("screenHistory").classList.remove("show");
-  document.getElementById("loading").style.display = "flex";
-}
-function hideLoading(){ document.getElementById("loading").style.display = "none"; }
-function showMain(){
-  hideLoading();
-  document.getElementById("screenHistory").classList.remove("show");
-  document.getElementById("screenMain").classList.add("show");
-}
-function showHistory(){
-  hideLoading();
-  document.getElementById("screenMain").classList.remove("show");
-  document.getElementById("screenHistory").classList.add("show");
-}
+window.toggleTheme = ()=> document.body.classList.toggle("light");
 
-window.abrirHistorico = function(){
-  renderListaMeses();
-  showHistory();
-};
-window.voltarDaTelaHistorico = function(){ showMain(); };
-
+/* =========================
+   ✅ Firebase / Auth
+========================= */
 async function initFirebase(){
   if(!window.firebase){
     dbg("Firebase não carregou (sem internet ou bloqueio).");
@@ -694,6 +823,8 @@ window.googleLogin = async function(){
   }
 };
 
+function salvarTudoLocal(){ localStorage.setItem("gastos_pro", JSON.stringify(state)); }
+
 function salvarCategorias(){ localStorage.setItem("categorias_" + window.USER_ID, JSON.stringify(categorias)); }
 function carregarCategorias(){
   const raw = localStorage.getItem("categorias_" + window.USER_ID);
@@ -708,12 +839,6 @@ function carregarFixos(){
   fixos = fixos.map(f=>({ ...f, isFixo:true }));
 }
 
-window.toggleTheme = ()=> document.body.classList.toggle("light");
-window.abrirConfig = ()=>{
-  const box = document.getElementById("configBox");
-  box.style.display = box.style.display==="none" ? "block" : "none";
-};
-
 window.getMes = ()=>{
   const el = document.getElementById("month");
   const v = el && el.value ? el.value : new Date().toISOString().slice(0,7);
@@ -721,6 +846,7 @@ window.getMes = ()=>{
 };
 
 function keyItem(i){ return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}`; }
+
 function garantirFixosNoMes(d){
   const set = new Set((d.items||[]).map(keyItem));
   for(const f of fixos){
@@ -737,7 +863,7 @@ window.getDataMes = ()=>{
       items: fixos.map(f=>({ ...f, isFixo:true })),
       meta: 0,
       notes: "",
-      saved: [] // ✅ NOVO: lista de dinheiro guardado/investido
+      saved: []
     };
   }else{
     garantirFixosNoMes(state.meses[mesAtual]);
@@ -753,6 +879,9 @@ function detectarCategoria(desc){
   return "Outros";
 }
 
+/* =========================
+   ✅ Categorias
+========================= */
 window.addCategoria = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   const input=document.getElementById("novaCategoria");
@@ -762,12 +891,16 @@ window.addCategoria = ()=>{
   categorias.push(nome); input.value="";
   salvarCategorias(); renderCategorias();
 };
-
 function renderCategorias(){
-  document.getElementById("listaCategorias").innerHTML = categorias.map(c=>`<div>• ${c}</div>`).join("");
-  document.getElementById("categoriaFixo").innerHTML = categorias.map(c=>`<option value="${c}">${c}</option>`).join("");
+  const listEl = document.getElementById("listaCategorias");
+  const selEl = document.getElementById("categoriaFixo");
+  if(listEl) listEl.innerHTML = categorias.map(c=>`<div>• ${c}</div>`).join("");
+  if(selEl) selEl.innerHTML = categorias.map(c=>`<option value="${c}">${c}</option>`).join("");
 }
 
+/* =========================
+   ✅ Fixos
+========================= */
 window.addFixo = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   const desc=(document.getElementById("descFixo").value||"").trim();
@@ -776,6 +909,7 @@ window.addFixo = ()=>{
   if(!desc || !valor || valor<=0){ alert("Preencha descrição e valor (maior que 0)."); return; }
 
   fixos.push({ desc, amount:valor, category:categoria, isFixo:true });
+
   document.getElementById("descFixo").value="";
   document.getElementById("valorFixo").value="";
 
@@ -788,7 +922,6 @@ window.addFixo = ()=>{
 window.removerFixo = function(idx){
   if(idx<0 || idx>=fixos.length) return;
   if(!confirm("Remover este gasto fixo? (ele não vai entrar nos próximos meses)")) return;
-
   const alvo = fixos[idx];
   fixos.splice(idx, 1);
   salvarFixos();
@@ -802,21 +935,62 @@ window.removerFixo = function(idx){
 
 function renderFixos(){
   const div=document.getElementById("listaFixos");
+  if(!div) return;
   if(!fixos.length){
     div.innerHTML = "<div>Nenhum gasto fixo cadastrado.</div>";
     return;
   }
   div.innerHTML = fixos.map((f,idx)=>`
-    <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+    <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div style="flex:1">
         • ${f.desc} — R$ ${Number(f.amount).toFixed(2)}
         <span class="badge">${f.category}</span>
       </div>
-      <button class="mini danger" onclick="removerFixo(${idx})">❌</button>
+      <button class="btnX" title="Remover fixo" onclick="removerFixo(${idx})">✕</button>
     </div>
   `).join("");
 }
 
+/* =========================
+   ✅ Guardado / notas / salvar
+========================= */
+window.saveSettings = ()=>{
+  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
+  mesAtual = window.getMes();
+  const d = window.getDataMes();
+
+  d.salary = Number(document.getElementById("salary").value);
+  d.meta   = Number(document.getElementById("meta").value);
+
+  const notesEl = document.getElementById("notes");
+  if(notesEl) d.notes = String(notesEl.value || "");
+
+  const descEl = document.getElementById("savedDesc");
+  const desc = descEl ? String(descEl.value || "").trim() : "";
+
+  // ✅ adiciona guardado no mês (se preencheu)
+  const savedV = Number(document.getElementById("savedValue").value);
+  if(savedV && savedV > 0){
+    if(!Array.isArray(d.saved)) d.saved = [];
+    d.saved.push({ valor: savedV, desc, data: new Date().toISOString().slice(0,10) });
+    document.getElementById("savedValue").value = "";
+    if(descEl) descEl.value = "";
+  }
+
+  salvarTudoLocal();
+
+  fetch(API+"/salvarMes",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,salary:d.salary,meta:d.meta,notes:d.notes, saved:d.saved})
+  }).catch(()=>{});
+
+  window.render();
+};
+
+/* =========================
+   ✅ Gastos do mês (+)
+========================= */
 window.abrirAdd = ()=>{
   if(!window.USER_ID){ alert("Faça login primeiro"); return; }
   mesAtual = window.getMes();
@@ -849,90 +1023,15 @@ window.del = (i)=>{
     salvarFixos();
     renderFixos();
   }
-
   d.items.splice(i,1);
   salvarTudoLocal();
   window.render();
 };
 
 /* =========================
-   ✅ NOVO: Dinheiro guardado
+   ✅ Render / gráficos
 ========================= */
-function renderGuardado(){
-  const d = window.getDataMes();
-  const el = document.getElementById("listaGuardado");
-  const saved = Array.isArray(d.saved) ? d.saved : [];
-  if(!saved.length){
-    el.innerHTML = "<div>Nenhuma anotação de dinheiro guardado neste mês.</div>";
-    return;
-  }
-  const total = saved.reduce((a,b)=>a+Number(b.valor||0),0);
-  el.innerHTML = `
-    <div style="margin-bottom:8px"><b>Total guardado:</b> R$ ${total.toFixed(2)}</div>
-    ${saved.map((s,idx)=>`
-      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <div style="flex:1">
-          • R$ ${Number(s.valor||0).toFixed(2)}
-          ${s.desc ? `<span class="badge">${String(s.desc).replace(/</g,"&lt;")}</span>` : ""}
-          <span class="badge">${s.data || ""}</span>
-        </div>
-        <button class="mini danger" onclick="removerGuardado(${idx})">❌</button>
-      </div>
-    `).join("")}
-  `;
-}
-window.addGuardado = function(){
-  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
-  const v = Number(document.getElementById("savedValue").value);
-  const desc = (document.getElementById("savedDesc").value || "").trim();
-  if(!v || v <= 0){ alert("Digite um valor guardado maior que 0."); return; }
-
-  const d = window.getDataMes();
-  if(!Array.isArray(d.saved)) d.saved = [];
-  d.saved.push({
-    valor: v,
-    desc,
-    data: new Date().toISOString().slice(0,10)
-  });
-
-  document.getElementById("savedValue").value = "";
-  document.getElementById("savedDesc").value = "";
-
-  salvarTudoLocal();
-  renderGuardado();
-  window.render();
-};
-window.removerGuardado = function(idx){
-  const d = window.getDataMes();
-  if(!Array.isArray(d.saved)) d.saved = [];
-  if(idx<0 || idx>=d.saved.length) return;
-  if(!confirm("Remover este item guardado?")) return;
-  d.saved.splice(idx,1);
-  salvarTudoLocal();
-  renderGuardado();
-  window.render();
-};
-
-window.saveSettings = ()=>{
-  if(!window.USER_ID){ alert("Faça login primeiro"); return; }
-  mesAtual=window.getMes();
-  const d=window.getDataMes();
-  d.salary=Number(document.getElementById("salary").value);
-  d.meta=Number(document.getElementById("meta").value);
-  d.notes=String(document.getElementById("notes").value || "");
-
-  salvarTudoLocal();
-
-  fetch(API+"/salvarMes",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({userId:window.USER_ID,mes:mesAtual,salary:d.salary,meta:d.meta,notes:d.notes, saved:d.saved})
-  }).catch(()=>{});
-
-  window.render();
-};
-
-function salvarTudoLocal(){ localStorage.setItem("gastos_pro", JSON.stringify(state)); }
+function formatBRL(n){ return "R$ " + Number(n||0).toFixed(2).replace(".", ","); }
 
 function drawChart(items){
   const mapa={}; items.forEach(i=>{ const cat=i.category||"Outros"; mapa[cat]=(mapa[cat]||0)+Number(i.amount||0); });
@@ -946,38 +1045,30 @@ function drawEvolucao(){
   if(graficoEvolucao) graficoEvolucao.destroy();
   graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{type:"line",data:{labels:meses,datasets:[{data:valores}]}} );
 }
+
 function paint(){
   const d=window.getDataMes();
-
-  document.getElementById("salary").value=Number(d.salary||0);
-  document.getElementById("month").value=mesAtual;
-  document.getElementById("meta").value=d.meta||"";
-  document.getElementById("notes").value = d.notes || "";
-
-  renderGuardado();
+  document.getElementById("salary").value = Number(d.salary||0);
+  document.getElementById("month").value  = mesAtual;
+  document.getElementById("meta").value   = d.meta||"";
 
   const total=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
   const sobra=Number(d.salary||0)-total;
 
-  // ✅ soma guardado no KPI (informativo)
   const savedTotal = (Array.isArray(d.saved) ? d.saved : []).reduce((a,b)=>a+Number(b.valor||0),0);
 
   document.getElementById("kpis").innerHTML=`
-    <div class="kpi">Salário<br><b>R$ ${Number(d.salary||0).toFixed(2)}</b></div>
-    <div class="kpi">Gasto<br><b>R$ ${total.toFixed(2)}</b></div>
-    <div class="kpi">Sobra<br><b>R$ ${sobra.toFixed(2)}</b></div>
-    <div class="kpi">Guardado<br><b>R$ ${savedTotal.toFixed(2)}</b></div>
-    <div class="success">Você economizou R$ ${sobra.toFixed(2)}</div>
+    <div class="kpi">Salário<br><b>${formatBRL(d.salary||0)}</b></div>
+    <div class="kpi">Gasto<br><b>${formatBRL(total)}</b></div>
+    <div class="kpi">Sobra<br><b>${formatBRL(sobra)}</b></div>
+    <div class="kpi">Guardado<br><b>${formatBRL(savedTotal)}</b></div>
+    <div class="success">Você economizou ${formatBRL(sobra)}</div>
   `;
 
   document.getElementById("list").innerHTML=(d.items||[]).map((i,idx)=>`
     <tr>
-      <td>
-        ${i.desc}
-        ${i.isFixo?` <span class="badge">Fixo</span>`:""}
-        <span class="badge">${i.category||"Outros"}</span>
-      </td>
-      <td>R$ ${Number(i.amount||0).toFixed(2)}</td>
+      <td>${i.desc}${i.isFixo?` <span class="badge">Fixo</span>`:""} <span class="badge">${i.category||"Outros"}</span></td>
+      <td>${formatBRL(i.amount||0)}</td>
       <td><button onclick="del(${idx})">X</button></td>
     </tr>
   `).join("");
@@ -986,58 +1077,10 @@ function paint(){
   drawEvolucao();
 }
 
-/* =========================
-   ✅ HISTÓRICO
-========================= */
-function formatBRL(n){ return "R$ " + Number(n||0).toFixed(2).replace(".", ","); }
-function renderListaMeses(){
-  const el = document.getElementById("listaMeses");
-  const meses = Object.keys(state.meses||{}).sort().reverse();
-  if(!meses.length){
-    el.innerHTML = `<div class="card"><div class="small">Nenhum mês salvo ainda.</div></div>`;
-    return;
-  }
-  el.innerHTML = meses.map(m=>{
-    const d = state.meses[m] || {};
-    const total = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-    const sal = Number(d.salary||0);
-    const sobra = sal - total;
-    const savedTotal = (Array.isArray(d.saved) ? d.saved : []).reduce((a,b)=>a+Number(b.valor||0),0);
-
-    const isAtual = (m === mesAtual);
-    const tag = isAtual ? `<span class="badge">Atual</span>` : ``;
-    const corSobra = sobra >= 0 ? "var(--ok)" : "var(--danger)";
-    return `
-      <div class="histItem">
-        <div class="histLeft">
-          <div class="histMonth">${m} ${tag}</div>
-          <div class="small histMeta">${(d.notes||"").trim() ? (d.notes||"").trim().slice(0,90) + ((d.notes||"").trim().length>90?"…":"") : "Sem anotações."}</div>
-          <div class="histNums">
-            <span class="pill">💰 <b>${formatBRL(sal)}</b></span>
-            <span class="pill">🧾 <b>${formatBRL(total)}</b></span>
-            <span class="pill">✅ <b style="color:${corSobra}">${formatBRL(sobra)}</b></span>
-            <span class="pill">🏦 <b>${formatBRL(savedTotal)}</b></span>
-          </div>
-        </div>
-        <button class="histBtn" onclick="abrirMesDoHistorico('${m}')">Abrir</button>
-      </div>
-    `;
-  }).join("");
-}
-window.abrirMesDoHistorico = function(m){
-  const monthEl = document.getElementById("month");
-  if(monthEl) monthEl.value = m;
-  mesAtual = m;
-  window.render();
-  showMain();
-  const box = document.getElementById("configBox");
-  if(box) box.style.display = "none";
-};
-
 window.render = ()=>{
   if(!window.USER_ID) return;
   mesAtual = window.getMes();
-  const d = window.getDataMes();
+  const d=window.getDataMes();
   paint();
 
   fetch(API+"/mes/"+window.USER_ID+"/"+mesAtual)
@@ -1051,8 +1094,6 @@ window.render = ()=>{
         d.salary = Number(data[0].salary||d.salary||0);
         d.meta   = Number(data[0].meta||d.meta||0);
         if(typeof data[0].notes === "string") d.notes = data[0].notes;
-
-        // ✅ se sua API não devolver saved, a gente mantém o local
         if(Array.isArray(data[0].saved)) d.saved = data[0].saved;
       }
 
@@ -1079,8 +1120,50 @@ window.render = ()=>{
     });
 };
 
+/* =========================
+   ✅ Histórico
+========================= */
+function renderListaMeses(){
+  const el = document.getElementById("listaMeses");
+  const meses = Object.keys(state.meses||{}).sort().reverse();
+  if(!meses.length){
+    el.innerHTML = `<div class="card"><div class="small">Nenhum mês salvo ainda.</div></div>`;
+    return;
+  }
+  el.innerHTML = meses.map(m=>{
+    const d = state.meses[m] || {};
+    const total = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+    const sal = Number(d.salary||0);
+    const sobra = sal - total;
+    const savedTotal = (Array.isArray(d.saved) ? d.saved : []).reduce((a,b)=>a+Number(b.valor||0),0);
+
+    return `
+      <div class="histItem">
+        <div style="flex:1">
+          <div class="histMonth">${m}</div>
+          <div class="small" style="margin-top:4px;opacity:.85">${(d.notes||"").trim() ? (d.notes||"").trim().slice(0,90) + ((d.notes||"").trim().length>90?"…":"") : "Sem anotações."}</div>
+          <div class="histNums">
+            <span class="pill">💰 <b>${formatBRL(sal)}</b></span>
+            <span class="pill">🧾 <b>${formatBRL(total)}</b></span>
+            <span class="pill">✅ <b>${formatBRL(sobra)}</b></span>
+            <span class="pill">🏦 <b>${formatBRL(savedTotal)}</b></span>
+          </div>
+        </div>
+        <button class="histBtn" onclick="abrirMesDoHistorico('${m}')">Abrir</button>
+      </div>
+    `;
+  }).join("");
+}
+window.abrirMesDoHistorico = function(m){
+  const monthEl = document.getElementById("month");
+  if(monthEl) monthEl.value = m;
+  mesAtual = m;
+  window.render();
+  showScreen("screenMain");
+};
+
 /* ==========================================================
-   ✅ SIMULADOR INVESTIMENTOS
+   ✅ SIMULADOR INVESTIMENTOS (mesmo do seu)
 ========================================================== */
 function clampNum(v, def=0){ v = Number(v); return Number.isFinite(v) ? v : def; }
 function anualParaMensalEfetivo(taxaAnual){ const r = taxaAnual/100; return Math.pow(1+r, 1/12) - 1; }
@@ -1105,26 +1188,26 @@ function simularComAporte(inicial, aporteMensal, meses, taxaMensal){
   return { final: saldo, investido, lucroBruto };
 }
 function atualizarCamposInvestimento(){
-  const tipo = document.getElementById("invTipo").value;
+  const tipo = document.getElementById("invTipo")?.value || "poupanca";
   const boxCDI = document.getElementById("boxCDI");
   const boxPrefixado = document.getElementById("boxPrefixado");
   const boxIPCA = document.getElementById("boxIPCA");
   const boxFundo = document.getElementById("boxFundo");
   const boxRV = document.getElementById("boxRV");
 
-  boxCDI.style.display = "none";
-  boxPrefixado.style.display = "none";
-  boxIPCA.style.display = "none";
-  boxFundo.style.display = "none";
-  boxRV.style.display = "none";
+  if(boxCDI) boxCDI.style.display = "none";
+  if(boxPrefixado) boxPrefixado.style.display = "none";
+  if(boxIPCA) boxIPCA.style.display = "none";
+  if(boxFundo) boxFundo.style.display = "none";
+  if(boxRV) boxRV.style.display = "none";
 
   if(tipo === "poupanca" || tipo === "tesouro_selic" || tipo === "cdb" || tipo === "lci_lca" || tipo === "fundo_di"){
-    boxCDI.style.display = "block";
+    if(boxCDI) boxCDI.style.display = "block";
   }
-  if(tipo === "prefixado"){ boxPrefixado.style.display = "block"; }
-  if(tipo === "ipca_plus"){ boxIPCA.style.display = "block"; }
-  if(tipo === "fundo_di"){ boxFundo.style.display = "block"; }
-  if(tipo === "renda_variavel"){ boxRV.style.display = "block"; }
+  if(tipo === "prefixado" && boxPrefixado) boxPrefixado.style.display = "block";
+  if(tipo === "ipca_plus" && boxIPCA) boxIPCA.style.display = "block";
+  if(tipo === "fundo_di" && boxFundo) boxFundo.style.display = "block";
+  if(tipo === "renda_variavel" && boxRV) boxRV.style.display = "block";
 }
 window.simularInvestimentos = function(){
   const tipo = document.getElementById("invTipo").value;
@@ -1163,13 +1246,13 @@ window.simularInvestimentos = function(){
     const cdi = clampNum(document.getElementById("invCDI").value, 10.5);
     const anual = cdi * 0.70;
     taxaMensal = anualParaMensalEfetivo(anual);
-    textoTaxa = `Poupança (aprox. 70% do CDI): ~${anual.toFixed(2)}% a.a.`;
+    textoTaxa = `Poupança (~70% do CDI): ~${anual.toFixed(2)}% a.a.`;
   }
 
   if(tipo === "tesouro_selic"){
     const cdi = clampNum(document.getElementById("invCDI").value, 10.5);
     taxaMensal = anualParaMensalEfetivo(cdi);
-    textoTaxa = `Tesouro Selic (aprox CDI): ${cdi.toFixed(2)}% a.a.`;
+    textoTaxa = `Tesouro Selic (~CDI): ${cdi.toFixed(2)}% a.a.`;
   }
 
   if(tipo === "cdb" || tipo === "lci_lca" || tipo === "fundo_di"){
@@ -1334,6 +1417,7 @@ Análise: ${msg}`;
    ✅ CHAT IA (modal)
 ========================================================== */
 function getIaBase(){ return (window.API_BASE_URL || "").replace(/\/$/, ""); }
+
 function resumoDoMesParaIA(){
   const d = window.getDataMes();
   const items = d.items || [];
@@ -1341,34 +1425,22 @@ function resumoDoMesParaIA(){
   const sobra = Number(d.salary||0) - total;
 
   const savedTotal = (Array.isArray(d.saved) ? d.saved : []).reduce((a,b)=>a+Number(b.valor||0),0);
-  const savedList = (Array.isArray(d.saved) ? d.saved : [])
-    .slice(-8)
-    .map(s=>`- R$ ${Number(s.valor||0).toFixed(2)} (${s.desc||"sem desc"}) em ${s.data||""}`)
-    .join("\n");
-
-  const porCat = {};
-  for(const it of items){
-    const c = it.category || "Outros";
-    porCat[c] = (porCat[c] || 0) + Number(it.amount||0);
-  }
-  const topCats = Object.entries(porCat)
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,6)
-    .map(([c,v])=>`${c}: R$ ${v.toFixed(2)}`)
-    .join(", ");
-
-  const fixosTotal = items.filter(x=>x.isFixo).reduce((a,b)=>a+Number(b.amount||0),0);
+  const topCats = (() => {
+    const porCat = {};
+    for(const it of items){
+      const c = it.category || "Outros";
+      porCat[c] = (porCat[c] || 0) + Number(it.amount||0);
+    }
+    return Object.entries(porCat).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([c,v])=>`${c}: R$ ${v.toFixed(2)}`).join(", ");
+  })();
 
   return `
 MÊS: ${mesAtual}
 SALÁRIO: R$ ${Number(d.salary||0).toFixed(2)}
 META: R$ ${Number(d.meta||0).toFixed(2)}
 GASTO TOTAL: R$ ${total.toFixed(2)}
-GASTO FIXO TOTAL: R$ ${fixosTotal.toFixed(2)}
 SOBRA (SALÁRIO - GASTOS): R$ ${sobra.toFixed(2)}
 DINHEIRO GUARDADO/INVESTIDO NO MÊS: R$ ${savedTotal.toFixed(2)}
-DETALHES GUARDADO:
-${savedList || "(sem lançamentos de guardado)"}
 TOP CATEGORIAS: ${topCats || "sem dados"}
 ANOTAÇÕES: ${(d.notes||"").trim() || "(vazio)"}
   `.trim();
@@ -1400,12 +1472,8 @@ function chatAdd(role, text){
 }
 
 window.abrirChatIA = function(){
-  const modal = document.getElementById("iaModal");
-  modal.classList.add("show");
-  setTimeout(()=>{
-    const inp = document.getElementById("iaPrompt");
-    inp && inp.focus();
-  }, 50);
+  document.getElementById("iaModal").classList.add("show");
+  setTimeout(()=>{ document.getElementById("iaPrompt")?.focus(); }, 50);
   iaHealth();
 };
 
@@ -1414,9 +1482,7 @@ window.fecharChatIA = function(){
 };
 
 window.fecharChatIAClickFora = function(ev){
-  if(ev.target && ev.target.id === "iaModal"){
-    fecharChatIA();
-  }
+  if(ev.target && ev.target.id === "iaModal") fecharChatIA();
 };
 
 window.iaEnviar = async function(){
@@ -1439,9 +1505,9 @@ window.iaEnviar = async function(){
 
     const promptFinal =
 `Você é um consultor financeiro pessoal. Use os dados abaixo para responder de forma prática.
-- Se eu perguntar sobre investimento, sugira 1 a 3 opções coerentes com minha SOBRA e meu DINHEIRO GUARDADO, perfil conservador por padrão.
+- Perfil conservador por padrão.
 - Se a SOBRA estiver negativa, explique como ajustar gastos antes de investir.
-- Considere que "DINHEIRO GUARDADO" é o que eu consegui separar no mês.
+- Se perguntarem sobre investimento, sugira 1 a 3 opções coerentes com a SOBRA e o GUARDADO.
 - Responda em português, direto, com passos.
 
 DADOS DO USUÁRIO:
@@ -1454,19 +1520,14 @@ ${pergunta}
     const resp = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "llama3.2:3b",
-        prompt: promptFinal
-      })
+      body: JSON.stringify({ model: "llama3.2:3b", prompt: promptFinal })
     });
 
     const data = await resp.json();
-    const txt = data.response || JSON.stringify(data, null, 2);
-    chatAdd("ai", txt);
+    chatAdd("ai", data.response || JSON.stringify(data, null, 2));
     if(statusEl) statusEl.textContent = "Online ✅";
   }catch(e){
-    const msg = (e && e.message) ? e.message : String(e);
-    chatAdd("ai", "Erro: " + msg);
+    chatAdd("ai", "Erro: " + ((e && e.message) ? e.message : String(e)));
     if(statusEl) statusEl.textContent = "Erro ❌";
   }
 };
@@ -1482,12 +1543,9 @@ document.addEventListener("keydown", (e)=>{
     }
   }
 });
-/* ==========================================================
-   ✅ FIM CHAT IA
-========================================================== */
 
 /* =========================
-   ✅ INIT
+   ✅ INIT / AUTH + Render
 ========================= */
 document.addEventListener("DOMContentLoaded", async ()=>{
   showLoading();
@@ -1518,7 +1576,9 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     }
 
     window.USER_ID = user.uid;
-    document.getElementById("userName").innerText = user.displayName || user.email;
+
+    const nameEl = document.getElementById("userName");
+    if(nameEl) nameEl.textContent = user.displayName || user.email;
 
     carregarCategorias();
     carregarFixos();
@@ -1532,7 +1592,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
     mesAtual = window.getMes();
 
-    showMain();
+    hideLoading();
+    showScreen("screenMain");
     window.render();
     iaHealth();
   });
