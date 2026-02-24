@@ -119,6 +119,32 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
 .light .pill{ background:rgba(0,0,0,.06); }
 .pill b{ font-weight:800; }
 .histBtn{ width:auto; padding:10px 12px; border-radius:14px; }
+
+/* =========================
+   ✅ MENU SIMULADORES (colapsável)
+========================= */
+.menuCard{
+  background:linear-gradient(135deg, rgba(86,156,255,.18), rgba(255,255,255,.06));
+  border:1px solid rgba(255,255,255,.10);
+}
+.light .menuCard{ border:1px solid rgba(0,0,0,.10); }
+.menuHeader{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.menuTitle{
+  font-weight:900;
+  display:flex; align-items:center; gap:10px;
+}
+.chev{
+  width:auto;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+  color:var(--text);
+}
+.light .chev{ background:rgba(0,0,0,.04); border:1px solid rgba(0,0,0,.10); }
+.collapsed{ display:none; }
 </style>
 </head>
 
@@ -194,111 +220,128 @@ hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:10px 0}
       </div>
     </div>
 
-    <!-- ✅ SIMULADOR INVESTIMENTOS -->
-    <div class="card">
-      <h3>📈 Simulador de Investimentos (Mais opções)</h3>
-
-      <label>Tipo de investimento</label>
-      <select id="invTipo" onchange="atualizarCamposInvestimento()">
-        <option value="poupanca">Poupança</option>
-        <option value="tesouro_selic">Tesouro Selic</option>
-        <option value="cdb">CDB (CDI %)</option>
-        <option value="lci_lca">LCI/LCA (CDI % — isento IR)</option>
-        <option value="fundo_di">Fundo DI (CDI % - taxa adm)</option>
-        <option value="prefixado">Prefixado (% ao ano)</option>
-        <option value="ipca_plus">Tesouro IPCA+ (IPCA + taxa real)</option>
-        <option value="renda_variavel">Renda Variável (média % ao ano)</option>
-      </select>
-
-      <label>Valor inicial (R$)</label>
-      <input id="invInicial" type="number" placeholder="Ex: 1000">
-
-      <label>Aporte mensal (R$) (opcional)</label>
-      <input id="invAporte" type="number" placeholder="Ex: 200">
-
-      <label>Tempo</label>
-      <div class="row">
-        <input id="invMeses" type="number" placeholder="Meses (ex: 24)">
-        <input id="invDias" type="number" placeholder="Dias (opcional)">
+    <!-- ✅ MENU (colapsa / expande) -->
+    <div class="card menuCard">
+      <div class="menuHeader">
+        <div class="menuTitle">📌 Menu de Simuladores</div>
+        <button class="chev" onclick="toggleMenuSim()"><span id="menuSimIcon">▼</span></button>
       </div>
-
-      <div id="boxCDI" style="margin-top:10px">
-        <label>CDI (% ao ano)</label>
-        <input id="invCDI" type="number" placeholder="Ex: 10.65">
-        <label>Percentual do CDI (%)</label>
-        <input id="invPercCDI" type="number" placeholder="Ex: 110">
-      </div>
-
-      <div id="boxPrefixado" style="display:none;margin-top:10px">
-        <label>Taxa prefixada (% ao ano)</label>
-        <input id="invPrefixado" type="number" placeholder="Ex: 12">
-      </div>
-
-      <div id="boxIPCA" style="display:none;margin-top:10px">
-        <label>IPCA (% ao ano)</label>
-        <input id="invIPCA" type="number" placeholder="Ex: 4.5">
-        <label>Taxa real (% ao ano)</label>
-        <input id="invReal" type="number" placeholder="Ex: 5.5">
-      </div>
-
-      <div id="boxFundo" style="display:none;margin-top:10px">
-        <label>Taxa de administração (% ao ano)</label>
-        <input id="invAdm" type="number" placeholder="Ex: 1.0">
-      </div>
-
-      <div id="boxRV" style="display:none;margin-top:10px">
-        <label>Retorno médio (% ao ano)</label>
-        <input id="invRV" type="number" placeholder="Ex: 15">
-      </div>
-
-      <div style="margin-top:10px">
-        <label>
-          <input id="invAplicarIOF" type="checkbox" style="width:auto;transform:scale(1.1);margin-right:8px">
-          Aplicar IOF (se resgatar antes de 30 dias) — estimativa
-        </label>
-      </div>
-
-      <button onclick="simularInvestimentos()">Calcular</button>
-
-      <div id="resultadoInv" style="margin-top:10px;font-weight:bold"></div>
-      <div id="detalhesInv" class="small" style="margin-top:8px"></div>
-    </div>
-
-    <!-- ✅ SIMULADOR EMPRÉSTIMO/COMPRA -->
-    <div class="card">
-      <h3>💳 Simulador de Empréstimo / Compra</h3>
-
-      <label>Tipo</label>
-      <select id="empTipo" onchange="empToggleCampos()">
-        <option value="financiamento">Financiamento (Price)</option>
-        <option value="juros_simples">Juros simples</option>
-      </select>
-
-      <label>Valor emprestado / valor da compra (R$)</label>
-      <input id="empValor" type="number" placeholder="Ex: 5000">
-
-      <label>Parcelas</label>
-      <input id="empParcelas" type="number" placeholder="Ex: 12">
-
-      <label>Juros ao mês (%)</label>
-      <input id="empJuros" type="number" placeholder="Ex: 3">
-
-      <div id="empCamposExtras" style="margin-top:10px">
-        <label>Entrada (R$) (opcional)</label>
-        <input id="empEntrada" type="number" placeholder="Ex: 1000">
-        <label>Tarifa / taxa fixa (R$) (opcional)</label>
-        <input id="empTarifa" type="number" placeholder="Ex: 50">
-      </div>
-
-      <button onclick="simularEmprestimo()">Calcular</button>
-
-      <div id="resultadoEmp" style="margin-top:10px;font-weight:bold"></div>
-      <div id="detalhesEmp" class="small" style="margin-top:8px; white-space:pre-wrap;"></div>
-
-      <div class="small" style="margin-top:8px;opacity:.8">
-        Dica: o app compara a parcela com sua sobra atual (Salário - Gastos).
+      <div class="small" style="margin-top:6px;opacity:.85">
+        Abra para ver <b>Investimento</b> e <b>Empréstimo/Compra</b>.
       </div>
     </div>
+
+    <!-- ✅ CONTEÚDO DO MENU (fica escondido por padrão) -->
+    <div id="menuSimConteudo" class="collapsed">
+
+      <!-- ✅ SIMULADOR INVESTIMENTOS -->
+      <div class="card">
+        <h3>📈 Simulador de Investimentos (Mais opções)</h3>
+
+        <label>Tipo de investimento</label>
+        <select id="invTipo" onchange="atualizarCamposInvestimento()">
+          <option value="poupanca">Poupança</option>
+          <option value="tesouro_selic">Tesouro Selic</option>
+          <option value="cdb">CDB (CDI %)</option>
+          <option value="lci_lca">LCI/LCA (CDI % — isento IR)</option>
+          <option value="fundo_di">Fundo DI (CDI % - taxa adm)</option>
+          <option value="prefixado">Prefixado (% ao ano)</option>
+          <option value="ipca_plus">Tesouro IPCA+ (IPCA + taxa real)</option>
+          <option value="renda_variavel">Renda Variável (média % ao ano)</option>
+        </select>
+
+        <label>Valor inicial (R$)</label>
+        <input id="invInicial" type="number" placeholder="Ex: 1000">
+
+        <label>Aporte mensal (R$) (opcional)</label>
+        <input id="invAporte" type="number" placeholder="Ex: 200">
+
+        <label>Tempo</label>
+        <div class="row">
+          <input id="invMeses" type="number" placeholder="Meses (ex: 24)">
+          <input id="invDias" type="number" placeholder="Dias (opcional)">
+        </div>
+
+        <div id="boxCDI" style="margin-top:10px">
+          <label>CDI (% ao ano)</label>
+          <input id="invCDI" type="number" placeholder="Ex: 10.65">
+          <label>Percentual do CDI (%)</label>
+          <input id="invPercCDI" type="number" placeholder="Ex: 110">
+        </div>
+
+        <div id="boxPrefixado" style="display:none;margin-top:10px">
+          <label>Taxa prefixada (% ao ano)</label>
+          <input id="invPrefixado" type="number" placeholder="Ex: 12">
+        </div>
+
+        <div id="boxIPCA" style="display:none;margin-top:10px">
+          <label>IPCA (% ao ano)</label>
+          <input id="invIPCA" type="number" placeholder="Ex: 4.5">
+          <label>Taxa real (% ao ano)</label>
+          <input id="invReal" type="number" placeholder="Ex: 5.5">
+        </div>
+
+        <div id="boxFundo" style="display:none;margin-top:10px">
+          <label>Taxa de administração (% ao ano)</label>
+          <input id="invAdm" type="number" placeholder="Ex: 1.0">
+        </div>
+
+        <div id="boxRV" style="display:none;margin-top:10px">
+          <label>Retorno médio (% ao ano)</label>
+          <input id="invRV" type="number" placeholder="Ex: 15">
+        </div>
+
+        <div style="margin-top:10px">
+          <label>
+            <input id="invAplicarIOF" type="checkbox" style="width:auto;transform:scale(1.1);margin-right:8px">
+            Aplicar IOF (se resgatar antes de 30 dias) — estimativa
+          </label>
+        </div>
+
+        <button onclick="simularInvestimentos()">Calcular</button>
+
+        <div id="resultadoInv" style="margin-top:10px;font-weight:bold"></div>
+        <div id="detalhesInv" class="small" style="margin-top:8px"></div>
+      </div>
+
+      <!-- ✅ SIMULADOR EMPRÉSTIMO/COMPRA -->
+      <div class="card">
+        <h3>💳 Simulador de Empréstimo / Compra</h3>
+
+        <label>Tipo</label>
+        <select id="empTipo">
+          <option value="financiamento">Financiamento (Price)</option>
+          <option value="juros_simples">Juros simples</option>
+        </select>
+
+        <label>Valor emprestado / valor da compra (R$)</label>
+        <input id="empValor" type="number" placeholder="Ex: 5000">
+
+        <label>Parcelas</label>
+        <input id="empParcelas" type="number" placeholder="Ex: 12">
+
+        <label>Juros ao mês (%)</label>
+        <input id="empJuros" type="number" placeholder="Ex: 3">
+
+        <div id="empCamposExtras" style="margin-top:10px">
+          <label>Entrada (R$) (opcional)</label>
+          <input id="empEntrada" type="number" placeholder="Ex: 1000">
+          <label>Tarifa / taxa fixa (R$) (opcional)</label>
+          <input id="empTarifa" type="number" placeholder="Ex: 50">
+        </div>
+
+        <button onclick="simularEmprestimo()">Calcular</button>
+
+        <div id="resultadoEmp" style="margin-top:10px;font-weight:bold"></div>
+        <div id="detalhesEmp" class="small" style="margin-top:8px; white-space:pre-wrap;"></div>
+
+        <div class="small" style="margin-top:8px;opacity:.8">
+          Dica: o app compara a parcela com sua sobra atual (Salário - Gastos).
+        </div>
+      </div>
+
+    </div>
+    <!-- ✅ FIM DO MENU -->
 
     <!-- ✅ IA -->
     <div class="card" id="iaCard">
@@ -411,6 +454,25 @@ let fixos = [];
 let mesAtual = new Date().toISOString().slice(0,7);
 let grafico = null;
 let graficoEvolucao = null;
+
+/* =========================
+   ✅ MENU (colapsável)
+========================= */
+window.toggleMenuSim = function(){
+  const box = document.getElementById("menuSimConteudo");
+  const icon = document.getElementById("menuSimIcon");
+  const aberto = box && !box.classList.contains("collapsed");
+  if(!box) return;
+  if(aberto){
+    box.classList.add("collapsed");
+    if(icon) icon.textContent = "▼";
+  }else{
+    box.classList.remove("collapsed");
+    if(icon) icon.textContent = "▲";
+    // rola suavemente para o começo do menu
+    box.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+};
 
 /* =========================
    ✅ TELA / NAVEGAÇÃO
@@ -698,15 +760,6 @@ function paint(){
 
   drawChart(d.items||[]);
   drawEvolucao();
-
-  // ✅ atualiza “referência” do simulador de empréstimo (sobra atual)
-  const ref = document.getElementById("detalhesEmp");
-  if(ref){
-    // não sobrescreve se usuário já calculou; só se vazio
-    if(!ref.textContent.trim()){
-      ref.textContent = `Sobra atual (Salário - Gastos): R$ ${sobra.toFixed(2)}`;
-    }
-  }
 }
 
 /* =========================
@@ -970,28 +1023,19 @@ window.simularInvestimentos = function(){
 /* ==========================================================
    ✅ SIMULADOR EMPRÉSTIMO / COMPRA
 ========================================================== */
-function empToggleCampos(){
-  // hoje só muda o texto da explicação, mas deixei pronto caso você queira esconder/mostrar
-  const tipo = document.getElementById("empTipo").value;
-  const extras = document.getElementById("empCamposExtras");
-  extras.style.display = "block";
-}
 function empCalcPrice(valor, jurosMensal, n){
-  // Price: PMT = PV * i / (1 - (1+i)^-n)
   if(n <= 0) return 0;
   if(jurosMensal <= 0) return valor / n;
   const i = jurosMensal;
   return valor * ( i / (1 - Math.pow(1+i, -n)) );
 }
 function empCalcJurosSimples(valor, jurosMensal, n){
-  // Juros simples: total = PV*(1+i*n) ; parcela = total/n
   if(n <= 0) return { total: 0, parcela: 0 };
   const total = valor * (1 + jurosMensal * n);
   return { total, parcela: total / n };
 }
-function empFormat(n){
-  return "R$ " + Number(n||0).toFixed(2).replace(".", ",");
-}
+function empFormat(n){ return "R$ " + Number(n||0).toFixed(2).replace(".", ","); }
+
 window.simularEmprestimo = function(){
   const tipo = document.getElementById("empTipo").value;
 
@@ -1032,7 +1076,6 @@ window.simularEmprestimo = function(){
     jurosTotal = total - pv;
   }
 
-  // compara com sobra do mês
   const d = window.getDataMes();
   const gastos = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
   const salario = Number(d.salary||0);
@@ -1179,7 +1222,6 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }
 
   atualizarCamposInvestimento();
-  empToggleCampos();
 
   document.getElementById("month").addEventListener("change", ()=>{
     mesAtual = window.getMes();
