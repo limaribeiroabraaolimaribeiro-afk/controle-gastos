@@ -120,12 +120,23 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .pill{
   display:flex;gap:10px;align-items:center;justify-content:center;
   padding:10px 12px;border-radius:18px;
-  background: rgba(255,255,255,.06);
   border:1px solid var(--stroke);
   min-width:92px;
   font-weight:800;
 }
-.pill .icon{opacity:.9}
+
+/* ✅ botão menu/tema mais claro */
+.pill.menuBtn{
+  background: rgba(255,255,255,.14);
+  border-color: rgba(255,255,255,.20);
+  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+}
+.pill.themeBtn{
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.18);
+}
+
+.pill .icon{opacity:.95}
 
 .list{
   width:100%;
@@ -300,10 +311,10 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <div class="small" id="subHeader">Aqui fica só o essencial. Para editar categorias, fixos e simuladores, use o Menu.</div>
       </div>
       <div class="right">
-        <button class="pill" onclick="openMenu()" title="Menu">
+        <button class="pill menuBtn" onclick="openMenu()" title="Menu">
           <span class="icon">☰</span> Menu
         </button>
-        <button class="pill" onclick="toggleTheme()" title="Tema">
+        <button class="pill themeBtn" onclick="toggleTheme()" title="Tema">
           <span class="icon">🌙/☀️</span>
         </button>
       </div>
@@ -486,7 +497,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: INVESTIMENTOS FIXOS -->
+    <!-- SCREEN: INVESTIMENTOS FIXOS (AUTOMÁTICO) -->
     <div class="screen" id="screen-investfixos">
       <div class="backRow">
         <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
@@ -496,43 +507,33 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="card">
         <h3>Como funciona</h3>
         <div class="small">
-          Você cadastra um investimento fixo (ex.: CDB, Tesouro, Ações) e o valor mensal.
+          Você informa <b>Nome</b>, <b>Meta final (R$)</b> e <b>Prazo (meses)</b>.
+          O app calcula automaticamente o <b>valor mensal</b> (meta ÷ meses).
           Esse valor aparece em <b>todos os meses</b> como um item fixo “Juntar”.
-          Você marca <b>Pendente/Pago</b> todo mês para controlar se já investiu.
+          Você marca <b>Pendente/Pago</b> em cada mês.
         </div>
       </div>
 
       <div class="card" style="margin-top:12px">
         <h3>Adicionar investimento fixo</h3>
 
-        <label>Nome (ex.: Reserva, CDB Banco X)</label>
+        <label>Nome (ex.: Reserva, Carro, Casa)</label>
         <input id="invNome" placeholder="Ex: Reserva">
 
         <div class="grid2" style="margin-top:10px">
           <div>
-            <label>Tipo (ex.: CDB, Tesouro, Ações)</label>
-            <input id="invTipo" placeholder="Ex: CDB 110% CDI">
+            <label>Meta final (R$)</label>
+            <input id="invMetaFinal" type="number" placeholder="Ex: 10000">
           </div>
           <div>
-            <label>Valor mensal (R$)</label>
-            <input id="invMensal" type="number" placeholder="Ex: 300">
-          </div>
-        </div>
-
-        <div class="grid2" style="margin-top:10px">
-          <div>
-            <label>Objetivo (R$) (ex.: 10.000)</label>
-            <input id="invObjetivo" type="number" placeholder="Ex: 10000">
-          </div>
-          <div>
-            <label>Em quantos meses?</label>
-            <input id="invMeses" type="number" placeholder="Ex: 12">
+            <label>Prazo (meses)</label>
+            <input id="invPrazoMeses" type="number" placeholder="Ex: 12" value="12">
           </div>
         </div>
 
         <div class="note" style="margin-top:10px">
-          <div style="font-weight:900">Resumo automático</div>
-          <div class="small" id="invResumo">Preencha para ver o resumo.</div>
+          <div style="font-weight:900">Mensal automático</div>
+          <div class="small" id="invResumo">Preencha Meta e Prazo para ver o valor por mês.</div>
         </div>
 
         <button class="btn primary" style="margin-top:10px" onclick="addInvestFixo()">Adicionar</button>
@@ -650,7 +651,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- LOGIN SCREEN (NÃO USADO - mantido por compat, mas agora redireciona pro login.html) -->
+    <!-- LOGIN SCREEN -->
     <div class="screen" id="screen-login">
       <div class="card" style="max-width:520px;margin:auto">
         <h2 style="font-weight:950;margin-bottom:6px">Entrar</h2>
@@ -761,10 +762,10 @@ const FIREBASE_CONFIG = {
 const API = "https://api-rf1w.onrender.com";
 
 let auth = null;
-let USER = null;      // firebase user
-let USER_ID = null;   // uid
+let USER = null;
+let USER_ID = null;
 
-// ✅ inclui "Investimentos" como categoria padrão
+// ✅ inclui "Investimentos" na categoria padrão
 const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
 
 let regras = [
@@ -784,18 +785,14 @@ let regras = [
 ];
 
 let categorias = [...DEFAULT_CATEGORIAS];
-let fixos = []; // {desc, amount, category, isFixo:true}
+let fixos = [];         // gastos fixos
+let investFixos = [];   // investimentos fixos automáticos: {id, nome, metaFinal, prazoMeses, mensal}
 
-// ✅ investimentos fixos
-let investFixos = []; // {id, nome, tipo, mensal, objetivo, meses}
-
-let state = { meses:{} }; // { "2026-02": {salary, meta, items[], saved[] } }
+let state = { meses:{} };
 let mesAtual = new Date().toISOString().slice(0,7);
 
 let grafico = null;
 let graficoEvolucao = null;
-
-// ✅ controle de navegação
 let lastNonHistoryScreen = "screen-home";
 
 /* =========================
@@ -805,6 +802,11 @@ const money = (n)=> {
   const v = Number(n||0);
   return v.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
 };
+
+function uid(){
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
 function showLoading(){
   document.getElementById("app").style.display="none";
   document.getElementById("loading").style.display="flex";
@@ -830,7 +832,6 @@ function openMenu(){
   lastNonHistoryScreen = "screen-menu";
   showScreen("screen-menu");
 }
-
 function openHistory(){
   buildHistoryUI();
   showScreen("screen-history");
@@ -838,12 +839,10 @@ function openHistory(){
 function goBackFromHistory(){
   showScreen(lastNonHistoryScreen || "screen-home");
 }
-
 function toggleTheme(){
   document.body.classList.toggle("light");
   localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
 }
-
 function openModal(id){
   const o = document.getElementById(id);
   if(o) o.style.display="flex";
@@ -851,10 +850,6 @@ function openModal(id){
 function closeModal(id){
   const o = document.getElementById(id);
   if(o) o.style.display="none";
-}
-
-function uid(){
-  return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
 
 /* =========================
@@ -878,7 +873,6 @@ function loadAll(){
     const raw = localStorage.getItem(kCat());
     categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
     if(!Array.isArray(categorias) || !categorias.length) categorias=[...DEFAULT_CATEGORIAS];
-    // garante Investimentos na lista
     if(!categorias.some(c=>String(c).toLowerCase()==="investimentos")) categorias.splice(categorias.length-1,0,"Investimentos");
   }catch(e){ categorias=[...DEFAULT_CATEGORIAS]; }
 
@@ -906,11 +900,11 @@ function saveAll(){
   localStorage.setItem(kInv(), JSON.stringify(investFixos));
 }
 
-// ✅ chave do item (inclui invId para não conflitar)
 function keyItem(i){
   const inv = i && i.invId ? `|inv:${i.invId}` : "";
   return `${(i.desc||"").toLowerCase()}|${Number(i.amount||0)}|${(i.category||"Outros").toLowerCase()}|${i.isFixo?1:0}|${i.isInvestFixo?1:0}${inv}`;
 }
+
 function detectarCategoria(desc){
   const txt=(desc||"").toLowerCase();
   for(const r of regras){
@@ -921,7 +915,7 @@ function detectarCategoria(desc){
 
 function ensureItemDefaults(it){
   if(!it) return it;
-  if(typeof it.paid !== "boolean") it.paid = false; // ✅ pendente/pago
+  if(typeof it.paid !== "boolean") it.paid = false;
   return it;
 }
 
@@ -934,10 +928,9 @@ function getDataMes(m){
   if(!Array.isArray(d.items)) d.items=[];
   if(!Array.isArray(d.saved)) d.saved=[];
 
-  // normaliza paid
   d.items = d.items.map(ensureItemDefaults);
 
-  // garante fixos no mês
+  // fixos normais
   let set = new Set((d.items||[]).map(keyItem));
   for(const f of fixos){
     const obj = ensureItemDefaults({ ...f, isFixo:true, isInvestFixo:false });
@@ -948,9 +941,9 @@ function getDataMes(m){
     }
   }
 
-  // ✅ garante investimentos fixos no mês (aparecem em todos os meses)
+  // ✅ investimentos fixos automáticos
   for(const inv of investFixos){
-    const desc = `Juntar: ${inv.nome} (${inv.tipo})`;
+    const desc = `Juntar: ${inv.nome}`;
     const obj = ensureItemDefaults({
       desc,
       amount: Number(inv.mensal||0),
@@ -972,17 +965,14 @@ function getDataMes(m){
 /* =========================
    UI BUILDERS
 ========================= */
-
-// ✅ MESES = passado + futuro
 function buildMonthSelect(){
   const sel = document.getElementById("monthSelect");
   if(!sel) return;
 
   const monthsSet = new Set(Object.keys(state.meses||{}));
-
   const now = new Date();
-  const PAST = 120;   // 10 anos
-  const FUTURE = 120; // 10 anos
+  const PAST = 120;
+  const FUTURE = 120;
 
   for(let i=0;i<=PAST;i++){
     const dt = new Date(now.getFullYear(), now.getMonth()-i, 1);
@@ -1002,9 +992,7 @@ function buildMonthSelect(){
     return `<option value="${m}">${label}</option>`;
   }).join("");
 
-  if(!months.includes(mesAtual)){
-    mesAtual = new Date().toISOString().slice(0,7);
-  }
+  if(!months.includes(mesAtual)) mesAtual = new Date().toISOString().slice(0,7);
   sel.value = mesAtual;
 
   sel.onchange = ()=>{
@@ -1046,6 +1034,40 @@ function renderFixos(){
   `).join("");
 }
 
+function calcMensalAuto(metaFinal, prazoMeses){
+  const meta = Number(metaFinal||0);
+  const meses = Number(prazoMeses||0);
+  if(!meta || meta<=0) return 0;
+  if(!meses || meses<=0) return 0;
+  // ✅ arredonda para 2 casas
+  return Math.round((meta/meses)*100)/100;
+}
+
+function updateInvResumo(){
+  const nome = (document.getElementById("invNome").value||"").trim();
+  const metaFinal = Number(document.getElementById("invMetaFinal").value||0);
+  const prazoMeses = Number(document.getElementById("invPrazoMeses").value||0) || 12;
+
+  const out = document.getElementById("invResumo");
+  if(!out) return;
+
+  if(!nome){
+    out.textContent = "Digite o Nome.";
+    return;
+  }
+  if(!metaFinal || metaFinal<=0){
+    out.textContent = "Digite a Meta final (R$).";
+    return;
+  }
+  if(!prazoMeses || prazoMeses<=0){
+    out.textContent = "Digite o Prazo (meses).";
+    return;
+  }
+
+  const mensal = calcMensalAuto(metaFinal, prazoMeses);
+  out.textContent = `Para juntar ${money(metaFinal)} em ${prazoMeses} meses, o valor mensal fica: ${money(mensal)} (meta ÷ meses).`;
+}
+
 function renderInvestFixos(){
   const div = document.getElementById("listaInvestFixos");
   if(!div) return;
@@ -1056,51 +1078,26 @@ function renderInvestFixos(){
   }
 
   div.innerHTML = investFixos.map((inv,idx)=>{
-    const meses = Number(inv.meses||12) || 12;
+    const meta = Number(inv.metaFinal||0);
+    const meses = Number(inv.prazoMeses||12) || 12;
     const mensal = Number(inv.mensal||0);
-    const objetivo = Number(inv.objetivo||0);
-
     const totalPlanejado = mensal * meses;
-    const falta = objetivo ? (objetivo - totalPlanejado) : 0;
 
     return `
       <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div>
-          <div style="font-weight:950">📌 ${escapeHtml(inv.nome)} <span class="badge">${escapeHtml(inv.tipo)}</span></div>
+          <div style="font-weight:950">📌 ${escapeHtml(inv.nome)}</div>
           <div class="small" style="margin-top:6px">
-            Mensal: <b>${money(mensal)}</b> • Meses: <b>${meses}</b>
-            ${objetivo ? ` • Objetivo: <b>${money(objetivo)}</b>` : ``}
+            Meta: <b>${money(meta)}</b> • Prazo: <b>${meses} meses</b>
           </div>
           <div class="small">
-            Planejado: <b>${money(totalPlanejado)}</b>
-            ${objetivo ? (falta>0 ? ` • Falta: <b class="warnText">${money(falta)}</b>` : ` • Meta batida: <b class="successText">${money(Math.abs(falta))}</b>`) : ``}
+            Mensal automático: <b class="successText">${money(mensal)}</b> • Planejado: <b>${money(totalPlanejado)}</b>
           </div>
         </div>
         <button class="btn icon mini" title="Remover" onclick="removeInvestFixo(${idx})">✕</button>
       </div>
     `;
   }).join("");
-}
-
-function renderSaved(){
-  const d = getDataMes(mesAtual);
-  const div = document.getElementById("savedList");
-  if(!div) return;
-
-  if(!d.saved.length){
-    div.innerHTML = "";
-    return;
-  }
-
-  div.innerHTML = d.saved.map((s,idx)=>`
-    <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <div>
-        <div style="font-weight:950">🏦 ${money(s.value)}</div>
-        <div class="small">Data: ${escapeHtml(s.date || "")}${s.desc?(" • "+escapeHtml(s.desc)):""}</div>
-      </div>
-      <button class="btn icon mini" title="Remover" onclick="removeSaved(${idx})">✕</button>
-    </div>
-  `).join("");
 }
 
 function buildHistoryUI(){
@@ -1174,12 +1171,12 @@ function addFixo(){
   document.getElementById("descFixo").value="";
   document.getElementById("valorFixo").value="";
 
-  // injeta nos meses existentes também
   for(const m of Object.keys(state.meses||{})){
     const d = getDataMes(m);
-    const k = keyItem({desc, amount:valor, category:categoria, isFixo:true});
+    const obj = ensureItemDefaults({desc, amount:valor, category:categoria, isFixo:true, isInvestFixo:false});
     const set = new Set(d.items.map(keyItem));
-    if(!set.has(k)) d.items.unshift(ensureItemDefaults({desc, amount:valor, category:categoria, isFixo:true}));
+    const k = keyItem(obj);
+    if(!set.has(k)) d.items.unshift(obj);
   }
 
   saveAll();
@@ -1192,7 +1189,6 @@ function removeFixo(idx){
   const f = fixos[idx];
   fixos.splice(idx,1);
 
-  // remove dos meses (apenas o fixo correspondente)
   for(const m of Object.keys(state.meses||{})){
     const d = getDataMes(m);
     d.items = (d.items||[]).filter(it=>{
@@ -1208,64 +1204,33 @@ function removeFixo(idx){
   render();
 }
 
-/* ✅ INVESTIMENTOS FIXOS */
-function updateInvResumo(){
-  const nome = (document.getElementById("invNome").value||"").trim();
-  const tipo = (document.getElementById("invTipo").value||"").trim();
-  const mensal = Number(document.getElementById("invMensal").value||0);
-  const objetivo = Number(document.getElementById("invObjetivo").value||0);
-  const meses = Number(document.getElementById("invMeses").value||0) || 12;
-
-  const out = document.getElementById("invResumo");
-  if(!out) return;
-
-  if(!nome || !tipo || !mensal){
-    out.textContent = "Preencha Nome, Tipo e Valor mensal.";
-    return;
-  }
-
-  const totalPlanejado = mensal * meses;
-  let linha = `Você vai juntar ${money(mensal)} por mês durante ${meses} meses = ${money(totalPlanejado)}.`;
-  if(objetivo){
-    const falta = objetivo - totalPlanejado;
-    linha += falta>0
-      ? ` Para chegar em ${money(objetivo)}, faltariam ${money(falta)} (sem contar juros).`
-      : ` Você passaria da meta de ${money(objetivo)} em ${money(Math.abs(falta))} (sem contar juros).`;
-  }
-  out.textContent = linha;
-}
-
+/* ✅ Investimento fixo automático: só nome + meta + prazo */
 function addInvestFixo(){
   if(!USER_ID){ alert("Faça login primeiro"); return; }
 
   const nome = (document.getElementById("invNome").value||"").trim();
-  const tipo = (document.getElementById("invTipo").value||"").trim();
-  const mensal = Number(document.getElementById("invMensal").value||0);
-  const objetivo = Number(document.getElementById("invObjetivo").value||0);
-  const meses = Number(document.getElementById("invMeses").value||0) || 12;
+  const metaFinal = Number(document.getElementById("invMetaFinal").value||0);
+  const prazoMeses = Number(document.getElementById("invPrazoMeses").value||0) || 12;
 
-  if(!nome || !tipo || !mensal || mensal<=0){
-    alert("Preencha Nome, Tipo e Valor mensal (maior que 0).");
-    return;
-  }
+  if(!nome) return alert("Digite o Nome.");
+  if(!metaFinal || metaFinal<=0) return alert("Digite a Meta final (R$).");
+  if(!prazoMeses || prazoMeses<=0) return alert("Digite o Prazo (meses).");
 
-  const inv = { id: uid(), nome, tipo, mensal, objetivo: objetivo||0, meses };
+  const mensal = calcMensalAuto(metaFinal, prazoMeses);
+
+  const inv = { id: uid(), nome, metaFinal, prazoMeses, mensal };
   investFixos.push(inv);
 
-  // limpa inputs
   document.getElementById("invNome").value="";
-  document.getElementById("invTipo").value="";
-  document.getElementById("invMensal").value="";
-  document.getElementById("invObjetivo").value="";
-  document.getElementById("invMeses").value="12";
+  document.getElementById("invMetaFinal").value="";
+  document.getElementById("invPrazoMeses").value="12";
   updateInvResumo();
 
   // injeta nos meses existentes também
   for(const m of Object.keys(state.meses||{})){
     const d = getDataMes(m);
-    const desc = `Juntar: ${inv.nome} (${inv.tipo})`;
     const obj = ensureItemDefaults({
-      desc,
+      desc: `Juntar: ${inv.nome}`,
       amount: Number(inv.mensal||0),
       category: "Investimentos",
       isFixo: true,
@@ -1287,7 +1252,6 @@ function removeInvestFixo(idx){
   const inv = investFixos[idx];
   investFixos.splice(idx,1);
 
-  // remove de todos os meses
   for(const m of Object.keys(state.meses||{})){
     const d = getDataMes(m);
     d.items = (d.items||[]).filter(it=>{
@@ -1376,7 +1340,7 @@ function delItem(idx){
   render();
 }
 
-// ✅ X inteligente: se for investimento fixo, remove o cadastro (e todos os meses)
+// ✅ X inteligente: inv fixo remove o cadastro e todos os meses
 function delItemSmart(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
@@ -1385,8 +1349,7 @@ function delItemSmart(idx){
   if(it.isInvestFixo){
     const invIdx = investFixos.findIndex(x=>String(x.id)===String(it.invId));
     if(invIdx>=0){ removeInvestFixo(invIdx); return; }
-    delItem(idx);
-    return;
+    delItem(idx); return;
   }
 
   if(it.isFixo){
@@ -1396,11 +1359,34 @@ function delItemSmart(idx){
       && String(f.category||"")===String(it.category||"")
     );
     if(fIdx >= 0){ removeFixo(fIdx); return; }
-    delItem(idx);
-    return;
+    delItem(idx); return;
   }
 
   delItem(idx);
+}
+
+/* =========================
+   SAVED RENDER
+========================= */
+function renderSaved(){
+  const d = getDataMes(mesAtual);
+  const div = document.getElementById("savedList");
+  if(!div) return;
+
+  if(!d.saved.length){
+    div.innerHTML = "";
+    return;
+  }
+
+  div.innerHTML = d.saved.map((s,idx)=>`
+    <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div>
+        <div style="font-weight:950">🏦 ${money(s.value)}</div>
+        <div class="small">Data: ${escapeHtml(s.date || "")}${s.desc?(" • "+escapeHtml(s.desc)):""}</div>
+      </div>
+      <button class="btn icon mini" title="Remover" onclick="removeSaved(${idx})">✕</button>
+    </div>
+  `).join("");
 }
 
 /* =========================
@@ -1567,10 +1553,10 @@ function render(){
 
       const merged=[], seen=new Set();
 
-      // investimentos fixos (sempre)
+      // investimentos fixos automáticos
       for(const inv of investFixos){
         const obj = ensureItemDefaults({
-          desc: `Juntar: ${inv.nome} (${inv.tipo})`,
+          desc: `Juntar: ${inv.nome}`,
           amount: Number(inv.mensal||0),
           category: "Investimentos",
           isFixo: true,
@@ -1730,13 +1716,12 @@ function simularEmprestimo(){
 }
 
 /* =========================
-   IA (chat)
+   IA (chat) - mantido
 ========================= */
 function getIaBase(){
   const v = (window.API_BASE_URL || "").trim();
   return v.replace(/\/$/, "");
 }
-
 function chatAdd(role, text){
   const box = document.getElementById("chatBox");
   const b = document.createElement("div");
@@ -1745,20 +1730,18 @@ function chatAdd(role, text){
   box.appendChild(b);
   box.scrollTop = box.scrollHeight;
 }
-
 async function iaHealth(){
   const el = document.getElementById("iaStatus");
   try{
     const base = getIaBase();
     if(!base) throw new Error("API_BASE_URL vazio (config.js não carregou)");
     const r = await fetch(base + "/", { cache:"no-store" });
-    const j = await r.json();
-    el.textContent = (j && j.message) ? ("Online ✅") : "Online ✅";
+    await r.json().catch(()=>({}));
+    el.textContent = "Online ✅";
   }catch(e){
     el.textContent = "Offline: " + (e.message || e);
   }
 }
-
 function buildIaContext(){
   const d = getDataMes(mesAtual);
   const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
@@ -1773,18 +1756,15 @@ function buildIaContext(){
   });
   const catsSorted = Object.entries(topCats).sort((a,b)=>b[1]-a[1]).slice(0,5);
 
-  const lines = [
+  return [
     `Mês: ${mesAtual}`,
     `Salário: ${salary}`,
     `Gasto total: ${spent}`,
     `Sobra: ${left}`,
     `Guardado no mês: ${saved}`,
     `Top categorias: ${catsSorted.map(([c,v])=>`${c}=${v}`).join(", ")}`
-  ];
-
-  return lines.join("\n");
+  ].join("\n");
 }
-
 async function iaSend(){
   const input = document.getElementById("iaPrompt");
   const q = (input.value||"").trim();
@@ -1834,7 +1814,6 @@ ${q}`;
     statusEl.textContent = "Offline: " + (e.message||e);
   }
 }
-
 function openIa(){
   openModal("overlay-ia");
   const box = document.getElementById("chatBox");
@@ -1848,7 +1827,7 @@ function openIa(){
 }
 
 /* =========================
-   AUTH (Google) + REDIRECIONAR PRO login.html
+   AUTH
 ========================= */
 async function initFirebase(){
   if(!window.firebase){
@@ -1889,7 +1868,6 @@ async function initFirebase(){
     updateInvestUI();
     updateInvResumo();
 
-    // listeners (1x)
     const tipoSel = document.getElementById("tipoSimulacao");
     if(tipoSel && !tipoSel.dataset.bound){
       tipoSel.addEventListener("change", ()=>{
@@ -1906,17 +1884,16 @@ async function initFirebase(){
       investSel.dataset.bound = "1";
     }
 
-    // resumo investimentos fixos (inputs)
-    const bindInvResumo = (id)=>{
+    // listeners investimento fixo automático
+    const bindInv = (id)=>{
       const el = document.getElementById(id);
       if(el && !el.dataset.bound){
         el.addEventListener("input", updateInvResumo);
         el.dataset.bound="1";
       }
     };
-    ["invNome","invTipo","invMensal","invObjetivo","invMeses"].forEach(bindInvResumo);
+    ["invNome","invMetaFinal","invPrazoMeses"].forEach(bindInv);
 
-    if(!mesAtual) mesAtual = new Date().toISOString().slice(0,7);
     const sel = document.getElementById("monthSelect");
     if(sel) sel.value = mesAtual;
 
@@ -1932,7 +1909,6 @@ async function loginGoogle(){
   try{
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
-
     try{
       await auth.signInWithPopup(provider);
     }catch(e){
