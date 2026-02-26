@@ -276,6 +276,28 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .chatComposer input{flex:1}
 
 .mono{font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
+
+/* ✅ Editor do painel (Config > Edição) */
+.layoutItem{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 12px;border-radius:16px;
+  background: rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+}
+.layoutLeft{display:flex;align-items:center;gap:10px;min-width:0}
+.layoutTitle{font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.layoutActions{display:flex;gap:8px;flex:0 0 auto}
+.chk{
+  width:18px;height:18px;accent-color: var(--accent);
+}
+.handle{
+  width:34px;height:34px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.06);
+  font-weight:900;
+  user-select:none;
+}
 </style>
 </head>
 
@@ -311,87 +333,107 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
     <!-- SCREEN: HOME -->
     <div class="screen active" id="screen-home">
-      <div class="card">
-        <h2 style="font-weight:900;margin-bottom:10px">Resumo do mês</h2>
+      <!-- ✅ Tudo do home agora é montado dentro desse container, e a ordem/visibilidade vem da Config > Edição -->
+      <div id="homeContainer">
 
-        <div class="grid2">
-          <div>
-            <label>Mês</label>
-            <select id="monthSelect"></select>
+        <!-- SECTION: Resumo -->
+        <div data-home="resumo">
+          <div class="card">
+            <h2 style="font-weight:900;margin-bottom:10px">Resumo do mês</h2>
+
+            <div class="grid2">
+              <div>
+                <label>Mês</label>
+                <select id="monthSelect"></select>
+              </div>
+              <div>
+                <label>Salário</label>
+                <input id="salary" type="number" placeholder="Ex: 4000">
+              </div>
+              <div>
+                <label>Meta</label>
+                <input id="meta" type="number" placeholder="Ex: 500">
+              </div>
+              <div>
+                <label>Guardado (adicionar)</label>
+                <input id="savedValue" type="number" placeholder="Ex: 1000">
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div style="grid-column:1/2">
+                <label>Descrição do guardado (opcional)</label>
+                <input id="savedDesc" placeholder="Ex: Reserva, CDB, Tesouro...">
+              </div>
+              <div style="display:flex;align-items:flex-end">
+                <button class="btn primary" style="width:100%" onclick="addSaved()">Adicionar</button>
+              </div>
+            </div>
+
+            <div id="savedList" style="margin-top:12px"></div>
+
+            <div class="row" style="margin-top:14px">
+              <button class="btn primary" onclick="saveSettings()" style="flex:1">Salvar</button>
+              <button class="btn" onclick="openHistory()" style="flex:1">📅 Histórico</button>
+            </div>
+
+            <div class="small" style="margin-top:10px">
+              Dica: toque em <b>IA PRO</b> para analisar seu mês e sugerir investimentos.
+            </div>
           </div>
-          <div>
-            <label>Salário</label>
-            <input id="salary" type="number" placeholder="Ex: 4000">
+        </div>
+
+        <!-- SECTION: KPIs -->
+        <div data-home="kpis" style="margin-top:12px">
+          <div class="grid2">
+            <div class="kpi">
+              <div class="small">Salário</div>
+              <div class="v" id="kpiSalary">R$ 0,00</div>
+            </div>
+            <div class="kpi">
+              <div class="small">Gasto</div>
+              <div class="v" id="kpiSpent">R$ 0,00</div>
+            </div>
+            <div class="kpi">
+              <div class="small">Sobra</div>
+              <div class="v" id="kpiLeft">R$ 0,00</div>
+            </div>
+            <div class="kpi">
+              <div class="small">Guardado</div>
+              <div class="v" id="kpiSaved">R$ 0,00</div>
+            </div>
           </div>
-          <div>
-            <label>Meta</label>
-            <input id="meta" type="number" placeholder="Ex: 500">
-          </div>
-          <div>
-            <label>Guardado (adicionar)</label>
-            <input id="savedValue" type="number" placeholder="Ex: 1000">
-          </div>
         </div>
 
-        <div class="grid2" style="margin-top:10px">
-          <div style="grid-column:1/2">
-            <label>Descrição do guardado (opcional)</label>
-            <input id="savedDesc" placeholder="Ex: Reserva, CDB, Tesouro...">
-          </div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn primary" style="width:100%" onclick="addSaved()">Adicionar</button>
+        <!-- SECTION: Chart categorias -->
+        <div data-home="chartCat" style="margin-top:12px">
+          <div class="card">
+            <h3>Gastos por categoria</h3>
+            <canvas id="chart" style="width:100%;height:220px"></canvas>
           </div>
         </div>
 
-        <div id="savedList" style="margin-top:12px"></div>
-
-        <div class="row" style="margin-top:14px">
-          <button class="btn primary" onclick="saveSettings()" style="flex:1">Salvar</button>
-          <button class="btn" onclick="openHistory()" style="flex:1">📅 Histórico</button>
+        <!-- SECTION: Evolução -->
+        <div data-home="chartEvo" style="margin-top:12px">
+          <div class="card">
+            <h3>Evolução</h3>
+            <canvas id="chartEvolucao" style="width:100%;height:220px"></canvas>
+          </div>
         </div>
 
-        <div class="small" style="margin-top:10px">
-          Dica: toque em <b>IA PRO</b> para analisar seu mês e sugerir investimentos.
+        <!-- SECTION: Lista -->
+        <div data-home="lista" style="margin-top:12px">
+          <div class="card">
+            <h3>Lista do mês</h3>
+            <div class="small" style="margin-bottom:10px">
+              Toque em <b>Pendente/Pago</b> para marcar se você já pagou.
+              <br>✅ Itens de investimento fixo (Juntar) também aparecem aqui.
+              <br>✅ Ao marcar “Pago” em “Juntar”, o valor entra automaticamente no <b>Guardado</b>.
+            </div>
+            <table class="list" id="list"></table>
+          </div>
         </div>
-      </div>
 
-      <div class="grid2" style="margin-top:12px">
-        <div class="kpi">
-          <div class="small">Salário</div>
-          <div class="v" id="kpiSalary">R$ 0,00</div>
-        </div>
-        <div class="kpi">
-          <div class="small">Gasto</div>
-          <div class="v" id="kpiSpent">R$ 0,00</div>
-        </div>
-        <div class="kpi">
-          <div class="small">Sobra</div>
-          <div class="v" id="kpiLeft">R$ 0,00</div>
-        </div>
-        <div class="kpi">
-          <div class="small">Guardado</div>
-          <div class="v" id="kpiSaved">R$ 0,00</div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <h3>Gastos por categoria</h3>
-        <canvas id="chart" style="width:100%;height:220px"></canvas>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <h3>Evolução</h3>
-        <canvas id="chartEvolucao" style="width:100%;height:220px"></canvas>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <h3>Lista do mês</h3>
-        <div class="small" style="margin-bottom:10px">
-          Toque em <b>Pendente/Pago</b> para marcar se você já pagou.
-          <br>✅ Itens de investimento fixo (Juntar) também aparecem aqui.
-          <br>✅ Ao marcar “Pago” em “Juntar”, o valor entra automaticamente no <b>Guardado</b>.
-        </div>
-        <table class="list" id="list"></table>
       </div>
     </div>
 
@@ -433,6 +475,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
       <div class="grid1">
         <button class="btn" onclick="openScreen('screen-themes')">🎨 Temas</button>
+        <!-- ✅ NOVO: Edição do painel -->
+        <button class="btn" onclick="openHomeEditor()">🧩 Edição do painel</button>
       </div>
 
       <div class="card" style="margin-top:12px">
@@ -445,6 +489,33 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="card" style="margin-top:12px">
         <h3>Preferências</h3>
         <button class="btn" onclick="toggleTheme()">🌙/☀️ Alternar tema</button>
+      </div>
+    </div>
+
+    <!-- ✅ SCREEN: HOME EDITOR -->
+    <div class="screen" id="screen-home-editor">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
+        <div style="font-weight:900">Edição do painel</div>
+      </div>
+
+      <div class="card">
+        <h3>Organize sua tela principal</h3>
+        <div class="small">
+          Marque o que aparece e use as setas para mudar a ordem (pra cima/baixo).
+          Assim, cada pessoa monta o painel do jeito que quiser.
+        </div>
+
+        <div class="hr"></div>
+
+        <div id="layoutList"></div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <button class="btn" onclick="resetHomeLayout()">↩️ Padrão</button>
+          <button class="btn primary" onclick="applyHomeLayoutFromEditor()">Salvar e aplicar</button>
+        </div>
       </div>
     </div>
 
@@ -889,6 +960,145 @@ function resetThemes(){
 }
 
 /* =========================
+   HOME LAYOUT (✅ NOVO)
+   - usuário escolhe o que aparece e a ordem do painel principal
+========================= */
+const HOME_SECTIONS = [
+  { id:"resumo",  title:"Resumo do mês" },
+  { id:"kpis",    title:"Cards (Salário/Gasto/Sobra/Guardado)" },
+  { id:"chartCat",title:"Gráfico por categoria" },
+  { id:"chartEvo",title:"Gráfico evolução" },
+  { id:"lista",   title:"Lista do mês" }
+];
+
+function kHomeLayout(){ return `home_layout_${USER_ID || "guest"}`; }
+
+function defaultHomeLayout(){
+  return HOME_SECTIONS.map(s=>({ id:s.id, show:true }));
+}
+
+function loadHomeLayout(){
+  try{
+    const raw = localStorage.getItem(kHomeLayout());
+    if(!raw) return defaultHomeLayout();
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed)) return defaultHomeLayout();
+
+    // garante que se entrar seção nova, ela aparece no final
+    const ids = new Set(parsed.map(x=>x && x.id).filter(Boolean));
+    const fixed = parsed
+      .filter(x=>x && typeof x.id==="string")
+      .map(x=>({ id:x.id, show: x.show!==false }));
+
+    HOME_SECTIONS.forEach(s=>{
+      if(!ids.has(s.id)) fixed.push({ id:s.id, show:true });
+    });
+
+    // remove itens que não existem mais
+    return fixed.filter(x=>HOME_SECTIONS.some(s=>s.id===x.id));
+  }catch(e){
+    return defaultHomeLayout();
+  }
+}
+
+function saveHomeLayout(layout){
+  localStorage.setItem(kHomeLayout(), JSON.stringify(layout));
+}
+
+/* aplica no DOM da home */
+function applyHomeLayoutToDOM(){
+  const container = document.getElementById("homeContainer");
+  if(!container) return;
+
+  const layout = loadHomeLayout();
+
+  // mapeia seções existentes
+  const map = {};
+  container.querySelectorAll("[data-home]").forEach(el=>{
+    map[el.getAttribute("data-home")] = el;
+  });
+
+  // reordena
+  layout.forEach(item=>{
+    const el = map[item.id];
+    if(!el) return;
+    container.appendChild(el);
+    el.style.display = item.show ? "" : "none";
+  });
+
+  // garante display para seções não listadas (não deveria)
+  Object.keys(map).forEach(id=>{
+    if(!layout.some(x=>x.id===id)){
+      map[id].style.display = "";
+      container.appendChild(map[id]);
+    }
+  });
+}
+
+/* tela editor */
+function openHomeEditor(){
+  renderHomeEditorUI();
+  openScreen("screen-home-editor");
+}
+function renderHomeEditorUI(){
+  const div = document.getElementById("layoutList");
+  if(!div) return;
+
+  const layout = loadHomeLayout();
+  const titleById = Object.fromEntries(HOME_SECTIONS.map(s=>[s.id,s.title]));
+
+  div.innerHTML = layout.map((it,idx)=>{
+    const t = titleById[it.id] || it.id;
+    const checked = it.show ? "checked" : "";
+    const upDisabled = idx===0 ? "disabled" : "";
+    const downDisabled = idx===layout.length-1 ? "disabled" : "";
+
+    return `
+      <div class="layoutItem" data-layout-row="${idx}">
+        <div class="layoutLeft">
+          <div class="handle">≡</div>
+          <input class="chk" type="checkbox" ${checked} onchange="toggleHomeSectionShow(${idx}, this.checked)">
+          <div class="layoutTitle">${escapeHtml(t)}</div>
+        </div>
+        <div class="layoutActions">
+          <button class="btn icon mini" ${upDisabled} onclick="moveHomeSection(${idx}, -1)" title="Subir">↑</button>
+          <button class="btn icon mini" ${downDisabled} onclick="moveHomeSection(${idx}, 1)" title="Descer">↓</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function moveHomeSection(index, dir){
+  const layout = loadHomeLayout();
+  const newIndex = index + dir;
+  if(newIndex < 0 || newIndex >= layout.length) return;
+  const tmp = layout[index];
+  layout[index] = layout[newIndex];
+  layout[newIndex] = tmp;
+  saveHomeLayout(layout);
+  renderHomeEditorUI();
+}
+
+function toggleHomeSectionShow(index, show){
+  const layout = loadHomeLayout();
+  if(!layout[index]) return;
+  layout[index].show = !!show;
+  saveHomeLayout(layout);
+}
+
+function resetHomeLayout(){
+  saveHomeLayout(defaultHomeLayout());
+  renderHomeEditorUI();
+}
+
+function applyHomeLayoutFromEditor(){
+  // já foi salvando; só aplica
+  applyHomeLayoutToDOM();
+  goHome();
+}
+
+/* =========================
    HELPERS
 ========================= */
 const money = (n)=> Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
@@ -903,7 +1113,7 @@ function showScreen(id){
   if(el) el.classList.add("active");
 }
 function openScreen(id){ lastNonHistoryScreen = id; showScreen(id); }
-function goHome(){ lastNonHistoryScreen = "screen-home"; showScreen("screen-home"); }
+function goHome(){ lastNonHistoryScreen = "screen-home"; showScreen("screen-home"); applyHomeLayoutToDOM(); }
 function openMenu(){ lastNonHistoryScreen = "screen-menu"; showScreen("screen-menu"); }
 function openHistory(){ buildHistoryUI(); showScreen("screen-history"); }
 function goBackFromHistory(){ showScreen(lastNonHistoryScreen || "screen-home"); }
@@ -965,13 +1175,13 @@ function detectarCategoria(desc){
   return "Outros";
 }
 
-/* ✅ Investimento fixo com status por mês */
+/* Invest fixo */
 function ensureMonthInvestStatus(d){
   if(!d.investStatus || typeof d.investStatus!=="object") d.investStatus = {};
   return d.investStatus;
 }
 
-/* ✅ Guardado: garante array e permite rastrear itens automáticos */
+/* Guardado auto do investimento fixo */
 function ensureSavedArray(d){
   if(!Array.isArray(d.saved)) d.saved = [];
   return d.saved;
@@ -1022,7 +1232,7 @@ function getDataMes(m){
   const hidden = new Set(d.hiddenFixos.map(String));
   const present = new Set(d.items.map(it=>fixKey(it.desc,it.amount,it.category)));
 
-  // Fixos normais
+  // fixos normais
   for(const f of fixos){
     const fk = fixKey(f.desc, f.amount, f.category);
     if(hidden.has(fk)) continue;
@@ -1031,7 +1241,7 @@ function getDataMes(m){
     present.add(fk);
   }
 
-  // Investimentos fixos como "Juntar" na tela principal (com status por mês)
+  // investimentos fixos como "Juntar" na tela principal
   for(const inv of investFixos){
     const desc = `Juntar: ${inv.nome}`;
     const amount = Number(inv.mensal||0);
@@ -1290,7 +1500,6 @@ function removeInvestFixo(idx){
   Object.keys(state.meses||{}).forEach(m=>{
     const d = state.meses[m];
     if(d && d.investStatus && inv && inv.id) delete d.investStatus[inv.id];
-    // remove guardado automático também
     if(d && inv && inv.id) removeAutoSavedForInv(d, inv.id, m);
   });
 
@@ -1340,7 +1549,7 @@ function saveSettings(){
   render();
 }
 
-/* ✅ Pendente/Pago (inclui investimento fixo) + ✅ ao marcar Pago no investimento fixo: anota no Guardado */
+/* Pendente/Pago (inclui investimento fixo) + ao pagar: anota no guardado */
 function togglePaid(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
@@ -1348,13 +1557,11 @@ function togglePaid(idx){
 
   it.paid = !it.paid;
 
-  // investimento fixo: salva status por mês + cria/remover guardado automático
   if(it.isInvestFixo && it.invId){
     ensureMonthInvestStatus(d);
     d.investStatus[it.invId] = !!it.paid;
 
     if(it.paid){
-      // ✅ adiciona no guardado automaticamente (1 vez por mês)
       addAutoSavedForInv(
         d,
         it.invId,
@@ -1363,7 +1570,6 @@ function togglePaid(idx){
         `Automático: ${it.desc}`
       );
     }else{
-      // ✅ se desmarcar pago, remove o guardado automático daquele mês
       removeAutoSavedForInv(d, it.invId, mesAtual);
     }
   }
@@ -1380,7 +1586,6 @@ function hideFixoOnlyThisMonth(it){
   if(!d.hiddenFixos.includes(fk)) d.hiddenFixos.push(fk);
   d.items = (d.items||[]).filter((x)=>fixKey(x.desc,x.amount,x.category)!==fk);
 
-  // se esconder um investimento fixo pago, também remove o guardado automático (pra não ficar “sumido” mas contado)
   if(it.isInvestFixo && it.invId){
     removeAutoSavedForInv(d, it.invId, mesAtual);
     ensureMonthInvestStatus(d);
@@ -1499,8 +1704,6 @@ function drawChart(items){
     options:{ plugins:{ legend:{ labels:{ color: getComputedStyle(document.body).getPropertyValue("--text") } } } }
   });
 }
-
-/* Evolução (ordem correta) */
 function drawEvolucao(){
   const meses = Object.keys(state.meses||{}).sort().reverse();
   if(!meses.length) return;
@@ -1577,12 +1780,11 @@ function render(){
   buildMonthSelect();
   const d = getDataMes(mesAtual);
 
-  // garante que itens Juntar tenham o status correto + guardado automático coerente
+  // garante coerência do guardado auto para investimentos fixos
   ensureMonthInvestStatus(d);
   d.items.forEach(it=>{
     if(it && it.isInvestFixo && it.invId){
       it.paid = !!d.investStatus[it.invId];
-      // se estiver pago, garante guardado auto; se não, remove
       if(it.paid){
         addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
       }else{
@@ -1590,8 +1792,10 @@ function render(){
       }
     }
   });
-
   saveAll();
+
+  // aplica layout do painel antes de renderizar gráficos (pra garantir canvas visível)
+  applyHomeLayoutToDOM();
 
   renderKPIs();
   renderSaved();
@@ -1645,7 +1849,6 @@ function render(){
 
       d.items = merged.map(ensureItemDefaults);
 
-      // sincroniza status e guardado auto depois do merge
       ensureMonthInvestStatus(d);
       d.items.forEach(it=>{
         if(it && it.isInvestFixo && it.invId){
@@ -1660,6 +1863,7 @@ function render(){
 
       saveAll();
 
+      applyHomeLayoutToDOM();
       renderKPIs();
       renderSaved();
       renderList();
@@ -1980,10 +2184,10 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   showLoading();
   const ok = await initFirebase();
   if(!ok) return;
+
   applyThemeSettings();
-  renderCategorias();
-  updateInvestUI();
-  updateInvResumo();
+  // se abrir editor sem login, ainda mostra algo
+  renderHomeEditorUI();
 });
 </script>
 </body>
