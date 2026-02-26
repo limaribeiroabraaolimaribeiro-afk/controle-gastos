@@ -389,6 +389,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <div class="small" style="margin-bottom:10px">
           Toque em <b>Pendente/Pago</b> para marcar se você já pagou.
           <br>✅ Itens de investimento fixo (Juntar) também aparecem aqui.
+          <br>✅ Ao marcar “Pago” em “Juntar”, o valor entra automaticamente no <b>Guardado</b>.
         </div>
         <table class="list" id="list"></table>
       </div>
@@ -556,6 +557,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           O app calcula automaticamente o <b>valor mensal</b> (meta ÷ meses).
           Esse valor aparece em <b>todos os meses</b> como um item fixo “Juntar”.
           ✅ E aparece na tela principal junto com as anotações como <b>Pendente/Pago</b>.
+          ✅ Ao marcar como <b>Pago</b>, o app automaticamente soma no <b>Guardado</b>.
         </div>
       </div>
 
@@ -891,6 +893,7 @@ function resetThemes(){
 ========================= */
 const money = (n)=> Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 function uid(){ return Math.random().toString(16).slice(2) + Date.now().toString(16); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
 
 function showLoading(){ document.getElementById("app").style.display="none"; document.getElementById("loading").style.display="flex"; }
 function showApp(){ document.getElementById("loading").style.display="none"; document.getElementById("app").style.display="block"; }
@@ -962,10 +965,36 @@ function detectarCategoria(desc){
   return "Outros";
 }
 
-/* ✅ Investimento fixo com status por mês (para não sumir na tela principal) */
+/* ✅ Investimento fixo com status por mês */
 function ensureMonthInvestStatus(d){
   if(!d.investStatus || typeof d.investStatus!=="object") d.investStatus = {};
   return d.investStatus;
+}
+
+/* ✅ Guardado: garante array e permite rastrear itens automáticos */
+function ensureSavedArray(d){
+  if(!Array.isArray(d.saved)) d.saved = [];
+  return d.saved;
+}
+function hasAutoSavedForInv(d, invId, month){
+  const saved = ensureSavedArray(d);
+  return saved.some(s => s && s.source==="investFixo" && s.invId===invId && s.month===month);
+}
+function addAutoSavedForInv(d, invId, month, value, desc){
+  const saved = ensureSavedArray(d);
+  if(hasAutoSavedForInv(d, invId, month)) return;
+  saved.unshift({
+    value: Number(value||0),
+    desc: desc || "Investimento fixo",
+    date: todayISO(),
+    source: "investFixo",
+    invId,
+    month
+  });
+}
+function removeAutoSavedForInv(d, invId, month){
+  const saved = ensureSavedArray(d);
+  d.saved = saved.filter(s => !(s && s.source==="investFixo" && s.invId===invId && s.month===month));
 }
 
 function ensureItemDefaults(it){
@@ -984,8 +1013,8 @@ function getDataMes(m){
   const d = state.meses[mm];
 
   if(!Array.isArray(d.items)) d.items=[];
-  if(!Array.isArray(d.saved)) d.saved=[];
   if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos=[];
+  ensureSavedArray(d);
   ensureMonthInvestStatus(d);
 
   d.items = d.items.map(ensureItemDefaults);
@@ -1002,7 +1031,7 @@ function getDataMes(m){
     present.add(fk);
   }
 
-  // ✅ Investimentos fixos como "anotações" na tela principal, com Pendente/Pago do mês
+  // Investimentos fixos como "Juntar" na tela principal (com status por mês)
   for(const inv of investFixos){
     const desc = `Juntar: ${inv.nome}`;
     const amount = Number(inv.mensal||0);
@@ -1010,7 +1039,7 @@ function getDataMes(m){
     if(hidden.has(fk)) continue;
     if(present.has(fk)) continue;
 
-    const paid = !!d.investStatus[inv.id]; // status por mês
+    const paid = !!d.investStatus[inv.id];
 
     d.items.unshift(ensureItemDefaults({
       desc,
@@ -1121,7 +1150,7 @@ function renderInvestFixos(){
           <div style="font-weight:950">📌 ${escapeHtml(inv.nome)}</div>
           <div class="small" style="margin-top:6px">Meta: <b>${money(meta)}</b> • Prazo: <b>${meses} meses</b></div>
           <div class="small">Mensal automático: <b class="successText">${money(mensal)}</b></div>
-          <div class="small">✅ Aparece na tela principal como item “Juntar” com <b>Pendente/Pago</b>.</div>
+          <div class="small">✅ Na tela principal, marque <b>Pendente/Pago</b> e ao pagar entra no <b>Guardado</b>.</div>
         </div>
         <button class="btn icon mini" title="Remover do cadastro (todos os meses)" onclick="removeInvestFixo(${idx})">✕</button>
       </div>
@@ -1241,7 +1270,6 @@ function addInvestFixo(){
   const id = uid();
   investFixos.push({ id, nome, metaFinal, prazoMeses, mensal });
 
-  // garante status inicial (pendente) para o mês atual
   const d = getDataMes(mesAtual);
   ensureMonthInvestStatus(d);
   if(typeof d.investStatus[id] !== "boolean") d.investStatus[id] = false;
@@ -1253,16 +1281,17 @@ function addInvestFixo(){
 
   saveAll();
   renderInvestFixos();
-  render(); // ✅ para aparecer na tela principal na hora
+  render();
 }
 function removeInvestFixo(idx){
   if(idx<0 || idx>=investFixos.length) return;
   const inv = investFixos[idx];
 
-  // remove status de todos os meses
   Object.keys(state.meses||{}).forEach(m=>{
     const d = state.meses[m];
     if(d && d.investStatus && inv && inv.id) delete d.investStatus[inv.id];
+    // remove guardado automático também
+    if(d && inv && inv.id) removeAutoSavedForInv(d, inv.id, m);
   });
 
   investFixos.splice(idx,1);
@@ -1277,7 +1306,8 @@ function addSaved(){
   const desc = (document.getElementById("savedDesc").value||"").trim();
   if(!v || v<=0) return alert("Digite um valor para adicionar ao guardado.");
   const d = getDataMes(mesAtual);
-  d.saved.unshift({ value:v, desc, date:new Date().toISOString().slice(0,10) });
+  ensureSavedArray(d);
+  d.saved.unshift({ value:v, desc, date:todayISO(), source:"manual" });
   document.getElementById("savedValue").value="";
   document.getElementById("savedDesc").value="";
   saveAll();
@@ -1286,6 +1316,7 @@ function addSaved(){
 }
 function removeSaved(idx){
   const d = getDataMes(mesAtual);
+  ensureSavedArray(d);
   if(!d.saved || idx<0 || idx>=d.saved.length) return;
   d.saved.splice(idx,1);
   saveAll();
@@ -1309,7 +1340,7 @@ function saveSettings(){
   render();
 }
 
-/* ✅ Pendente/Pago (inclui investimento fixo e grava status por mês) */
+/* ✅ Pendente/Pago (inclui investimento fixo) + ✅ ao marcar Pago no investimento fixo: anota no Guardado */
 function togglePaid(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
@@ -1317,13 +1348,28 @@ function togglePaid(idx){
 
   it.paid = !it.paid;
 
-  // se for investimento fixo, salva no mapa do mês para nunca sumir
+  // investimento fixo: salva status por mês + cria/remover guardado automático
   if(it.isInvestFixo && it.invId){
     ensureMonthInvestStatus(d);
     d.investStatus[it.invId] = !!it.paid;
+
+    if(it.paid){
+      // ✅ adiciona no guardado automaticamente (1 vez por mês)
+      addAutoSavedForInv(
+        d,
+        it.invId,
+        mesAtual,
+        Number(it.amount||0),
+        `Automático: ${it.desc}`
+      );
+    }else{
+      // ✅ se desmarcar pago, remove o guardado automático daquele mês
+      removeAutoSavedForInv(d, it.invId, mesAtual);
+    }
   }
 
   saveAll();
+  renderSaved();
   renderList();
   renderKPIs();
 }
@@ -1333,6 +1379,14 @@ function hideFixoOnlyThisMonth(it){
   const fk = fixKey(it.desc, it.amount, it.category);
   if(!d.hiddenFixos.includes(fk)) d.hiddenFixos.push(fk);
   d.items = (d.items||[]).filter((x)=>fixKey(x.desc,x.amount,x.category)!==fk);
+
+  // se esconder um investimento fixo pago, também remove o guardado automático (pra não ficar “sumido” mas contado)
+  if(it.isInvestFixo && it.invId){
+    removeAutoSavedForInv(d, it.invId, mesAtual);
+    ensureMonthInvestStatus(d);
+    d.investStatus[it.invId] = false;
+  }
+
   saveAll();
 }
 function delItemMonthOnly(idx){
@@ -1372,12 +1426,20 @@ function renderSaved(){
   const d = getDataMes(mesAtual);
   const div = document.getElementById("savedList");
   if(!div) return;
+
+  ensureSavedArray(d);
+
   if(!d.saved.length){ div.innerHTML=""; return; }
+
   div.innerHTML = d.saved.map((s,idx)=>`
     <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
       <div>
         <div style="font-weight:950">🏦 ${money(s.value)}</div>
-        <div class="small">Data: ${escapeHtml(s.date || "")}${s.desc?(" • "+escapeHtml(s.desc)):""}</div>
+        <div class="small">
+          Data: ${escapeHtml(s.date || "")}
+          ${s.desc?(" • "+escapeHtml(s.desc)):""}
+          ${s.source==="investFixo" ? ` • <span class="badge">Auto</span>` : ``}
+        </div>
       </div>
       <button class="btn icon mini" title="Remover" onclick="removeSaved(${idx})">✕</button>
     </div>
@@ -1515,6 +1577,22 @@ function render(){
   buildMonthSelect();
   const d = getDataMes(mesAtual);
 
+  // garante que itens Juntar tenham o status correto + guardado automático coerente
+  ensureMonthInvestStatus(d);
+  d.items.forEach(it=>{
+    if(it && it.isInvestFixo && it.invId){
+      it.paid = !!d.investStatus[it.invId];
+      // se estiver pago, garante guardado auto; se não, remove
+      if(it.paid){
+        addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
+      }else{
+        removeAutoSavedForInv(d, it.invId, mesAtual);
+      }
+    }
+  });
+
+  saveAll();
+
   renderKPIs();
   renderSaved();
   renderList();
@@ -1532,7 +1610,6 @@ function render(){
         if(first.meta!=null) d.meta = Number(first.meta||d.meta||0);
       }
 
-      // itens da API (não fixos)
       const apiItems = data
         .filter(x=>x && x.desc)
         .map(x=>ensureItemDefaults({
@@ -1543,12 +1620,10 @@ function render(){
           isInvestFixo:false
         }));
 
-      // reconstrói com fixos (inclui Juntar) + locais não fixos + api
       const hidden = new Set((d.hiddenFixos||[]).map(String));
       const merged = [];
       const seen = new Set();
 
-      // fixa: pega um fresh do mês (que injeta Juntar sempre)
       const fresh = getDataMes(mesAtual);
 
       for(const it of (fresh.items||[]).filter(x=>x.isFixo)){
@@ -1570,11 +1645,16 @@ function render(){
 
       d.items = merged.map(ensureItemDefaults);
 
-      // garante que os "Juntar" tenham o status correto do mês
+      // sincroniza status e guardado auto depois do merge
       ensureMonthInvestStatus(d);
       d.items.forEach(it=>{
         if(it && it.isInvestFixo && it.invId){
           it.paid = !!d.investStatus[it.invId];
+          if(it.paid){
+            addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
+          }else{
+            removeAutoSavedForInv(d, it.invId, mesAtual);
+          }
         }
       });
 
