@@ -1,6 +1,2 @@
-// config.js
-// ⚠️ IMPORTANTE:
-// 1) não coloque barra "/" no final da URL
-// 2) não coloque ponto e vírgula dentro das aspas
-
-window.API_BASE_URL = "http://192.168.20.13:3000";
+window.API_BASE_URL = "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
+window.APP_KEY = "GastosPro@2026!";
