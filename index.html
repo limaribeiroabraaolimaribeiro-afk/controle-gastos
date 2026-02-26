@@ -11,12 +11,21 @@
 <style>
 :root{
   --bg:#07101f;
+
+  /* ✅ Gradientes do fundo (agora configuráveis) */
+  --grad1: rgba(86,156,255,.22);
+  --grad2: rgba(57,217,138,.16);
+  --grad3: rgba(255,93,93,.12);
+
   --panel: rgba(255,255,255,.06);
   --panel2: rgba(255,255,255,.08);
   --stroke: rgba(255,255,255,.10);
   --text:#eaf0ff;
   --muted: rgba(234,240,255,.72);
+
+  /* ✅ Cor principal (botões/painéis principais) configurável */
   --accent:#569cff;
+
   --good:#39d98a;
   --warn:#ffd166;
   --danger:#ff5d5d;
@@ -28,6 +37,11 @@
 }
 .light{
   --bg:#f4f6ff;
+
+  --grad1: rgba(86,156,255,.20);
+  --grad2: rgba(57,217,138,.14);
+  --grad3: rgba(255,93,93,.10);
+
   --panel: rgba(0,0,0,.04);
   --panel2: rgba(0,0,0,.06);
   --stroke: rgba(0,0,0,.08);
@@ -39,10 +53,11 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  background: radial-gradient(1000px 700px at 20% 10%, rgba(86,156,255,.22), transparent 55%),
-              radial-gradient(900px 700px at 80% 30%, rgba(57,217,138,.16), transparent 60%),
-              radial-gradient(800px 600px at 70% 90%, rgba(255,93,93,.12), transparent 60%),
-              var(--bg);
+  background:
+    radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
+    radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
+    radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
+    var(--bg);
   color:var(--text);
   font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
   min-height:100vh;
@@ -75,9 +90,21 @@ h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
   font-weight:650;
   box-shadow: 0 10px 26px rgba(0,0,0,.18);
 }
-.btn.primary{background: linear-gradient(135deg, rgba(86,156,255,.95), rgba(86,156,255,.70)); border-color: rgba(86,156,255,.35)}
-.btn.good{background: linear-gradient(135deg, rgba(57,217,138,.95), rgba(57,217,138,.70)); border-color: rgba(57,217,138,.35)}
-.btn.warn{background: linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,209,102,.70)); border-color: rgba(255,209,102,.35); color:#281a00}
+.btn.primary{
+  background: var(--accent);
+  border-color: color-mix(in srgb, var(--accent), transparent 55%);
+  color:#fff;
+}
+.btn.good{
+  background: var(--good);
+  border-color: color-mix(in srgb, var(--good), transparent 55%);
+  color:#062114;
+}
+.btn.warn{
+  background: var(--warn);
+  border-color: color-mix(in srgb, var(--warn), transparent 55%);
+  color:#281a00
+}
 .btn.ghost{background: transparent}
 .btn.mini{padding:9px 10px;border-radius:12px;font-size:13px}
 .btn.icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0;border-radius:16px}
@@ -155,10 +182,11 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 }
 .fab.ai{
   background: radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
-              linear-gradient(135deg, rgba(86,156,255,.98), rgba(86,156,255,.55));
+              linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 15%), color-mix(in srgb, var(--accent), #000 20%));
   color:#04152c; font-weight:1000; letter-spacing:.8px;
   font-size:12px; line-height:1.05; text-align:center;
 }
+.light .fab.ai{color:#04152c}
 .fab.ai span{display:block;font-weight:950;font-size:13px}
 .fab.ai em{font-style:normal;font-weight:900;font-size:11px;opacity:.9}
 
@@ -242,7 +270,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   margin: 8px 0;
   border:1px solid var(--stroke);
 }
-.bubble.me{margin-left:auto;background: rgba(86,156,255,.18)}
+.bubble.me{margin-left:auto;background: color-mix(in srgb, var(--accent), transparent 80%)}
 .bubble.bot{margin-right:auto;background: rgba(255,255,255,.08)}
 .chatComposer{display:flex;gap:10px;margin-top:12px}
 .chatComposer input{flex:1}
@@ -358,7 +386,10 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
       <div class="card" style="margin-top:12px">
         <h3>Lista do mês</h3>
-        <div class="small" style="margin-bottom:10px">Toque em <b>Pendente/Pago</b> para marcar se você já pagou.</div>
+        <div class="small" style="margin-bottom:10px">
+          Toque em <b>Pendente/Pago</b> para marcar se você já pagou.
+          <!-- ✅ Investimento fixo (Juntar) também aparece aqui e usa o mesmo Pendente/Pago -->
+        </div>
         <table class="list" id="list"></table>
       </div>
     </div>
@@ -399,7 +430,11 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <div style="font-weight:900">Configurações</div>
       </div>
 
-      <div class="card">
+      <div class="grid1">
+        <button class="btn" onclick="openScreen('screen-themes')">🎨 Temas</button>
+      </div>
+
+      <div class="card" style="margin-top:12px">
         <h3>Histórico</h3>
         <div class="small">Acesse seu histórico completo de meses.</div>
         <div class="hr"></div>
@@ -409,6 +444,54 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="card" style="margin-top:12px">
         <h3>Preferências</h3>
         <button class="btn" onclick="toggleTheme()">🌙/☀️ Alternar tema</button>
+      </div>
+    </div>
+
+    <!-- ✅ SCREEN: THEMES -->
+    <div class="screen" id="screen-themes">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
+        <div style="font-weight:900">Temas</div>
+      </div>
+
+      <div class="card">
+        <h3>Cor do app (painel/fundo)</h3>
+        <div class="small">Escolha um estilo de fundo. Isso muda a “cor do painel principal em si”.</div>
+
+        <div class="hr"></div>
+
+        <label>Preset</label>
+        <select id="themePreset" onchange="saveThemePreset()">
+          <option value="default">Padrão (Azul/Verde)</option>
+          <option value="purple">Roxo</option>
+          <option value="green">Verde</option>
+          <option value="sunset">Pôr do sol</option>
+          <option value="mono">Escuro minimal</option>
+        </select>
+
+        <div class="hr"></div>
+
+        <h3>Cor dos botões (accent)</h3>
+        <div class="small">Isso muda os botões principais e detalhes do app.</div>
+
+        <div class="grid2" style="margin-top:10px">
+          <div>
+            <label>Escolher cor</label>
+            <input id="accentPicker" type="color" value="#569cff" onchange="saveAccentColor()">
+          </div>
+          <div class="note">
+            <div style="font-weight:900">Prévia</div>
+            <div class="small" style="margin-top:6px">Botões “Salvar / Adicionar” ficam nessa cor.</div>
+            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn primary mini" type="button">Primário</button>
+              <button class="btn mini" type="button">Normal</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <button class="btn" onclick="resetThemes()">↩️ Voltar ao padrão</button>
       </div>
     </div>
 
@@ -473,7 +556,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           Você informa <b>Nome</b>, <b>Meta final (R$)</b> e <b>Prazo (meses)</b>.
           O app calcula automaticamente o <b>valor mensal</b> (meta ÷ meses).
           Esse valor aparece em <b>todos os meses</b> como um item fixo “Juntar”.
-          Você marca <b>Pendente/Pago</b> em cada mês.
+          ✅ E esse item aparece na tela principal com <b>Pendente/Pago</b>.
         </div>
       </div>
 
@@ -741,8 +824,8 @@ let regras = [
 ];
 
 let categorias = [...DEFAULT_CATEGORIAS];
-let fixos = [];         // fixos (cadastro)
-let investFixos = [];   // investimentos fixos (cadastro)
+let fixos = [];
+let investFixos = [];
 
 let state = { meses:{} };
 let mesAtual = new Date().toISOString().slice(0,7);
@@ -750,6 +833,68 @@ let mesAtual = new Date().toISOString().slice(0,7);
 let grafico = null;
 let graficoEvolucao = null;
 let lastNonHistoryScreen = "screen-home";
+
+/* =========================
+   THEME (✅ NOVO)
+========================= */
+const THEME_KEYS = {
+  preset: "theme_preset_v1",
+  accent: "theme_accent_v1"
+};
+
+const THEME_PRESETS = {
+  default: { bgDark:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
+  purple:  { bgDark:"#0d0a1f", g1:"rgba(170,110,255,.25)", g2:"rgba(86,156,255,.12)", g3:"rgba(57,217,138,.10)" },
+  green:   { bgDark:"#061a14", g1:"rgba(57,217,138,.28)", g2:"rgba(86,156,255,.10)", g3:"rgba(255,209,102,.10)" },
+  sunset:  { bgDark:"#1a0b0b", g1:"rgba(255,93,93,.22)", g2:"rgba(255,209,102,.18)", g3:"rgba(86,156,255,.10)" },
+  mono:    { bgDark:"#05070c", g1:"rgba(255,255,255,.10)", g2:"rgba(255,255,255,.06)", g3:"rgba(255,255,255,.04)" }
+};
+
+function applyThemeSettings(){
+  const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
+  const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
+
+  const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
+
+  // aplica accent
+  document.documentElement.style.setProperty("--accent", accent);
+
+  // aplica fundo/gradientes (somente no modo atual; no light ele usa os valores do .light,
+  // mas ainda deixamos os gradientes aqui para manter coerência)
+  document.documentElement.style.setProperty("--bg", p.bgDark);
+  document.documentElement.style.setProperty("--grad1", p.g1);
+  document.documentElement.style.setProperty("--grad2", p.g2);
+  document.documentElement.style.setProperty("--grad3", p.g3);
+
+  // atualiza UI da tela temas (se existir)
+  const sel = document.getElementById("themePreset");
+  if(sel) sel.value = preset;
+
+  const pick = document.getElementById("accentPicker");
+  if(pick) pick.value = accent;
+
+  // meta theme-color (PWA)
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", accent);
+}
+
+function saveThemePreset(){
+  const sel = document.getElementById("themePreset");
+  const preset = sel ? sel.value : "default";
+  localStorage.setItem(THEME_KEYS.preset, preset);
+  applyThemeSettings();
+}
+function saveAccentColor(){
+  const pick = document.getElementById("accentPicker");
+  const accent = pick ? pick.value : "#569cff";
+  localStorage.setItem(THEME_KEYS.accent, accent);
+  applyThemeSettings();
+}
+function resetThemes(){
+  localStorage.removeItem(THEME_KEYS.preset);
+  localStorage.removeItem(THEME_KEYS.accent);
+  applyThemeSettings();
+}
 
 /* =========================
    HELPERS
@@ -772,6 +917,8 @@ function goBackFromHistory(){ showScreen(lastNonHistoryScreen || "screen-home");
 function toggleTheme(){
   document.body.classList.toggle("light");
   localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+  // reaplica para manter theme-color atualizado
+  applyThemeSettings();
 }
 function openModal(id){ const o=document.getElementById(id); if(o) o.style.display="flex"; }
 function closeModal(id){ const o=document.getElementById(id); if(o) o.style.display="none"; }
@@ -825,11 +972,10 @@ function detectarCategoria(desc){
 
 function ensureItemDefaults(it){
   if(!it) return it;
-  if(typeof it.paid !== "boolean") it.paid = false;
+  if(typeof it.paid !== "boolean") it.paid = false; // ✅ pendente/pago para TUDO (inclui investimento fixo)
   return it;
 }
 
-/* ✅ chave única para cada fixo (para remover só do mês atual) */
 function fixKey(desc, amount, category){
   return `${String(desc||"").toLowerCase()}|${Number(amount||0)}|${String(category||"").toLowerCase()}`;
 }
@@ -845,7 +991,6 @@ function getDataMes(m){
 
   d.items = d.items.map(ensureItemDefaults);
 
-  // injeta fixos do cadastro, exceto os "escondidos" neste mês
   const hidden = new Set(d.hiddenFixos.map(String));
   const present = new Set(d.items.map(it=>fixKey(it.desc,it.amount,it.category)));
 
@@ -853,17 +998,16 @@ function getDataMes(m){
     const fk = fixKey(f.desc, f.amount, f.category);
     if(hidden.has(fk)) continue;
     if(present.has(fk)) continue;
-
     d.items.unshift(ensureItemDefaults({ ...f, isFixo:true, isInvestFixo:false }));
     present.add(fk);
   }
 
-  // injeta investimentos fixos (automáticos)
   for(const inv of investFixos){
     const fk = fixKey(`Juntar: ${inv.nome}`, Number(inv.mensal||0), "Investimentos");
     if(hidden.has(fk)) continue;
     if(present.has(fk)) continue;
 
+    // ✅ aparece na tela principal e já vem com Pendente/Pago
     d.items.unshift(ensureItemDefaults({
       desc:`Juntar: ${inv.nome}`,
       amount:Number(inv.mensal||0),
@@ -972,6 +1116,7 @@ function renderInvestFixos(){
           <div style="font-weight:950">📌 ${escapeHtml(inv.nome)}</div>
           <div class="small" style="margin-top:6px">Meta: <b>${money(meta)}</b> • Prazo: <b>${meses} meses</b></div>
           <div class="small">Mensal automático: <b class="successText">${money(mensal)}</b></div>
+          <div class="small">✅ Aparece na tela principal como <b>Pendente/Pago</b> (item “Juntar”).</div>
         </div>
         <button class="btn icon mini" title="Remover do cadastro (todos os meses)" onclick="removeInvestFixo(${idx})">✕</button>
       </div>
@@ -979,7 +1124,9 @@ function renderInvestFixos(){
   }).join("");
 }
 
-/* ✅ Deletar mês do histórico (estado local) */
+/* =========================
+   HISTÓRICO (com X)
+========================= */
 function deleteMonth(m){
   if(!USER_ID) return;
   if(!state.meses || !state.meses[m]) return;
@@ -991,10 +1138,7 @@ function deleteMonth(m){
   delete state.meses[m];
   saveAll();
 
-  // ajusta mesAtual se apagou o mês atual
-  if(mesAtual === m){
-    mesAtual = new Date().toISOString().slice(0,7);
-  }
+  if(mesAtual === m) mesAtual = new Date().toISOString().slice(0,7);
 
   buildMonthSelect();
   buildHistoryUI();
@@ -1071,7 +1215,6 @@ function addFixo(){
   renderFixos();
   render();
 }
-
 function removeFixo(idx){
   if(idx<0 || idx>=fixos.length) return;
   fixos.splice(idx,1);
@@ -1100,7 +1243,6 @@ function addInvestFixo(){
   renderInvestFixos();
   render();
 }
-
 function removeInvestFixo(idx){
   if(idx<0 || idx>=investFixos.length) return;
   investFixos.splice(idx,1);
@@ -1147,7 +1289,7 @@ function saveSettings(){
   render();
 }
 
-/* ✅ Toggle pago/pendente (vale também para investimentos fixos na tela principal) */
+/* ✅ Pendente/Pago (vale para o investimento fixo também) */
 function togglePaid(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
@@ -1158,7 +1300,7 @@ function togglePaid(idx){
   renderKPIs();
 }
 
-/* ✅ Remover só do mês (sem apagar do cadastro) */
+/* remover só do mês (sem apagar do cadastro) */
 function hideFixoOnlyThisMonth(it){
   const d = getDataMes(mesAtual);
   const fk = fixKey(it.desc, it.amount, it.category);
@@ -1166,8 +1308,6 @@ function hideFixoOnlyThisMonth(it){
   d.items = (d.items||[]).filter((x)=>fixKey(x.desc,x.amount,x.category)!==fk);
   saveAll();
 }
-
-/* remover item normal do mês */
 function delItemMonthOnly(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
@@ -1175,7 +1315,6 @@ function delItemMonthOnly(idx){
   d.items.splice(idx,1);
   saveAll();
 
-  // mantém seu comportamento atual de apagar no backend apenas para itens normais (não fixos)
   if(!it.isFixo){
     fetch(API+"/delGasto",{
       method:"POST",
@@ -1184,18 +1323,13 @@ function delItemMonthOnly(idx){
     }).catch(()=>{});
   }
 }
-
-/* ✅ X da lista do mês:
-   - se for fixo (gasto fixo ou investimento fixo): some SÓ neste mês
-   - se for normal: apaga só deste mês (como já era)
-*/
 function delItemSmart(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
   if(!it) return;
 
   if(it.isFixo){
-    hideFixoOnlyThisMonth(it);   // ✅ agora não afeta os outros meses
+    hideFixoOnlyThisMonth(it);
     render();
     return;
   }
@@ -1277,9 +1411,9 @@ function drawChart(items){
   });
 }
 
-/* ✅ GRÁFICO DE TODOS OS MESES ARRUMADO (ordem invertida para não ficar "de trás pra frente") */
+/* ✅ Gráfico de todos os meses (ordem correta) */
 function drawEvolucao(){
-  const meses = Object.keys(state.meses||{}).sort().reverse(); // << aqui foi ajustado
+  const meses = Object.keys(state.meses||{}).sort().reverse();
   if(!meses.length) return;
   const valores = meses.map(m=>{
     const d = getDataMes(m);
@@ -1289,13 +1423,7 @@ function drawEvolucao(){
   graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{
     type:"line",
     data:{ labels: meses, datasets:[{ data: valores }] },
-    options:{
-      plugins:{ legend:{ display:false } },
-      scales:{
-        x:{ ticks:{ color: getComputedStyle(document.body).getPropertyValue("--muted") } },
-        y:{ ticks:{ color: getComputedStyle(document.body).getPropertyValue("--muted") } }
-      }
-    }
+    options:{ plugins:{ legend:{ display:false } } }
   });
 }
 
@@ -1315,6 +1443,7 @@ function renderList(){
     const fixBadge = i.isInvestFixo ? `<span class="badge">Juntar</span>` : (i.isFixo ? `<span class="badge">Fixo</span>` : ``);
     const btnPaidClass = paid ? "good" : "warn";
     const btnPaidText = paid ? "✅ Pago" : "⏳ Pendente";
+
     return `
       <tr>
         <td>
@@ -1325,10 +1454,12 @@ function renderList(){
             ${statusBadge}
           </div>
           <div class="small">${money(i.amount||0)}</div>
+
           <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn ${btnPaidClass} mini" onclick="togglePaid(${idx})">${btnPaidText}</button>
           </div>
         </td>
+
         <td style="width:64px;text-align:right">
           <button class="btn icon mini" onclick="delItemSmart(${idx})" title="Remover">✕</button>
         </td>
@@ -1376,7 +1507,6 @@ function render(){
         if(first.meta!=null) d.meta = Number(first.meta||d.meta||0);
       }
 
-      // mescla itens vindos da API com itens locais, mantendo fixos e "hiddenFixos"
       const apiItems = data
         .filter(x=>x && x.desc)
         .map(x=>ensureItemDefaults({
@@ -1387,12 +1517,10 @@ function render(){
           isInvestFixo:false
         }));
 
-      // reconstrói d.items: mantém fixos já injetados + locais não fixos + api
       const hidden = new Set((d.hiddenFixos||[]).map(String));
       const merged = [];
       const seen = new Set();
 
-      // garante fixos/invest fixos do mês (já respeitando hidden)
       const fresh = getDataMes(mesAtual);
       for(const it of (fresh.items||[]).filter(x=>x.isFixo)){
         const fk = fixKey(it.desc,it.amount,it.category);
@@ -1401,13 +1529,11 @@ function render(){
         if(!seen.has(k)){ merged.push(it); seen.add(k); }
       }
 
-      // locais não fixos
       for(const it of (d.items||[]).filter(x=>!x.isFixo)){
         const k = fixKey(it.desc,it.amount,it.category) + "|loc";
         if(!seen.has(k)){ merged.push(it); seen.add(k); }
       }
 
-      // api
       for(const it of apiItems){
         const k = fixKey(it.desc,it.amount,it.category) + "|api";
         if(!seen.has(k)){ merged.push(it); seen.add(k); }
@@ -1415,6 +1541,7 @@ function render(){
 
       d.items = merged.map(ensureItemDefaults);
       saveAll();
+
       renderKPIs();
       renderSaved();
       renderList();
@@ -1656,6 +1783,9 @@ async function initFirebase(){
     const t = localStorage.getItem("theme");
     if(t==="light") document.body.classList.add("light");
 
+    // ✅ aplica tema salvo (accent + preset)
+    applyThemeSettings();
+
     loadAll();
     buildMonthSelect();
     renderCategorias();
@@ -1729,9 +1859,16 @@ function escapeHtml(s){
    BOOT
 ========================= */
 document.addEventListener("DOMContentLoaded", async ()=>{
+  // aplica tema antes de tudo para já aparecer certo
+  applyThemeSettings();
+
   showLoading();
   const ok = await initFirebase();
   if(!ok) return;
+
+  // garante UI da tela temas preenchida
+  applyThemeSettings();
+
   renderCategorias();
   updateInvestUI();
   updateInvResumo();
