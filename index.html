@@ -112,6 +112,11 @@ h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
   border-color: color-mix(in srgb, var(--warn), transparent 55%);
   color:#281a00
 }
+.btn.danger{
+  background: var(--danger);
+  border-color: color-mix(in srgb, var(--danger), transparent 55%);
+  color:#2b0707;
+}
 .btn.ghost{background: transparent}
 .btn.mini{padding:9px 10px;border-radius:12px;font-size:13px}
 .btn.icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0;border-radius:16px}
@@ -294,9 +299,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .layoutLeft{display:flex;align-items:center;gap:10px;min-width:0}
 .layoutTitle{font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .layoutActions{display:flex;gap:8px;flex:0 0 auto}
-.chk{
-  width:18px;height:18px;accent-color: var(--accent);
-}
+.chk{ width:18px;height:18px;accent-color: var(--accent); }
 .handle{
   width:34px;height:34px;border-radius:12px;
   display:flex;align-items:center;justify-content:center;
@@ -304,6 +307,14 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   background: rgba(255,255,255,.06);
   font-weight:900;
   user-select:none;
+}
+
+/* ✅ PDF */
+.pdfPreview{
+  border:1px dashed var(--stroke);
+  border-radius:18px;
+  padding:12px;
+  background: rgba(255,255,255,.04);
 }
 </style>
 </head>
@@ -326,7 +337,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
     <div class="topbar">
       <div>
         <h1>Controle de Gastos PRO</h1>
-        <div class="small" id="subHeader">Aqui fica só o essencial. Para editar categorias, fixos e simuladores, use o Menu.</div>
+        <div class="small" id="subHeader">Aqui fica só o essencial. Para editar categorias, fixos, PDF e simuladores, use o Menu.</div>
       </div>
       <div class="right">
         <button class="pill menuBtn" onclick="openMenu()" title="Menu">
@@ -434,7 +445,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
             <h3>Lista do mês</h3>
             <div class="small" style="margin-bottom:10px">
               Toque em <b>Pendente/Pago</b> para marcar se você já pagou.
-              <br>✅ Itens de investimento fixo (Juntar) também aparecem aqui.
+              <br>✅ Investimentos fixos aparecem como <b>Juntar</b> e começam como <b>Pendente</b>.
               <br>✅ Ao marcar “Pago” em “Juntar”, o valor entra automaticamente no <b>Guardado</b>.
             </div>
             <table class="list" id="list"></table>
@@ -482,8 +493,9 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
       <div class="grid1">
         <button class="btn" onclick="openScreen('screen-themes')">🎨 Temas</button>
-        <!-- ✅ NOVO: Edição do painel -->
         <button class="btn" onclick="openHomeEditor()">🧩 Edição do painel</button>
+        <!-- ✅ NOVO: PDF -->
+        <button class="btn" onclick="openPdfScreen()">🖨️ Imprimir em PDF</button>
       </div>
 
       <div class="card" style="margin-top:12px">
@@ -499,6 +511,51 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
+    <!-- ✅ SCREEN: PDF -->
+    <div class="screen" id="screen-pdf">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
+        <div style="font-weight:900">Imprimir em PDF</div>
+      </div>
+
+      <div class="card">
+        <h3>Relatório completo</h3>
+        <div class="small">
+          O PDF inclui: gráficos do ano, anotações (mês selecionado), salário, investimentos e o que mais gastou no ano.
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="grid2">
+          <div>
+            <label>Ano</label>
+            <select id="pdfYear"></select>
+          </div>
+          <div>
+            <label>Mês para “Anotações”</label>
+            <select id="pdfMonth"></select>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="pdfPreview small">
+          <b>Prévia do que vai no PDF:</b><br>
+          • Gráfico “Categorias do ano”<br>
+          • Gráfico “Evolução mensal do ano”<br>
+          • Tabela (Salário / Gastos / Guardado por mês)<br>
+          • “Mais gastou no ano” (categoria e valor)<br>
+          • Investimentos fixos cadastrados<br>
+          • Anotações do mês escolhido (itens e status)
+        </div>
+
+        <div class="hr"></div>
+
+        <button class="btn primary" onclick="gerarPDF()">📄 Gerar PDF</button>
+        <div class="small" id="pdfStatus" style="margin-top:10px"></div>
+      </div>
+    </div>
+
     <!-- ✅ SCREEN: HOME EDITOR -->
     <div class="screen" id="screen-home-editor">
       <div class="backRow">
@@ -510,7 +567,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <h3>Organize sua tela principal</h3>
         <div class="small">
           Marque o que aparece e use as setas para mudar a ordem (pra cima/baixo).
-          Assim, cada pessoa monta o painel do jeito que quiser.
         </div>
 
         <div class="hr"></div>
@@ -587,6 +643,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           <button class="btn primary mini" style="flex:0 0 auto" onclick="addCategoria()">Adicionar</button>
         </div>
         <div class="hr"></div>
+        <div class="small">⚠️ O X remove a categoria. Gastos dessa categoria vão para “Outros”.</div>
+        <div class="hr"></div>
         <div id="listaCategorias" class="small"></div>
       </div>
     </div>
@@ -633,9 +691,9 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <div class="small">
           Você informa <b>Nome</b>, <b>Meta final (R$)</b> e <b>Prazo (meses)</b>.
           O app calcula automaticamente o <b>valor mensal</b> (meta ÷ meses).
-          Esse valor aparece em <b>todos os meses</b> como um item fixo “Juntar”.
-          ✅ E aparece na tela principal junto com as anotações como <b>Pendente/Pago</b>.
-          ✅ Ao marcar como <b>Pago</b>, o app automaticamente soma no <b>Guardado</b>.
+          Esse valor aparece em <b>todos os meses</b> como “Juntar” na tela principal.
+          ✅ Começa como <b>Pendente</b>
+          ✅ Ao marcar <b>Pago</b>, entra automaticamente no <b>Guardado</b>.
         </div>
       </div>
 
@@ -865,6 +923,11 @@ window.addEventListener("unhandledrejection", (e)=>{
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- ✅ PDF libs -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
@@ -877,7 +940,7 @@ window.addEventListener("unhandledrejection", (e)=>{
 const FIREBASE_CONFIG = {
   apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
   authDomain:"controle-gastos-pro.firebaseapp.com",
-  projectId:"controle-gastos-pro"
+  projectId:"controle-gastos-pro.firebaseapp.com"
 };
 const API = "https://api-rf1w.onrender.com";
 
@@ -967,8 +1030,7 @@ function resetThemes(){
 }
 
 /* =========================
-   HOME LAYOUT (✅ NOVO)
-   - usuário escolhe o que aparece e a ordem do painel principal
+   HOME LAYOUT
 ========================= */
 const HOME_SECTIONS = [
   { id:"resumo",  title:"Resumo do mês" },
@@ -979,10 +1041,7 @@ const HOME_SECTIONS = [
 ];
 
 function kHomeLayout(){ return `home_layout_${USER_ID || "guest"}`; }
-
-function defaultHomeLayout(){
-  return HOME_SECTIONS.map(s=>({ id:s.id, show:true }));
-}
+function defaultHomeLayout(){ return HOME_SECTIONS.map(s=>({ id:s.id, show:true })); }
 
 function loadHomeLayout(){
   try{
@@ -991,7 +1050,6 @@ function loadHomeLayout(){
     const parsed = JSON.parse(raw);
     if(!Array.isArray(parsed)) return defaultHomeLayout();
 
-    // garante que se entrar seção nova, ela aparece no final
     const ids = new Set(parsed.map(x=>x && x.id).filter(Boolean));
     const fixed = parsed
       .filter(x=>x && typeof x.id==="string")
@@ -1001,31 +1059,24 @@ function loadHomeLayout(){
       if(!ids.has(s.id)) fixed.push({ id:s.id, show:true });
     });
 
-    // remove itens que não existem mais
     return fixed.filter(x=>HOME_SECTIONS.some(s=>s.id===x.id));
   }catch(e){
     return defaultHomeLayout();
   }
 }
-
 function saveHomeLayout(layout){
   localStorage.setItem(kHomeLayout(), JSON.stringify(layout));
 }
-
-/* aplica no DOM da home */
 function applyHomeLayoutToDOM(){
   const container = document.getElementById("homeContainer");
   if(!container) return;
 
   const layout = loadHomeLayout();
-
-  // mapeia seções existentes
   const map = {};
   container.querySelectorAll("[data-home]").forEach(el=>{
     map[el.getAttribute("data-home")] = el;
   });
 
-  // reordena
   layout.forEach(item=>{
     const el = map[item.id];
     if(!el) return;
@@ -1033,7 +1084,6 @@ function applyHomeLayoutToDOM(){
     el.style.display = item.show ? "" : "none";
   });
 
-  // garante display para seções não listadas (não deveria)
   Object.keys(map).forEach(id=>{
     if(!layout.some(x=>x.id===id)){
       map[id].style.display = "";
@@ -1042,11 +1092,7 @@ function applyHomeLayoutToDOM(){
   });
 }
 
-/* tela editor */
-function openHomeEditor(){
-  renderHomeEditorUI();
-  openScreen("screen-home-editor");
-}
+function openHomeEditor(){ renderHomeEditorUI(); openScreen("screen-home-editor"); }
 function renderHomeEditorUI(){
   const div = document.getElementById("layoutList");
   if(!div) return;
@@ -1075,7 +1121,6 @@ function renderHomeEditorUI(){
     `;
   }).join("");
 }
-
 function moveHomeSection(index, dir){
   const layout = loadHomeLayout();
   const newIndex = index + dir;
@@ -1086,24 +1131,14 @@ function moveHomeSection(index, dir){
   saveHomeLayout(layout);
   renderHomeEditorUI();
 }
-
 function toggleHomeSectionShow(index, show){
   const layout = loadHomeLayout();
   if(!layout[index]) return;
   layout[index].show = !!show;
   saveHomeLayout(layout);
 }
-
-function resetHomeLayout(){
-  saveHomeLayout(defaultHomeLayout());
-  renderHomeEditorUI();
-}
-
-function applyHomeLayoutFromEditor(){
-  // já foi salvando; só aplica
-  applyHomeLayoutToDOM();
-  goHome();
-}
+function resetHomeLayout(){ saveHomeLayout(defaultHomeLayout()); renderHomeEditorUI(); }
+function applyHomeLayoutFromEditor(){ applyHomeLayoutToDOM(); goHome(); }
 
 /* =========================
    HELPERS
@@ -1248,13 +1283,16 @@ function getDataMes(m){
     present.add(fk);
   }
 
-  // investimentos fixos como "Juntar" na tela principal
+  // ✅ investimentos fixos como "Juntar" na tela principal (sempre começam Pendente)
   for(const inv of investFixos){
     const desc = `Juntar: ${inv.nome}`;
     const amount = Number(inv.mensal||0);
     const fk = fixKey(desc, amount, "Investimentos");
     if(hidden.has(fk)) continue;
     if(present.has(fk)) continue;
+
+    // se não existir status ainda, começa false (Pendente)
+    if(typeof d.investStatus[inv.id] !== "boolean") d.investStatus[inv.id] = false;
 
     const paid = !!d.investStatus[inv.id];
 
@@ -1305,16 +1343,93 @@ function buildMonthSelect(){
   sel.onchange = ()=>{ mesAtual = sel.value; render(); };
 }
 
+/* ✅ PDF selectors */
+function buildPdfSelectors(){
+  const yearSel = document.getElementById("pdfYear");
+  const monthSel = document.getElementById("pdfMonth");
+  if(!yearSel || !monthSel) return;
+
+  const months = Object.keys(state.meses||{}).sort();
+  const years = new Set(months.map(m=>m.slice(0,4)));
+  years.add(String(new Date().getFullYear()));
+  const yearsArr = Array.from(years).sort().reverse();
+
+  yearSel.innerHTML = yearsArr.map(y=>`<option value="${y}">${y}</option>`).join("");
+  const currentYear = mesAtual.slice(0,4);
+  yearSel.value = yearsArr.includes(currentYear) ? currentYear : (yearsArr[0]||currentYear);
+
+  const monthsSorted = Object.keys(state.meses||{}).sort().reverse();
+  if(!monthsSorted.includes(mesAtual)) monthsSorted.unshift(mesAtual);
+  monthSel.innerHTML = monthsSorted.map(m=>{
+    const dt = new Date(m+"-01T00:00:00");
+    const label = dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+    return `<option value="${m}">${escapeHtml(label)}</option>`;
+  }).join("");
+  monthSel.value = mesAtual;
+}
+
+function openPdfScreen(){
+  buildPdfSelectors();
+  openScreen("screen-pdf");
+}
+
 function renderCategorias(){
   const list = document.getElementById("listaCategorias");
   const selF = document.getElementById("categoriaFixo");
   const selM = document.getElementById("mCategoria");
   if(list){
-    list.innerHTML = categorias.map(c=>`<div class="note">• ${escapeHtml(c)}</div>`).join("") || "<div class='small'>Nenhuma categoria.</div>";
+    list.innerHTML = categorias.map((c,idx)=>{
+      const lower = String(c).toLowerCase();
+      const isLocked = (lower==="investimentos"); // não deixa remover invest
+      return `
+        <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div>• <b>${escapeHtml(c)}</b></div>
+          <button class="btn icon mini" ${isLocked?"disabled":""}
+            title="${isLocked ? "Não pode remover Investimentos" : "Remover categoria"}"
+            onclick="removeCategoria(${idx})">✕</button>
+        </div>
+      `;
+    }).join("") || "<div class='small'>Nenhuma categoria.</div>";
   }
   const opts = categorias.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
   if(selF) selF.innerHTML = opts;
   if(selM) selM.innerHTML = opts;
+}
+
+/* ✅ remove categoria (X) */
+function removeCategoria(idx){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  if(idx<0 || idx>=categorias.length) return;
+  const cat = categorias[idx];
+  const lower = String(cat).toLowerCase();
+  if(lower==="investimentos") return alert("A categoria Investimentos não pode ser removida.");
+
+  if(!confirm(`Remover a categoria "${cat}"? Gastos dessa categoria vão para "Outros".`)) return;
+
+  // remove da lista
+  categorias.splice(idx,1);
+
+  // reatribui itens e fixos
+  fixos = (fixos||[]).map(f=>{
+    if(String(f.category||"")===cat) return { ...f, category:"Outros" };
+    return f;
+  });
+
+  Object.keys(state.meses||{}).forEach(m=>{
+    const d = state.meses[m];
+    if(!d) return;
+    if(Array.isArray(d.items)){
+      d.items = d.items.map(it=>{
+        if(String(it.category||"")===cat) return { ...it, category:"Outros" };
+        return it;
+      });
+    }
+  });
+
+  saveAll();
+  renderCategorias();
+  renderFixos();
+  render();
 }
 
 function renderFixos(){
@@ -1367,7 +1482,7 @@ function renderInvestFixos(){
           <div style="font-weight:950">📌 ${escapeHtml(inv.nome)}</div>
           <div class="small" style="margin-top:6px">Meta: <b>${money(meta)}</b> • Prazo: <b>${meses} meses</b></div>
           <div class="small">Mensal automático: <b class="successText">${money(mensal)}</b></div>
-          <div class="small">✅ Na tela principal, marque <b>Pendente/Pago</b> e ao pagar entra no <b>Guardado</b>.</div>
+          <div class="small">✅ Na tela principal, começa <b>Pendente</b> e ao marcar <b>Pago</b> soma no <b>Guardado</b>.</div>
         </div>
         <button class="btn icon mini" title="Remover do cadastro (todos os meses)" onclick="removeInvestFixo(${idx})">✕</button>
       </div>
@@ -1474,6 +1589,7 @@ function removeFixo(idx){
   render();
 }
 
+/* ✅ Invest fixo: ao cadastrar -> aparece Pendente no mês atual e nos próximos (pela lógica do getDataMes) */
 function addInvestFixo(){
   if(!USER_ID){ alert("Faça login primeiro"); return; }
   const nome = (document.getElementById("invNome").value||"").trim();
@@ -1487,9 +1603,10 @@ function addInvestFixo(){
   const id = uid();
   investFixos.push({ id, nome, metaFinal, prazoMeses, mensal });
 
+  // garante status do mês atual como Pendente (false)
   const d = getDataMes(mesAtual);
   ensureMonthInvestStatus(d);
-  if(typeof d.investStatus[id] !== "boolean") d.investStatus[id] = false;
+  d.investStatus[id] = false;
 
   document.getElementById("invNome").value="";
   document.getElementById("invMetaFinal").value="";
@@ -1498,8 +1615,9 @@ function addInvestFixo(){
 
   saveAll();
   renderInvestFixos();
-  render();
+  render(); // ✅ já aparece no Home como Pendente
 }
+
 function removeInvestFixo(idx){
   if(idx<0 || idx>=investFixos.length) return;
   const inv = investFixos[idx];
@@ -1556,7 +1674,7 @@ function saveSettings(){
   render();
 }
 
-/* Pendente/Pago (inclui investimento fixo) + ao pagar: anota no guardado */
+/* ✅ Pendente/Pago (inclui investimento fixo) + ao pagar: anota no guardado automaticamente */
 function togglePaid(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
@@ -1791,6 +1909,7 @@ function render(){
   ensureMonthInvestStatus(d);
   d.items.forEach(it=>{
     if(it && it.isInvestFixo && it.invId){
+      if(typeof d.investStatus[it.invId] !== "boolean") d.investStatus[it.invId] = false;
       it.paid = !!d.investStatus[it.invId];
       if(it.paid){
         addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
@@ -1801,7 +1920,6 @@ function render(){
   });
   saveAll();
 
-  // aplica layout do painel antes de renderizar gráficos (pra garantir canvas visível)
   applyHomeLayoutToDOM();
 
   renderKPIs();
@@ -1826,7 +1944,7 @@ function render(){
         .map(x=>ensureItemDefaults({
           desc: x.desc,
           amount: Number(x.amount||0),
-          category: x.category || detectarCategoria(x.desc),
+          category: (x.category && categorias.includes(x.category)) ? x.category : (x.category || detectarCategoria(x.desc)),
           isFixo:false,
           isInvestFixo:false
         }));
@@ -1859,6 +1977,7 @@ function render(){
       ensureMonthInvestStatus(d);
       d.items.forEach(it=>{
         if(it && it.isInvestFixo && it.invId){
+          if(typeof d.investStatus[it.invId] !== "boolean") d.investStatus[it.invId] = false;
           it.paid = !!d.investStatus[it.invId];
           if(it.paid){
             addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
@@ -1981,10 +2100,8 @@ function simularEmprestimo(){
 }
 
 /* =========================
-   IA (✅ Cloudflare Workers AI)
+   IA (Cloudflare Workers AI)
 ========================= */
-
-/* ✅ NOVA FUNÇÃO (substitui chamada local/Ollama) */
 async function callIA(prompt) {
   const base = (window.API_BASE_URL || "").replace(/\/$/, "");
   const resp = await fetch(base + "/api/chat", {
@@ -1998,9 +2115,7 @@ async function callIA(prompt) {
   });
 
   const data = await resp.json().catch(() => ({}));
-  if (!resp.ok) {
-    throw new Error(data?.error || ("Erro HTTP " + resp.status));
-  }
+  if (!resp.ok) throw new Error(data?.error || ("Erro HTTP " + resp.status));
   return data.response || "Sem resposta";
 }
 
@@ -2079,7 +2194,7 @@ ${ctx}
 PERGUNTA:
 ${q}`;
 
-    const ans = await callIA(prompt); // ✅ AQUI usa a nova IA
+    const ans = await callIA(prompt);
     chatAdd("bot", ans);
     statusEl.textContent = "Online ✅";
   }catch(e){
@@ -2097,6 +2212,223 @@ function openIa(){
   iaHealth();
   const base = getIaBase();
   document.getElementById("iaHint").textContent = base ? ("Conectando em: " + base) : "API_BASE_URL vazio.";
+}
+
+/* =========================
+   PDF (✅ novo)
+========================= */
+function monthsOfYear(year){
+  const y = String(year);
+  return Object.keys(state.meses||{}).filter(m=>m.startsWith(y+"-")).sort(); // asc
+}
+function aggregateYear(year){
+  const months = monthsOfYear(year);
+  const byCat = {};
+  const byMonth = []; // {m, salary, spent, saved}
+  months.forEach(m=>{
+    const d = getDataMes(m);
+    const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+    const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
+    const salary= Number(d.salary||0);
+    byMonth.push({ m, salary, spent, saved });
+
+    (d.items||[]).forEach(it=>{
+      const c = it.category||"Outros";
+      byCat[c]=(byCat[c]||0)+Number(it.amount||0);
+    });
+  });
+
+  const catsSorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const topCat = catsSorted[0] ? { cat: catsSorted[0][0], value: catsSorted[0][1] } : { cat:"—", value:0 };
+  return { months, byCat, byMonth, topCat };
+}
+
+async function gerarPDF(){
+  const status = document.getElementById("pdfStatus");
+  try{
+    status.textContent = "Gerando… (pode demorar alguns segundos)";
+
+    const year = document.getElementById("pdfYear").value;
+    const monthNotes = document.getElementById("pdfMonth").value;
+
+    const agg = aggregateYear(year);
+    const notesData = getDataMes(monthNotes);
+
+    // cria um container offscreen
+    const wrap = document.createElement("div");
+    wrap.style.position = "fixed";
+    wrap.style.left = "-9999px";
+    wrap.style.top = "0";
+    wrap.style.width = "900px";
+    wrap.style.padding = "16px";
+    wrap.style.background = "#ffffff";
+    wrap.style.color = "#111";
+    wrap.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+    wrap.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
+        <div>
+          <div style="font-size:22px;font-weight:900">Relatório • Controle de Gastos PRO</div>
+          <div style="font-size:13px;color:#444">Ano: <b>${escapeHtml(year)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
+          <div style="font-size:13px;color:#444">Usuário: <b>${escapeHtml(USER?.displayName||"Usuário")}</b></div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:#444">
+          <div>Mais gastou no ano:</div>
+          <div style="font-size:14px;font-weight:900">${escapeHtml(agg.topCat.cat)} • ${money(agg.topCat.value)}</div>
+        </div>
+      </div>
+
+      <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Gráfico • Categorias do ano</div>
+          <canvas id="pdfChartCats" width="400" height="280"></canvas>
+        </div>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Gráfico • Evolução mensal (gasto)</div>
+          <canvas id="pdfChartEvo" width="400" height="280"></canvas>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
+        <div style="font-weight:900;margin-bottom:8px">Tabela do ano</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr>
+              <th style="text-align:left;border-bottom:1px solid #ddd;padding:8px">Mês</th>
+              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Salário</th>
+              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Gastos</th>
+              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Guardado</th>
+              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Sobra</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${agg.byMonth.map(x=>{
+              const sobra = Number(x.salary||0) - Number(x.spent||0);
+              const dt = new Date(x.m+"-01T00:00:00");
+              const label = dt.toLocaleDateString("pt-BR",{month:"short",year:"numeric"});
+              return `
+                <tr>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-transform:capitalize">${escapeHtml(label)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.salary)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.spent)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.saved)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(sobra)}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Investimentos fixos cadastrados</div>
+          ${
+            (investFixos||[]).length
+            ? (investFixos||[]).map(inv=>{
+                return `<div style="padding:6px 0;border-bottom:1px dashed #eee">
+                  <div style="font-weight:800">${escapeHtml(inv.nome)}</div>
+                  <div style="font-size:12px;color:#444">Meta: ${money(inv.metaFinal)} • Prazo: ${escapeHtml(inv.prazoMeses)} meses • Mensal: <b>${money(inv.mensal)}</b></div>
+                </div>`;
+              }).join("")
+            : `<div style="font-size:12px;color:#444">Nenhum investimento fixo cadastrado.</div>`
+          }
+        </div>
+
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Anotações do mês (${escapeHtml(monthNotes)})</div>
+          ${
+            (notesData.items||[]).length
+            ? (notesData.items||[]).slice(0,28).map(it=>{
+                const st = it.paid ? "Pago" : "Pendente";
+                return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee">
+                  <div style="min-width:0">
+                    <div style="font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(it.desc||"")}</div>
+                    <div style="font-size:12px;color:#444">${escapeHtml(it.category||"Outros")} • ${escapeHtml(st)}${it.isInvestFixo ? " • Juntar" : (it.isFixo ? " • Fixo" : "")}</div>
+                  </div>
+                  <div style="font-weight:900">${money(it.amount||0)}</div>
+                </div>`;
+              }).join("") + ((notesData.items||[]).length>28 ? `<div style="font-size:12px;color:#444;margin-top:8px">… (mostrando 28 itens)</div>` : "")
+            : `<div style="font-size:12px;color:#444">Nenhuma anotação neste mês.</div>`
+          }
+          <div style="margin-top:10px;font-size:12px;color:#444">
+            Salário do mês: <b>${money(notesData.salary||0)}</b> • Guardado: <b>${money((notesData.saved||[]).reduce((a,b)=>a+Number(b.value||0),0))}</b>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;font-size:11px;color:#666">
+        Observação: Este relatório é um resumo do seu controle. Não é recomendação financeira.
+      </div>
+    `;
+    document.body.appendChild(wrap);
+
+    // renderiza charts no container offscreen
+    const catLabels = Object.keys(agg.byCat);
+    const catValues = Object.values(agg.byCat);
+
+    const months = agg.byMonth.map(x=>{
+      const dt = new Date(x.m+"-01T00:00:00");
+      return dt.toLocaleDateString("pt-BR",{month:"short"});
+    });
+    const evoValues = agg.byMonth.map(x=>Number(x.spent||0));
+
+    const catCanvas = wrap.querySelector("#pdfChartCats");
+    const evoCanvas = wrap.querySelector("#pdfChartEvo");
+
+    const catChart = new Chart(catCanvas, {
+      type:"doughnut",
+      data:{ labels: catLabels, datasets:[{ data: catValues }] },
+      options:{ plugins:{ legend:{ position:"bottom" } } }
+    });
+    const evoChart = new Chart(evoCanvas, {
+      type:"line",
+      data:{ labels: months, datasets:[{ data: evoValues }] },
+      options:{ plugins:{ legend:{ display:false } } }
+    });
+
+    // espera o chart desenhar
+    await new Promise(r=>setTimeout(r, 250));
+
+    // screenshot do conteúdo
+    const canvas = await html2canvas(wrap, { scale: 2, backgroundColor:"#ffffff" });
+    const imgData = canvas.toDataURL("image/png");
+
+    // monta PDF A4
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p","mm","a4");
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+
+    // calcula altura proporcional
+    const imgW = pageW;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    let y = 0;
+    let remaining = imgH;
+
+    // primeira página
+    pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+    remaining -= pageH;
+
+    // páginas extras se precisar
+    while(remaining > 0){
+      pdf.addPage();
+      y = - (imgH - remaining);
+      pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+      remaining -= pageH;
+    }
+
+    // limpa
+    catChart.destroy(); evoChart.destroy();
+    wrap.remove();
+
+    pdf.save(`relatorio_gastos_${year}.pdf`);
+    status.textContent = "PDF gerado ✅";
+  }catch(e){
+    status.textContent = "Erro ao gerar PDF: " + (e.message||e);
+  }
 }
 
 /* =========================
@@ -2129,6 +2461,7 @@ async function initFirebase(){
     renderInvestFixos();
     updateInvestUI();
     updateInvResumo();
+    buildPdfSelectors();
 
     const tipoSel = document.getElementById("tipoSimulacao");
     if(tipoSel && !tipoSel.dataset.bound){
@@ -2201,7 +2534,6 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   if(!ok) return;
 
   applyThemeSettings();
-  // se abrir editor sem login, ainda mostra algo
   renderHomeEditorUI();
 });
 </script>
