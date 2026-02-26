@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>IA PRO</title>
+
+<meta name="theme-color" content="#569cff">
+
+<script>
+  // ✅ mesma IA
+  window.API_BASE_URL = "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
+  window.APP_KEY = "GastosPro@2026!";
+</script>
+
+<style>
+:root{
+  --bg:#07101f;
+  --grad1: rgba(86,156,255,.22);
+  --grad2: rgba(57,217,138,.16);
+  --grad3: rgba(255,93,93,.12);
+
+  --panel: rgba(255,255,255,.06);
+  --panel2: rgba(255,255,255,.08);
+  --stroke: rgba(255,255,255,.10);
+  --text:#eaf0ff;
+  --muted: rgba(234,240,255,.72);
+  --accent:#569cff;
+
+  --good:#39d98a;
+  --warn:#ffd166;
+  --shadow: 0 18px 60px rgba(0,0,0,.45);
+  --glass: blur(14px);
+}
+.light{
+  --bg:#f4f6ff;
+  --grad1: rgba(86,156,255,.20);
+  --grad2: rgba(57,217,138,.14);
+  --grad3: rgba(255,93,93,.10);
+
+  --panel: rgba(0,0,0,.04);
+  --panel2: rgba(0,0,0,.06);
+  --stroke: rgba(0,0,0,.08);
+  --text:#0d1222;
+  --muted: rgba(13,18,34,.68);
+  --shadow: 0 18px 60px rgba(0,0,0,.12);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
+    radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
+    radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+}
+
+.btn{
+  appearance:none;border:0;cursor:pointer;
+  background: rgba(255,255,255,.10);
+  color:var(--text);
+  padding:12px 12px;border-radius:14px;
+  border:1px solid var(--stroke);
+  font-weight:750;
+}
+.btn.primary{
+  background: var(--accent);
+  border-color: color-mix(in srgb, var(--accent), transparent 55%);
+  color:#fff;
+}
+.btn.icon{
+  width:46px;height:46px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  padding:0;
+}
+.btn:active{transform:translateY(1px)}
+
+.shell{
+  height: 100vh;
+  display:flex;
+  flex-direction:column;
+  padding: 14px;
+  gap: 12px;
+}
+
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding: 12px;
+  border-radius: 22px;
+  border: 1px solid var(--stroke);
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  box-shadow: var(--shadow);
+  backdrop-filter: var(--glass);
+}
+
+.title{
+  display:flex;align-items:center;gap:10px;min-width:0;
+}
+.logo{
+  width:44px;height:44px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  background: radial-gradient(60px 50px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
+              linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 12%), color-mix(in srgb, var(--accent), #000 25%));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow: 0 14px 38px rgba(0,0,0,.28);
+  font-weight:1000;
+  color:#06162d;
+}
+.light .logo{color:#06162d}
+.titleText{min-width:0}
+.titleText .h{
+  font-weight:950;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.titleText .s{
+  font-size:12px;color:var(--muted);margin-top:2px;
+}
+
+.statusPill{
+  display:inline-flex;gap:8px;align-items:center;
+  padding:8px 10px;border-radius:999px;
+  background: rgba(255,255,255,.10);
+  border:1px solid var(--stroke);
+  font-size:12px;color:var(--muted);
+}
+.dot{
+  width:10px;height:10px;border-radius:999px;
+  background: var(--warn);
+  box-shadow: 0 0 0 4px rgba(255,209,102,.12);
+}
+.dot.ok{
+  background: var(--good);
+  box-shadow: 0 0 0 4px rgba(57,217,138,.12);
+}
+
+/* ✅ Chat ocupa quase toda a tela */
+.chat{
+  flex: 1;
+  min-height: 0;
+  border-radius: 24px;
+  border:1px solid var(--stroke);
+  background:
+    radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.12), transparent 55%),
+    radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.10), transparent 60%),
+    rgba(0,0,0,.14);
+  box-shadow: var(--shadow);
+  backdrop-filter: var(--glass);
+  overflow:auto;
+  padding: 16px;
+}
+.light .chat{
+  background:
+    radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.10), transparent 55%),
+    radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.08), transparent 60%),
+    rgba(255,255,255,.65);
+}
+
+.row{display:flex;margin:10px 0}
+.row.me{justify-content:flex-end}
+.row.bot{justify-content:flex-start}
+
+.bubble{
+  max-width: 88%;
+  padding: 12px 12px;
+  border-radius: 18px;
+  border:1px solid var(--stroke);
+  line-height:1.35;
+  white-space:pre-wrap;
+}
+.bubble.me{
+  background:
+    radial-gradient(120px 90px at 20% 10%, rgba(255,255,255,.22), transparent 60%),
+    color-mix(in srgb, var(--accent), transparent 78%);
+}
+.bubble.bot{
+  background: rgba(255,255,255,.08);
+}
+
+.quick{
+  display:flex;gap:8px;flex-wrap:wrap;
+  padding: 0 2px;
+}
+.chip{
+  padding:10px 12px;
+  border-radius:999px;
+  background: rgba(255,255,255,.08);
+  border:1px solid var(--stroke);
+  font-size:12px;
+  color: var(--muted);
+  cursor:pointer;
+  user-select:none;
+}
+.chip:active{transform:translateY(1px)}
+
+/* ✅ Composer estilo chat moderno */
+.composer{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+  padding: 12px;
+  border-radius: 22px;
+  border: 1px solid var(--stroke);
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  box-shadow: var(--shadow);
+  backdrop-filter: var(--glass);
+}
+.inputWrap{
+  flex:1;
+  border-radius: 18px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.06);
+  padding: 10px 12px;
+}
+.inputWrap:focus-within{
+  border-color: color-mix(in srgb, var(--accent), transparent 30%);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent), transparent 85%);
+}
+textarea{
+  width:100%;
+  min-height:44px;
+  max-height:140px;
+  resize:none;
+  border:0;outline:none;
+  background:transparent;
+  color:var(--text);
+  font-size:14px;
+}
+.light textarea{color:var(--text)}
+.small{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+
+<body>
+
+<div class="shell">
+  <div class="top">
+    <div class="title">
+      <div class="logo">IA</div>
+      <div class="titleText">
+        <div class="h">IA PRO • Consultor Financeiro</div>
+        <div class="s" id="iaHint">Conectando…</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="statusPill">
+        <span class="dot" id="dot"></span>
+        <span id="status">Aguardando…</span>
+      </div>
+      <!-- ✅ botão X de voltar -->
+      <button class="btn icon" onclick="goBack()" title="Voltar">✕</button>
+    </div>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <div class="quick">
+    <div class="chip" onclick="quick('Me faça um resumo do mês e diga onde dá pra economizar.')">Resumo do mês</div>
+    <div class="chip" onclick="quick('Qual foi a categoria que mais gastei e como reduzir?')">Onde reduzir</div>
+    <div class="chip" onclick="quick('Me sugira um plano para guardar dinheiro todo mês.')">Plano de guardar</div>
+    <div class="chip" onclick="quick('Analise se meu mês está saudável e me dê 3 ações práticas.')">Saúde financeira</div>
+  </div>
+
+  <div class="composer">
+    <div class="inputWrap">
+      <textarea id="prompt" placeholder="Digite sua pergunta… (Shift+Enter quebra linha)"></textarea>
+      <div class="small">Use seus gastos do mês para recomendações práticas (sem promessas).</div>
+    </div>
+    <button class="btn primary" onclick="send()">Enviar</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+<script>
+/* ✅ mesmo Firebase do app */
+const FIREBASE_CONFIG = {
+  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+  authDomain:"controle-gastos-pro.firebaseapp.com",
+  projectId:"controle-gastos-pro"
+};
+
+let auth=null;
+let USER=null;
+let USER_ID=null;
+
+let state={ meses:{} };
+let mesAtual=new Date().toISOString().slice(0,7);
+
+/* ===== helpers ===== */
+function money(n){ return Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}); }
+function setStatus(text, ok){
+  document.getElementById("status").textContent=text;
+  document.getElementById("dot").classList.toggle("ok", !!ok);
+}
+function add(role, text){
+  const box=document.getElementById("chat");
+  const row=document.createElement("div");
+  row.className="row "+(role==="me"?"me":"bot");
+  const b=document.createElement("div");
+  b.className="bubble "+(role==="me"?"me":"bot");
+  b.textContent=text;
+  row.appendChild(b);
+  box.appendChild(row);
+  box.scrollTop=box.scrollHeight;
+}
+function quick(text){
+  const p=document.getElementById("prompt");
+  p.value=text;
+  p.focus();
+}
+
+/* ✅ volta pro index e tenta voltar pra tela que estava */
+function goBack(){
+  // tenta voltar para tela salva, se existir
+  location.href = "./index.html";
+}
+
+/* ===== storage ===== */
+function kMes(){ return "gastos_pro_state_" + USER_ID; }
+function loadAll(){
+  try{
+    const raw = localStorage.getItem(kMes());
+    state = raw ? (JSON.parse(raw)||{meses:{}}) : {meses:{}};
+  }catch(e){
+    state={meses:{}};
+  }
+}
+function ensureMonthInvestStatus(d){
+  if(!d.investStatus || typeof d.investStatus!=="object") d.investStatus = {};
+  return d.investStatus;
+}
+function ensureSavedArray(d){
+  if(!Array.isArray(d.saved)) d.saved=[];
+  return d.saved;
+}
+function getDataMes(m){
+  const mm=m||mesAtual;
+  if(!state.meses[mm]) state.meses[mm]={salary:0,meta:0,items:[],saved:[],hiddenFixos:[],investStatus:{}};
+  const d=state.meses[mm];
+  if(!Array.isArray(d.items)) d.items=[];
+  ensureSavedArray(d);
+  ensureMonthInvestStatus(d);
+  return d;
+}
+function buildIaContext(){
+  const d=getDataMes(mesAtual);
+  const spent=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+  const saved=(d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
+  const salary=Number(d.salary||0);
+  const left=salary-spent;
+
+  const topCats={};
+  (d.items||[]).forEach(it=>{
+    const c=it.category||"Outros";
+    topCats[c]=(topCats[c]||0)+Number(it.amount||0);
+  });
+  const catsSorted=Object.entries(topCats).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  return [
+    `Mês: ${mesAtual}`,
+    `Salário: ${salary}`,
+    `Gasto total: ${spent}`,
+    `Sobra: ${left}`,
+    `Guardado no mês: ${saved}`,
+    `Top categorias: ${catsSorted.map(([c,v])=>`${c}=${v}`).join(", ")}`
+  ].join("\n");
+}
+
+/* ===== IA call ===== */
+async function callIA(prompt){
+  const base=(window.API_BASE_URL||"").replace(/\/$/,"");
+  const resp=await fetch(base + "/api/chat",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-app-key": window.APP_KEY
+    },
+    body: JSON.stringify({ prompt }),
+    cache:"no-store"
+  });
+  const data=await resp.json().catch(()=>({}));
+  if(!resp.ok) throw new Error(data?.error || ("Erro HTTP " + resp.status));
+  return data.response || "Sem resposta";
+}
+
+async function health(){
+  try{
+    const base=(window.API_BASE_URL||"").replace(/\/$/,"");
+    document.getElementById("iaHint").textContent = "Conectando em: " + base;
+    const r=await fetch(base + "/",{cache:"no-store", headers:{ "x-app-key": window.APP_KEY }});
+    await r.json().catch(()=>({}));
+    setStatus("Online ✅", true);
+  }catch(e){
+    setStatus("Offline", false);
+  }
+}
+
+async function send(){
+  const input=document.getElementById("prompt");
+  const q=(input.value||"").trim();
+  if(!q) return;
+  input.value="";
+  add("me", q);
+  setStatus("Consultando…", false);
+
+  try{
+    const ctx=buildIaContext();
+    const prompt =
+`Você é a IA PRO, consultor financeiro simples.
+Responda em PT-BR, direto e prático.
+Use os dados do mês para sugerir ações e investimentos coerentes, sem prometer ganhos.
+Se faltar dado, peça o mínimo necessário.
+Formate respostas com bullets quando fizer sentido.
+
+DADOS DO USUÁRIO:
+${ctx}
+
+PERGUNTA:
+${q}`;
+    const ans=await callIA(prompt);
+    add("bot", ans);
+    setStatus("Online ✅", true);
+  }catch(e){
+    add("bot","Erro ao conectar na IA: " + (e.message||e));
+    setStatus("Offline", false);
+  }
+}
+
+/* Enter envia (Shift+Enter quebra linha) */
+document.getElementById("prompt").addEventListener("keydown",(e)=>{
+  if(e.key==="Enter" && !e.shiftKey){
+    e.preventDefault();
+    send();
+  }
+});
+
+/* ===== init ===== */
+(async ()=>{
+  const t = localStorage.getItem("theme");
+  if(t==="light") document.body.classList.add("light");
+
+  try{ firebase.initializeApp(FIREBASE_CONFIG); }catch(e){}
+  auth=firebase.auth();
+  auth.onAuthStateChanged((u)=>{
+    USER=u||null;
+    if(!USER){
+      // se não estiver logado, volta pro login do app
+      location.replace("./login.html");
+      return;
+    }
+    USER_ID=USER.uid;
+    loadAll();
+
+    if(!document.getElementById("chat").dataset.inited){
+      add("bot","Oi! Eu sou a IA PRO. Me pergunte sobre seus gastos, salário e como investir melhor. 🙂");
+      add("bot","Dica: peça um resumo do mês, onde cortar gastos e um plano de guardar dinheiro.");
+      document.getElementById("chat").dataset.inited="1";
+    }
+
+    health();
+  });
+})();
+</script>
+</body>
+</html>
