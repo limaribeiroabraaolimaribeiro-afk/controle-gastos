@@ -606,7 +606,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
       <div class="card">
         <h3>Seus meses salvos</h3>
-        <div class="small">Toque em um mês para abrir na tela principal.</div>
+        <div class="small">Toque em um mês para abrir na tela principal. Use o <b>✕</b> para deletar o mês do histórico.</div>
         <div class="hr"></div>
         <div id="historyList"></div>
       </div>
@@ -979,11 +979,34 @@ function renderInvestFixos(){
   }).join("");
 }
 
+/* ✅ Deletar mês do histórico (estado local) */
+function deleteMonth(m){
+  if(!USER_ID) return;
+  if(!state.meses || !state.meses[m]) return;
+
+  const dt = new Date(m+"-01T00:00:00");
+  const label = dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+  if(!confirm(`Deletar o mês de ${label} do histórico?`)) return;
+
+  delete state.meses[m];
+  saveAll();
+
+  // ajusta mesAtual se apagou o mês atual
+  if(mesAtual === m){
+    mesAtual = new Date().toISOString().slice(0,7);
+  }
+
+  buildMonthSelect();
+  buildHistoryUI();
+  render();
+}
+
 function buildHistoryUI(){
   const div = document.getElementById("historyList");
   if(!div) return;
   const meses = Object.keys(state.meses||{}).sort().reverse();
   if(!meses.length){ div.innerHTML = `<div class="small">Nenhum mês salvo ainda. Use “Salvar” na tela inicial.</div>`; return; }
+
   div.innerHTML = meses.map(m=>{
     const d = getDataMes(m);
     const total = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
@@ -991,11 +1014,17 @@ function buildHistoryUI(){
     const left = Number(d.salary||0) - total;
     const dt = new Date(m+"-01T00:00:00");
     const label = dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+
     return `
       <div class="note" style="cursor:pointer" onclick="openMonthFromHistory('${m}')">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
-          <div style="font-weight:950;text-transform:capitalize">${escapeHtml(label)}</div>
-          <span class="badge">${money(left)} sobra</span>
+          <div style="display:flex;align-items:center;gap:10px;min-width:0">
+            <div style="font-weight:950;text-transform:capitalize;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(label)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex:0 0 auto">
+            <span class="badge">${money(left)} sobra</span>
+            <button class="btn icon mini" title="Deletar mês do histórico" onclick="event.stopPropagation(); deleteMonth('${m}')">✕</button>
+          </div>
         </div>
         <div class="small" style="margin-top:6px">
           Salário: <b>${money(d.salary||0)}</b> • Gasto: <b>${money(total)}</b> • Guardado: <b>${money(saved)}</b>
@@ -1118,7 +1147,7 @@ function saveSettings(){
   render();
 }
 
-/* ✅ Toggle pago/pendente */
+/* ✅ Toggle pago/pendente (vale também para investimentos fixos na tela principal) */
 function togglePaid(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
@@ -1247,8 +1276,10 @@ function drawChart(items){
     options:{ plugins:{ legend:{ labels:{ color: getComputedStyle(document.body).getPropertyValue("--text") } } } }
   });
 }
+
+/* ✅ GRÁFICO DE TODOS OS MESES ARRUMADO (ordem invertida para não ficar "de trás pra frente") */
 function drawEvolucao(){
-  const meses = Object.keys(state.meses||{}).sort();
+  const meses = Object.keys(state.meses||{}).sort().reverse(); // << aqui foi ajustado
   if(!meses.length) return;
   const valores = meses.map(m=>{
     const d = getDataMes(m);
@@ -1258,7 +1289,13 @@ function drawEvolucao(){
   graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{
     type:"line",
     data:{ labels: meses, datasets:[{ data: valores }] },
-    options:{ plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color: getComputedStyle(document.body).getPropertyValue("--muted") } }, y:{ ticks:{ color: getComputedStyle(document.body).getPropertyValue("--muted") } } } }
+    options:{
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{ color: getComputedStyle(document.body).getPropertyValue("--muted") } },
+        y:{ ticks:{ color: getComputedStyle(document.body).getPropertyValue("--muted") } }
+      }
+    }
   });
 }
 
