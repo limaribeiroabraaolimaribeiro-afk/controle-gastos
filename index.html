@@ -12,7 +12,7 @@
 :root{
   --bg:#07101f;
 
-  /* ✅ Gradientes do fundo (agora configuráveis) */
+  /* Fundo (configurável) */
   --grad1: rgba(86,156,255,.22);
   --grad2: rgba(57,217,138,.16);
   --grad3: rgba(255,93,93,.12);
@@ -23,7 +23,7 @@
   --text:#eaf0ff;
   --muted: rgba(234,240,255,.72);
 
-  /* ✅ Cor principal (botões/painéis principais) configurável */
+  /* Cor principal (configurável) */
   --accent:#569cff;
 
   --good:#39d98a;
@@ -388,7 +388,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <h3>Lista do mês</h3>
         <div class="small" style="margin-bottom:10px">
           Toque em <b>Pendente/Pago</b> para marcar se você já pagou.
-          <!-- ✅ Investimento fixo (Juntar) também aparece aqui e usa o mesmo Pendente/Pago -->
+          <br>✅ Itens de investimento fixo (Juntar) também aparecem aqui.
         </div>
         <table class="list" id="list"></table>
       </div>
@@ -447,7 +447,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- ✅ SCREEN: THEMES -->
+    <!-- SCREEN: THEMES -->
     <div class="screen" id="screen-themes">
       <div class="backRow">
         <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
@@ -456,7 +456,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
       <div class="card">
         <h3>Cor do app (painel/fundo)</h3>
-        <div class="small">Escolha um estilo de fundo. Isso muda a “cor do painel principal em si”.</div>
+        <div class="small">Escolha um estilo de fundo. Isso muda o painel principal.</div>
 
         <div class="hr"></div>
 
@@ -471,8 +471,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
         <div class="hr"></div>
 
-        <h3>Cor dos botões (accent)</h3>
-        <div class="small">Isso muda os botões principais e detalhes do app.</div>
+        <h3>Cor dos botões</h3>
+        <div class="small">Muda os botões principais e detalhes do app.</div>
 
         <div class="grid2" style="margin-top:10px">
           <div>
@@ -481,7 +481,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           </div>
           <div class="note">
             <div style="font-weight:900">Prévia</div>
-            <div class="small" style="margin-top:6px">Botões “Salvar / Adicionar” ficam nessa cor.</div>
             <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
               <button class="btn primary mini" type="button">Primário</button>
               <button class="btn mini" type="button">Normal</button>
@@ -537,7 +536,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <button class="btn primary" style="margin-top:10px" onclick="addFixo()">Adicionar</button>
 
         <div class="hr"></div>
-        <div class="small">⚠️ Agora o X aqui remove o fixo do sistema. Na lista do mês (Home), o X remove só daquele mês.</div>
+        <div class="small">⚠️ O X aqui remove do sistema. Na lista do mês (Home), o X remove só daquele mês.</div>
         <div class="hr"></div>
         <div id="listaFixos" class="small"></div>
       </div>
@@ -556,7 +555,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           Você informa <b>Nome</b>, <b>Meta final (R$)</b> e <b>Prazo (meses)</b>.
           O app calcula automaticamente o <b>valor mensal</b> (meta ÷ meses).
           Esse valor aparece em <b>todos os meses</b> como um item fixo “Juntar”.
-          ✅ E esse item aparece na tela principal com <b>Pendente/Pago</b>.
+          ✅ E aparece na tela principal junto com as anotações como <b>Pendente/Pago</b>.
         </div>
       </div>
 
@@ -835,13 +834,12 @@ let graficoEvolucao = null;
 let lastNonHistoryScreen = "screen-home";
 
 /* =========================
-   THEME (✅ NOVO)
+   THEME
 ========================= */
 const THEME_KEYS = {
   preset: "theme_preset_v1",
   accent: "theme_accent_v1"
 };
-
 const THEME_PRESETS = {
   default: { bgDark:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
   purple:  { bgDark:"#0d0a1f", g1:"rgba(170,110,255,.25)", g2:"rgba(86,156,255,.12)", g3:"rgba(57,217,138,.10)" },
@@ -853,31 +851,23 @@ const THEME_PRESETS = {
 function applyThemeSettings(){
   const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
   const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
-
   const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
 
-  // aplica accent
   document.documentElement.style.setProperty("--accent", accent);
-
-  // aplica fundo/gradientes (somente no modo atual; no light ele usa os valores do .light,
-  // mas ainda deixamos os gradientes aqui para manter coerência)
   document.documentElement.style.setProperty("--bg", p.bgDark);
   document.documentElement.style.setProperty("--grad1", p.g1);
   document.documentElement.style.setProperty("--grad2", p.g2);
   document.documentElement.style.setProperty("--grad3", p.g3);
 
-  // atualiza UI da tela temas (se existir)
   const sel = document.getElementById("themePreset");
   if(sel) sel.value = preset;
 
   const pick = document.getElementById("accentPicker");
   if(pick) pick.value = accent;
 
-  // meta theme-color (PWA)
   const meta = document.querySelector('meta[name="theme-color"]');
   if(meta) meta.setAttribute("content", accent);
 }
-
 function saveThemePreset(){
   const sel = document.getElementById("themePreset");
   const preset = sel ? sel.value : "default";
@@ -917,7 +907,6 @@ function goBackFromHistory(){ showScreen(lastNonHistoryScreen || "screen-home");
 function toggleTheme(){
   document.body.classList.toggle("light");
   localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
-  // reaplica para manter theme-color atualizado
   applyThemeSettings();
 }
 function openModal(id){ const o=document.getElementById(id); if(o) o.style.display="flex"; }
@@ -936,18 +925,21 @@ function kInv(){ return "inv_fixos_" + USER_ID; }
 ========================= */
 function loadAll(){
   try{ const raw = localStorage.getItem(kMes()); if(raw) state = JSON.parse(raw) || {meses:{}}; }catch(e){ state={meses:{}}; }
+
   try{
     const raw = localStorage.getItem(kCat());
     categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
     if(!Array.isArray(categorias) || !categorias.length) categorias=[...DEFAULT_CATEGORIAS];
     if(!categorias.some(c=>String(c).toLowerCase()==="investimentos")) categorias.splice(categorias.length-1,0,"Investimentos");
   }catch(e){ categorias=[...DEFAULT_CATEGORIAS]; }
+
   try{
     const raw = localStorage.getItem(kFix());
     fixos = raw ? JSON.parse(raw) : [];
     if(!Array.isArray(fixos)) fixos=[];
     fixos = fixos.map(f=>({ ...f, isFixo:true }));
   }catch(e){ fixos=[]; }
+
   try{
     const raw = localStorage.getItem(kInv());
     investFixos = raw ? JSON.parse(raw) : [];
@@ -970,9 +962,15 @@ function detectarCategoria(desc){
   return "Outros";
 }
 
+/* ✅ Investimento fixo com status por mês (para não sumir na tela principal) */
+function ensureMonthInvestStatus(d){
+  if(!d.investStatus || typeof d.investStatus!=="object") d.investStatus = {};
+  return d.investStatus;
+}
+
 function ensureItemDefaults(it){
   if(!it) return it;
-  if(typeof it.paid !== "boolean") it.paid = false; // ✅ pendente/pago para TUDO (inclui investimento fixo)
+  if(typeof it.paid !== "boolean") it.paid = false;
   return it;
 }
 
@@ -982,18 +980,20 @@ function fixKey(desc, amount, category){
 
 function getDataMes(m){
   const mm = m || mesAtual;
-  if(!state.meses[mm]) state.meses[mm] = { salary:0, meta:0, items:[], saved:[], hiddenFixos:[] };
+  if(!state.meses[mm]) state.meses[mm] = { salary:0, meta:0, items:[], saved:[], hiddenFixos:[], investStatus:{} };
   const d = state.meses[mm];
 
   if(!Array.isArray(d.items)) d.items=[];
   if(!Array.isArray(d.saved)) d.saved=[];
   if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos=[];
+  ensureMonthInvestStatus(d);
 
   d.items = d.items.map(ensureItemDefaults);
 
   const hidden = new Set(d.hiddenFixos.map(String));
   const present = new Set(d.items.map(it=>fixKey(it.desc,it.amount,it.category)));
 
+  // Fixos normais
   for(const f of fixos){
     const fk = fixKey(f.desc, f.amount, f.category);
     if(hidden.has(fk)) continue;
@@ -1002,19 +1002,24 @@ function getDataMes(m){
     present.add(fk);
   }
 
+  // ✅ Investimentos fixos como "anotações" na tela principal, com Pendente/Pago do mês
   for(const inv of investFixos){
-    const fk = fixKey(`Juntar: ${inv.nome}`, Number(inv.mensal||0), "Investimentos");
+    const desc = `Juntar: ${inv.nome}`;
+    const amount = Number(inv.mensal||0);
+    const fk = fixKey(desc, amount, "Investimentos");
     if(hidden.has(fk)) continue;
     if(present.has(fk)) continue;
 
-    // ✅ aparece na tela principal e já vem com Pendente/Pago
+    const paid = !!d.investStatus[inv.id]; // status por mês
+
     d.items.unshift(ensureItemDefaults({
-      desc:`Juntar: ${inv.nome}`,
-      amount:Number(inv.mensal||0),
+      desc,
+      amount,
       category:"Investimentos",
       isFixo:true,
       isInvestFixo:true,
-      invId: inv.id
+      invId: inv.id,
+      paid
     }));
     present.add(fk);
   }
@@ -1116,7 +1121,7 @@ function renderInvestFixos(){
           <div style="font-weight:950">📌 ${escapeHtml(inv.nome)}</div>
           <div class="small" style="margin-top:6px">Meta: <b>${money(meta)}</b> • Prazo: <b>${meses} meses</b></div>
           <div class="small">Mensal automático: <b class="successText">${money(mensal)}</b></div>
-          <div class="small">✅ Aparece na tela principal como <b>Pendente/Pago</b> (item “Juntar”).</div>
+          <div class="small">✅ Aparece na tela principal como item “Juntar” com <b>Pendente/Pago</b>.</div>
         </div>
         <button class="btn icon mini" title="Remover do cadastro (todos os meses)" onclick="removeInvestFixo(${idx})">✕</button>
       </div>
@@ -1232,7 +1237,14 @@ function addInvestFixo(){
   if(!metaFinal || metaFinal<=0) return alert("Digite a Meta final (R$).");
   if(!prazoMeses || prazoMeses<=0) return alert("Digite o Prazo (meses).");
   const mensal = calcMensalAuto(metaFinal, prazoMeses);
-  investFixos.push({ id: uid(), nome, metaFinal, prazoMeses, mensal });
+
+  const id = uid();
+  investFixos.push({ id, nome, metaFinal, prazoMeses, mensal });
+
+  // garante status inicial (pendente) para o mês atual
+  const d = getDataMes(mesAtual);
+  ensureMonthInvestStatus(d);
+  if(typeof d.investStatus[id] !== "boolean") d.investStatus[id] = false;
 
   document.getElementById("invNome").value="";
   document.getElementById("invMetaFinal").value="";
@@ -1241,10 +1253,18 @@ function addInvestFixo(){
 
   saveAll();
   renderInvestFixos();
-  render();
+  render(); // ✅ para aparecer na tela principal na hora
 }
 function removeInvestFixo(idx){
   if(idx<0 || idx>=investFixos.length) return;
+  const inv = investFixos[idx];
+
+  // remove status de todos os meses
+  Object.keys(state.meses||{}).forEach(m=>{
+    const d = state.meses[m];
+    if(d && d.investStatus && inv && inv.id) delete d.investStatus[inv.id];
+  });
+
   investFixos.splice(idx,1);
   saveAll();
   renderInvestFixos();
@@ -1289,18 +1309,25 @@ function saveSettings(){
   render();
 }
 
-/* ✅ Pendente/Pago (vale para o investimento fixo também) */
+/* ✅ Pendente/Pago (inclui investimento fixo e grava status por mês) */
 function togglePaid(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
   if(!it) return;
+
   it.paid = !it.paid;
+
+  // se for investimento fixo, salva no mapa do mês para nunca sumir
+  if(it.isInvestFixo && it.invId){
+    ensureMonthInvestStatus(d);
+    d.investStatus[it.invId] = !!it.paid;
+  }
+
   saveAll();
   renderList();
   renderKPIs();
 }
 
-/* remover só do mês (sem apagar do cadastro) */
 function hideFixoOnlyThisMonth(it){
   const d = getDataMes(mesAtual);
   const fk = fixKey(it.desc, it.amount, it.category);
@@ -1411,7 +1438,7 @@ function drawChart(items){
   });
 }
 
-/* ✅ Gráfico de todos os meses (ordem correta) */
+/* Evolução (ordem correta) */
 function drawEvolucao(){
   const meses = Object.keys(state.meses||{}).sort().reverse();
   if(!meses.length) return;
@@ -1454,12 +1481,10 @@ function renderList(){
             ${statusBadge}
           </div>
           <div class="small">${money(i.amount||0)}</div>
-
           <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn ${btnPaidClass} mini" onclick="togglePaid(${idx})">${btnPaidText}</button>
           </div>
         </td>
-
         <td style="width:64px;text-align:right">
           <button class="btn icon mini" onclick="delItemSmart(${idx})" title="Remover">✕</button>
         </td>
@@ -1507,6 +1532,7 @@ function render(){
         if(first.meta!=null) d.meta = Number(first.meta||d.meta||0);
       }
 
+      // itens da API (não fixos)
       const apiItems = data
         .filter(x=>x && x.desc)
         .map(x=>ensureItemDefaults({
@@ -1517,11 +1543,14 @@ function render(){
           isInvestFixo:false
         }));
 
+      // reconstrói com fixos (inclui Juntar) + locais não fixos + api
       const hidden = new Set((d.hiddenFixos||[]).map(String));
       const merged = [];
       const seen = new Set();
 
+      // fixa: pega um fresh do mês (que injeta Juntar sempre)
       const fresh = getDataMes(mesAtual);
+
       for(const it of (fresh.items||[]).filter(x=>x.isFixo)){
         const fk = fixKey(it.desc,it.amount,it.category);
         if(hidden.has(fk)) continue;
@@ -1540,6 +1569,15 @@ function render(){
       }
 
       d.items = merged.map(ensureItemDefaults);
+
+      // garante que os "Juntar" tenham o status correto do mês
+      ensureMonthInvestStatus(d);
+      d.items.forEach(it=>{
+        if(it && it.isInvestFixo && it.invId){
+          it.paid = !!d.investStatus[it.invId];
+        }
+      });
+
       saveAll();
 
       renderKPIs();
@@ -1783,7 +1821,6 @@ async function initFirebase(){
     const t = localStorage.getItem("theme");
     if(t==="light") document.body.classList.add("light");
 
-    // ✅ aplica tema salvo (accent + preset)
     applyThemeSettings();
 
     loadAll();
@@ -1859,16 +1896,11 @@ function escapeHtml(s){
    BOOT
 ========================= */
 document.addEventListener("DOMContentLoaded", async ()=>{
-  // aplica tema antes de tudo para já aparecer certo
   applyThemeSettings();
-
   showLoading();
   const ok = await initFirebase();
   if(!ok) return;
-
-  // garante UI da tela temas preenchida
   applyThemeSettings();
-
   renderCategorias();
   updateInvestUI();
   updateInvResumo();
