@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Comando de Voz • Controle de Gastos PRO</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#569cff">
+
+<style>
+:root{
+  --bg:#07101f;
+  --grad1: rgba(86,156,255,.22);
+  --grad2: rgba(57,217,138,.16);
+  --grad3: rgba(255,93,93,.12);
+
+  --panel: rgba(255,255,255,.06);
+  --panel2: rgba(255,255,255,.08);
+  --stroke: rgba(255,255,255,.10);
+  --text:#eaf0ff;
+  --muted: rgba(234,240,255,.72);
+  --accent:#569cff;
+  --good:#39d98a;
+  --warn:#ffd166;
+  --danger:#ff5d5d;
+  --shadow: 0 18px 60px rgba(0,0,0,.45);
+  --glass: blur(14px);
+}
+
+.light{
+  --panel: rgba(0,0,0,.04);
+  --panel2: rgba(0,0,0,.06);
+  --stroke: rgba(0,0,0,.08);
+  --text:#0d1222;
+  --muted: rgba(13,18,34,.68);
+  --shadow: 0 18px 60px rgba(0,0,0,.12);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
+    radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
+    radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+}
+.wrap{
+  max-width:760px;
+  margin:auto;
+  padding:16px;
+  padding-bottom:40px;
+}
+.card{
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  border:1px solid var(--stroke);
+  border-radius:24px;
+  padding:16px;
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--glass);
+}
+h1{margin:0;font-size:22px}
+h2{margin:0;font-size:16px}
+.small{font-size:12px;color:var(--muted)}
+.hr{height:1px;background:var(--stroke);margin:14px 0}
+.btn{
+  appearance:none;border:0;cursor:pointer;
+  background:rgba(255,255,255,.10);
+  color:var(--text);
+  padding:12px 14px;
+  border-radius:16px;
+  border:1px solid var(--stroke);
+  font-weight:800;
+  box-shadow:0 10px 26px rgba(0,0,0,.18);
+}
+.btn.primary{
+  background:var(--accent);
+  border-color: color-mix(in srgb, var(--accent), transparent 55%);
+  color:#fff;
+}
+.btn.good{
+  background:var(--good);
+  border-color: color-mix(in srgb, var(--good), transparent 55%);
+  color:#062114;
+}
+.btn.warn{
+  background:var(--warn);
+  border-color: color-mix(in srgb, var(--warn), transparent 55%);
+  color:#281a00;
+}
+.btn.danger{
+  background:var(--danger);
+  border-color: color-mix(in srgb, var(--danger), transparent 55%);
+  color:#2b0707;
+}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row > *{flex:1}
+.note{
+  background: rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  border-radius:18px;
+  padding:12px;
+}
+.badge{
+  display:inline-flex;gap:6px;align-items:center;
+  padding:4px 10px;border-radius:999px;
+  background: rgba(255,255,255,.10);
+  border:1px solid var(--stroke);
+  font-size:12px;color:var(--muted);
+}
+.badge.good{color:var(--good);border-color:rgba(57,217,138,.35);background:rgba(57,217,138,.10)}
+.badge.warn{color:var(--warn);border-color:rgba(255,209,102,.35);background:rgba(255,209,102,.10)}
+textarea,input{
+  width:100%;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid var(--stroke);
+  background: rgba(0,0,0,.15);
+  color:var(--text);
+  outline:none;
+  font-size:14px;
+}
+.light textarea,.light input{background: rgba(255,255,255,.75)}
+label{display:block;margin-bottom:6px;font-size:12px;color:var(--muted)}
+.top{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  margin-bottom:12px;
+}
+.micArea{
+  display:grid;
+  place-items:center;
+  padding:18px 0;
+}
+.bigMic{
+  width:140px;height:140px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:54px;font-weight:900;
+  background:
+    radial-gradient(120px 90px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+    linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
+  color:#1a1100;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+}
+.bigMic.listening{
+  background:
+    radial-gradient(120px 90px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+    linear-gradient(135deg, rgba(57,217,138,.98), rgba(86,156,255,.55));
+  color:#04152c;
+}
+.center{text-align:center}
+.successText{color:var(--good);font-weight:900}
+.warnText{color:var(--warn);font-weight:900}
+.dangerText{color:var(--danger);font-weight:900}
+#debugBox{
+  position:fixed; left:12px; right:12px; bottom:12px;
+  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
+  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Comando de Voz</h1>
+      <div class="small">Fale o gasto e o sistema anota no mês atual.</div>
+    </div>
+    <div class="row" style="flex:0 0 auto">
+      <button class="btn" onclick="goBack()">← Voltar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Como usar</h2>
+    <div class="small" style="margin-top:6px">
+      Fale assim:
+      <br>• <b>anote mercado 120</b>
+      <br>• <b>anote uber 25 transporte</b>
+      <br>• <b>anote aluguel 950 casa</b>
+      <br><br>
+      O sistema vai responder só: <b>Anotado</b>.
+      A anotação entra no mês atual como <b>Pendente</b>.
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="micArea">
+      <div class="bigMic" id="bigMic">🎙️</div>
+      <div class="small center" style="margin-top:10px" id="voiceStatus">Status: pronto</div>
+    </div>
+
+    <div class="row">
+      <button class="btn primary" id="btnStartVoice" onclick="startVoiceCommand()">Enviar comando de voz</button>
+      <button class="btn" onclick="clearVoiceFields()">Limpar</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <label>Último comando reconhecido</label>
+    <textarea id="voiceTranscript" rows="3" placeholder="Aqui aparece o que foi entendido..." readonly></textarea>
+
+    <div class="hr"></div>
+
+    <label>Resposta do sistema</label>
+    <input id="voiceReply" readonly placeholder="A resposta aparece aqui">
+
+    <div class="hr"></div>
+
+    <div class="note">
+      <div style="font-weight:900">Observação</div>
+      <div class="small" style="margin-top:6px">
+        Esta tela depende dos mesmos dados salvos no navegador do app principal.
+        Se não houver login salvo, ela vai pedir para você voltar ao login.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="debugBox"></div>
+
+<script>
+function dbg(msg){
+  const box = document.getElementById("debugBox");
+  box.style.display = "block";
+  box.textContent = String(msg);
+}
+window.addEventListener("error", (e)=>{
+  dbg("Erro JS:\\n" + (e.message || e.type) + "\\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+});
+window.addEventListener("unhandledrejection", (e)=>{
+  dbg("Promise rejeitada:\\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+});
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+<script>
+const FIREBASE_CONFIG = {
+  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+  authDomain:"controle-gastos-pro.firebaseapp.com",
+  projectId:"controle-gastos-pro"
+};
+const API = "https://api-rf1w.onrender.com";
+
+let auth = null;
+let USER = null;
+let USER_ID = null;
+let mesAtual = new Date().toISOString().slice(0,7);
+
+const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
+let categorias = [...DEFAULT_CATEGORIAS];
+let regras = [
+  {palavra:"aluguel", categoria:"Casa"},
+  {palavra:"luz", categoria:"Casa"},
+  {palavra:"agua", categoria:"Casa"},
+  {palavra:"água", categoria:"Casa"},
+  {palavra:"mercado", categoria:"Alimentação"},
+  {palavra:"padaria", categoria:"Alimentação"},
+  {palavra:"gasolina", categoria:"Transporte"},
+  {palavra:"uber", categoria:"Transporte"},
+  {palavra:"ração", categoria:"Pets"},
+  {palavra:"pet", categoria:"Pets"},
+  {palavra:"cdb", categoria:"Investimentos"},
+  {palavra:"tesouro", categoria:"Investimentos"},
+  {palavra:"invest", categoria:"Investimentos"}
+];
+
+let state = { meses:{} };
+let voiceRec = null;
+
+function goBack(){
+  location.href = "./index.html";
+}
+
+function money(n){
+  return Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+}
+
+function kMes(){ return "gastos_pro_state_" + USER_ID; }
+function kCat(){ return "categorias_" + USER_ID; }
+
+function loadAll(){
+  try{
+    const raw = localStorage.getItem(kMes());
+    if(raw) state = JSON.parse(raw) || {meses:{}};
+  }catch(e){
+    state = {meses:{}};
+  }
+
+  try{
+    const raw = localStorage.getItem(kCat());
+    categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
+    if(!Array.isArray(categorias) || !categorias.length) categorias = [...DEFAULT_CATEGORIAS];
+    if(!categorias.some(c=>String(c).toLowerCase()==="investimentos")){
+      categorias.splice(categorias.length-1,0,"Investimentos");
+    }
+  }catch(e){
+    categorias = [...DEFAULT_CATEGORIAS];
+  }
+
+  if(!state || typeof state!=="object") state = {meses:{}};
+  if(!state.meses || typeof state.meses!=="object") state.meses = {};
+}
+
+function saveAll(){
+  localStorage.setItem(kMes(), JSON.stringify(state));
+}
+
+function ensureItemDefaults(it){
+  if(!it) return it;
+  if(typeof it.paid !== "boolean") it.paid = false;
+  return it;
+}
+
+function getDataMes(m){
+  const mm = m || mesAtual;
+  if(!state.meses[mm]) state.meses[mm] = { salary:0, meta:0, items:[], saved:[], hiddenFixos:[], investStatus:{} };
+  const d = state.meses[mm];
+  if(!Array.isArray(d.items)) d.items = [];
+  return d;
+}
+
+function detectarCategoria(desc){
+  const txt = (desc||"").toLowerCase();
+  for(const r of regras){
+    if(txt.includes(r.palavra)) return r.categoria;
+  }
+  return "Outros";
+}
+
+function parseExpenseFromSpeech(text){
+  let t = (text||"").toLowerCase().trim();
+
+  if(t.startsWith("anote")) t = t.replace(/^anote\s*/, "").trim();
+  if(t.startsWith("anotar")) t = t.replace(/^anotar\s*/, "").trim();
+
+  const matches = t.match(/(\d+[.,]?\d*)/g);
+  if(!matches || !matches.length) return null;
+
+  const last = matches[matches.length - 1].replace(",", ".");
+  const amount = Number(last);
+  if(!amount || amount <= 0) return null;
+
+  t = t.replace(matches[matches.length - 1], "").trim();
+
+  let category = "Outros";
+  if(Array.isArray(categorias) && categorias.length){
+    const parts = t.split(" ").filter(Boolean);
+    const lastWord = parts[parts.length-1] || "";
+    const found = categorias.find(c => c.toLowerCase() === lastWord.toLowerCase());
+    if(found){
+      category = found;
+      parts.pop();
+      t = parts.join(" ").trim();
+    }else{
+      category = detectarCategoria(t);
+    }
+  }else{
+    category = detectarCategoria(t);
+  }
+
+  const desc = t || "Gasto";
+  return { desc, amount, category };
+}
+
+function setVoiceUI(statusText, listening){
+  const status = document.getElementById("voiceStatus");
+  const mic = document.getElementById("bigMic");
+  if(status) status.textContent = statusText;
+  if(mic) mic.classList.toggle("listening", !!listening);
+}
+
+function clearVoiceFields(){
+  document.getElementById("voiceTranscript").value = "";
+  document.getElementById("voiceReply").value = "";
+  setVoiceUI("Status: pronto", false);
+}
+
+function setReply(text){
+  document.getElementById("voiceReply").value = text || "";
+}
+
+function startVoiceCommand(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById("btnStartVoice");
+
+  if(!SpeechRecognition){
+    alert("Reconhecimento de voz não suportado. Use Chrome no Android.");
+    return;
+  }
+  if(!USER_ID){
+    alert("Faça login primeiro.");
+    return;
+  }
+
+  if(btn) btn.disabled = true;
+  setReply("");
+  setVoiceUI("Status: ouvindo…", true);
+
+  if(!voiceRec){
+    voiceRec = new SpeechRecognition();
+    voiceRec.lang = "pt-BR";
+    voiceRec.interimResults = false;
+    voiceRec.maxAlternatives = 1;
+    try{ voiceRec.continuous = false; }catch(e){}
+
+    voiceRec.onresult = (event) => {
+      const text = (event.results?.[0]?.[0]?.transcript || "").trim();
+      document.getElementById("voiceTranscript").value = text || "";
+
+      const parsed = parseExpenseFromSpeech(text);
+      if(!parsed){
+        setVoiceUI("Status: não entendi o comando", false);
+        setReply("Não entendi");
+        if(btn) btn.disabled = false;
+        return;
+      }
+
+      const { desc, amount, category } = parsed;
+      const d = getDataMes(mesAtual);
+      d.items.push(ensureItemDefaults({
+        desc,
+        amount,
+        category,
+        isFixo:false,
+        isInvestFixo:false,
+        paid:false
+      }));
+      saveAll();
+
+      fetch(API+"/addGasto",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc, amount, category })
+      }).catch(()=>{});
+
+      setVoiceUI("Status: comando executado", false);
+      setReply("Anotado");
+      if(btn) btn.disabled = false;
+    };
+
+    voiceRec.onerror = (e) => {
+      setVoiceUI("Status: erro no microfone", false);
+      setReply("Erro");
+      if(btn) btn.disabled = false;
+    };
+
+    voiceRec.onend = () => {
+      if(btn) btn.disabled = false;
+      const current = document.getElementById("voiceReply").value || "";
+      if(!current) setVoiceUI("Status: pronto", false);
+    };
+  }
+
+  try{
+    voiceRec.start();
+  }catch(e){
+    setVoiceUI("Status: não foi possível iniciar", false);
+    setReply("Erro");
+    if(btn) btn.disabled = false;
+  }
+}
+
+async function initFirebase(){
+  if(!window.firebase){
+    dbg("Firebase não carregou.");
+    return false;
+  }
+
+  try{
+    if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  }catch(e){}
+
+  auth = firebase.auth();
+  try{
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  }catch(e){}
+
+  auth.onAuthStateChanged((u)=>{
+    USER = u || null;
+    if(!USER){
+      USER_ID = null;
+      location.replace("./login.html");
+      return;
+    }
+
+    USER_ID = USER.uid;
+
+    const t = localStorage.getItem("theme");
+    if(t==="light") document.body.classList.add("light");
+
+    loadAll();
+    clearVoiceFields();
+  });
+
+  return true;
+}
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  setVoiceUI("Status: pronto", false);
+  await initFirebase();
+});
+</script>
+</body>
+</html>
