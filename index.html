@@ -197,6 +197,43 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .fab.ai span{display:block;font-weight:950;font-size:13px}
 .fab.ai em{font-style:normal;font-weight:900;font-size:11px;opacity:.9}
 
+.overlay{
+  position:fixed;inset:0;
+  background: rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:2000;
+}
+.modal{
+  width: min(520px, 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  backdrop-filter: var(--glass);
+  overflow:hidden;
+}
+.modalHeader{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px;
+  border-bottom:1px solid var(--stroke);
+}
+.modalHeader .title{display:flex;gap:10px;align-items:center;font-weight:900}
+.modalBody{padding:14px}
+.modalFooter{
+  padding:14px;border-top:1px solid var(--stroke);
+  display:flex;gap:10px;justify-content:flex-end;
+}
+.closeX{
+  width:42px;height:42px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  background: rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  cursor:pointer;
+  font-weight:900;
+}
 .screen{display:none}
 .screen.active{display:block}
 .backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -251,6 +288,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
 /* =========================
    ✅ IA FULLSCREEN (designer único)
+   (fica no index também, mas o botão IA pode abrir ia.html — não removi nada)
 ========================= */
 .iaWrap{
   max-width:1100px;
@@ -364,11 +402,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .msg.bot{
   background: rgba(255,255,255,.08);
 }
-.msgMeta{
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 6px;
-}
 .iaComposer{
   margin-top: 12px;
   display:flex;
@@ -429,7 +462,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
 <div id="app" style="display:none">
 
-  <!-- ✅ HOME/MENU/etc -->
   <div class="wrap">
 
     <!-- TOP BAR -->
@@ -944,7 +976,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
   </div><!-- /wrap -->
 
-  <!-- ✅ SCREEN: IA FULLSCREEN -->
+  <!-- ✅ SCREEN: IA FULLSCREEN (mantida no index, não removi nada) -->
   <div class="screen" id="screen-ia">
     <div class="iaWrap">
       <div class="backRow">
@@ -979,7 +1011,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
           <div class="iaComposer">
             <div class="iaInputWrap">
-              <textarea id="iaPrompt" class="iaInput" placeholder="Digite sua pergunta… (ex.: 'quanto posso investir por mês?')"></textarea>
+              <textarea id="iaPrompt" class="iaInput" placeholder="Digite sua pergunta… (Shift+Enter quebra linha)"></textarea>
               <div class="small" style="margin-top:8px">Dica: pergunte por metas, corte de gastos e sugestões de investimento (sem promessas).</div>
             </div>
             <button class="btn primary" style="flex:0 0 auto" onclick="iaSend()">Enviar</button>
@@ -1002,14 +1034,14 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
 <div id="debugBox"></div>
 
-<!-- MODAL ADD EXPENSE (mantido) -->
-<div class="overlay" id="overlay-addExpense" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px;z-index:2000;">
-  <div class="modal" style="width:min(520px,100%);background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.05));border:1px solid var(--stroke);border-radius:22px;box-shadow:var(--shadow);backdrop-filter:var(--glass);overflow:hidden;">
-    <div class="modalHeader" style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px;border-bottom:1px solid var(--stroke);">
-      <div class="title" style="display:flex;gap:10px;align-items:center;font-weight:900">➕ Adicionar gasto</div>
-      <div class="closeX" onclick="closeModal('overlay-addExpense')" style="width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid var(--stroke);cursor:pointer;font-weight:900;">✕</div>
+<!-- MODALS -->
+<div class="overlay" id="overlay-addExpense">
+  <div class="modal">
+    <div class="modalHeader">
+      <div class="title">➕ Adicionar gasto</div>
+      <div class="closeX" onclick="closeModal('overlay-addExpense')">✕</div>
     </div>
-    <div class="modalBody" style="padding:14px">
+    <div class="modalBody">
       <label>Descrição</label>
       <input id="mDesc" placeholder="Ex: Mercado">
       <div class="grid2" style="margin-top:10px">
@@ -1026,7 +1058,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         Dica: a categoria pode ser sugerida automaticamente pela descrição.
       </div>
     </div>
-    <div class="modalFooter" style="padding:14px;border-top:1px solid var(--stroke);display:flex;gap:10px;justify-content:flex-end;">
+    <div class="modalFooter">
       <button class="btn" onclick="closeModal('overlay-addExpense')">Cancelar</button>
       <button class="btn good" onclick="confirmAddExpense()">Adicionar</button>
     </div>
@@ -1048,8 +1080,6 @@ window.addEventListener("unhandledrejection", (e)=>{
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- ✅ PDF libs -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
@@ -1266,7 +1296,6 @@ function showScreen(id){
   if(el) el.classList.add("active");
 }
 function openScreen(id){
-  // salva tela anterior para voltar do histórico e IA
   if(id !== "screen-history" && id !== "screen-ia") lastNonHistoryScreen = id;
   if(id !== "screen-ia") lastNonIAScreen = id;
   showScreen(id);
@@ -1282,6 +1311,17 @@ function toggleTheme(){
 }
 function openModal(id){ const o=document.getElementById(id); if(o) o.style.display="flex"; }
 function closeModal(id){ const o=document.getElementById(id); if(o) o.style.display="none"; }
+
+/* ✅ IA: abre arquivo separado ia.html (mas mantive a screen-ia aqui também, não removi nada) */
+function openIa(){
+  // guarda a tela atual caso você queira usar no ia.html para voltar
+  const current = document.querySelector(".screen.active")?.id || "screen-home";
+  sessionStorage.setItem("return_screen", current);
+  location.href = "./ia.html";
+}
+function goBackFromIA(){
+  showScreen(lastNonIAScreen || "screen-home");
+}
 
 /* =========================
    STORAGE KEYS
@@ -2196,7 +2236,7 @@ function simularEmprestimo(){
 }
 
 /* =========================
-   IA (Cloudflare Workers AI) - FULLSCREEN
+   IA (Cloudflare Workers AI) - FULLSCREEN (mantida)
 ========================= */
 async function callIA(prompt) {
   const base = (window.API_BASE_URL || "").replace(/\/$/, "");
@@ -2219,9 +2259,7 @@ function iaSetStatus(text, ok){
   const s = document.getElementById("iaStatus");
   const dot = document.getElementById("iaDot");
   if(s) s.textContent = text;
-  if(dot){
-    dot.classList.toggle("ok", !!ok);
-  }
+  if(dot) dot.classList.toggle("ok", !!ok);
 }
 function getIaBase(){
   const v = (window.API_BASE_URL || "").trim();
@@ -2310,27 +2348,6 @@ ${q}`;
   }
 }
 
-function openIa(){
-  // abre tela cheia
-  lastNonIAScreen = document.querySelector(".screen.active")?.id || lastNonIAScreen || "screen-home";
-  openScreen("screen-ia");
-
-  const base = getIaBase();
-  const hint = document.getElementById("iaHint");
-  hint.textContent = base ? ("Conectando em: " + base) : "API_BASE_URL vazio.";
-
-  const box = document.getElementById("iaChat");
-  if(!box.dataset.inited){
-    iaAdd("bot", "Oi! Eu sou a IA PRO. Me pergunte sobre seus gastos, salário e como investir melhor. 🙂");
-    iaAdd("bot", "Dica: peça um resumo do mês, onde cortar gastos e um plano de guardar dinheiro.");
-    box.dataset.inited = "1";
-  }
-  iaHealth();
-}
-function goBackFromIA(){
-  showScreen(lastNonIAScreen || "screen-home");
-}
-
 /* =========================
    PDF
 ========================= */
@@ -2360,7 +2377,6 @@ function aggregateYear(year){
 }
 
 async function renderPdfAndSave(wrap, filename){
-  // renderiza charts do container e exporta PDF multi-página
   const canvas = await html2canvas(wrap, { scale: 2, backgroundColor:"#ffffff" });
   const imgData = canvas.toDataURL("image/png");
 
@@ -2715,7 +2731,7 @@ async function initFirebase(){
       }
     });
 
-    // Enter para enviar no chat (Shift+Enter quebra linha)
+    // Enter para enviar na IA do index (Shift+Enter quebra linha)
     const iaInput = document.getElementById("iaPrompt");
     if(iaInput && !iaInput.dataset.bound){
       iaInput.addEventListener("keydown",(e)=>{
