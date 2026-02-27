@@ -8,10 +8,14 @@
 <meta name="theme-color" content="#569cff">
 
 <script>
-  // ✅ mesma IA
-  window.API_BASE_URL = "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
-  window.APP_KEY = "GastosPro@2026!";
+  // ✅ fallback (se config.js não carregar)
+  window.API_BASE_URL = window.API_BASE_URL || "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
+  window.APP_KEY = window.APP_KEY || "GastosPro@2026!";
 </script>
+
+<!-- ✅ IMPORTANTE: agora ia.html também lê seu config.js -->
+<!-- (se config.js definir API_BASE_URL / APP_KEY, ele sobrescreve o fallback acima) -->
+<script src="./config.js"></script>
 
 <style>
 :root{
@@ -281,6 +285,10 @@ textarea{
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
 <script>
+/* ✅ Garante que, se config.js existir, ele manda */
+window.API_BASE_URL = (window.API_BASE_URL || "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev").replace(/\/$/,"");
+window.APP_KEY = window.APP_KEY || "GastosPro@2026!";
+
 /* ✅ mesmo Firebase do app */
 const FIREBASE_CONFIG = {
   apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
@@ -318,9 +326,8 @@ function quick(text){
   p.focus();
 }
 
-/* ✅ volta pro index e tenta voltar pra tela que estava */
+/* ✅ volta pro index */
 function goBack(){
-  // tenta voltar para tela salva, se existir
   location.href = "./index.html";
 }
 
@@ -375,29 +382,46 @@ function buildIaContext(){
   ].join("\n");
 }
 
-/* ===== IA call ===== */
+/* ===== IA call (corrigido e blindado) ===== */
 async function callIA(prompt){
-  const base=(window.API_BASE_URL||"").replace(/\/$/,"");
-  const resp=await fetch(base + "/api/chat",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "x-app-key": window.APP_KEY
-    },
-    body: JSON.stringify({ prompt }),
-    cache:"no-store"
-  });
-  const data=await resp.json().catch(()=>({}));
-  if(!resp.ok) throw new Error(data?.error || ("Erro HTTP " + resp.status));
+  const base = (window.API_BASE_URL || "").replace(/\/$/,"");
+  const url = base + "/api/chat";
+
+  let resp;
+  try{
+    resp = await fetch(url,{
+      method:"POST",
+      mode:"cors",
+      cache:"no-store",
+      headers:{
+        "Content-Type":"application/json",
+        "x-app-key": window.APP_KEY
+      },
+      body: JSON.stringify({ prompt })
+    });
+  }catch(e){
+    // ✅ Isso é o seu "Failed to fetch": preflight/CORS/Network
+    throw new Error("Falha de rede/CORS (OPTIONS). Seu Worker precisa responder OPTIONS e liberar Content-Type e x-app-key.");
+  }
+
+  const text = await resp.text();
+  let data = {};
+  try{ data = JSON.parse(text); }catch(e){}
+
+  if(!resp.ok){
+    throw new Error(`HTTP ${resp.status}: ${data?.error || text || "Erro sem detalhe"}`);
+  }
+
   return data.response || "Sem resposta";
 }
 
+/* ✅ Health check agora testa /api/chat com ping (não depende de GET /) */
 async function health(){
+  const base=(window.API_BASE_URL||"").replace(/\/$/,"");
+  document.getElementById("iaHint").textContent = "Conectando em: " + base;
+
   try{
-    const base=(window.API_BASE_URL||"").replace(/\/$/,"");
-    document.getElementById("iaHint").textContent = "Conectando em: " + base;
-    const r=await fetch(base + "/",{cache:"no-store", headers:{ "x-app-key": window.APP_KEY }});
-    await r.json().catch(()=>({}));
+    await callIA("ping");
     setStatus("Online ✅", true);
   }catch(e){
     setStatus("Offline", false);
@@ -453,7 +477,6 @@ document.getElementById("prompt").addEventListener("keydown",(e)=>{
   auth.onAuthStateChanged((u)=>{
     USER=u||null;
     if(!USER){
-      // se não estiver logado, volta pro login do app
       location.replace("./login.html");
       return;
     }
