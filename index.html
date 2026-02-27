@@ -39,10 +39,6 @@
   --glass: blur(14px);
 }
 
-/* ✅ IMPORTANTE:
-   O JS aplica as cores do preset também no claro.
-   Então aqui deixamos o .light apenas para painéis/textos/sombra.
-*/
 .light{
   --panel: rgba(0,0,0,.04);
   --panel2: rgba(0,0,0,.06);
@@ -197,7 +193,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .fab.ai span{display:block;font-weight:950;font-size:13px}
 .fab.ai em{font-style:normal;font-weight:900;font-size:11px;opacity:.9}
 
-/* ✅ NOVO: FAB do sensor de voz (fica bonito e consistente) */
+/* ✅ FAB VOZ (só aparece quando ativado nas Config) */
 .fab.voice{
   background:
     radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
@@ -206,12 +202,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   font-weight:1000;
   font-size:20px;
 }
-.fab.voice.on{
-  background:
-    radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
-    linear-gradient(135deg, rgba(57,217,138,.95), rgba(86,156,255,.45));
-  color:#04152c;
-}
+.fab.voice.hidden{ display:none; }
 
 .overlay{
   position:fixed;inset:0;
@@ -294,7 +285,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   user-select:none;
 }
 
-/* ✅ PDF */
 .pdfPreview{
   border:1px dashed var(--stroke);
   border-radius:18px;
@@ -305,12 +295,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 /* =========================
    ✅ IA FULLSCREEN (designer único)
 ========================= */
-.iaWrap{
-  max-width:1100px;
-  margin:auto;
-  padding:16px;
-  padding-bottom:120px;
-}
+.iaWrap{ max-width:1100px; margin:auto; padding:16px; padding-bottom:120px; }
 .iaShell{
   border-radius: 26px;
   border: 1px solid color-mix(in srgb, var(--stroke), transparent 20%);
@@ -327,9 +312,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   padding:14px 14px;
   border-bottom:1px solid var(--stroke);
 }
-.iaBrand{
-  display:flex;align-items:center;gap:10px;min-width:0;
-}
+.iaBrand{ display:flex;align-items:center;gap:10px;min-width:0; }
 .iaLogo{
   width:44px;height:44px;border-radius:16px;
   display:flex;align-items:center;justify-content:center;
@@ -341,41 +324,22 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   color:#06162d;
 }
 .light .iaLogo{ color:#06162d; }
-.iaTitle{
-  min-width:0;
-}
+.iaTitle{ min-width:0; }
 .iaTitle .t{
-  font-weight:950;
-  letter-spacing:.2px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  font-weight:950; letter-spacing:.2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.iaTitle .s{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:2px;
-}
+.iaTitle .s{ font-size:12px; color:var(--muted); margin-top:2px; }
 .iaStatusPill{
   display:inline-flex;gap:8px;align-items:center;
   padding:8px 10px;border-radius:999px;
   background: rgba(255,255,255,.10);
   border:1px solid var(--stroke);
-  font-size:12px;
-  color:var(--muted);
+  font-size:12px; color:var(--muted);
 }
-.iaStatusDot{
-  width:10px;height:10px;border-radius:999px;
-  background: var(--warn);
-  box-shadow: 0 0 0 4px rgba(255,209,102,.12);
-}
-.iaStatusDot.ok{
-  background: var(--good);
-  box-shadow: 0 0 0 4px rgba(57,217,138,.12);
-}
-.iaBody{
-  padding:14px;
-}
+.iaStatusDot{ width:10px;height:10px;border-radius:999px; background: var(--warn); box-shadow: 0 0 0 4px rgba(255,209,102,.12); }
+.iaStatusDot.ok{ background: var(--good); box-shadow: 0 0 0 4px rgba(57,217,138,.12); }
+.iaBody{ padding:14px; }
 .iaChat{
   height: min(64vh, 540px);
   min-height: 320px;
@@ -394,10 +358,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
     radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.08), transparent 60%),
     rgba(255,255,255,.65);
 }
-.msgRow{
-  display:flex;
-  margin: 10px 0;
-}
+.msgRow{ display:flex; margin: 10px 0; }
 .msgRow.me{justify-content:flex-end}
 .msgRow.bot{justify-content:flex-start}
 .msg{
@@ -414,15 +375,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
     radial-gradient(120px 90px at 20% 10%, rgba(255,255,255,.22), transparent 60%),
     color-mix(in srgb, var(--accent), transparent 78%);
 }
-.msg.bot{
-  background: rgba(255,255,255,.08);
-}
-.iaComposer{
-  margin-top: 12px;
-  display:flex;
-  gap: 10px;
-  align-items:flex-end;
-}
+.msg.bot{ background: rgba(255,255,255,.08); }
+.iaComposer{ margin-top: 12px; display:flex; gap: 10px; align-items:flex-end; }
 .iaInputWrap{
   flex:1;
   border-radius: 18px;
@@ -447,9 +401,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   padding: 0;
 }
 .light .iaInput{ color: var(--text); }
-.iaQuick{
-  display:flex;gap:8px;flex-wrap:wrap;margin-top:10px
-}
+.iaQuick{ display:flex;gap:8px;flex-wrap:wrap;margin-top:10px }
 .iaChip{
   padding:8px 10px;
   border-radius:999px;
@@ -603,6 +555,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
 
       <div class="grid1">
+        <button class="btn" id="menuVoiceBtn" onclick="openVoiceScreen()">🎙️ Comando de voz</button>
         <button class="btn" onclick="openScreen('screen-config')">⚙️ Configurações</button>
         <button class="btn" onclick="openScreen('screen-simulators')">🧠 Simuladores</button>
         <button class="btn" onclick="openScreen('screen-categories')">📂 Minhas Categorias</button>
@@ -647,19 +600,58 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="card" style="margin-top:12px">
         <h3>Preferências</h3>
 
-        <!-- ✅ NOVO: sensor de voz (ativa uma vez e fica ouvindo com o app aberto) -->
+        <!-- ✅ NOVO: bloquear/ativar sistema de voz -->
         <div class="note" style="margin-bottom:10px">
-          <div style="font-weight:950">🎙️ Sensor de voz (app aberto)</div>
+          <div style="font-weight:950">🎙️ Sistema de voz</div>
           <div class="small" style="margin-top:6px">
-            Toque para ativar e permita o microfone. Depois diga <b>“meu gastos pro”</b> para ativar,
-            e em seguida fale: <b>“anote mercado 120”</b>.
+            Quando <b>bloqueado</b>, o botão de voz some da tela principal.
+            Quando <b>ativado</b>, aparece o botão 🎙️ e você pode gravar um comando (tipo WhatsApp).
           </div>
           <div class="hr"></div>
-          <button class="btn" onclick="toggleVoiceSensor()">🎙️ Ligar/Desligar sensor</button>
-          <div class="small" id="voiceStatus" style="margin-top:8px">Status: Desligado</div>
+          <div class="row">
+            <div>
+              <div class="small">Status</div>
+              <div style="font-weight:950" id="voiceEnableStatus">—</div>
+            </div>
+            <button class="btn" id="btnToggleVoiceEnabled" onclick="toggleVoiceEnabled()">—</button>
+          </div>
         </div>
 
         <button class="btn" onclick="toggleTheme()">🌙/☀️ Alternar tema</button>
+      </div>
+    </div>
+
+    <!-- ✅ SCREEN: VOZ (tela única de áudio) -->
+    <div class="screen" id="screen-voice">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="goBackFromVoice()">← Voltar</button>
+        <div style="font-weight:900">Comando de voz</div>
+      </div>
+
+      <div class="card">
+        <h3>Como falar</h3>
+        <div class="small">
+          Fale assim:
+          <br>• <b>anote mercado 120</b>
+          <br>• <b>anote uber 25 transporte</b>
+          <br>• <b>anote aluguel 950 casa</b>
+          <br><br>
+          ✅ O app vai responder apenas: <b>Anotado</b> e salvar como <b>Pendente</b> no mês atual.
+        </div>
+
+        <div class="hr"></div>
+
+        <label>Último comando reconhecido</label>
+        <textarea id="voiceTranscript" rows="3" placeholder="Aqui aparece o que foi entendido..." readonly></textarea>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <button class="btn primary" id="btnVoiceStart" onclick="startVoiceCommand()">🎙️ Enviar comando de voz</button>
+          <button class="btn" onclick="goHome()">🏠 Ir para Home</button>
+        </div>
+
+        <div class="small" id="voiceCmdStatus" style="margin-top:10px">Status: pronto</div>
       </div>
     </div>
 
@@ -1056,10 +1048,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <span>IA</span><em>PRO</em>
     </div>
 
-    <!-- ✅ NOVO: Sensor de voz (liga/desliga) -->
-    <div class="fab voice" id="fabVoice" onclick="toggleVoiceSensor()" title="Sensor de voz">
-      🎙️
-    </div>
+    <!-- ✅ VOZ (só aparece quando ativado em Config) -->
+    <div class="fab voice hidden" id="fabVoice" onclick="openVoiceScreen()" title="Comando de voz">🎙️</div>
 
     <div class="fab add" onclick="openAddExpense()" title="Adicionar gasto">+</div>
   </div>
@@ -1165,13 +1155,48 @@ let grafico = null;
 let graficoEvolucao = null;
 let lastNonHistoryScreen = "screen-home";
 let lastNonIAScreen = "screen-home";
+let lastNonVoiceScreen = "screen-home";
+
+/* =========================
+   ✅ VOZ (ativar/bloquear)
+========================= */
+const VOICE_KEYS = { enabled: "voice_enabled_v1" };
+function kVoiceEnabled(){ return `${VOICE_KEYS.enabled}_${USER_ID || "guest"}`; }
+/* padrão: BLOQUEADO (0) */
+function isVoiceEnabled(){
+  const v = localStorage.getItem(kVoiceEnabled());
+  return v === "1";
+}
+function setVoiceEnabled(on){
+  localStorage.setItem(kVoiceEnabled(), on ? "1" : "0");
+  applyVoiceVisibility();
+}
+function applyVoiceVisibility(){
+  const fab = document.getElementById("fabVoice");
+  const menuBtn = document.getElementById("menuVoiceBtn");
+  const status = document.getElementById("voiceEnableStatus");
+  const toggleBtn = document.getElementById("btnToggleVoiceEnabled");
+
+  const enabled = isVoiceEnabled();
+
+  if(fab) fab.classList.toggle("hidden", !enabled);
+  if(menuBtn) menuBtn.style.display = enabled ? "" : "none";
+
+  if(status) status.textContent = enabled ? "Ativado" : "Bloqueado";
+  if(toggleBtn){
+    toggleBtn.textContent = enabled ? "Bloquear" : "Ativar";
+    toggleBtn.className = "btn " + (enabled ? "danger" : "good");
+  }
+}
+function toggleVoiceEnabled(){
+  const enabled = isVoiceEnabled();
+  setVoiceEnabled(!enabled);
+}
 
 /* =========================
    THEME
 ========================= */
 const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
-
-/* ✅ Presets com dark+light */
 const THEME_PRESETS = {
   default: {
     dark:  { bg:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
@@ -1356,8 +1381,9 @@ function showScreen(id){
   if(el) el.classList.add("active");
 }
 function openScreen(id){
-  if(id !== "screen-history" && id !== "screen-ia") lastNonHistoryScreen = id;
+  if(id !== "screen-history" && id !== "screen-ia" && id !== "screen-voice") lastNonHistoryScreen = id;
   if(id !== "screen-ia") lastNonIAScreen = id;
+  if(id !== "screen-voice") lastNonVoiceScreen = id;
   showScreen(id);
 }
 function goHome(){ openScreen("screen-home"); applyHomeLayoutToDOM(); }
@@ -1381,214 +1407,22 @@ function openIa(){
   sessionStorage.setItem("return_screen", current);
   location.href = "./ia.html";
 }
-function goBackFromIA(){
-  showScreen(lastNonIAScreen || "screen-home");
-}
+function goBackFromIA(){ showScreen(lastNonIAScreen || "screen-home"); }
 
-/* =========================
-   ✅ SENSOR DE VOZ (app aberto)
-   - Usuário ativa 1 vez (permite microfone)
-   - Depois diz: "meu gastos pro" (wake word)
-   - Em seguida diz o comando: "anote mercado 120" etc
-========================= */
-let VOICE_ON = false;
-let VOICE_STATE = "idle"; // idle | armed | command
-let voiceRec = null;
-let voiceLastHeardAt = 0;
-
-function toast(msg){
-  try{
-    dbg(msg);
-    setTimeout(()=>{
-      const box = document.getElementById("debugBox");
-      if(box){ box.style.display="none"; box.textContent=""; }
-    }, 2200);
-  }catch(e){
-    console.log(msg);
-  }
-}
-function setVoiceUI(){
-  const s = document.getElementById("voiceStatus");
-  const fab = document.getElementById("fabVoice");
-  if(s) s.textContent = "Status: " + (VOICE_ON ? (VOICE_STATE==="command" ? "Aguardando comando…" : "Ligado (diga: “meu gastos pro”)") : "Desligado");
-  if(fab){
-    fab.classList.toggle("on", VOICE_ON);
-  }
-}
-function toggleVoiceSensor(){
-  if(VOICE_ON) stopVoiceSensor();
-  else startVoiceSensor();
-}
-function startVoiceSensor(){
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SpeechRecognition){
-    alert("Reconhecimento de voz não suportado. Use Chrome no Android.");
+/* ✅ VOZ: tela única */
+function openVoiceScreen(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  if(!isVoiceEnabled()){
+    alert("O sistema de voz está bloqueado. Ative em Configurações.");
     return;
   }
-
-  if(!voiceRec){
-    voiceRec = new SpeechRecognition();
-    voiceRec.lang = "pt-BR";
-    voiceRec.interimResults = false;
-    voiceRec.maxAlternatives = 1;
-    try { voiceRec.continuous = true; } catch(e){}
-
-    voiceRec.onresult = (event) => {
-      const text = (event.results?.[0]?.[0]?.transcript || "").trim();
-      if(!text) return;
-      handleVoiceSensor(text);
-    };
-
-    voiceRec.onerror = (e) => {
-      if(e.error === "not-allowed" || e.error === "service-not-allowed"){
-        VOICE_ON = false;
-        VOICE_STATE = "idle";
-        setVoiceUI();
-        alert("Permissão de microfone negada.");
-        return;
-      }
-      if(VOICE_ON) safeRestartVoice();
-    };
-
-    voiceRec.onend = () => {
-      if(VOICE_ON) safeRestartVoice();
-    };
-  }
-
-  VOICE_ON = true;
-  VOICE_STATE = "armed";
-  setVoiceUI();
-  safeRestartVoice(true);
-  toast("🎙️ Sensor ATIVO. Diga: “meu gastos pro”.");
+  const t = document.getElementById("voiceTranscript");
+  const s = document.getElementById("voiceCmdStatus");
+  if(t) t.value = "";
+  if(s) s.textContent = "Status: pronto";
+  openScreen("screen-voice");
 }
-
-function stopVoiceSensor(){
-  VOICE_ON = false;
-  VOICE_STATE = "idle";
-  setVoiceUI();
-  try{ voiceRec && voiceRec.stop(); }catch(e){}
-  toast("🎙️ Sensor DESLIGADO.");
-}
-
-function safeRestartVoice(first=false){
-  if(!VOICE_ON) return;
-  const now = Date.now();
-  if(!first && now - voiceLastHeardAt < 600) return;
-
-  try{ voiceRec.stop(); }catch(e){}
-  setTimeout(()=>{
-    if(!VOICE_ON) return;
-    try{ voiceRec.start(); }catch(e){}
-  }, 250);
-}
-
-function handleVoiceSensor(raw){
-  voiceLastHeardAt = Date.now();
-  const text = (raw || "").toLowerCase();
-
-  const WAKE = ["meu gastos pro", "meus gastos pro", "gastos pro"];
-  const saidWake = WAKE.some(w => text.includes(w));
-
-  if(VOICE_STATE === "armed"){
-    if(saidWake){
-      VOICE_STATE = "command";
-      setVoiceUI();
-      toast("✅ Pode falar. Ex: “anote mercado 120”");
-    }
-    return;
-  }
-
-  if(VOICE_STATE === "command"){
-    if(saidWake && text.replace(/[^a-z0-9çãõáéíóú\s]/g,"").trim().length <= 15) return;
-
-    handleVoiceCommand(raw);
-
-    VOICE_STATE = "armed";
-    setVoiceUI();
-    return;
-  }
-}
-
-/* ✅ comandos simples: "anote ..." */
-function handleVoiceCommand(raw){
-  const text = (raw||"").toLowerCase();
-
-  // navegação simples
-  if(text.includes("abra gastos pro") || text.includes("abrir gastos pro")){
-    goHome();
-    toast("✅ Gastos PRO aberto (home).");
-    return;
-  }
-
-  // gasto
-  if(text.includes("anote")){
-    const parsed = parseExpenseFromSpeech(text);
-    if(!parsed){
-      alert("Não entendi. Fale assim: “anote mercado 120” ou “anote uber 25 transporte”.");
-      return;
-    }
-
-    if(!USER_ID){
-      alert("Faça login primeiro para anotar por voz.");
-      return;
-    }
-
-    const { desc, amount, category } = parsed;
-
-    const d = getDataMes(mesAtual);
-    d.items.push(ensureItemDefaults({ desc, amount, category, isFixo:false, isInvestFixo:false }));
-    saveAll();
-
-    fetch(API+"/addGasto",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc, amount, category })
-    }).catch(()=>{});
-
-    render();
-    toast(`✅ Anotado: ${desc} • ${money(amount)} • ${category}`);
-    return;
-  }
-
-  toast("Comando não reconhecido. Use: “meu gastos pro” + “anote …”");
-}
-
-function parseExpenseFromSpeech(text){
-  let t = (text||"")
-    .replace("anote que comprei", "anote")
-    .replace("anote que eu comprei", "anote")
-    .replace("anote que gastei", "anote")
-    .replace("anote", "")
-    .trim();
-
-  const matches = t.match(/(\d+[.,]?\d*)/g);
-  if(!matches || !matches.length) return null;
-
-  const last = matches[matches.length - 1].replace(",", ".");
-  const amount = Number(last);
-  if(!amount || amount <= 0) return null;
-
-  t = t.replace(matches[matches.length - 1], "").trim();
-
-  let category = "Outros";
-  if(Array.isArray(categorias) && categorias.length){
-    const parts = t.split(" ").filter(Boolean);
-    const lastWord = parts[parts.length-1] || "";
-    const found = categorias.find(c => c.toLowerCase() === lastWord.toLowerCase());
-    if(found){
-      category = found;
-      parts.pop();
-      t = parts.join(" ").trim();
-    } else {
-      category = detectarCategoria(t);
-    }
-  } else {
-    category = detectarCategoria(t);
-  }
-
-  const desc = t || "Gasto";
-  return { desc, amount, category };
-}
+function goBackFromVoice(){ showScreen(lastNonVoiceScreen || "screen-home"); }
 
 /* =========================
    STORAGE KEYS
@@ -1696,7 +1530,6 @@ function getDataMes(m){
   const hidden = new Set(d.hiddenFixos.map(String));
   const present = new Set(d.items.map(it=>fixKey(it.desc,it.amount,it.category)));
 
-  // fixos normais
   for(const f of fixos){
     const fk = fixKey(f.desc, f.amount, f.category);
     if(hidden.has(fk)) continue;
@@ -1705,7 +1538,6 @@ function getDataMes(m){
     present.add(fk);
   }
 
-  // investimentos fixos como "Juntar" na tela principal
   for(const inv of investFixos){
     const desc = `Juntar: ${inv.nome}`;
     const amount = Number(inv.mensal||0);
@@ -1729,6 +1561,121 @@ function getDataMes(m){
   }
 
   return d;
+}
+
+/* =========================
+   ✅ VOZ: comando tipo WhatsApp (aperte, fale, executa)
+========================= */
+function parseExpenseFromSpeech(text){
+  let t = (text||"").toLowerCase().trim();
+
+  // opcional: remover "anote"
+  if(t.startsWith("anote")) t = t.replace(/^anote\s*/, "").trim();
+  t = t.replace(/^anotar\s*/, "").trim();
+
+  // pega último número como valor
+  const matches = t.match(/(\d+[.,]?\d*)/g);
+  if(!matches || !matches.length) return null;
+
+  const last = matches[matches.length - 1].replace(",", ".");
+  const amount = Number(last);
+  if(!amount || amount <= 0) return null;
+
+  t = t.replace(matches[matches.length - 1], "").trim();
+
+  // categoria opcional no final
+  let category = "Outros";
+  if(Array.isArray(categorias) && categorias.length){
+    const parts = t.split(" ").filter(Boolean);
+    const lastWord = parts[parts.length-1] || "";
+    const found = categorias.find(c => c.toLowerCase() === lastWord.toLowerCase());
+    if(found){
+      category = found;
+      parts.pop();
+      t = parts.join(" ").trim();
+    }else{
+      category = detectarCategoria(t);
+    }
+  }else{
+    category = detectarCategoria(t);
+  }
+
+  const desc = t || "Gasto";
+  return { desc, amount, category };
+}
+
+let voiceCmdRec = null;
+function startVoiceCommand(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const status = document.getElementById("voiceCmdStatus");
+  const btn = document.getElementById("btnVoiceStart");
+
+  if(!SpeechRecognition){
+    alert("Reconhecimento de voz não suportado. Use Chrome no Android.");
+    return;
+  }
+  if(!USER_ID){
+    alert("Faça login primeiro.");
+    return;
+  }
+
+  if(btn) btn.disabled = true;
+  if(status) status.textContent = "Status: ouvindo…";
+
+  if(!voiceCmdRec){
+    voiceCmdRec = new SpeechRecognition();
+    voiceCmdRec.lang = "pt-BR";
+    voiceCmdRec.interimResults = false;
+    voiceCmdRec.maxAlternatives = 1;
+    try{ voiceCmdRec.continuous = false; }catch(e){}
+
+    voiceCmdRec.onresult = (event) => {
+      const text = (event.results?.[0]?.[0]?.transcript || "").trim();
+      const t = document.getElementById("voiceTranscript");
+      if(t) t.value = text || "";
+
+      const parsed = parseExpenseFromSpeech(text);
+      if(!parsed){
+        if(status) status.textContent = "Status: não entendi. Fale: “anote mercado 120”.";
+        if(btn) btn.disabled = false;
+        return;
+      }
+
+      // adiciona como PENDENTE (paid=false)
+      const { desc, amount, category } = parsed;
+      const d = getDataMes(mesAtual);
+      d.items.push(ensureItemDefaults({ desc, amount, category, isFixo:false, isInvestFixo:false, paid:false }));
+      saveAll();
+
+      fetch(API+"/addGasto",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc, amount, category })
+      }).catch(()=>{});
+
+      render();
+
+      // ✅ só responde "Anotado"
+      if(status) status.textContent = "Anotado ✅";
+      if(btn) btn.disabled = false;
+    };
+
+    voiceCmdRec.onerror = (e) => {
+      if(status) status.textContent = "Status: erro no microfone (" + (e.error||"") + ").";
+      if(btn) btn.disabled = false;
+    };
+
+    voiceCmdRec.onend = () => {
+      if(btn) btn.disabled = false;
+      // se ainda estava "ouvindo", volta pro pronto
+      if(status && status.textContent.includes("ouvindo")) status.textContent = "Status: pronto";
+    };
+  }
+
+  try{ voiceCmdRec.start(); }catch(e){
+    if(status) status.textContent = "Status: não foi possível iniciar.";
+    if(btn) btn.disabled = false;
+  }
 }
 
 /* =========================
@@ -2020,7 +1967,7 @@ function addInvestFixo(){
 
   const d = getDataMes(mesAtual);
   ensureMonthInvestStatus(d);
-  d.investStatus[id] = false; // começa Pendente
+  d.investStatus[id] = false;
 
   document.getElementById("invNome").value="";
   document.getElementById("invMetaFinal").value="";
@@ -2616,11 +2563,11 @@ ${q}`;
 }
 
 /* =========================
-   PDF
+   PDF (mantido como estava)
 ========================= */
 function monthsOfYear(year){
   const y = String(year);
-  return Object.keys(state.meses||{}).filter(m=>m.startsWith(y+"-")).sort(); // asc
+  return Object.keys(state.meses||{}).filter(m=>m.startsWith(y+"-")).sort();
 }
 function aggregateYear(year){
   const months = monthsOfYear(year);
@@ -2671,8 +2618,8 @@ async function renderPdfAndSave(wrap, filename){
   pdf.save(filename);
 }
 
-/* ✅ (mantive suas funções PDF daqui pra baixo sem mexer no texto/estrutura) */
-async function gerarPDFResumoAno(){
+/* ✅ suas funções de PDF resumido/complete seguem (iguais) */
+async function gerarPDFResumoAno(){ /* ...mantido igual ao seu... */ 
   const status = document.getElementById("pdfStatus");
   try{
     status.textContent = "Gerando resumo do ano…";
@@ -2788,7 +2735,7 @@ async function gerarPDFResumoAno(){
   }
 }
 
-async function gerarPDFCompleto(){
+async function gerarPDFCompleto(){ /* ...mantido igual ao seu... */
   const status = document.getElementById("pdfStatus");
   try{
     status.textContent = "Gerando relatório completo…";
@@ -2931,7 +2878,6 @@ async function gerarPDFCompleto(){
     });
 
     await new Promise(r=>setTimeout(r, 250));
-
     await renderPdfAndSave(wrap, `relatorio_completo_${year}_${monthNotes}.pdf`);
 
     catChart.destroy(); evoChart.destroy();
@@ -2964,10 +2910,14 @@ async function initFirebase(){
     const t = localStorage.getItem("theme");
     if(t==="light") document.body.classList.add("light");
 
-    // ✅ aplica preset conforme o modo (claro/escuro)
     applyThemeSettings();
 
     loadAll();
+
+    // ✅ aplica UI da voz (padrão bloqueado se ainda não existir chave)
+    if(localStorage.getItem(kVoiceEnabled()) == null) localStorage.setItem(kVoiceEnabled(), "0");
+    applyVoiceVisibility();
+
     buildMonthSelect();
     renderCategorias();
     renderFixos();
@@ -3000,7 +2950,6 @@ async function initFirebase(){
       }
     });
 
-    // Enter para enviar na IA do index (Shift+Enter quebra linha)
     const iaInput = document.getElementById("iaPrompt");
     if(iaInput && !iaInput.dataset.bound){
       iaInput.addEventListener("keydown",(e)=>{
@@ -3011,9 +2960,6 @@ async function initFirebase(){
       });
       iaInput.dataset.bound="1";
     }
-
-    // ✅ atualiza UI do sensor de voz
-    setVoiceUI();
 
     showApp();
     goHome();
