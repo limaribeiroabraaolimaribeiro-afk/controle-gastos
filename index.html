@@ -40,8 +40,7 @@
 }
 
 /* ✅ IMPORTANTE:
-   Antes: .light sobrescrevia --bg e as --grad* fixas.
-   Agora: o JS aplica as cores do preset também no claro.
+   O JS aplica as cores do preset também no claro.
    Então aqui deixamos o .light apenas para painéis/textos/sombra.
 */
 .light{
@@ -197,6 +196,22 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .light .fab.ai{color:#04152c}
 .fab.ai span{display:block;font-weight:950;font-size:13px}
 .fab.ai em{font-style:normal;font-weight:900;font-size:11px;opacity:.9}
+
+/* ✅ NOVO: FAB do sensor de voz (fica bonito e consistente) */
+.fab.voice{
+  background:
+    radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+    linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
+  color:#1a1100;
+  font-weight:1000;
+  font-size:20px;
+}
+.fab.voice.on{
+  background:
+    radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+    linear-gradient(135deg, rgba(57,217,138,.95), rgba(86,156,255,.45));
+  color:#04152c;
+}
 
 .overlay{
   position:fixed;inset:0;
@@ -631,6 +646,19 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
       <div class="card" style="margin-top:12px">
         <h3>Preferências</h3>
+
+        <!-- ✅ NOVO: sensor de voz (ativa uma vez e fica ouvindo com o app aberto) -->
+        <div class="note" style="margin-bottom:10px">
+          <div style="font-weight:950">🎙️ Sensor de voz (app aberto)</div>
+          <div class="small" style="margin-top:6px">
+            Toque para ativar e permita o microfone. Depois diga <b>“meu gastos pro”</b> para ativar,
+            e em seguida fale: <b>“anote mercado 120”</b>.
+          </div>
+          <div class="hr"></div>
+          <button class="btn" onclick="toggleVoiceSensor()">🎙️ Ligar/Desligar sensor</button>
+          <div class="small" id="voiceStatus" style="margin-top:8px">Status: Desligado</div>
+        </div>
+
         <button class="btn" onclick="toggleTheme()">🌙/☀️ Alternar tema</button>
       </div>
     </div>
@@ -1027,6 +1055,12 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
     <div class="fab ai" onclick="openIa()" title="IA PRO">
       <span>IA</span><em>PRO</em>
     </div>
+
+    <!-- ✅ NOVO: Sensor de voz (liga/desliga) -->
+    <div class="fab voice" id="fabVoice" onclick="toggleVoiceSensor()" title="Sensor de voz">
+      🎙️
+    </div>
+
     <div class="fab add" onclick="openAddExpense()" title="Adicionar gasto">+</div>
   </div>
 
@@ -1137,9 +1171,7 @@ let lastNonIAScreen = "screen-home";
 ========================= */
 const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
 
-/* ✅ AGORA: cada preset tem cores para DARK e LIGHT.
-   Assim o tema claro também muda com o preset.
-*/
+/* ✅ Presets com dark+light */
 const THEME_PRESETS = {
   default: {
     dark:  { bg:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
@@ -1333,7 +1365,7 @@ function openMenu(){ openScreen("screen-menu"); }
 function openHistory(){ buildHistoryUI(); showScreen("screen-history"); }
 function goBackFromHistory(){ showScreen(lastNonHistoryScreen || "screen-home"); }
 
-/* ✅ quando alterna tema, agora também reaplica o preset do claro/escuro */
+/* ✅ alterna tema e reaplica preset claro/escuro */
 function toggleTheme(){
   document.body.classList.toggle("light");
   localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
@@ -1343,7 +1375,7 @@ function toggleTheme(){
 function openModal(id){ const o=document.getElementById(id); if(o) o.style.display="flex"; }
 function closeModal(id){ const o=document.getElementById(id); if(o) o.style.display="none"; }
 
-/* ✅ IA: abre arquivo separado ia.html (mantido) */
+/* ✅ IA: abre arquivo separado ia.html */
 function openIa(){
   const current = document.querySelector(".screen.active")?.id || "screen-home";
   sessionStorage.setItem("return_screen", current);
@@ -1351,6 +1383,211 @@ function openIa(){
 }
 function goBackFromIA(){
   showScreen(lastNonIAScreen || "screen-home");
+}
+
+/* =========================
+   ✅ SENSOR DE VOZ (app aberto)
+   - Usuário ativa 1 vez (permite microfone)
+   - Depois diz: "meu gastos pro" (wake word)
+   - Em seguida diz o comando: "anote mercado 120" etc
+========================= */
+let VOICE_ON = false;
+let VOICE_STATE = "idle"; // idle | armed | command
+let voiceRec = null;
+let voiceLastHeardAt = 0;
+
+function toast(msg){
+  try{
+    dbg(msg);
+    setTimeout(()=>{
+      const box = document.getElementById("debugBox");
+      if(box){ box.style.display="none"; box.textContent=""; }
+    }, 2200);
+  }catch(e){
+    console.log(msg);
+  }
+}
+function setVoiceUI(){
+  const s = document.getElementById("voiceStatus");
+  const fab = document.getElementById("fabVoice");
+  if(s) s.textContent = "Status: " + (VOICE_ON ? (VOICE_STATE==="command" ? "Aguardando comando…" : "Ligado (diga: “meu gastos pro”)") : "Desligado");
+  if(fab){
+    fab.classList.toggle("on", VOICE_ON);
+  }
+}
+function toggleVoiceSensor(){
+  if(VOICE_ON) stopVoiceSensor();
+  else startVoiceSensor();
+}
+function startVoiceSensor(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    alert("Reconhecimento de voz não suportado. Use Chrome no Android.");
+    return;
+  }
+
+  if(!voiceRec){
+    voiceRec = new SpeechRecognition();
+    voiceRec.lang = "pt-BR";
+    voiceRec.interimResults = false;
+    voiceRec.maxAlternatives = 1;
+    try { voiceRec.continuous = true; } catch(e){}
+
+    voiceRec.onresult = (event) => {
+      const text = (event.results?.[0]?.[0]?.transcript || "").trim();
+      if(!text) return;
+      handleVoiceSensor(text);
+    };
+
+    voiceRec.onerror = (e) => {
+      if(e.error === "not-allowed" || e.error === "service-not-allowed"){
+        VOICE_ON = false;
+        VOICE_STATE = "idle";
+        setVoiceUI();
+        alert("Permissão de microfone negada.");
+        return;
+      }
+      if(VOICE_ON) safeRestartVoice();
+    };
+
+    voiceRec.onend = () => {
+      if(VOICE_ON) safeRestartVoice();
+    };
+  }
+
+  VOICE_ON = true;
+  VOICE_STATE = "armed";
+  setVoiceUI();
+  safeRestartVoice(true);
+  toast("🎙️ Sensor ATIVO. Diga: “meu gastos pro”.");
+}
+
+function stopVoiceSensor(){
+  VOICE_ON = false;
+  VOICE_STATE = "idle";
+  setVoiceUI();
+  try{ voiceRec && voiceRec.stop(); }catch(e){}
+  toast("🎙️ Sensor DESLIGADO.");
+}
+
+function safeRestartVoice(first=false){
+  if(!VOICE_ON) return;
+  const now = Date.now();
+  if(!first && now - voiceLastHeardAt < 600) return;
+
+  try{ voiceRec.stop(); }catch(e){}
+  setTimeout(()=>{
+    if(!VOICE_ON) return;
+    try{ voiceRec.start(); }catch(e){}
+  }, 250);
+}
+
+function handleVoiceSensor(raw){
+  voiceLastHeardAt = Date.now();
+  const text = (raw || "").toLowerCase();
+
+  const WAKE = ["meu gastos pro", "meus gastos pro", "gastos pro"];
+  const saidWake = WAKE.some(w => text.includes(w));
+
+  if(VOICE_STATE === "armed"){
+    if(saidWake){
+      VOICE_STATE = "command";
+      setVoiceUI();
+      toast("✅ Pode falar. Ex: “anote mercado 120”");
+    }
+    return;
+  }
+
+  if(VOICE_STATE === "command"){
+    if(saidWake && text.replace(/[^a-z0-9çãõáéíóú\s]/g,"").trim().length <= 15) return;
+
+    handleVoiceCommand(raw);
+
+    VOICE_STATE = "armed";
+    setVoiceUI();
+    return;
+  }
+}
+
+/* ✅ comandos simples: "anote ..." */
+function handleVoiceCommand(raw){
+  const text = (raw||"").toLowerCase();
+
+  // navegação simples
+  if(text.includes("abra gastos pro") || text.includes("abrir gastos pro")){
+    goHome();
+    toast("✅ Gastos PRO aberto (home).");
+    return;
+  }
+
+  // gasto
+  if(text.includes("anote")){
+    const parsed = parseExpenseFromSpeech(text);
+    if(!parsed){
+      alert("Não entendi. Fale assim: “anote mercado 120” ou “anote uber 25 transporte”.");
+      return;
+    }
+
+    if(!USER_ID){
+      alert("Faça login primeiro para anotar por voz.");
+      return;
+    }
+
+    const { desc, amount, category } = parsed;
+
+    const d = getDataMes(mesAtual);
+    d.items.push(ensureItemDefaults({ desc, amount, category, isFixo:false, isInvestFixo:false }));
+    saveAll();
+
+    fetch(API+"/addGasto",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc, amount, category })
+    }).catch(()=>{});
+
+    render();
+    toast(`✅ Anotado: ${desc} • ${money(amount)} • ${category}`);
+    return;
+  }
+
+  toast("Comando não reconhecido. Use: “meu gastos pro” + “anote …”");
+}
+
+function parseExpenseFromSpeech(text){
+  let t = (text||"")
+    .replace("anote que comprei", "anote")
+    .replace("anote que eu comprei", "anote")
+    .replace("anote que gastei", "anote")
+    .replace("anote", "")
+    .trim();
+
+  const matches = t.match(/(\d+[.,]?\d*)/g);
+  if(!matches || !matches.length) return null;
+
+  const last = matches[matches.length - 1].replace(",", ".");
+  const amount = Number(last);
+  if(!amount || amount <= 0) return null;
+
+  t = t.replace(matches[matches.length - 1], "").trim();
+
+  let category = "Outros";
+  if(Array.isArray(categorias) && categorias.length){
+    const parts = t.split(" ").filter(Boolean);
+    const lastWord = parts[parts.length-1] || "";
+    const found = categorias.find(c => c.toLowerCase() === lastWord.toLowerCase());
+    if(found){
+      category = found;
+      parts.pop();
+      t = parts.join(" ").trim();
+    } else {
+      category = detectarCategoria(t);
+    }
+  } else {
+    category = detectarCategoria(t);
+  }
+
+  const desc = t || "Gasto";
+  return { desc, amount, category };
 }
 
 /* =========================
@@ -2266,7 +2503,7 @@ function simularEmprestimo(){
 }
 
 /* =========================
-   IA (Cloudflare Workers AI) - FULLSCREEN (mantida)
+   IA (Cloudflare Workers AI)
 ========================= */
 async function callIA(prompt) {
   const base = (window.API_BASE_URL || "").replace(/\/$/, "");
@@ -2434,6 +2671,7 @@ async function renderPdfAndSave(wrap, filename){
   pdf.save(filename);
 }
 
+/* ✅ (mantive suas funções PDF daqui pra baixo sem mexer no texto/estrutura) */
 async function gerarPDFResumoAno(){
   const status = document.getElementById("pdfStatus");
   try{
@@ -2773,6 +3011,9 @@ async function initFirebase(){
       });
       iaInput.dataset.bound="1";
     }
+
+    // ✅ atualiza UI do sensor de voz
+    setVoiceUI();
 
     showApp();
     goHome();
