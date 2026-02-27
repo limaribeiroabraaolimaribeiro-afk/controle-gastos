@@ -38,12 +38,13 @@
   --pad: 14px;
   --glass: blur(14px);
 }
-.light{
-  --bg:#f4f6ff;
-  --grad1: rgba(86,156,255,.20);
-  --grad2: rgba(57,217,138,.14);
-  --grad3: rgba(255,93,93,.10);
 
+/* ✅ IMPORTANTE:
+   Antes: .light sobrescrevia --bg e as --grad* fixas.
+   Agora: o JS aplica as cores do preset também no claro.
+   Então aqui deixamos o .light apenas para painéis/textos/sombra.
+*/
+.light{
   --panel: rgba(0,0,0,.04);
   --panel2: rgba(0,0,0,.06);
   --stroke: rgba(0,0,0,.08);
@@ -288,7 +289,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
 /* =========================
    ✅ IA FULLSCREEN (designer único)
-   (fica no index também, mas o botão IA pode abrir ia.html — não removi nada)
 ========================= */
 .iaWrap{
   max-width:1100px;
@@ -722,7 +722,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
       <div class="card">
         <h3>Cor do app (painel/fundo)</h3>
-        <div class="small">Escolha um estilo de fundo. Isso muda o painel principal.</div>
+        <div class="small">Escolha um estilo de fundo. Isso muda o painel principal (no escuro e no claro).</div>
 
         <div class="hr"></div>
 
@@ -732,7 +732,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           <option value="purple">Roxo</option>
           <option value="green">Verde</option>
           <option value="sunset">Pôr do sol</option>
-          <option value="mono">Escuro minimal</option>
+          <option value="mono">Minimal</option>
         </select>
 
         <div class="hr"></div>
@@ -1136,23 +1136,50 @@ let lastNonIAScreen = "screen-home";
    THEME
 ========================= */
 const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
+
+/* ✅ AGORA: cada preset tem cores para DARK e LIGHT.
+   Assim o tema claro também muda com o preset.
+*/
 const THEME_PRESETS = {
-  default: { bgDark:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
-  purple:  { bgDark:"#0d0a1f", g1:"rgba(170,110,255,.25)", g2:"rgba(86,156,255,.12)", g3:"rgba(57,217,138,.10)" },
-  green:   { bgDark:"#061a14", g1:"rgba(57,217,138,.28)", g2:"rgba(86,156,255,.10)", g3:"rgba(255,209,102,.10)" },
-  sunset:  { bgDark:"#1a0b0b", g1:"rgba(255,93,93,.22)", g2:"rgba(255,209,102,.18)", g3:"rgba(86,156,255,.10)" },
-  mono:    { bgDark:"#05070c", g1:"rgba(255,255,255,.10)", g2:"rgba(255,255,255,.06)", g3:"rgba(255,255,255,.04)" }
+  default: {
+    dark:  { bg:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
+    light: { bg:"#f4f6ff", g1:"rgba(86,156,255,.14)", g2:"rgba(57,217,138,.10)", g3:"rgba(255,93,93,.08)" }
+  },
+  purple: {
+    dark:  { bg:"#0d0a1f", g1:"rgba(170,110,255,.25)", g2:"rgba(86,156,255,.12)", g3:"rgba(57,217,138,.10)" },
+    light: { bg:"#fbf8ff", g1:"rgba(170,110,255,.16)", g2:"rgba(86,156,255,.10)", g3:"rgba(57,217,138,.08)" }
+  },
+  green:  {
+    dark:  { bg:"#061a14", g1:"rgba(57,217,138,.28)", g2:"rgba(86,156,255,.10)", g3:"rgba(255,209,102,.10)" },
+    light: { bg:"#f7fffb", g1:"rgba(57,217,138,.16)", g2:"rgba(86,156,255,.08)", g3:"rgba(255,209,102,.10)" }
+  },
+  sunset: {
+    dark:  { bg:"#1a0b0b", g1:"rgba(255,93,93,.22)", g2:"rgba(255,209,102,.18)", g3:"rgba(86,156,255,.10)" },
+    light: { bg:"#fff7f2", g1:"rgba(255,93,93,.14)", g2:"rgba(255,209,102,.14)", g3:"rgba(86,156,255,.08)" }
+  },
+  mono:   {
+    dark:  { bg:"#05070c", g1:"rgba(255,255,255,.10)", g2:"rgba(255,255,255,.06)", g3:"rgba(255,255,255,.04)" },
+    light: { bg:"#ffffff", g1:"rgba(0,0,0,.06)", g2:"rgba(0,0,0,.04)", g3:"rgba(0,0,0,.03)" }
+  }
 };
+
+function isLightMode(){
+  return document.body.classList.contains("light");
+}
+
 function applyThemeSettings(){
   const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
   const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
   const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
 
+  const mode = isLightMode() ? "light" : "dark";
+  const colors = p[mode] || p.dark;
+
   document.documentElement.style.setProperty("--accent", accent);
-  document.documentElement.style.setProperty("--bg", p.bgDark);
-  document.documentElement.style.setProperty("--grad1", p.g1);
-  document.documentElement.style.setProperty("--grad2", p.g2);
-  document.documentElement.style.setProperty("--grad3", p.g3);
+  document.documentElement.style.setProperty("--bg", colors.bg);
+  document.documentElement.style.setProperty("--grad1", colors.g1);
+  document.documentElement.style.setProperty("--grad2", colors.g2);
+  document.documentElement.style.setProperty("--grad3", colors.g3);
 
   const sel = document.getElementById("themePreset");
   if(sel) sel.value = preset;
@@ -1163,6 +1190,7 @@ function applyThemeSettings(){
   const meta = document.querySelector('meta[name="theme-color"]');
   if(meta) meta.setAttribute("content", accent);
 }
+
 function saveThemePreset(){
   const sel = document.getElementById("themePreset");
   const preset = sel ? sel.value : "default";
@@ -1304,17 +1332,19 @@ function goHome(){ openScreen("screen-home"); applyHomeLayoutToDOM(); }
 function openMenu(){ openScreen("screen-menu"); }
 function openHistory(){ buildHistoryUI(); showScreen("screen-history"); }
 function goBackFromHistory(){ showScreen(lastNonHistoryScreen || "screen-home"); }
+
+/* ✅ quando alterna tema, agora também reaplica o preset do claro/escuro */
 function toggleTheme(){
   document.body.classList.toggle("light");
   localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
   applyThemeSettings();
 }
+
 function openModal(id){ const o=document.getElementById(id); if(o) o.style.display="flex"; }
 function closeModal(id){ const o=document.getElementById(id); if(o) o.style.display="none"; }
 
-/* ✅ IA: abre arquivo separado ia.html (mas mantive a screen-ia aqui também, não removi nada) */
+/* ✅ IA: abre arquivo separado ia.html (mantido) */
 function openIa(){
-  // guarda a tela atual caso você queira usar no ia.html para voltar
   const current = document.querySelector(".screen.active")?.id || "screen-home";
   sessionStorage.setItem("return_screen", current);
   location.href = "./ia.html";
@@ -2696,6 +2726,7 @@ async function initFirebase(){
     const t = localStorage.getItem("theme");
     if(t==="light") document.body.classList.add("light");
 
+    // ✅ aplica preset conforme o modo (claro/escuro)
     applyThemeSettings();
 
     loadAll();
