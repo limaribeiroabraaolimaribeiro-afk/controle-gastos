@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Comando de Voz PRO • Controle de Gastos PRO</title>
+  <title>Comando de Voz IA • Controle de Gastos PRO</title>
 
   <style>
     :root{
@@ -47,7 +47,7 @@
     }
 
     .wrap{
-      max-width:980px;
+      max-width:1050px;
       margin:auto;
       padding:16px;
       padding-bottom:120px;
@@ -64,7 +64,6 @@
 
     h1{margin:0;font-size:24px}
     h2{margin:0;font-size:18px}
-    h3{margin:0;font-size:14px;color:var(--muted)}
     .small{font-size:12px;color:var(--muted)}
 
     .btn{
@@ -112,7 +111,7 @@
 
     .grid2{
       display:grid;
-      grid-template-columns:1.25fr .95fr;
+      grid-template-columns:1.2fr .95fr;
       gap:14px;
     }
     .grid22{
@@ -170,8 +169,8 @@
     }
 
     .bigMic{
-      width:146px;
-      height:146px;
+      width:150px;
+      height:150px;
       border-radius:50%;
       border:1px solid rgba(255,255,255,.18);
       display:flex;
@@ -215,7 +214,7 @@
       background:rgba(255,255,255,.04);
     }
     .result{
-      min-height:132px;
+      min-height:160px;
       white-space:pre-wrap;
       line-height:1.5;
       font-size:15px;
@@ -266,6 +265,23 @@
       user-select:none;
     }
 
+    .jsonBox{
+      min-height:180px;
+      max-height:360px;
+      overflow:auto;
+      white-space:pre-wrap;
+      word-break:break-word;
+      line-height:1.45;
+      font-size:12px;
+      padding:14px;
+      border-radius:18px;
+      border:1px dashed var(--stroke);
+      background:rgba(255,255,255,.04);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+    }
+
+    .hidden{display:none !important}
+
     @media (max-width:900px){
       .grid2{grid-template-columns:1fr}
     }
@@ -278,10 +294,10 @@
   <div class="wrap">
     <div class="topbar">
       <div>
-        <h1>Comando de Voz PRO</h1>
-        <div class="small">Fale o comando, revise o texto e toque em <b>Executar comando</b>.</div>
+        <h1>Comando de Voz IA</h1>
+        <div class="small">Ele tenta regra local primeiro. Se não bater, envia o texto para sua IA e executa automaticamente.</div>
       </div>
-      <div class="row" style="max-width:320px">
+      <div class="row" style="max-width:340px">
         <button class="btn" onclick="goBack()">← Voltar</button>
         <button class="btn" onclick="toggleTheme()">🌙/☀️</button>
       </div>
@@ -290,20 +306,17 @@
     <div class="card">
       <div class="heroTop">
         <div>
-          <h2>Fale como áudio de WhatsApp</h2>
+          <h2>Fale normalmente</h2>
           <div class="small" style="margin-top:6px">
             Exemplos:
-            <br>• adicionar gasto mercado 120 categoria alimentação
-            <br>• adicionar gasto fixo internet 99 categoria casa vence dia 11
-            <br>• adicionar investimento fixo reserva 3000 em 12 meses vence dia 10
-            <br>• marcar internet como pago
-            <br>• desmarcar internet como pago
-            <br>• remover gasto mercado
-            <br>• remover gasto fixo internet
-            <br>• remover investimento fixo reserva
-            <br>• adicionar categoria farmácia
-            <br>• mostrar resumo do mês
-            <br>• abrir notificações
+            <br>• anota que paguei 50 no mercado hoje
+            <br>• coloca internet 99 fixo vencendo dia 11
+            <br>• quero guardar 300 pro tablet
+            <br>• marca internet como pago
+            <br>• tira internet do pago
+            <br>• remove o gasto mercado
+            <br>• gera pdf de março de 2026
+            <br>• muda o tema para roxo
           </div>
         </div>
         <div class="badge">
@@ -324,10 +337,11 @@
       </div>
 
       <div class="chipRow">
-        <div class="chip" onclick="fillExample('adicionar gasto mercado 120 categoria alimentação')">Exemplo gasto</div>
-        <div class="chip" onclick="fillExample('adicionar gasto fixo internet 99 categoria casa vence dia 11')">Exemplo fixo</div>
-        <div class="chip" onclick="fillExample('adicionar investimento fixo reserva 3000 em 12 meses vence dia 10')">Exemplo investimento</div>
-        <div class="chip" onclick="fillExample('mostrar resumo do mês')">Exemplo resumo</div>
+        <div class="chip" onclick="fillExample('anota que paguei 50 no mercado hoje')">Gasto natural</div>
+        <div class="chip" onclick="fillExample('coloca internet 99 fixo vencendo dia 11')">Fixo</div>
+        <div class="chip" onclick="fillExample('quero guardar 300 pro tablet')">Guardado</div>
+        <div class="chip" onclick="fillExample('muda o tema para roxo')">Tema</div>
+        <div class="chip" onclick="fillExample('gera pdf de março de 2026')">PDF</div>
       </div>
 
       <div class="row" style="margin-top:14px">
@@ -352,37 +366,56 @@
 
       <div>
         <div class="card">
-          <div style="font-weight:900;margin-bottom:10px">Comandos aceitos</div>
-          <div class="list small">
-            <div class="item"><b>Adicionar gasto normal</b><br>Ex.: adicionar gasto mercado 120 categoria alimentação</div>
-            <div class="item"><b>Adicionar gasto fixo</b><br>Ex.: adicionar gasto fixo internet 99 categoria casa vence dia 11</div>
-            <div class="item"><b>Adicionar investimento fixo</b><br>Ex.: adicionar investimento fixo reserva 3000 em 12 meses vence dia 10</div>
-            <div class="item"><b>Adicionar categoria</b><br>Ex.: adicionar categoria farmácia</div>
-            <div class="item"><b>Marcar como pago</b><br>Ex.: marcar internet como pago</div>
-            <div class="item"><b>Desmarcar como pago</b><br>Ex.: desmarcar internet como pago</div>
-            <div class="item"><b>Remover gasto</b><br>Ex.: remover gasto mercado</div>
-            <div class="item"><b>Remover gasto fixo</b><br>Ex.: remover gasto fixo internet</div>
-            <div class="item"><b>Remover investimento fixo</b><br>Ex.: remover investimento fixo reserva</div>
-            <div class="item"><b>Mostrar resumo do mês</b></div>
-            <div class="item"><b>Abrir notificações</b></div>
+          <div style="font-weight:900;margin-bottom:10px">Modo IA</div>
+          <div class="small">
+            Quando a regra local não entende, o sistema manda o texto para sua IA em:
+            <br><b>/api/chat</b>
+            <br><br>
+            A IA precisa responder JSON puro ou um bloco JSON com:
+            <br>• <b>action</b>
+            <br>• parâmetros da ação
+          </div>
+          <div class="hr" style="height:1px;background:var(--stroke);margin:12px 0"></div>
+          <div class="grid22">
+            <button class="btn" onclick="testAI()">Testar IA</button>
+            <button class="btn" onclick="toggleRawBox()">Mostrar JSON</button>
           </div>
         </div>
 
+        <div class="card hidden" id="rawCard">
+          <div style="font-weight:900;margin-bottom:10px">Resposta bruta da IA</div>
+          <div id="rawJsonBox" class="jsonBox">Nenhum retorno ainda.</div>
+        </div>
+
         <div class="card">
-          <div style="font-weight:900;margin-bottom:10px">Ações rápidas</div>
-          <div class="grid22">
-            <button class="btn" onclick="fillExample('mostrar resumo do mês')">Resumo do mês</button>
-            <button class="btn" onclick="requestNotificationPermission()">Ativar notificações</button>
-            <button class="btn" onclick="fillExample('abrir notificações')">Abrir notificações</button>
-            <button class="btn" onclick="location.href='./index.html'">Abrir início</button>
+          <div style="font-weight:900;margin-bottom:10px">Ações que a IA pode devolver</div>
+          <div class="list small">
+            <div class="item"><b>add_expense</b><br>{ "action":"add_expense","desc":"mercado","amount":50,"category":"Alimentação","paid":true }</div>
+            <div class="item"><b>add_fixed_expense</b><br>{ "action":"add_fixed_expense","desc":"internet","amount":99,"category":"Casa","dueDay":11 }</div>
+            <div class="item"><b>add_fixed_investment</b><br>{ "action":"add_fixed_investment","name":"reserva","goalAmount":3000,"months":12,"dueDay":10 }</div>
+            <div class="item"><b>mark_paid</b> / <b>mark_pending</b><br>{ "action":"mark_paid","target":"internet" }</div>
+            <div class="item"><b>remove_expense</b> / <b>remove_fixed_expense</b> / <b>remove_fixed_investment</b></div>
+            <div class="item"><b>add_saved</b><br>{ "action":"add_saved","amount":300,"desc":"tablet" }</div>
+            <div class="item"><b>change_theme</b><br>{ "action":"change_theme","preset":"purple","accent":"#aa6eff" }</div>
+            <div class="item"><b>generate_month_pdf</b><br>{ "action":"generate_month_pdf","month":"2026-03" }</div>
+            <div class="item"><b>generate_year_summary_pdf</b><br>{ "action":"generate_year_summary_pdf","year":"2026" }</div>
+            <div class="item"><b>show_summary</b><br>{ "action":"show_summary" }</div>
+            <div class="item"><b>request_notifications</b><br>{ "action":"request_notifications" }</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+<script>
+  window.API_BASE_URL = window.API_BASE_URL || "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
+  window.APP_KEY = window.APP_KEY || "GastosPro@2026!";
+</script>
 
 <script>
 const FIREBASE_CONFIG = {
@@ -392,17 +425,56 @@ const FIREBASE_CONFIG = {
 };
 
 const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
+const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
+
+const THEME_PRESETS = {
+  default:{ dark:{bg:"#07101f",g1:"rgba(86,156,255,.22)",g2:"rgba(57,217,138,.16)",g3:"rgba(255,93,93,.12)"}, light:{bg:"#f4f6ff",g1:"rgba(86,156,255,.14)",g2:"rgba(57,217,138,.10)",g3:"rgba(255,93,93,.08)"} },
+  purple:{ dark:{bg:"#0d0a1f",g1:"rgba(170,110,255,.25)",g2:"rgba(86,156,255,.12)",g3:"rgba(57,217,138,.10)"}, light:{bg:"#fbf8ff",g1:"rgba(170,110,255,.16)",g2:"rgba(86,156,255,.10)",g3:"rgba(57,217,138,.08)"} },
+  green:{ dark:{bg:"#061a14",g1:"rgba(57,217,138,.28)",g2:"rgba(86,156,255,.10)",g3:"rgba(255,209,102,.10)"}, light:{bg:"#f7fffb",g1:"rgba(57,217,138,.16)",g2:"rgba(86,156,255,.08)",g3:"rgba(255,209,102,.10)"} },
+  sunset:{ dark:{bg:"#1a0b0b",g1:"rgba(255,93,93,.22)",g2:"rgba(255,209,102,.18)",g3:"rgba(86,156,255,.10)"}, light:{bg:"#fff7f2",g1:"rgba(255,93,93,.14)",g2:"rgba(255,209,102,.14)",g3:"rgba(86,156,255,.08)"} },
+  mono:{ dark:{bg:"#05070c",g1:"rgba(255,255,255,.10)",g2:"rgba(255,255,255,.06)",g3:"rgba(255,255,255,.04)"}, light:{bg:"#ffffff",g1:"rgba(0,0,0,.06)",g2:"rgba(0,0,0,.04)",g3:"rgba(0,0,0,.03)"} }
+};
+
+const COLOR_MAP = {
+  azul:"#569cff", blue:"#569cff",
+  verde:"#39d98a", green:"#39d98a",
+  vermelho:"#ff5d5d", red:"#ff5d5d",
+  amarelo:"#ffd166", yellow:"#ffd166",
+  roxo:"#aa6eff", purple:"#aa6eff",
+  rosa:"#ff69b4", pink:"#ff69b4",
+  laranja:"#ff8c42", orange:"#ff8c42",
+  branco:"#f5f5f5", preto:"#222222",
+  ciano:"#00c2ff"
+};
+
+const MONTHS_PT = {
+  janeiro:"01", fevereiro:"02", marco:"03", "março":"03", abril:"04", maio:"05", junho:"06",
+  julho:"07", agosto:"08", setembro:"09", outubro:"10", novembro:"11", dezembro:"12"
+};
 
 let auth = null;
 let USER = null;
 let USER_ID = null;
-
 let recognition = null;
 let listening = false;
 let lastTranscript = "";
+let lastRaw = "";
 
 function dbg(msg){
   document.getElementById("debugBox").textContent = String(msg);
+}
+
+function setResult(html){
+  document.getElementById("resultBox").innerHTML = html;
+}
+
+function setRawBox(text){
+  lastRaw = String(text || "");
+  document.getElementById("rawJsonBox").textContent = lastRaw || "Nenhum retorno ainda.";
+}
+
+function toggleRawBox(){
+  document.getElementById("rawCard").classList.toggle("hidden");
 }
 
 function escapeHtml(s){
@@ -438,12 +510,12 @@ function uid(){
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
 
-function currentMonthKey(){
-  return new Date().toISOString().slice(0,7);
-}
-
 function todayISO(){
   return new Date().toISOString().slice(0,10);
+}
+
+function currentMonthKey(){
+  return new Date().toISOString().slice(0,7);
 }
 
 function kMes(){ return "gastos_pro_state_" + USER_ID; }
@@ -492,6 +564,22 @@ function loadState(){
 
   if(!state.meses || typeof state.meses !== "object") state.meses = {};
 
+  fixos = (fixos || []).map(f => ({
+    ...f,
+    id: f.id || uid(),
+    diaPagar: Number(f.diaPagar || 0),
+    isFixo: true
+  }));
+
+  investFixos = (investFixos || []).map(inv => ({
+    ...inv,
+    id: inv.id || uid(),
+    diaPagar: Number(inv.diaPagar || 0),
+    metaFinal: Number(inv.metaFinal || 0),
+    prazoMeses: Number(inv.prazoMeses || 0),
+    mensal: Number(inv.mensal || 0)
+  }));
+
   return { state, categorias, fixos, investFixos };
 }
 
@@ -519,6 +607,62 @@ function getMesData(all, monthKey){
   if(!Array.isArray(d.saved)) d.saved = [];
   if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos = [];
   if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
+  d.items = d.items.map(it => ({
+    ...it,
+    id: it.id || uid(),
+    paid: !!it.paid,
+    isFixo: !!it.isFixo,
+    isInvestFixo: !!it.isInvestFixo,
+    diaPagar: Number(it.diaPagar || 0)
+  }));
+  return d;
+}
+
+function fixKey(desc, amount, category){
+  return `${String(desc||"").toLowerCase()}|${Number(amount||0)}|${String(category||"").toLowerCase()}`;
+}
+
+function ensureMonthItems(all, monthKey){
+  const d = getMesData(all, monthKey);
+  const hidden = new Set((d.hiddenFixos || []).map(String));
+  const present = new Set(d.items.map(it => fixKey(it.desc, it.amount, it.category)));
+
+  (all.fixos || []).forEach(f=>{
+    const fk = fixKey(f.desc, f.amount, f.category);
+    if(hidden.has(fk) || present.has(fk)) return;
+    d.items.unshift({
+      id: f.id,
+      desc: f.desc,
+      amount: Number(f.amount || 0),
+      category: f.category || "Outros",
+      isFixo:true,
+      isInvestFixo:false,
+      diaPagar:Number(f.diaPagar || 0),
+      paid:false
+    });
+    present.add(fk);
+  });
+
+  (all.investFixos || []).forEach(inv=>{
+    const desc = `Juntar: ${inv.nome}`;
+    const amount = Number(inv.mensal || 0);
+    const fk = fixKey(desc, amount, "Investimentos");
+    if(hidden.has(fk) || present.has(fk)) return;
+    if(typeof d.investStatus[inv.id] !== "boolean") d.investStatus[inv.id] = false;
+    d.items.unshift({
+      id: inv.id,
+      invId: inv.id,
+      desc,
+      amount,
+      category:"Investimentos",
+      isFixo:true,
+      isInvestFixo:true,
+      diaPagar:Number(inv.diaPagar || 0),
+      paid: !!d.investStatus[inv.id]
+    });
+    present.add(fk);
+  });
+
   return d;
 }
 
@@ -540,22 +684,33 @@ function fillExample(text){
   setResult(`Exemplo carregado:<br><b>${escapeHtml(text)}</b>`);
 }
 
-function setResult(html){
-  document.getElementById("resultBox").innerHTML = html;
+function clearTranscript(){
+  setTranscript("");
+  setResult("Nenhuma ação executada ainda.");
+}
+
+function applyThemeToPage(){
+  const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
+  const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
+  const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
+  const light = document.body.classList.contains("light");
+  const colors = light ? p.light : p.dark;
+
+  document.documentElement.style.setProperty("--accent", accent);
+  document.documentElement.style.setProperty("--bg", colors.bg);
+  document.documentElement.style.setProperty("--grad1", colors.g1);
+  document.documentElement.style.setProperty("--grad2", colors.g2);
+  document.documentElement.style.setProperty("--grad3", colors.g3);
 }
 
 function toggleTheme(){
   document.body.classList.toggle("light");
   localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+  applyThemeToPage();
 }
 
 function goBack(){
   location.href = "./index.html";
-}
-
-function clearTranscript(){
-  setTranscript("");
-  setResult("Nenhuma ação executada ainda.");
 }
 
 function ensureSpeech(){
@@ -621,12 +776,10 @@ function toggleRecording(){
 
 function parseCategory(text, categorias){
   const normalized = normalizeText(text);
-
   for(const c of categorias){
     const nc = normalizeText(c);
     if(normalized.includes("categoria " + nc)) return c;
   }
-
   if(normalized.includes("casa")) return "Casa";
   if(normalized.includes("alimentacao")) return "Alimentação";
   if(normalized.includes("transporte")) return "Transporte";
@@ -658,7 +811,8 @@ function extractDueDay(text){
     t.match(/dia (\d{1,2}) prazo/) ||
     t.match(/prazo dia (\d{1,2})/) ||
     t.match(/pagar dia (\d{1,2})/) ||
-    t.match(/ate dia (\d{1,2})/);
+    t.match(/ate dia (\d{1,2})/) ||
+    t.match(/até dia (\d{1,2})/);
   return m ? Number(m[1]) : 0;
 }
 
@@ -685,7 +839,12 @@ function cleanDesc(raw){
     .replace(/^deletar\s+/, "")
     .replace(/^excluir\s+/, "")
     .replace(/^marcar\s+/, "")
-    .replace(/^desmarcar\s+/, "");
+    .replace(/^desmarcar\s+/, "")
+    .replace(/^gastei\s+/, "")
+    .replace(/^guardei\s+/, "")
+    .replace(/^quero guardar\s+/, "")
+    .replace(/^quero juntar\s+/, "")
+    .replace(/^quero\s+/, "");
 
   t = t
     .replace(/\bgasto fixo\b/g, "")
@@ -694,14 +853,22 @@ function cleanDesc(raw){
     .replace(/\binvestimento\b/g, "")
     .replace(/\bcategoria\b/g, "")
     .replace(/\bfixo\b/g, "")
+    .replace(/\bguardado\b/g, "")
+    .replace(/\bguardar\b/g, "")
     .replace(/\bcomo pago\b/g, "")
     .replace(/\bpago\b/g, "")
     .replace(/\bpendente\b/g, "")
     .replace(/\bvencer\b/g, "")
+    .replace(/\bvencendo\b/g, "")
     .replace(/\bvence\b/g, "")
     .replace(/\bdia \d{1,2}\b/g, "")
     .replace(/\bcategoria [a-zA-ZÀ-ÿçÇ]+\b/g, "")
     .replace(/\bem \d{1,3} meses?\b/g, "")
+    .replace(/\bhoje\b/g, "")
+    .replace(/\bno\b/g, " ")
+    .replace(/\bna\b/g, " ")
+    .replace(/\bpro\b/g, " ")
+    .replace(/\bpra\b/g, " ")
     .replace(/\d+(\.\d+)?/g, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -709,8 +876,17 @@ function cleanDesc(raw){
   return titleCase(t);
 }
 
-function monthSummaryHtml(all){
-  const d = getMesData(all, currentMonthKey());
+function findCurrentMonthItemByName(all, name, monthKey){
+  const d = ensureMonthItems(all, monthKey || currentMonthKey());
+  const n = normalizeText(name);
+  return d.items.find(it => {
+    const itemName = normalizeText(it.desc);
+    return itemName.includes(n) || n.includes(itemName);
+  });
+}
+
+function monthSummaryHtml(all, monthKey){
+  const d = ensureMonthItems(all, monthKey || currentMonthKey());
   const salary = Number(d.salary || 0);
   const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
   const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
@@ -724,7 +900,7 @@ function monthSummaryHtml(all){
   const topCats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,3);
 
   return (
-    `<span class="ok">Resumo do mês atual.</span><br><br>` +
+    `<span class="ok">Resumo do mês.</span><br><br>` +
     `• Salário: <b>${money(salary)}</b><br>` +
     `• Gastos: <b>${money(spent)}</b><br>` +
     `• Guardado: <b>${money(saved)}</b><br>` +
@@ -733,344 +909,782 @@ function monthSummaryHtml(all){
   );
 }
 
+function parseMonthYearFromText(cmd){
+  const t = normalizeText(cmd);
+  const yearMatch = t.match(/\b(20\d{2})\b/);
+  const year = yearMatch ? yearMatch[1] : String(new Date().getFullYear());
+
+  for(const [name, num] of Object.entries(MONTHS_PT)){
+    if(t.includes(name)) return { year, month:num, monthName:name };
+  }
+
+  const current = currentMonthKey();
+  return { year: current.slice(0,4), month: current.slice(5,7), monthName: "" };
+}
+
 function requestNotificationPermission(){
   if(!("Notification" in window)){
     setResult(`<span class="err">Seu navegador não suporta notificações.</span>`);
     return;
   }
   Notification.requestPermission().then((perm)=>{
-    if(perm === "granted"){
-      setResult(`<span class="ok">Notificações ativadas com sucesso.</span>`);
-    }else{
-      setResult(`<span class="warn">Notificações não foram permitidas.</span>`);
-    }
+    if(perm === "granted") setResult(`<span class="ok">Notificações ativadas com sucesso.</span>`);
+    else setResult(`<span class="warn">Notificações não foram permitidas.</span>`);
   }).catch(()=>{
     setResult(`<span class="err">Não foi possível ativar notificações.</span>`);
   });
 }
 
-function tryAddCategoria(cmd, all){
-  const t = normalizeText(cmd);
-  if(!(t.includes("adicionar categoria") || t.includes("criar categoria"))) return null;
-
-  let nome = t
-    .replace("adicionar categoria","")
-    .replace("criar categoria","")
-    .trim();
-
-  if(!nome) return { ok:false, msg:"Não entendi o nome da categoria." };
-
-  nome = titleCase(nome);
-
-  if(all.categorias.some(c => normalizeText(c) === normalizeText(nome))){
-    return { ok:false, msg:`A categoria "${escapeHtml(nome)}" já existe.` };
-  }
-
-  all.categorias.push(nome);
-  saveState(all);
-  return { ok:true, msg:`Categoria <b>${escapeHtml(nome)}</b> adicionada com sucesso.` };
-}
-
-function tryAddGastoFixo(cmd, all){
-  const t = normalizeText(cmd);
-  if(!t.includes("gasto fixo")) return null;
-
-  const valor = extractAmount(t);
-  const categoria = parseCategory(t, all.categorias);
-  const diaPagar = extractDueDay(t);
-  const desc = cleanDesc(t);
-
-  if(!desc) return { ok:false, msg:"Não entendi a descrição do gasto fixo." };
-  if(!valor || valor <= 0) return { ok:false, msg:"Não entendi o valor do gasto fixo." };
-
-  all.fixos.push({
-    id: uid(),
-    desc,
-    amount: valor,
-    category: categoria,
-    diaPagar: diaPagar || 0,
-    isFixo: true
-  });
-
-  saveState(all);
-
-  return {
-    ok:true,
-    msg:
-      `Gasto fixo adicionado:<br>` +
-      `• <b>${escapeHtml(desc)}</b><br>` +
-      `• Valor: <b>${money(valor)}</b><br>` +
-      `• Categoria: <b>${escapeHtml(categoria)}</b><br>` +
-      `• Vence: <b>${diaPagar ? ("dia " + diaPagar) : "sem prazo"}</b>`
-  };
-}
-
-function tryAddInvestimentoFixo(cmd, all){
-  const t = normalizeText(cmd);
-  if(!t.includes("investimento fixo")) return null;
-
-  const nums = extractAllNumbers(t);
-  const metaFinal = nums[0] || 0;
-  const prazoMeses = extractMonths(t) || nums[1] || 0;
-  const diaPagar = extractDueDay(t);
-  const nome = cleanDesc(t);
-
-  if(!nome) return { ok:false, msg:"Não entendi o nome do investimento fixo." };
-  if(!metaFinal || metaFinal <= 0) return { ok:false, msg:"Não entendi a meta final do investimento fixo." };
-  if(!prazoMeses || prazoMeses <= 0) return { ok:false, msg:"Não entendi o prazo em meses." };
-
-  const mensal = Math.round(((metaFinal / prazoMeses) || 0) * 100) / 100;
-  const id = uid();
-
-  all.investFixos.push({
-    id,
-    nome,
-    metaFinal,
-    prazoMeses,
-    mensal,
-    diaPagar: diaPagar || 0
-  });
-
-  const d = getMesData(all, currentMonthKey());
-  d.investStatus[id] = false;
-
-  saveState(all);
-
-  return {
-    ok:true,
-    msg:
-      `Investimento fixo adicionado:<br>` +
-      `• <b>${escapeHtml(nome)}</b><br>` +
-      `• Meta final: <b>${money(metaFinal)}</b><br>` +
-      `• Prazo: <b>${prazoMeses} meses</b><br>` +
-      `• Mensal automático: <b>${money(mensal)}</b><br>` +
-      `• Vence: <b>${diaPagar ? ("dia " + diaPagar) : "sem prazo"}</b>`
-  };
-}
-
-function findCurrentMonthItemByName(all, name){
-  const d = getMesData(all, currentMonthKey());
+function setThemePresetByName(name){
   const n = normalizeText(name);
-
-  return d.items.find(it => {
-    const itemName = normalizeText(it.desc);
-    return itemName.includes(n) || n.includes(itemName);
-  });
+  if(n.includes("roxo") || n.includes("purple")) return "purple";
+  if(n.includes("verde") || n.includes("green")) return "green";
+  if(n.includes("sunset") || n.includes("por do sol") || n.includes("laranja")) return "sunset";
+  if(n.includes("minimal") || n.includes("mono") || n.includes("preto e branco")) return "mono";
+  if(n.includes("padrao") || n.includes("normal") || n.includes("azul")) return "default";
+  return "";
 }
 
-function tryMarkAsPaid(cmd, all){
-  const t = normalizeText(cmd);
-  if(!(t.includes("como pago") || t.includes("marcar") || t.includes("paguei"))) return null;
-  if(t.includes("desmarcar")) return null;
+function setAccentByName(name){
+  const n = normalizeText(name).replace(/\s+/g,"");
+  return COLOR_MAP[n] || "";
+}
 
-  let nome = t
-    .replace("marcar","")
-    .replace("como pago","")
-    .replace("paguei","")
-    .replace("como paga","")
-    .trim();
+function monthsOfYear(all, year){
+  return Object.keys(all.state.meses || {}).filter(m => m.startsWith(String(year) + "-")).sort();
+}
 
-  if(!nome) return { ok:false, msg:"Não entendi qual item você quer marcar como pago." };
+function aggregateYear(all, year){
+  const months = monthsOfYear(all, year);
+  const byCat = {};
+  const byMonth = [];
 
-  const d = getMesData(all, currentMonthKey());
-  const target = findCurrentMonthItemByName(all, nome);
+  months.forEach(m=>{
+    const d = ensureMonthItems(all, m);
+    const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
+    const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
+    const salary = Number(d.salary || 0);
+    byMonth.push({ m, salary, spent, saved });
+    (d.items || []).forEach(it=>{
+      const c = it.category || "Outros";
+      byCat[c] = (byCat[c] || 0) + Number(it.amount || 0);
+    });
+  });
 
-  if(!target){
-    return { ok:false, msg:`Não encontrei item do mês com o nome parecido com "<b>${escapeHtml(nome)}</b>".` };
+  const catsSorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const topCat = catsSorted[0] ? { cat: catsSorted[0][0], value: catsSorted[0][1] } : { cat:"—", value:0 };
+  return { months, byCat, byMonth, topCat };
+}
+
+async function renderPdfAndSaveFromElement(wrap, filename){
+  const canvas = await html2canvas(wrap, { scale: 2, backgroundColor:"#ffffff" });
+  const imgData = canvas.toDataURL("image/png");
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p","mm","a4");
+
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const imgW = pageW;
+  const imgH = (canvas.height * imgW) / canvas.width;
+
+  let y = 0;
+  let remaining = imgH;
+  pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+  remaining -= pageH;
+
+  while(remaining > 0){
+    pdf.addPage();
+    y = -(imgH - remaining);
+    pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+    remaining -= pageH;
   }
 
-  target.paid = true;
+  pdf.save(filename);
+}
 
-  if(target.isInvestFixo && target.invId){
-    d.investStatus[target.invId] = true;
-    if(!Array.isArray(d.saved)) d.saved = [];
-    const exists = d.saved.some(s => s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey());
-    if(!exists){
-      d.saved.unshift({
-        value:Number(target.amount||0),
-        desc:`Automático: ${target.desc}`,
-        date:todayISO(),
-        source:"investFixo",
-        invId:target.invId,
-        month:currentMonthKey()
-      });
+async function generateYearSummaryPDF(all, year){
+  const agg = aggregateYear(all, year);
+
+  const wrap = document.createElement("div");
+  wrap.style.position = "fixed";
+  wrap.style.left = "-9999px";
+  wrap.style.top = "0";
+  wrap.style.width = "900px";
+  wrap.style.padding = "16px";
+  wrap.style.background = "#fff";
+  wrap.style.color = "#111";
+  wrap.style.fontFamily = "system-ui, sans-serif";
+
+  wrap.innerHTML = `
+    <div style="font-size:22px;font-weight:900">Resumo do Ano • Controle de Gastos PRO</div>
+    <div style="font-size:13px;color:#444">Ano: <b>${escapeHtml(year)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
+    <div style="margin-top:10px;font-size:14px;font-weight:900">Mais gastou no ano: ${escapeHtml(agg.topCat.cat)} • ${money(agg.topCat.value)}</div>
+    <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
+    <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+      <div style="font-weight:900;margin-bottom:8px">Tabela do ano</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr>
+            <th style="text-align:left;border-bottom:1px solid #ddd;padding:8px">Mês</th>
+            <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Salário</th>
+            <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Gastos</th>
+            <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Guardado</th>
+            <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Sobra</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${agg.byMonth.map(x=>{
+            const sobra = Number(x.salary||0) - Number(x.spent||0);
+            const label = new Date(x.m+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"short",year:"numeric"});
+            return `<tr>
+              <td style="padding:7px;border-bottom:1px solid #eee">${escapeHtml(label)}</td>
+              <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.salary)}</td>
+              <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.spent)}</td>
+              <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.saved)}</td>
+              <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(sobra)}</td>
+            </tr>`;
+          }).join("") || `<tr><td colspan="5" style="padding:10px">Sem dados no ano.</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document.body.appendChild(wrap);
+  await new Promise(r=>setTimeout(r,200));
+  await renderPdfAndSaveFromElement(wrap, `resumo_ano_${year}.pdf`);
+  wrap.remove();
+}
+
+async function generateMonthPDF(all, monthKey){
+  const d = ensureMonthItems(all, monthKey);
+  const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
+  const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
+  const salary = Number(d.salary || 0);
+  const left = salary - spent;
+
+  const wrap = document.createElement("div");
+  wrap.style.position = "fixed";
+  wrap.style.left = "-9999px";
+  wrap.style.top = "0";
+  wrap.style.width = "900px";
+  wrap.style.padding = "16px";
+  wrap.style.background = "#fff";
+  wrap.style.color = "#111";
+  wrap.style.fontFamily = "system-ui, sans-serif";
+
+  const monthLabel = new Date(monthKey + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+
+  wrap.innerHTML = `
+    <div style="font-size:22px;font-weight:900">PDF do Mês • Controle de Gastos PRO</div>
+    <div style="font-size:13px;color:#444">Mês: <b>${escapeHtml(monthLabel)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
+    <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+        <div style="font-weight:900;margin-bottom:8px">Resumo</div>
+        <div>Salário: <b>${money(salary)}</b></div>
+        <div>Gastos: <b>${money(spent)}</b></div>
+        <div>Guardado: <b>${money(saved)}</b></div>
+        <div>Sobra: <b>${money(left)}</b></div>
+      </div>
+      <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+        <div style="font-weight:900;margin-bottom:8px">Totais</div>
+        <div>Itens anotados: <b>${(d.items || []).length}</b></div>
+        <div>Entradas guardadas: <b>${(d.saved || []).length}</b></div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
+      <div style="font-weight:900;margin-bottom:8px">Itens do mês</div>
+      ${(d.items || []).length ? (d.items || []).map(it=>`
+        <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee">
+          <div>
+            <div style="font-weight:800">${escapeHtml(it.desc || "")}</div>
+            <div style="font-size:12px;color:#444">
+              ${escapeHtml(it.category || "Outros")} • ${it.paid ? "Pago" : "Pendente"}
+              ${it.isFixo ? " • Fixo" : ""}
+              ${it.isInvestFixo ? " • Juntar" : ""}
+              ${it.diaPagar ? (" • Vence dia " + escapeHtml(it.diaPagar)) : ""}
+            </div>
+          </div>
+          <div style="font-weight:900">${money(it.amount || 0)}</div>
+        </div>
+      `).join("") : `<div style="padding:8px 0">Sem itens no mês.</div>`}
+    </div>
+
+    <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
+      <div style="font-weight:900;margin-bottom:8px">Guardado</div>
+      ${(d.saved || []).length ? (d.saved || []).map(s=>`
+        <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee">
+          <div>
+            <div style="font-weight:800">${escapeHtml(s.desc || "Sem descrição")}</div>
+            <div style="font-size:12px;color:#444">${escapeHtml(s.date || "")}</div>
+          </div>
+          <div style="font-weight:900">${money(s.value || 0)}</div>
+        </div>
+      `).join("") : `<div style="padding:8px 0">Sem valores guardados no mês.</div>`}
+    </div>
+  `;
+
+  document.body.appendChild(wrap);
+  await new Promise(r=>setTimeout(r,200));
+  await renderPdfAndSaveFromElement(wrap, `pdf_mes_${monthKey}.pdf`);
+  wrap.remove();
+}
+
+/* =========================
+   REGRAS LOCAIS
+========================= */
+
+function tryLocalRule(cmd, all){
+  const t = normalizeText(cmd);
+
+  if(t.includes("mostrar resumo do mes") || t.includes("resumo do mes")){
+    return { ok:true, html: monthSummaryHtml(all, currentMonthKey()) };
+  }
+
+  if(t.includes("abrir notificacoes") || t.includes("ativar notificacoes") || t === "notificacoes"){
+    requestNotificationPermission();
+    return { ok:true, html:`Abrindo permissão de <b>notificações</b>.` };
+  }
+
+  if(t.includes("anotar guardado") || t.includes("guardar ") || t.includes("guardei ") || t.includes("quero guardar ")){
+    const valor = extractAmount(t);
+    let desc = cleanDesc(t);
+    if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor do guardado." };
+    if(!desc) desc = "Guardado";
+    const d = ensureMonthItems(all, currentMonthKey());
+    d.saved.unshift({ value:valor, desc, date:todayISO(), source:"manual" });
+    saveState(all);
+    return { ok:true, html:`Valor guardado anotado:<br>• Valor: <b>${money(valor)}</b><br>• Descrição: <b>${escapeHtml(desc)}</b>` };
+  }
+
+  if(t.includes("mudar tema") || t.includes("trocar tema") || t.includes("mudar cor") || t.includes("trocar cor")){
+    let changed = [];
+    const preset = setThemePresetByName(t);
+    if(preset){
+      localStorage.setItem(THEME_KEYS.preset, preset);
+      changed.push(`Tema alterado para <b>${escapeHtml(preset)}</b>`);
     }
-  }
-
-  saveState(all);
-
-  return {
-    ok:true,
-    msg:`Item <b>${escapeHtml(target.desc)}</b> marcado como <b>Pago</b>.`
-  };
-}
-
-function tryUnmarkAsPaid(cmd, all){
-  const t = normalizeText(cmd);
-  if(!(t.includes("desmarcar") || t.includes("tirar pago") || t.includes("voltar pendente"))) return null;
-
-  let nome = t
-    .replace("desmarcar","")
-    .replace("como pago","")
-    .replace("tirar pago","")
-    .replace("voltar pendente","")
-    .replace("pago","")
-    .trim();
-
-  if(!nome) return { ok:false, msg:"Não entendi qual item você quer voltar para pendente." };
-
-  const d = getMesData(all, currentMonthKey());
-  const target = findCurrentMonthItemByName(all, nome);
-
-  if(!target){
-    return { ok:false, msg:`Não encontrei item do mês com nome parecido com "<b>${escapeHtml(nome)}</b>".` };
-  }
-
-  target.paid = false;
-
-  if(target.isInvestFixo && target.invId){
-    d.investStatus[target.invId] = false;
-    d.saved = (d.saved || []).filter(s => !(s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey()));
-  }
-
-  saveState(all);
-
-  return {
-    ok:true,
-    msg:`Item <b>${escapeHtml(target.desc)}</b> voltou para <b>Pendente</b>.`
-  };
-}
-
-function tryAddGastoNormal(cmd, all){
-  const t = normalizeText(cmd);
-
-  if(t.includes("gasto fixo") || t.includes("investimento fixo")) return null;
-  if(!(t.includes("adicionar gasto") || t.includes("anotar gasto") || t.startsWith("gasto "))) return null;
-
-  const valor = extractAmount(t);
-  const categoria = parseCategory(t, all.categorias);
-  const desc = cleanDesc(t);
-
-  if(!desc) return { ok:false, msg:"Não entendi a descrição do gasto." };
-  if(!valor || valor <= 0) return { ok:false, msg:"Não entendi o valor do gasto." };
-
-  const d = getMesData(all, currentMonthKey());
-  d.items.push({
-    id: uid(),
-    desc,
-    amount: valor,
-    category: categoria,
-    isFixo: false,
-    isInvestFixo: false,
-    paid: false
-  });
-
-  saveState(all);
-
-  return {
-    ok:true,
-    msg:
-      `Gasto adicionado:<br>` +
-      `• <b>${escapeHtml(desc)}</b><br>` +
-      `• Valor: <b>${money(valor)}</b><br>` +
-      `• Categoria: <b>${escapeHtml(categoria)}</b>`
-  };
-}
-
-function tryRemoveGastoNormal(cmd, all){
-  const t = normalizeText(cmd);
-  if(!(t.includes("remover gasto") || t.includes("apagar gasto") || t.includes("deletar gasto") || t.includes("excluir gasto"))) return null;
-  if(t.includes("gasto fixo")) return null;
-
-  const nome = cleanDesc(t);
-  if(!nome) return { ok:false, msg:"Não entendi qual gasto você quer remover." };
-
-  const d = getMesData(all, currentMonthKey());
-  const idx = d.items.findIndex(it => !it.isFixo && (normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc))));
-
-  if(idx === -1){
-    return { ok:false, msg:`Não encontrei gasto normal parecido com "<b>${escapeHtml(nome)}</b>" no mês atual.` };
-  }
-
-  const removed = d.items[idx];
-  d.items.splice(idx,1);
-  saveState(all);
-
-  return { ok:true, msg:`Gasto <b>${escapeHtml(removed.desc)}</b> removido do mês atual.` };
-}
-
-function tryRemoveGastoFixo(cmd, all){
-  const t = normalizeText(cmd);
-  if(!(t.includes("remover gasto fixo") || t.includes("apagar gasto fixo") || t.includes("deletar gasto fixo") || t.includes("excluir gasto fixo"))) return null;
-
-  const nome = cleanDesc(t);
-  if(!nome) return { ok:false, msg:"Não entendi qual gasto fixo você quer remover." };
-
-  const idx = all.fixos.findIndex(it => normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc)));
-  if(idx === -1){
-    return { ok:false, msg:`Não encontrei gasto fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
-  }
-
-  const removed = all.fixos[idx];
-  all.fixos.splice(idx,1);
-
-  Object.keys(all.state.meses || {}).forEach(m=>{
-    const d = all.state.meses[m];
-    if(d && Array.isArray(d.items)){
-      d.items = d.items.filter(it=> !(it.isFixo && !it.isInvestFixo && (it.id === removed.id || normalizeText(it.desc) === normalizeText(removed.desc))));
-    }
-  });
-
-  saveState(all);
-  return { ok:true, msg:`Gasto fixo <b>${escapeHtml(removed.desc)}</b> removido do sistema.` };
-}
-
-function tryRemoveInvestFixo(cmd, all){
-  const t = normalizeText(cmd);
-  if(!(t.includes("remover investimento fixo") || t.includes("apagar investimento fixo") || t.includes("deletar investimento fixo") || t.includes("excluir investimento fixo"))) return null;
-
-  const nome = cleanDesc(t);
-  if(!nome) return { ok:false, msg:"Não entendi qual investimento fixo você quer remover." };
-
-  const idx = all.investFixos.findIndex(it => normalizeText(it.nome).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.nome)));
-  if(idx === -1){
-    return { ok:false, msg:`Não encontrei investimento fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
-  }
-
-  const removed = all.investFixos[idx];
-  all.investFixos.splice(idx,1);
-
-  Object.keys(all.state.meses || {}).forEach(m=>{
-    const d = all.state.meses[m];
-    if(d){
-      if(d.investStatus && removed.id) delete d.investStatus[removed.id];
-      if(Array.isArray(d.saved)){
-        d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===removed.id));
+    for(const [name, hex] of Object.entries(COLOR_MAP)){
+      if(t.includes(name)){
+        localStorage.setItem(THEME_KEYS.accent, hex);
+        changed.push(`Cor principal alterada para <b>${escapeHtml(name)}</b>`);
+        break;
       }
-      if(Array.isArray(d.items)){
-        d.items = d.items.filter(it => !(it.isInvestFixo && (it.invId === removed.id || it.id === removed.id)));
+    }
+    if(!changed.length) return { ok:false, html:"Não entendi qual cor/tema você quer usar." };
+    applyThemeToPage();
+    return { ok:true, html: changed.join("<br>") };
+  }
+
+  if(t.includes("marcar") && t.includes("como pago") && !t.includes("desmarcar")){
+    let nome = t.replace("marcar","").replace("como pago","").trim();
+    const target = findCurrentMonthItemByName(all, nome, currentMonthKey());
+    if(!target) return { ok:false, html:`Não encontrei item parecido com "<b>${escapeHtml(nome)}</b>".` };
+    target.paid = true;
+    const d = ensureMonthItems(all, currentMonthKey());
+    if(target.isInvestFixo && target.invId){
+      d.investStatus[target.invId] = true;
+      const exists = d.saved.some(s => s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey());
+      if(!exists){
+        d.saved.unshift({
+          value:Number(target.amount || 0),
+          desc:`Automático: ${target.desc}`,
+          date:todayISO(),
+          source:"investFixo",
+          invId:target.invId,
+          month:currentMonthKey()
+        });
       }
     }
+    saveState(all);
+    return { ok:true, html:`Item <b>${escapeHtml(target.desc)}</b> marcado como <b>Pago</b>.` };
+  }
+
+  if((t.includes("desmarcar") && t.includes("pago")) || t.includes("voltar pendente") || t.includes("tirar pago")){
+    let nome = t.replace("desmarcar","").replace("como pago","").replace("tirar pago","").replace("voltar pendente","").replace("pago","").trim();
+    const target = findCurrentMonthItemByName(all, nome, currentMonthKey());
+    if(!target) return { ok:false, html:`Não encontrei item parecido com "<b>${escapeHtml(nome)}</b>".` };
+    target.paid = false;
+    const d = ensureMonthItems(all, currentMonthKey());
+    if(target.isInvestFixo && target.invId){
+      d.investStatus[target.invId] = false;
+      d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey()));
+    }
+    saveState(all);
+    return { ok:true, html:`Item <b>${escapeHtml(target.desc)}</b> voltou para <b>Pendente</b>.` };
+  }
+
+  if(t.startsWith("gastei ") || t.startsWith("paguei ")){
+    const valor = extractAmount(t);
+    if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor gasto." };
+    let desc = cleanDesc(t);
+    if(!desc) desc = "Gasto";
+    const categoria = parseCategory(t, all.categorias);
+    const d = ensureMonthItems(all, currentMonthKey());
+    d.items.push({
+      id: uid(),
+      desc,
+      amount: valor,
+      category: categoria,
+      isFixo: false,
+      isInvestFixo: false,
+      paid: true
+    });
+    saveState(all);
+    return { ok:true, html:`Gasto anotado:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(valor)}</b><br>• Categoria: <b>${escapeHtml(categoria)}</b><br>• Status: <b>Pago</b>` };
+  }
+
+  if(t.includes("adicionar gasto") || t.includes("anotar gasto") || t.startsWith("gasto ")){
+    if(t.includes("gasto fixo")) return null;
+    const valor = extractAmount(t);
+    const categoria = parseCategory(t, all.categorias);
+    const desc = cleanDesc(t);
+    if(!desc) return { ok:false, html:"Não entendi a descrição do gasto." };
+    if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor do gasto." };
+    const d = ensureMonthItems(all, currentMonthKey());
+    d.items.push({
+      id: uid(),
+      desc,
+      amount: valor,
+      category: categoria,
+      isFixo: false,
+      isInvestFixo: false,
+      paid: false
+    });
+    saveState(all);
+    return { ok:true, html:`Gasto adicionado:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(valor)}</b><br>• Categoria: <b>${escapeHtml(categoria)}</b>` };
+  }
+
+  if(t.includes("gasto fixo") || (t.includes("fixo") && extractAmount(t))){
+    const valor = extractAmount(t);
+    const categoria = parseCategory(t, all.categorias);
+    const dueDay = extractDueDay(t);
+    const desc = cleanDesc(t);
+    if(!desc) return { ok:false, html:"Não entendi a descrição do gasto fixo." };
+    if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor do gasto fixo." };
+    all.fixos.push({
+      id: uid(),
+      desc,
+      amount: valor,
+      category: categoria,
+      diaPagar: dueDay || 0,
+      isFixo: true
+    });
+    saveState(all);
+    return { ok:true, html:`Gasto fixo adicionado:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(valor)}</b><br>• Categoria: <b>${escapeHtml(categoria)}</b><br>• Vence: <b>${dueDay ? ("dia " + dueDay) : "sem prazo"}</b>` };
+  }
+
+  if(t.includes("investimento fixo")){
+    const nums = extractAllNumbers(t);
+    const goalAmount = nums[0] || 0;
+    const months = extractMonths(t) || nums[1] || 0;
+    const dueDay = extractDueDay(t);
+    const name = cleanDesc(t);
+    if(!name) return { ok:false, html:"Não entendi o nome do investimento fixo." };
+    if(!goalAmount || goalAmount <= 0) return { ok:false, html:"Não entendi a meta final." };
+    if(!months || months <= 0) return { ok:false, html:"Não entendi o prazo em meses." };
+    const mensal = Math.round((goalAmount / months) * 100) / 100;
+    const id = uid();
+    all.investFixos.push({ id, nome:name, metaFinal:goalAmount, prazoMeses:months, mensal, diaPagar:dueDay || 0 });
+    const d = ensureMonthItems(all, currentMonthKey());
+    d.investStatus[id] = false;
+    saveState(all);
+    return { ok:true, html:`Investimento fixo adicionado:<br>• <b>${escapeHtml(name)}</b><br>• Meta final: <b>${money(goalAmount)}</b><br>• Prazo: <b>${months} meses</b><br>• Mensal: <b>${money(mensal)}</b>` };
+  }
+
+  if(t.includes("adicionar categoria") || t.includes("criar categoria")){
+    let nome = t.replace("adicionar categoria","").replace("criar categoria","").trim();
+    if(!nome) return { ok:false, html:"Não entendi o nome da categoria." };
+    nome = titleCase(nome);
+    if(all.categorias.some(c => normalizeText(c) === normalizeText(nome))){
+      return { ok:false, html:`A categoria "${escapeHtml(nome)}" já existe.` };
+    }
+    all.categorias.push(nome);
+    saveState(all);
+    return { ok:true, html:`Categoria <b>${escapeHtml(nome)}</b> adicionada com sucesso.` };
+  }
+
+  if(t.includes("remover gasto fixo") || t.includes("apagar gasto fixo") || t.includes("deletar gasto fixo") || t.includes("excluir gasto fixo")){
+    const nome = cleanDesc(t);
+    const idx = all.fixos.findIndex(it => normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc)));
+    if(idx === -1) return { ok:false, html:`Não encontrei gasto fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
+    const removed = all.fixos[idx];
+    all.fixos.splice(idx,1);
+    Object.keys(all.state.meses || {}).forEach(m=>{
+      const d = all.state.meses[m];
+      if(d && Array.isArray(d.items)){
+        d.items = d.items.filter(it => !(it.isFixo && !it.isInvestFixo && (it.id === removed.id || normalizeText(it.desc) === normalizeText(removed.desc))));
+      }
+    });
+    saveState(all);
+    return { ok:true, html:`Gasto fixo <b>${escapeHtml(removed.desc)}</b> removido do sistema.` };
+  }
+
+  if(t.includes("remover investimento fixo") || t.includes("apagar investimento fixo") || t.includes("deletar investimento fixo") || t.includes("excluir investimento fixo")){
+    const nome = cleanDesc(t);
+    const idx = all.investFixos.findIndex(it => normalizeText(it.nome).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.nome)));
+    if(idx === -1) return { ok:false, html:`Não encontrei investimento fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
+    const removed = all.investFixos[idx];
+    all.investFixos.splice(idx,1);
+    Object.keys(all.state.meses || {}).forEach(m=>{
+      const d = all.state.meses[m];
+      if(d){
+        if(d.investStatus && removed.id) delete d.investStatus[removed.id];
+        if(Array.isArray(d.saved)) d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===removed.id));
+        if(Array.isArray(d.items)) d.items = d.items.filter(it => !(it.isInvestFixo && (it.invId === removed.id || it.id === removed.id)));
+      }
+    });
+    saveState(all);
+    return { ok:true, html:`Investimento fixo <b>${escapeHtml(removed.nome)}</b> removido do sistema.` };
+  }
+
+  if(t.includes("remover gasto") || t.includes("apagar gasto") || t.includes("deletar gasto") || t.includes("excluir gasto")){
+    if(t.includes("gasto fixo")) return null;
+    const nome = cleanDesc(t);
+    const d = ensureMonthItems(all, currentMonthKey());
+    const idx = d.items.findIndex(it => !it.isFixo && (normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc))));
+    if(idx === -1) return { ok:false, html:`Não encontrei gasto parecido com "<b>${escapeHtml(nome)}</b>".` };
+    const removed = d.items[idx];
+    d.items.splice(idx,1);
+    saveState(all);
+    return { ok:true, html:`Gasto <b>${escapeHtml(removed.desc)}</b> removido do mês atual.` };
+  }
+
+  return null;
+}
+
+/* =========================
+   IA
+========================= */
+
+function buildVoiceAIPrompt(userText, all){
+  const month = currentMonthKey();
+  const d = ensureMonthItems(all, month);
+
+  const context = {
+    currentMonth: month,
+    categories: all.categorias,
+    fixedExpenses: all.fixos.map(f=>({
+      desc:f.desc, amount:Number(f.amount||0), category:f.category || "Outros", dueDay:Number(f.diaPagar||0)
+    })),
+    fixedInvestments: all.investFixos.map(inv=>({
+      name:inv.nome, goalAmount:Number(inv.metaFinal||0), months:Number(inv.prazoMeses||0), monthlyAmount:Number(inv.mensal||0), dueDay:Number(inv.diaPagar||0)
+    })),
+    currentMonthItems: d.items.map(it=>({
+      desc:it.desc, amount:Number(it.amount||0), category:it.category || "Outros",
+      paid:!!it.paid, isFixed:!!it.isFixo, isFixedInvestment:!!it.isInvestFixo, dueDay:Number(it.diaPagar||0)
+    }))
+  };
+
+  return `
+Você é um interpretador de intenção para um app de finanças pessoais.
+Sua tarefa é converter o pedido do usuário em UM JSON executável.
+Responda SOMENTE JSON puro, sem explicação, sem markdown.
+
+Ações permitidas:
+- add_expense
+- add_fixed_expense
+- add_fixed_investment
+- mark_paid
+- mark_pending
+- remove_expense
+- remove_fixed_expense
+- remove_fixed_investment
+- add_saved
+- change_theme
+- generate_month_pdf
+- generate_year_summary_pdf
+- show_summary
+- request_notifications
+- unknown
+
+Regras:
+1) Sempre devolva um único objeto JSON.
+2) Se faltar algo essencial, preencha com o melhor palpite.
+3) Se não entender, use {"action":"unknown","raw":"...","reason":"..."}.
+4) Para "change_theme", você pode usar:
+   {"action":"change_theme","preset":"purple","accent":"#aa6eff"}
+5) Para "generate_month_pdf", use month no formato YYYY-MM.
+6) Para "generate_year_summary_pdf", use year no formato YYYY.
+7) Para "mark_paid" e "mark_pending", use "target".
+8) Para remover, use "target".
+9) Para add_saved, use "amount" e "desc".
+10) Para add_fixed_investment, use:
+   {"action":"add_fixed_investment","name":"...","goalAmount":3000,"months":12,"dueDay":10}
+11) Para add_fixed_expense, use:
+   {"action":"add_fixed_expense","desc":"...","amount":99,"category":"Casa","dueDay":11}
+12) Para add_expense, use:
+   {"action":"add_expense","desc":"...","amount":50,"category":"Alimentação","paid":true}
+
+Contexto do app:
+${JSON.stringify(context, null, 2)}
+
+Pedido do usuário:
+${userText}
+`.trim();
+}
+
+function extractJsonFromText(text){
+  const raw = String(text || "").trim();
+  try{
+    return JSON.parse(raw);
+  }catch(e){}
+
+  const match = raw.match(/\{[\s\S]*\}/);
+  if(match){
+    try{
+      return JSON.parse(match[0]);
+    }catch(e){}
+  }
+  throw new Error("A IA não retornou JSON válido.");
+}
+
+async function askAIToInterpret(userText, all){
+  const base = (window.API_BASE_URL || "").replace(/\/$/, "");
+  if(!base) throw new Error("API_BASE_URL não configurada.");
+
+  const prompt = buildVoiceAIPrompt(userText, all);
+
+  const resp = await fetch(base + "/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-app-key": window.APP_KEY || ""
+    },
+    body: JSON.stringify({ prompt }),
+    cache: "no-store"
   });
 
-  saveState(all);
-  return { ok:true, msg:`Investimento fixo <b>${escapeHtml(removed.nome)}</b> removido do sistema.` };
+  if(!resp.ok){
+    const txt = await resp.text().catch(()=> "");
+    throw new Error(`Falha na IA (${resp.status}): ${txt || "sem detalhe"}`);
+  }
+
+  const data = await resp.json();
+  const aiText = data.response || data.text || data.message || "";
+  setRawBox(aiText);
+  return extractJsonFromText(aiText);
 }
 
-function tryShowSummary(cmd, all){
-  const t = normalizeText(cmd);
-  if(!(t.includes("mostrar resumo do mes") || t.includes("resumo do mes") || t.includes("mostrar meu resumo"))) return null;
-  return { ok:true, msg: monthSummaryHtml(all) };
+async function testAI(){
+  try{
+    const all = loadState();
+    setResult("Testando IA...");
+    const out = await askAIToInterpret("anota que paguei 35 no mercado hoje", all);
+    setResult(`<span class="ok">IA respondeu JSON.</span><br><br><pre style="white-space:pre-wrap">${escapeHtml(JSON.stringify(out, null, 2))}</pre>`);
+  }catch(e){
+    setResult(`<span class="err">Falha no teste da IA.</span><br><br>${escapeHtml(e.message || String(e))}`);
+  }
 }
 
-function tryOpenNotifications(cmd){
-  const t = normalizeText(cmd);
-  if(!(t.includes("abrir notificacoes") || t.includes("ativar notificacoes") || t.includes("notificacoes"))) return null;
-  requestNotificationPermission();
-  return { ok:true, msg:`Abrindo permissão de <b>notificações</b>.` };
+/* =========================
+   EXECUÇÃO DAS AÇÕES
+========================= */
+
+async function executeParsedAction(parsed, all){
+  const action = String(parsed.action || "").trim();
+  const month = parsed.month || currentMonthKey();
+  const d = ensureMonthItems(all, month);
+
+  if(action === "unknown" || !action){
+    return { ok:false, html:`A IA não conseguiu identificar a ação.<br><br>${escapeHtml(parsed.reason || "Sem motivo informado.")}` };
+  }
+
+  if(action === "show_summary"){
+    return { ok:true, html: monthSummaryHtml(all, month) };
+  }
+
+  if(action === "request_notifications"){
+    requestNotificationPermission();
+    return { ok:true, html:`Abrindo permissão de <b>notificações</b>.` };
+  }
+
+  if(action === "add_saved"){
+    const amount = Number(parsed.amount || 0);
+    const desc = titleCase(parsed.desc || "Guardado");
+    if(!amount || amount <= 0) return { ok:false, html:"Ação add_saved veio sem valor válido." };
+    d.saved.unshift({ value:amount, desc, date:todayISO(), source:"manual" });
+    saveState(all);
+    return { ok:true, html:`Valor guardado anotado:<br>• Valor: <b>${money(amount)}</b><br>• Descrição: <b>${escapeHtml(desc)}</b>` };
+  }
+
+  if(action === "add_expense"){
+    const desc = titleCase(parsed.desc || "Gasto");
+    const amount = Number(parsed.amount || 0);
+    const category = parsed.category ? titleCase(parsed.category) : "Outros";
+    const paid = !!parsed.paid;
+    if(!amount || amount <= 0) return { ok:false, html:"Ação add_expense veio sem valor válido." };
+    d.items.push({
+      id: uid(),
+      desc,
+      amount,
+      category,
+      isFixo:false,
+      isInvestFixo:false,
+      paid
+    });
+    saveState(all);
+    return { ok:true, html:`Gasto adicionado pela IA:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(amount)}</b><br>• Categoria: <b>${escapeHtml(category)}</b><br>• Status: <b>${paid ? "Pago" : "Pendente"}</b>` };
+  }
+
+  if(action === "add_fixed_expense"){
+    const desc = titleCase(parsed.desc || "Fixo");
+    const amount = Number(parsed.amount || 0);
+    const category = parsed.category ? titleCase(parsed.category) : "Outros";
+    const dueDay = Number(parsed.dueDay || 0);
+    if(!amount || amount <= 0) return { ok:false, html:"Ação add_fixed_expense veio sem valor válido." };
+
+    all.fixos.push({
+      id: uid(),
+      desc,
+      amount,
+      category,
+      diaPagar: dueDay || 0,
+      isFixo:true
+    });
+    saveState(all);
+    return { ok:true, html:`Gasto fixo adicionado pela IA:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(amount)}</b><br>• Categoria: <b>${escapeHtml(category)}</b><br>• Vence: <b>${dueDay ? ("dia " + dueDay) : "sem prazo"}</b>` };
+  }
+
+  if(action === "add_fixed_investment"){
+    const name = titleCase(parsed.name || parsed.desc || "Investimento");
+    const goalAmount = Number(parsed.goalAmount || parsed.metaFinal || 0);
+    const months = Number(parsed.months || parsed.prazoMeses || 0);
+    const dueDay = Number(parsed.dueDay || 0);
+    if(!goalAmount || goalAmount <= 0) return { ok:false, html:"Ação add_fixed_investment veio sem meta válida." };
+    if(!months || months <= 0) return { ok:false, html:"Ação add_fixed_investment veio sem prazo válido." };
+
+    const mensal = Math.round((goalAmount / months) * 100) / 100;
+    const id = uid();
+    all.investFixos.push({
+      id,
+      nome:name,
+      metaFinal:goalAmount,
+      prazoMeses:months,
+      mensal,
+      diaPagar:dueDay || 0
+    });
+    const dm = ensureMonthItems(all, currentMonthKey());
+    dm.investStatus[id] = false;
+    saveState(all);
+    return { ok:true, html:`Investimento fixo adicionado pela IA:<br>• <b>${escapeHtml(name)}</b><br>• Meta: <b>${money(goalAmount)}</b><br>• Prazo: <b>${months} meses</b><br>• Mensal: <b>${money(mensal)}</b>` };
+  }
+
+  if(action === "mark_paid"){
+    const target = parsed.target || parsed.desc || "";
+    const item = findCurrentMonthItemByName(all, target, currentMonthKey());
+    if(!item) return { ok:false, html:`Não encontrei item para marcar como pago: <b>${escapeHtml(target)}</b>` };
+    item.paid = true;
+    const dc = ensureMonthItems(all, currentMonthKey());
+    if(item.isInvestFixo && item.invId){
+      dc.investStatus[item.invId] = true;
+      const exists = dc.saved.some(s => s && s.source==="investFixo" && s.invId===item.invId && s.month===currentMonthKey());
+      if(!exists){
+        dc.saved.unshift({
+          value:Number(item.amount || 0),
+          desc:`Automático: ${item.desc}`,
+          date:todayISO(),
+          source:"investFixo",
+          invId:item.invId,
+          month:currentMonthKey()
+        });
+      }
+    }
+    saveState(all);
+    return { ok:true, html:`Item <b>${escapeHtml(item.desc)}</b> marcado como <b>Pago</b>.` };
+  }
+
+  if(action === "mark_pending"){
+    const target = parsed.target || parsed.desc || "";
+    const item = findCurrentMonthItemByName(all, target, currentMonthKey());
+    if(!item) return { ok:false, html:`Não encontrei item para voltar a pendente: <b>${escapeHtml(target)}</b>` };
+    item.paid = false;
+    const dc = ensureMonthItems(all, currentMonthKey());
+    if(item.isInvestFixo && item.invId){
+      dc.investStatus[item.invId] = false;
+      dc.saved = dc.saved.filter(s => !(s && s.source==="investFixo" && s.invId===item.invId && s.month===currentMonthKey()));
+    }
+    saveState(all);
+    return { ok:true, html:`Item <b>${escapeHtml(item.desc)}</b> voltou para <b>Pendente</b>.` };
+  }
+
+  if(action === "remove_expense"){
+    const target = parsed.target || parsed.desc || "";
+    const idx = d.items.findIndex(it => !it.isFixo && (normalizeText(it.desc).includes(normalizeText(target)) || normalizeText(target).includes(normalizeText(it.desc))));
+    if(idx === -1) return { ok:false, html:`Não encontrei gasto para remover: <b>${escapeHtml(target)}</b>` };
+    const removed = d.items[idx];
+    d.items.splice(idx,1);
+    saveState(all);
+    return { ok:true, html:`Gasto <b>${escapeHtml(removed.desc)}</b> removido do mês atual.` };
+  }
+
+  if(action === "remove_fixed_expense"){
+    const target = parsed.target || parsed.desc || "";
+    const idx = all.fixos.findIndex(it => normalizeText(it.desc).includes(normalizeText(target)) || normalizeText(target).includes(normalizeText(it.desc)));
+    if(idx === -1) return { ok:false, html:`Não encontrei gasto fixo para remover: <b>${escapeHtml(target)}</b>` };
+    const removed = all.fixos[idx];
+    all.fixos.splice(idx,1);
+    Object.keys(all.state.meses || {}).forEach(m=>{
+      const dm = all.state.meses[m];
+      if(dm && Array.isArray(dm.items)){
+        dm.items = dm.items.filter(it => !(it.isFixo && !it.isInvestFixo && (it.id === removed.id || normalizeText(it.desc) === normalizeText(removed.desc))));
+      }
+    });
+    saveState(all);
+    return { ok:true, html:`Gasto fixo <b>${escapeHtml(removed.desc)}</b> removido do sistema.` };
+  }
+
+  if(action === "remove_fixed_investment"){
+    const target = parsed.target || parsed.name || parsed.desc || "";
+    const idx = all.investFixos.findIndex(it => normalizeText(it.nome).includes(normalizeText(target)) || normalizeText(target).includes(normalizeText(it.nome)));
+    if(idx === -1) return { ok:false, html:`Não encontrei investimento fixo para remover: <b>${escapeHtml(target)}</b>` };
+    const removed = all.investFixos[idx];
+    all.investFixos.splice(idx,1);
+    Object.keys(all.state.meses || {}).forEach(m=>{
+      const dm = all.state.meses[m];
+      if(dm){
+        if(dm.investStatus && removed.id) delete dm.investStatus[removed.id];
+        if(Array.isArray(dm.saved)) dm.saved = dm.saved.filter(s => !(s && s.source==="investFixo" && s.invId===removed.id));
+        if(Array.isArray(dm.items)) dm.items = dm.items.filter(it => !(it.isInvestFixo && (it.invId === removed.id || it.id === removed.id)));
+      }
+    });
+    saveState(all);
+    return { ok:true, html:`Investimento fixo <b>${escapeHtml(removed.nome)}</b> removido do sistema.` };
+  }
+
+  if(action === "change_theme"){
+    if(parsed.preset) localStorage.setItem(THEME_KEYS.preset, String(parsed.preset));
+    if(parsed.accent) localStorage.setItem(THEME_KEYS.accent, String(parsed.accent));
+    if(parsed.colorName){
+      const c = setAccentByName(parsed.colorName);
+      if(c) localStorage.setItem(THEME_KEYS.accent, c);
+    }
+    applyThemeToPage();
+    return { ok:true, html:`Tema alterado pela IA com sucesso.` };
+  }
+
+  if(action === "generate_month_pdf"){
+    const monthKey = String(parsed.month || currentMonthKey());
+    await generateMonthPDF(all, monthKey);
+    const label = new Date(monthKey + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+    return { ok:true, html:`PDF do mês <b>${escapeHtml(label)}</b> gerado com sucesso.` };
+  }
+
+  if(action === "generate_year_summary_pdf"){
+    const year = String(parsed.year || new Date().getFullYear());
+    await generateYearSummaryPDF(all, year);
+    return { ok:true, html:`PDF <b>resumo do ano ${escapeHtml(year)}</b> gerado com sucesso.` };
+  }
+
+  return { ok:false, html:`Ação não suportada: <b>${escapeHtml(action)}</b>` };
 }
 
-function executeVoiceCommand(){
+/* =========================
+   FLUXO PRINCIPAL
+========================= */
+
+async function executeVoiceCommand(){
   if(!USER_ID){
     setResult(`<span class="err">Faça login primeiro.</span>`);
     return;
@@ -1083,34 +1697,43 @@ function executeVoiceCommand(){
   }
 
   const all = loadState();
-  let res = null;
 
-  res = tryShowSummary(cmd, all);
-  if(res === null) res = tryOpenNotifications(cmd);
-  if(res === null) res = tryAddCategoria(cmd, all);
-  if(res === null) res = tryAddGastoFixo(cmd, all);
-  if(res === null) res = tryAddInvestimentoFixo(cmd, all);
-  if(res === null) res = tryUnmarkAsPaid(cmd, all);
-  if(res === null) res = tryMarkAsPaid(cmd, all);
-  if(res === null) res = tryRemoveGastoFixo(cmd, all);
-  if(res === null) res = tryRemoveInvestFixo(cmd, all);
-  if(res === null) res = tryRemoveGastoNormal(cmd, all);
-  if(res === null) res = tryAddGastoNormal(cmd, all);
+  try{
+    setResult("Analisando comando...");
+    setRawBox("");
 
-  if(res === null){
-    setResult(`<span class="err">Não consegui entender esse comando.</span><br><br>Tente falar de forma parecida com os exemplos da tela.`);
-    dbg("Comando não reconhecido: " + cmd);
-    return;
-  }
+    const local = tryLocalRule(cmd, all);
+    if(local){
+      if(local.ok){
+        setResult(`<span class="ok">Executado por regra local.</span><br><br>${local.html}`);
+        dbg("Local OK: " + cmd);
+      }else{
+        setResult(`<span class="warn">Regra local falhou.</span><br><br>${local.html}`);
+        dbg("Local falhou: " + cmd);
+      }
+      return;
+    }
 
-  if(res.ok){
-    setResult(`<span class="ok">Comando executado.</span><br><br>${res.msg}`);
-    dbg("OK: " + cmd);
-  }else{
-    setResult(`<span class="warn">Não foi possível concluir.</span><br><br>${res.msg}`);
-    dbg("Falha: " + cmd);
+    setResult("Enviando texto para sua IA...");
+    const parsed = await askAIToInterpret(cmd, all);
+    const execResult = await executeParsedAction(parsed, all);
+
+    if(execResult.ok){
+      setResult(`<span class="ok">Executado pela IA.</span><br><br>${execResult.html}`);
+      dbg("IA OK: " + cmd + "\nAction: " + JSON.stringify(parsed));
+    }else{
+      setResult(`<span class="warn">A IA respondeu, mas não consegui concluir.</span><br><br>${execResult.html}`);
+      dbg("IA falhou: " + cmd + "\nAction: " + JSON.stringify(parsed));
+    }
+  }catch(e){
+    setResult(`<span class="err">Erro ao executar comando.</span><br><br>${escapeHtml(e.message || String(e))}`);
+    dbg("Erro comando: " + (e.message || e));
   }
 }
+
+/* =========================
+   FIREBASE
+========================= */
 
 async function initFirebase(){
   if(!window.firebase){
@@ -1137,10 +1760,9 @@ async function initFirebase(){
     USER_ID = USER.uid;
 
     const savedTheme = localStorage.getItem("theme");
-    if(savedTheme === "light"){
-      document.body.classList.add("light");
-    }
+    if(savedTheme === "light") document.body.classList.add("light");
 
+    applyThemeToPage();
     dbg("Usuário autenticado: " + (USER.email || USER.uid));
   });
 
@@ -1151,6 +1773,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   const ok = await initFirebase();
   if(!ok) return;
   ensureSpeech();
+  applyThemeToPage();
 });
 </script>
 </body>
