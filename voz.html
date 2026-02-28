@@ -1,242 +1,385 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>Comando de Voz • Controle de Gastos PRO</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Comando de Voz PRO • Controle de Gastos PRO</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#569cff">
+  <style>
+    :root{
+      --bg:#07101f;
+      --grad1: rgba(86,156,255,.22);
+      --grad2: rgba(57,217,138,.16);
+      --grad3: rgba(255,93,93,.12);
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.10);
+      --text:#eaf0ff;
+      --muted: rgba(234,240,255,.72);
+      --accent:#569cff;
+      --good:#39d98a;
+      --warn:#ffd166;
+      --danger:#ff5d5d;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --glass: blur(14px);
+    }
 
-<style>
-:root{
-  --bg:#07101f;
-  --grad1: rgba(86,156,255,.22);
-  --grad2: rgba(57,217,138,.16);
-  --grad3: rgba(255,93,93,.12);
+    .light{
+      --panel: rgba(0,0,0,.04);
+      --panel2: rgba(0,0,0,.06);
+      --stroke: rgba(0,0,0,.08);
+      --text:#0d1222;
+      --muted: rgba(13,18,34,.68);
+      --shadow: 0 18px 60px rgba(0,0,0,.12);
+    }
 
-  --panel: rgba(255,255,255,.06);
-  --panel2: rgba(255,255,255,.08);
-  --stroke: rgba(255,255,255,.10);
-  --text:#eaf0ff;
-  --muted: rgba(234,240,255,.72);
-  --accent:#569cff;
-  --good:#39d98a;
-  --warn:#ffd166;
-  --danger:#ff5d5d;
-  --shadow: 0 18px 60px rgba(0,0,0,.45);
-  --glass: blur(14px);
-}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+      background:
+        radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
+        radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
+        radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
+        var(--bg);
+    }
 
-.light{
-  --panel: rgba(0,0,0,.04);
-  --panel2: rgba(0,0,0,.06);
-  --stroke: rgba(0,0,0,.08);
-  --text:#0d1222;
-  --muted: rgba(13,18,34,.68);
-  --shadow: 0 18px 60px rgba(0,0,0,.12);
-}
+    .wrap{
+      max-width:980px;
+      margin:auto;
+      padding:16px;
+      padding-bottom:120px;
+    }
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  min-height:100vh;
-  background:
-    radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
-    radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
-    radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
-    var(--bg);
-  color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-}
-.wrap{
-  max-width:760px;
-  margin:auto;
-  padding:16px;
-  padding-bottom:40px;
-}
-.card{
-  background: linear-gradient(180deg, var(--panel2), var(--panel));
-  border:1px solid var(--stroke);
-  border-radius:24px;
-  padding:16px;
-  box-shadow:var(--shadow);
-  backdrop-filter:var(--glass);
-}
-h1{margin:0;font-size:22px}
-h2{margin:0;font-size:16px}
-.small{font-size:12px;color:var(--muted)}
-.hr{height:1px;background:var(--stroke);margin:14px 0}
-.btn{
-  appearance:none;border:0;cursor:pointer;
-  background:rgba(255,255,255,.10);
-  color:var(--text);
-  padding:12px 14px;
-  border-radius:16px;
-  border:1px solid var(--stroke);
-  font-weight:800;
-  box-shadow:0 10px 26px rgba(0,0,0,.18);
-}
-.btn.primary{
-  background:var(--accent);
-  border-color: color-mix(in srgb, var(--accent), transparent 55%);
-  color:#fff;
-}
-.btn.good{
-  background:var(--good);
-  border-color: color-mix(in srgb, var(--good), transparent 55%);
-  color:#062114;
-}
-.btn.warn{
-  background:var(--warn);
-  border-color: color-mix(in srgb, var(--warn), transparent 55%);
-  color:#281a00;
-}
-.btn.danger{
-  background:var(--danger);
-  border-color: color-mix(in srgb, var(--danger), transparent 55%);
-  color:#2b0707;
-}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.row > *{flex:1}
-.note{
-  background: rgba(255,255,255,.06);
-  border:1px solid var(--stroke);
-  border-radius:18px;
-  padding:12px;
-}
-.badge{
-  display:inline-flex;gap:6px;align-items:center;
-  padding:4px 10px;border-radius:999px;
-  background: rgba(255,255,255,.10);
-  border:1px solid var(--stroke);
-  font-size:12px;color:var(--muted);
-}
-.badge.good{color:var(--good);border-color:rgba(57,217,138,.35);background:rgba(57,217,138,.10)}
-.badge.warn{color:var(--warn);border-color:rgba(255,209,102,.35);background:rgba(255,209,102,.10)}
-textarea,input{
-  width:100%;
-  padding:12px;
-  border-radius:16px;
-  border:1px solid var(--stroke);
-  background: rgba(0,0,0,.15);
-  color:var(--text);
-  outline:none;
-  font-size:14px;
-}
-.light textarea,.light input{background: rgba(255,255,255,.75)}
-label{display:block;margin-bottom:6px;font-size:12px;color:var(--muted)}
-.top{
-  display:flex;justify-content:space-between;align-items:center;gap:10px;
-  margin-bottom:12px;
-}
-.micArea{
-  display:grid;
-  place-items:center;
-  padding:18px 0;
-}
-.bigMic{
-  width:140px;height:140px;border-radius:50%;
-  border:1px solid rgba(255,255,255,.18);
-  display:flex;align-items:center;justify-content:center;
-  font-size:54px;font-weight:900;
-  background:
-    radial-gradient(120px 90px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
-    linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
-  color:#1a1100;
-  box-shadow:0 18px 50px rgba(0,0,0,.35);
-}
-.bigMic.listening{
-  background:
-    radial-gradient(120px 90px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
-    linear-gradient(135deg, rgba(57,217,138,.98), rgba(86,156,255,.55));
-  color:#04152c;
-}
-.center{text-align:center}
-.successText{color:var(--good);font-weight:900}
-.warnText{color:var(--warn);font-weight:900}
-.dangerText{color:var(--danger);font-weight:900}
-#debugBox{
-  position:fixed; left:12px; right:12px; bottom:12px;
-  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
-  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
-}
-</style>
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    h1{margin:0;font-size:24px}
+    h2{margin:0;font-size:18px}
+    h3{margin:0;font-size:14px;color:var(--muted)}
+    .small{font-size:12px;color:var(--muted)}
+
+    .btn{
+      appearance:none;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.10);
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:16px;
+      cursor:pointer;
+      font-weight:850;
+      box-shadow:0 10px 26px rgba(0,0,0,.18);
+    }
+    .btn.primary{
+      background:var(--accent);
+      color:#fff;
+      border-color:color-mix(in srgb, var(--accent), transparent 55%);
+    }
+    .btn.good{
+      background:var(--good);
+      color:#062114;
+      border-color:color-mix(in srgb, var(--good), transparent 55%);
+    }
+    .btn.warn{
+      background:var(--warn);
+      color:#2a1a00;
+      border-color:color-mix(in srgb, var(--warn), transparent 55%);
+    }
+    .btn.danger{
+      background:var(--danger);
+      color:#2b0707;
+      border-color:color-mix(in srgb, var(--danger), transparent 55%);
+    }
+    .btn:active{transform:translateY(1px)}
+
+    .card{
+      background:linear-gradient(180deg, var(--panel2), var(--panel));
+      border:1px solid var(--stroke);
+      border-radius:24px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      backdrop-filter:var(--glass);
+      margin-bottom:14px;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1.25fr .95fr;
+      gap:14px;
+    }
+    .grid22{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .row > *{flex:1}
+
+    .heroTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.10);
+      border:1px solid var(--stroke);
+      font-size:12px;
+      color:var(--muted);
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background:var(--warn);
+      box-shadow:0 0 0 4px rgba(255,209,102,.12);
+    }
+    .dot.ok{
+      background:var(--good);
+      box-shadow:0 0 0 4px rgba(57,217,138,.12);
+    }
+    .dot.err{
+      background:var(--danger);
+      box-shadow:0 0 0 4px rgba(255,93,93,.12);
+    }
+
+    .bigMicWrap{
+      display:flex;
+      justify-content:center;
+      margin:16px 0 18px;
+    }
+
+    .bigMic{
+      width:146px;
+      height:146px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:58px;
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+      box-shadow:0 24px 60px rgba(0,0,0,.35);
+      background:
+        radial-gradient(120px 90px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+        linear-gradient(135deg, rgba(86,156,255,.98), rgba(57,217,138,.55));
+      color:#04152c;
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .bigMic:active{transform:scale(.98)}
+    .bigMic.listening{
+      animation:pulse 1.2s infinite;
+      background:
+        radial-gradient(120px 90px at 30% 20%, rgba(255,255,255,.28), transparent 60%),
+        linear-gradient(135deg, rgba(255,93,93,.98), rgba(255,209,102,.65));
+      color:#1d1200;
+    }
+
+    @keyframes pulse{
+      0%{ box-shadow:0 0 0 0 rgba(255,93,93,.38), 0 24px 60px rgba(0,0,0,.35);}
+      70%{ box-shadow:0 0 0 18px rgba(255,93,93,0), 0 24px 60px rgba(0,0,0,.35);}
+      100%{ box-shadow:0 0 0 0 rgba(255,93,93,0), 0 24px 60px rgba(0,0,0,.35);}
+    }
+
+    .center{text-align:center}
+    .box{
+      min-height:88px;
+      white-space:pre-wrap;
+      line-height:1.45;
+      font-size:15px;
+      padding:14px;
+      border-radius:18px;
+      border:1px dashed var(--stroke);
+      background:rgba(255,255,255,.04);
+    }
+    .result{
+      min-height:132px;
+      white-space:pre-wrap;
+      line-height:1.5;
+      font-size:15px;
+      padding:14px;
+      border-radius:18px;
+      border:1px dashed var(--stroke);
+      background:rgba(255,255,255,.04);
+    }
+
+    .item{
+      padding:12px;
+      border-radius:18px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06);
+      line-height:1.45;
+    }
+
+    .list{
+      display:grid;
+      gap:10px;
+    }
+
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      font-size:12px;
+      white-space:pre-wrap;
+      line-height:1.45;
+    }
+
+    .ok{color:var(--good);font-weight:900}
+    .warn{color:var(--warn);font-weight:900}
+    .err{color:var(--danger);font-weight:900}
+
+    .chipRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .chip{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.08);
+      color:var(--muted);
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    @media (max-width:900px){
+      .grid2{grid-template-columns:1fr}
+    }
+    @media (max-width:700px){
+      .grid22{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 <body>
-
-<div class="wrap">
-  <div class="top">
-    <div>
-      <h1>Comando de Voz</h1>
-      <div class="small">Fale o gasto e o sistema anota no mês atual.</div>
-    </div>
-    <div class="row" style="flex:0 0 auto">
-      <button class="btn" onclick="goBack()">← Voltar</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Como usar</h2>
-    <div class="small" style="margin-top:6px">
-      Fale assim:
-      <br>• <b>anote mercado 120</b>
-      <br>• <b>anote uber 25 transporte</b>
-      <br>• <b>anote aluguel 950 casa</b>
-      <br><br>
-      O sistema vai responder só: <b>Anotado</b>.
-      A anotação entra no mês atual como <b>Pendente</b>.
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Comando de Voz PRO</h1>
+        <div class="small">Fale o comando, revise o texto e toque em <b>Executar comando</b>.</div>
+      </div>
+      <div class="row" style="max-width:320px">
+        <button class="btn" onclick="goBack()">← Voltar</button>
+        <button class="btn" onclick="toggleTheme()">🌙/☀️</button>
+      </div>
     </div>
 
-    <div class="hr"></div>
+    <div class="card">
+      <div class="heroTop">
+        <div>
+          <h2>Fale como áudio de WhatsApp</h2>
+          <div class="small" style="margin-top:6px">
+            Exemplos:
+            <br>• adicionar gasto mercado 120 categoria alimentação
+            <br>• adicionar gasto fixo internet 99 categoria casa vence dia 11
+            <br>• adicionar investimento fixo reserva 3000 em 12 meses vence dia 10
+            <br>• marcar internet como pago
+            <br>• desmarcar internet como pago
+            <br>• remover gasto mercado
+            <br>• remover gasto fixo internet
+            <br>• remover investimento fixo reserva
+            <br>• adicionar categoria farmácia
+            <br>• mostrar resumo do mês
+            <br>• abrir notificações
+          </div>
+        </div>
+        <div class="badge">
+          <span class="dot" id="micDot"></span>
+          <span id="micStatus">Parado</span>
+        </div>
+      </div>
 
-    <div class="micArea">
-      <div class="bigMic" id="bigMic">🎙️</div>
-      <div class="small center" style="margin-top:10px" id="voiceStatus">Status: pronto</div>
+      <div class="bigMicWrap">
+        <button class="bigMic" id="bigMic" onclick="toggleRecording()" title="Gravar comando">🎙️</button>
+      </div>
+
+      <div class="center small" id="hintText">Toque no microfone para começar a ouvir.</div>
+
+      <div style="margin-top:14px">
+        <div class="small" style="margin-bottom:6px">Texto reconhecido</div>
+        <div class="box" id="transcriptBox">Nenhum comando ainda.</div>
+      </div>
+
+      <div class="chipRow">
+        <div class="chip" onclick="fillExample('adicionar gasto mercado 120 categoria alimentação')">Exemplo gasto</div>
+        <div class="chip" onclick="fillExample('adicionar gasto fixo internet 99 categoria casa vence dia 11')">Exemplo fixo</div>
+        <div class="chip" onclick="fillExample('adicionar investimento fixo reserva 3000 em 12 meses vence dia 10')">Exemplo investimento</div>
+        <div class="chip" onclick="fillExample('mostrar resumo do mês')">Exemplo resumo</div>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn" onclick="clearTranscript()">Limpar</button>
+        <button class="btn warn" onclick="toggleRecording()">Ouvir novamente</button>
+        <button class="btn good" onclick="executeVoiceCommand()">Executar comando</button>
+      </div>
     </div>
 
-    <div class="row">
-      <button class="btn primary" id="btnStartVoice" onclick="startVoiceCommand()">Enviar comando de voz</button>
-      <button class="btn" onclick="clearVoiceFields()">Limpar</button>
-    </div>
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div style="font-weight:900;margin-bottom:10px">Último resultado</div>
+          <div id="resultBox" class="result">Nenhuma ação executada ainda.</div>
+        </div>
 
-    <div class="hr"></div>
+        <div class="card">
+          <div style="font-weight:900;margin-bottom:10px">Diagnóstico</div>
+          <div id="debugBox" class="mono">Aguardando...</div>
+        </div>
+      </div>
 
-    <label>Último comando reconhecido</label>
-    <textarea id="voiceTranscript" rows="3" placeholder="Aqui aparece o que foi entendido..." readonly></textarea>
+      <div>
+        <div class="card">
+          <div style="font-weight:900;margin-bottom:10px">Comandos aceitos</div>
+          <div class="list small">
+            <div class="item"><b>Adicionar gasto normal</b><br>Ex.: adicionar gasto mercado 120 categoria alimentação</div>
+            <div class="item"><b>Adicionar gasto fixo</b><br>Ex.: adicionar gasto fixo internet 99 categoria casa vence dia 11</div>
+            <div class="item"><b>Adicionar investimento fixo</b><br>Ex.: adicionar investimento fixo reserva 3000 em 12 meses vence dia 10</div>
+            <div class="item"><b>Adicionar categoria</b><br>Ex.: adicionar categoria farmácia</div>
+            <div class="item"><b>Marcar como pago</b><br>Ex.: marcar internet como pago</div>
+            <div class="item"><b>Desmarcar como pago</b><br>Ex.: desmarcar internet como pago</div>
+            <div class="item"><b>Remover gasto</b><br>Ex.: remover gasto mercado</div>
+            <div class="item"><b>Remover gasto fixo</b><br>Ex.: remover gasto fixo internet</div>
+            <div class="item"><b>Remover investimento fixo</b><br>Ex.: remover investimento fixo reserva</div>
+            <div class="item"><b>Mostrar resumo do mês</b></div>
+            <div class="item"><b>Abrir notificações</b></div>
+          </div>
+        </div>
 
-    <div class="hr"></div>
-
-    <label>Resposta do sistema</label>
-    <input id="voiceReply" readonly placeholder="A resposta aparece aqui">
-
-    <div class="hr"></div>
-
-    <div class="note">
-      <div style="font-weight:900">Observação</div>
-      <div class="small" style="margin-top:6px">
-        Esta tela depende dos mesmos dados salvos no navegador do app principal.
-        Se não houver login salvo, ela vai pedir para você voltar ao login.
+        <div class="card">
+          <div style="font-weight:900;margin-bottom:10px">Ações rápidas</div>
+          <div class="grid22">
+            <button class="btn" onclick="fillExample('mostrar resumo do mês')">Resumo do mês</button>
+            <button class="btn" onclick="requestNotificationPermission()">Ativar notificações</button>
+            <button class="btn" onclick="fillExample('abrir notificações')">Abrir notificações</button>
+            <button class="btn" onclick="location.href='./index.html'">Abrir início</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
-<div id="debugBox"></div>
-
-<script>
-function dbg(msg){
-  const box = document.getElementById("debugBox");
-  box.style.display = "block";
-  box.textContent = String(msg);
-}
-window.addEventListener("error", (e)=>{
-  dbg("Erro JS:\\n" + (e.message || e.type) + "\\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
-});
-window.addEventListener("unhandledrejection", (e)=>{
-  dbg("Promise rejeitada:\\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
-});
-</script>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -247,224 +390,725 @@ const FIREBASE_CONFIG = {
   authDomain:"controle-gastos-pro.firebaseapp.com",
   projectId:"controle-gastos-pro"
 };
-const API = "https://api-rf1w.onrender.com";
+
+const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
 
 let auth = null;
 let USER = null;
 let USER_ID = null;
-let mesAtual = new Date().toISOString().slice(0,7);
 
-const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
-let categorias = [...DEFAULT_CATEGORIAS];
-let regras = [
-  {palavra:"aluguel", categoria:"Casa"},
-  {palavra:"luz", categoria:"Casa"},
-  {palavra:"agua", categoria:"Casa"},
-  {palavra:"água", categoria:"Casa"},
-  {palavra:"mercado", categoria:"Alimentação"},
-  {palavra:"padaria", categoria:"Alimentação"},
-  {palavra:"gasolina", categoria:"Transporte"},
-  {palavra:"uber", categoria:"Transporte"},
-  {palavra:"ração", categoria:"Pets"},
-  {palavra:"pet", categoria:"Pets"},
-  {palavra:"cdb", categoria:"Investimentos"},
-  {palavra:"tesouro", categoria:"Investimentos"},
-  {palavra:"invest", categoria:"Investimentos"}
-];
+let recognition = null;
+let listening = false;
+let lastTranscript = "";
 
-let state = { meses:{} };
-let voiceRec = null;
+function dbg(msg){
+  document.getElementById("debugBox").textContent = String(msg);
+}
+
+function escapeHtml(s){
+  return String(s || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function normalizeText(s){
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function titleCase(s){
+  return String(s || "")
+    .split(" ")
+    .filter(Boolean)
+    .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" ");
+}
+
+function money(n){
+  return Number(n || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+}
+
+function uid(){
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
+function currentMonthKey(){
+  return new Date().toISOString().slice(0,7);
+}
+
+function todayISO(){
+  return new Date().toISOString().slice(0,10);
+}
+
+function kMes(){ return "gastos_pro_state_" + USER_ID; }
+function kCat(){ return "categorias_" + USER_ID; }
+function kFix(){ return "fixos_" + USER_ID; }
+function kInv(){ return "inv_fixos_" + USER_ID; }
+
+function loadState(){
+  let state = { meses:{} };
+  let categorias = [...DEFAULT_CATEGORIAS];
+  let fixos = [];
+  let investFixos = [];
+
+  try{
+    const raw = localStorage.getItem(kMes());
+    if(raw) state = JSON.parse(raw) || { meses:{} };
+  }catch(e){}
+
+  try{
+    const raw = localStorage.getItem(kCat());
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length) categorias = parsed;
+    }
+  }catch(e){}
+
+  try{
+    const raw = localStorage.getItem(kFix());
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)) fixos = parsed;
+    }
+  }catch(e){}
+
+  try{
+    const raw = localStorage.getItem(kInv());
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)) investFixos = parsed;
+    }
+  }catch(e){}
+
+  if(!categorias.some(c=>normalizeText(c)==="investimentos")){
+    categorias.splice(categorias.length-1,0,"Investimentos");
+  }
+
+  if(!state.meses || typeof state.meses !== "object") state.meses = {};
+
+  return { state, categorias, fixos, investFixos };
+}
+
+function saveState(all){
+  localStorage.setItem(kMes(), JSON.stringify(all.state));
+  localStorage.setItem(kCat(), JSON.stringify(all.categorias));
+  localStorage.setItem(kFix(), JSON.stringify(all.fixos));
+  localStorage.setItem(kInv(), JSON.stringify(all.investFixos));
+}
+
+function getMesData(all, monthKey){
+  const m = monthKey || currentMonthKey();
+  if(!all.state.meses[m]){
+    all.state.meses[m] = {
+      salary:0,
+      meta:0,
+      items:[],
+      saved:[],
+      hiddenFixos:[],
+      investStatus:{}
+    };
+  }
+  const d = all.state.meses[m];
+  if(!Array.isArray(d.items)) d.items = [];
+  if(!Array.isArray(d.saved)) d.saved = [];
+  if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos = [];
+  if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
+  return d;
+}
+
+function setMicStatus(text, type){
+  document.getElementById("micStatus").textContent = text;
+  const dot = document.getElementById("micDot");
+  dot.classList.remove("ok","err");
+  if(type === "ok") dot.classList.add("ok");
+  if(type === "err") dot.classList.add("err");
+}
+
+function setTranscript(text){
+  lastTranscript = String(text || "").trim();
+  document.getElementById("transcriptBox").textContent = lastTranscript || "Nenhum comando ainda.";
+}
+
+function fillExample(text){
+  setTranscript(text);
+  setResult(`Exemplo carregado:<br><b>${escapeHtml(text)}</b>`);
+}
+
+function setResult(html){
+  document.getElementById("resultBox").innerHTML = html;
+}
+
+function toggleTheme(){
+  document.body.classList.toggle("light");
+  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+}
 
 function goBack(){
   location.href = "./index.html";
 }
 
-function money(n){
-  return Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+function clearTranscript(){
+  setTranscript("");
+  setResult("Nenhuma ação executada ainda.");
 }
 
-function kMes(){ return "gastos_pro_state_" + USER_ID; }
-function kCat(){ return "categorias_" + USER_ID; }
-
-function loadAll(){
-  try{
-    const raw = localStorage.getItem(kMes());
-    if(raw) state = JSON.parse(raw) || {meses:{}};
-  }catch(e){
-    state = {meses:{}};
+function ensureSpeech(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    setMicStatus("Sem suporte", "err");
+    dbg("SpeechRecognition não suportado neste navegador.");
+    return false;
   }
 
-  try{
-    const raw = localStorage.getItem(kCat());
-    categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
-    if(!Array.isArray(categorias) || !categorias.length) categorias = [...DEFAULT_CATEGORIAS];
-    if(!categorias.some(c=>String(c).toLowerCase()==="investimentos")){
-      categorias.splice(categorias.length-1,0,"Investimentos");
+  recognition = new SR();
+  recognition.lang = "pt-BR";
+  recognition.interimResults = true;
+  recognition.continuous = false;
+
+  recognition.onstart = () => {
+    listening = true;
+    document.getElementById("bigMic").classList.add("listening");
+    document.getElementById("hintText").textContent = "Ouvindo... fale seu comando.";
+    setMicStatus("Ouvindo...", "ok");
+  };
+
+  recognition.onresult = (event) => {
+    let finalText = "";
+    let partialText = "";
+    for(let i = event.resultIndex; i < event.results.length; i++){
+      const txt = event.results[i][0].transcript || "";
+      if(event.results[i].isFinal) finalText += txt + " ";
+      else partialText += txt + " ";
     }
+    const merged = (finalText || partialText).trim();
+    if(merged) setTranscript(merged);
+  };
+
+  recognition.onerror = (event) => {
+    listening = false;
+    document.getElementById("bigMic").classList.remove("listening");
+    document.getElementById("hintText").textContent = "Erro ao ouvir. Tente novamente.";
+    setMicStatus("Erro", "err");
+    dbg("Erro SpeechRecognition: " + (event.error || "desconhecido"));
+  };
+
+  recognition.onend = () => {
+    listening = false;
+    document.getElementById("bigMic").classList.remove("listening");
+    document.getElementById("hintText").textContent = "Se o texto ficou certo, toque em Executar comando.";
+    if(lastTranscript) setMicStatus("Pronto", "ok");
+    else setMicStatus("Parado", "");
+  };
+
+  return true;
+}
+
+function toggleRecording(){
+  if(!recognition && !ensureSpeech()) return;
+  try{
+    if(listening) recognition.stop();
+    else recognition.start();
   }catch(e){
-    categorias = [...DEFAULT_CATEGORIAS];
+    dbg("Falha ao iniciar/parar gravação: " + e.message);
+  }
+}
+
+function parseCategory(text, categorias){
+  const normalized = normalizeText(text);
+
+  for(const c of categorias){
+    const nc = normalizeText(c);
+    if(normalized.includes("categoria " + nc)) return c;
   }
 
-  if(!state || typeof state!=="object") state = {meses:{}};
-  if(!state.meses || typeof state.meses!=="object") state.meses = {};
-}
-
-function saveAll(){
-  localStorage.setItem(kMes(), JSON.stringify(state));
-}
-
-function ensureItemDefaults(it){
-  if(!it) return it;
-  if(typeof it.paid !== "boolean") it.paid = false;
-  return it;
-}
-
-function getDataMes(m){
-  const mm = m || mesAtual;
-  if(!state.meses[mm]) state.meses[mm] = { salary:0, meta:0, items:[], saved:[], hiddenFixos:[], investStatus:{} };
-  const d = state.meses[mm];
-  if(!Array.isArray(d.items)) d.items = [];
-  return d;
-}
-
-function detectarCategoria(desc){
-  const txt = (desc||"").toLowerCase();
-  for(const r of regras){
-    if(txt.includes(r.palavra)) return r.categoria;
-  }
+  if(normalized.includes("casa")) return "Casa";
+  if(normalized.includes("alimentacao")) return "Alimentação";
+  if(normalized.includes("transporte")) return "Transporte";
+  if(normalized.includes("lazer")) return "Lazer";
+  if(normalized.includes("pets")) return "Pets";
+  if(normalized.includes("investimentos")) return "Investimentos";
   return "Outros";
 }
 
-function parseExpenseFromSpeech(text){
-  let t = (text||"").toLowerCase().trim();
+function extractAmount(text){
+  const t = normalizeText(text).replace(/,/g, ".");
+  const matches = t.match(/\d+(\.\d+)?/g);
+  if(!matches || !matches.length) return 0;
+  return Number(matches[0] || 0);
+}
 
-  if(t.startsWith("anote")) t = t.replace(/^anote\s*/, "").trim();
-  if(t.startsWith("anotar")) t = t.replace(/^anotar\s*/, "").trim();
+function extractAllNumbers(text){
+  const t = normalizeText(text).replace(/,/g, ".");
+  const matches = t.match(/\d+(\.\d+)?/g);
+  return (matches || []).map(Number).filter(n => !Number.isNaN(n));
+}
 
-  const matches = t.match(/(\d+[.,]?\d*)/g);
-  if(!matches || !matches.length) return null;
+function extractDueDay(text){
+  const t = normalizeText(text);
+  const m =
+    t.match(/vence dia (\d{1,2})/) ||
+    t.match(/vencimento dia (\d{1,2})/) ||
+    t.match(/dia (\d{1,2}) e o prazo/) ||
+    t.match(/dia (\d{1,2}) prazo/) ||
+    t.match(/prazo dia (\d{1,2})/) ||
+    t.match(/pagar dia (\d{1,2})/) ||
+    t.match(/ate dia (\d{1,2})/);
+  return m ? Number(m[1]) : 0;
+}
 
-  const last = matches[matches.length - 1].replace(",", ".");
-  const amount = Number(last);
-  if(!amount || amount <= 0) return null;
+function extractMonths(text){
+  const t = normalizeText(text);
+  const m = t.match(/em (\d{1,3}) meses?/) || t.match(/(\d{1,3}) meses?/);
+  return m ? Number(m[1]) : 0;
+}
 
-  t = t.replace(matches[matches.length - 1], "").trim();
+function cleanDesc(raw){
+  let t = normalizeText(raw);
 
-  let category = "Outros";
-  if(Array.isArray(categorias) && categorias.length){
-    const parts = t.split(" ").filter(Boolean);
-    const lastWord = parts[parts.length-1] || "";
-    const found = categorias.find(c => c.toLowerCase() === lastWord.toLowerCase());
-    if(found){
-      category = found;
-      parts.pop();
-      t = parts.join(" ").trim();
+  t = t
+    .replace(/^adicionar\s+/, "")
+    .replace(/^criar\s+/, "")
+    .replace(/^anotar\s+/, "")
+    .replace(/^colocar\s+/, "")
+    .replace(/^novo\s+/, "")
+    .replace(/^nova\s+/, "")
+    .replace(/^uma\s+/, "")
+    .replace(/^um\s+/, "")
+    .replace(/^remover\s+/, "")
+    .replace(/^apagar\s+/, "")
+    .replace(/^deletar\s+/, "")
+    .replace(/^excluir\s+/, "")
+    .replace(/^marcar\s+/, "")
+    .replace(/^desmarcar\s+/, "");
+
+  t = t
+    .replace(/\bgasto fixo\b/g, "")
+    .replace(/\bgasto\b/g, "")
+    .replace(/\binvestimento fixo\b/g, "")
+    .replace(/\binvestimento\b/g, "")
+    .replace(/\bcategoria\b/g, "")
+    .replace(/\bfixo\b/g, "")
+    .replace(/\bcomo pago\b/g, "")
+    .replace(/\bpago\b/g, "")
+    .replace(/\bpendente\b/g, "")
+    .replace(/\bvencer\b/g, "")
+    .replace(/\bvence\b/g, "")
+    .replace(/\bdia \d{1,2}\b/g, "")
+    .replace(/\bcategoria [a-zA-ZÀ-ÿçÇ]+\b/g, "")
+    .replace(/\bem \d{1,3} meses?\b/g, "")
+    .replace(/\d+(\.\d+)?/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return titleCase(t);
+}
+
+function monthSummaryHtml(all){
+  const d = getMesData(all, currentMonthKey());
+  const salary = Number(d.salary || 0);
+  const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
+  const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
+  const left = salary - spent;
+
+  const byCat = {};
+  (d.items || []).forEach(it=>{
+    const c = it.category || "Outros";
+    byCat[c] = (byCat[c] || 0) + Number(it.amount || 0);
+  });
+  const topCats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+  return (
+    `<span class="ok">Resumo do mês atual.</span><br><br>` +
+    `• Salário: <b>${money(salary)}</b><br>` +
+    `• Gastos: <b>${money(spent)}</b><br>` +
+    `• Guardado: <b>${money(saved)}</b><br>` +
+    `• Sobra: <b>${money(left)}</b><br><br>` +
+    `${topCats.length ? `Top categorias:<br>${topCats.map(([c,v])=>`• ${escapeHtml(c)}: <b>${money(v)}</b>`).join("<br>")}` : `Sem categorias registradas no mês.`}`
+  );
+}
+
+function requestNotificationPermission(){
+  if(!("Notification" in window)){
+    setResult(`<span class="err">Seu navegador não suporta notificações.</span>`);
+    return;
+  }
+  Notification.requestPermission().then((perm)=>{
+    if(perm === "granted"){
+      setResult(`<span class="ok">Notificações ativadas com sucesso.</span>`);
     }else{
-      category = detectarCategoria(t);
+      setResult(`<span class="warn">Notificações não foram permitidas.</span>`);
     }
-  }else{
-    category = detectarCategoria(t);
+  }).catch(()=>{
+    setResult(`<span class="err">Não foi possível ativar notificações.</span>`);
+  });
+}
+
+function tryAddCategoria(cmd, all){
+  const t = normalizeText(cmd);
+  if(!(t.includes("adicionar categoria") || t.includes("criar categoria"))) return null;
+
+  let nome = t
+    .replace("adicionar categoria","")
+    .replace("criar categoria","")
+    .trim();
+
+  if(!nome) return { ok:false, msg:"Não entendi o nome da categoria." };
+
+  nome = titleCase(nome);
+
+  if(all.categorias.some(c => normalizeText(c) === normalizeText(nome))){
+    return { ok:false, msg:`A categoria "${escapeHtml(nome)}" já existe.` };
   }
 
-  const desc = t || "Gasto";
-  return { desc, amount, category };
+  all.categorias.push(nome);
+  saveState(all);
+  return { ok:true, msg:`Categoria <b>${escapeHtml(nome)}</b> adicionada com sucesso.` };
 }
 
-function setVoiceUI(statusText, listening){
-  const status = document.getElementById("voiceStatus");
-  const mic = document.getElementById("bigMic");
-  if(status) status.textContent = statusText;
-  if(mic) mic.classList.toggle("listening", !!listening);
+function tryAddGastoFixo(cmd, all){
+  const t = normalizeText(cmd);
+  if(!t.includes("gasto fixo")) return null;
+
+  const valor = extractAmount(t);
+  const categoria = parseCategory(t, all.categorias);
+  const diaPagar = extractDueDay(t);
+  const desc = cleanDesc(t);
+
+  if(!desc) return { ok:false, msg:"Não entendi a descrição do gasto fixo." };
+  if(!valor || valor <= 0) return { ok:false, msg:"Não entendi o valor do gasto fixo." };
+
+  all.fixos.push({
+    id: uid(),
+    desc,
+    amount: valor,
+    category: categoria,
+    diaPagar: diaPagar || 0,
+    isFixo: true
+  });
+
+  saveState(all);
+
+  return {
+    ok:true,
+    msg:
+      `Gasto fixo adicionado:<br>` +
+      `• <b>${escapeHtml(desc)}</b><br>` +
+      `• Valor: <b>${money(valor)}</b><br>` +
+      `• Categoria: <b>${escapeHtml(categoria)}</b><br>` +
+      `• Vence: <b>${diaPagar ? ("dia " + diaPagar) : "sem prazo"}</b>`
+  };
 }
 
-function clearVoiceFields(){
-  document.getElementById("voiceTranscript").value = "";
-  document.getElementById("voiceReply").value = "";
-  setVoiceUI("Status: pronto", false);
+function tryAddInvestimentoFixo(cmd, all){
+  const t = normalizeText(cmd);
+  if(!t.includes("investimento fixo")) return null;
+
+  const nums = extractAllNumbers(t);
+  const metaFinal = nums[0] || 0;
+  const prazoMeses = extractMonths(t) || nums[1] || 0;
+  const diaPagar = extractDueDay(t);
+  const nome = cleanDesc(t);
+
+  if(!nome) return { ok:false, msg:"Não entendi o nome do investimento fixo." };
+  if(!metaFinal || metaFinal <= 0) return { ok:false, msg:"Não entendi a meta final do investimento fixo." };
+  if(!prazoMeses || prazoMeses <= 0) return { ok:false, msg:"Não entendi o prazo em meses." };
+
+  const mensal = Math.round(((metaFinal / prazoMeses) || 0) * 100) / 100;
+  const id = uid();
+
+  all.investFixos.push({
+    id,
+    nome,
+    metaFinal,
+    prazoMeses,
+    mensal,
+    diaPagar: diaPagar || 0
+  });
+
+  const d = getMesData(all, currentMonthKey());
+  d.investStatus[id] = false;
+
+  saveState(all);
+
+  return {
+    ok:true,
+    msg:
+      `Investimento fixo adicionado:<br>` +
+      `• <b>${escapeHtml(nome)}</b><br>` +
+      `• Meta final: <b>${money(metaFinal)}</b><br>` +
+      `• Prazo: <b>${prazoMeses} meses</b><br>` +
+      `• Mensal automático: <b>${money(mensal)}</b><br>` +
+      `• Vence: <b>${diaPagar ? ("dia " + diaPagar) : "sem prazo"}</b>`
+  };
 }
 
-function setReply(text){
-  document.getElementById("voiceReply").value = text || "";
+function findCurrentMonthItemByName(all, name){
+  const d = getMesData(all, currentMonthKey());
+  const n = normalizeText(name);
+
+  return d.items.find(it => {
+    const itemName = normalizeText(it.desc);
+    return itemName.includes(n) || n.includes(itemName);
+  });
 }
 
-function startVoiceCommand(){
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const btn = document.getElementById("btnStartVoice");
+function tryMarkAsPaid(cmd, all){
+  const t = normalizeText(cmd);
+  if(!(t.includes("como pago") || t.includes("marcar") || t.includes("paguei"))) return null;
+  if(t.includes("desmarcar")) return null;
 
-  if(!SpeechRecognition){
-    alert("Reconhecimento de voz não suportado. Use Chrome no Android.");
-    return;
+  let nome = t
+    .replace("marcar","")
+    .replace("como pago","")
+    .replace("paguei","")
+    .replace("como paga","")
+    .trim();
+
+  if(!nome) return { ok:false, msg:"Não entendi qual item você quer marcar como pago." };
+
+  const d = getMesData(all, currentMonthKey());
+  const target = findCurrentMonthItemByName(all, nome);
+
+  if(!target){
+    return { ok:false, msg:`Não encontrei item do mês com o nome parecido com "<b>${escapeHtml(nome)}</b>".` };
   }
-  if(!USER_ID){
-    alert("Faça login primeiro.");
-    return;
+
+  target.paid = true;
+
+  if(target.isInvestFixo && target.invId){
+    d.investStatus[target.invId] = true;
+    if(!Array.isArray(d.saved)) d.saved = [];
+    const exists = d.saved.some(s => s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey());
+    if(!exists){
+      d.saved.unshift({
+        value:Number(target.amount||0),
+        desc:`Automático: ${target.desc}`,
+        date:todayISO(),
+        source:"investFixo",
+        invId:target.invId,
+        month:currentMonthKey()
+      });
+    }
   }
 
-  if(btn) btn.disabled = true;
-  setReply("");
-  setVoiceUI("Status: ouvindo…", true);
+  saveState(all);
 
-  if(!voiceRec){
-    voiceRec = new SpeechRecognition();
-    voiceRec.lang = "pt-BR";
-    voiceRec.interimResults = false;
-    voiceRec.maxAlternatives = 1;
-    try{ voiceRec.continuous = false; }catch(e){}
+  return {
+    ok:true,
+    msg:`Item <b>${escapeHtml(target.desc)}</b> marcado como <b>Pago</b>.`
+  };
+}
 
-    voiceRec.onresult = (event) => {
-      const text = (event.results?.[0]?.[0]?.transcript || "").trim();
-      document.getElementById("voiceTranscript").value = text || "";
+function tryUnmarkAsPaid(cmd, all){
+  const t = normalizeText(cmd);
+  if(!(t.includes("desmarcar") || t.includes("tirar pago") || t.includes("voltar pendente"))) return null;
 
-      const parsed = parseExpenseFromSpeech(text);
-      if(!parsed){
-        setVoiceUI("Status: não entendi o comando", false);
-        setReply("Não entendi");
-        if(btn) btn.disabled = false;
-        return;
+  let nome = t
+    .replace("desmarcar","")
+    .replace("como pago","")
+    .replace("tirar pago","")
+    .replace("voltar pendente","")
+    .replace("pago","")
+    .trim();
+
+  if(!nome) return { ok:false, msg:"Não entendi qual item você quer voltar para pendente." };
+
+  const d = getMesData(all, currentMonthKey());
+  const target = findCurrentMonthItemByName(all, nome);
+
+  if(!target){
+    return { ok:false, msg:`Não encontrei item do mês com nome parecido com "<b>${escapeHtml(nome)}</b>".` };
+  }
+
+  target.paid = false;
+
+  if(target.isInvestFixo && target.invId){
+    d.investStatus[target.invId] = false;
+    d.saved = (d.saved || []).filter(s => !(s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey()));
+  }
+
+  saveState(all);
+
+  return {
+    ok:true,
+    msg:`Item <b>${escapeHtml(target.desc)}</b> voltou para <b>Pendente</b>.`
+  };
+}
+
+function tryAddGastoNormal(cmd, all){
+  const t = normalizeText(cmd);
+
+  if(t.includes("gasto fixo") || t.includes("investimento fixo")) return null;
+  if(!(t.includes("adicionar gasto") || t.includes("anotar gasto") || t.startsWith("gasto "))) return null;
+
+  const valor = extractAmount(t);
+  const categoria = parseCategory(t, all.categorias);
+  const desc = cleanDesc(t);
+
+  if(!desc) return { ok:false, msg:"Não entendi a descrição do gasto." };
+  if(!valor || valor <= 0) return { ok:false, msg:"Não entendi o valor do gasto." };
+
+  const d = getMesData(all, currentMonthKey());
+  d.items.push({
+    id: uid(),
+    desc,
+    amount: valor,
+    category: categoria,
+    isFixo: false,
+    isInvestFixo: false,
+    paid: false
+  });
+
+  saveState(all);
+
+  return {
+    ok:true,
+    msg:
+      `Gasto adicionado:<br>` +
+      `• <b>${escapeHtml(desc)}</b><br>` +
+      `• Valor: <b>${money(valor)}</b><br>` +
+      `• Categoria: <b>${escapeHtml(categoria)}</b>`
+  };
+}
+
+function tryRemoveGastoNormal(cmd, all){
+  const t = normalizeText(cmd);
+  if(!(t.includes("remover gasto") || t.includes("apagar gasto") || t.includes("deletar gasto") || t.includes("excluir gasto"))) return null;
+  if(t.includes("gasto fixo")) return null;
+
+  const nome = cleanDesc(t);
+  if(!nome) return { ok:false, msg:"Não entendi qual gasto você quer remover." };
+
+  const d = getMesData(all, currentMonthKey());
+  const idx = d.items.findIndex(it => !it.isFixo && (normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc))));
+
+  if(idx === -1){
+    return { ok:false, msg:`Não encontrei gasto normal parecido com "<b>${escapeHtml(nome)}</b>" no mês atual.` };
+  }
+
+  const removed = d.items[idx];
+  d.items.splice(idx,1);
+  saveState(all);
+
+  return { ok:true, msg:`Gasto <b>${escapeHtml(removed.desc)}</b> removido do mês atual.` };
+}
+
+function tryRemoveGastoFixo(cmd, all){
+  const t = normalizeText(cmd);
+  if(!(t.includes("remover gasto fixo") || t.includes("apagar gasto fixo") || t.includes("deletar gasto fixo") || t.includes("excluir gasto fixo"))) return null;
+
+  const nome = cleanDesc(t);
+  if(!nome) return { ok:false, msg:"Não entendi qual gasto fixo você quer remover." };
+
+  const idx = all.fixos.findIndex(it => normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc)));
+  if(idx === -1){
+    return { ok:false, msg:`Não encontrei gasto fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
+  }
+
+  const removed = all.fixos[idx];
+  all.fixos.splice(idx,1);
+
+  Object.keys(all.state.meses || {}).forEach(m=>{
+    const d = all.state.meses[m];
+    if(d && Array.isArray(d.items)){
+      d.items = d.items.filter(it=> !(it.isFixo && !it.isInvestFixo && (it.id === removed.id || normalizeText(it.desc) === normalizeText(removed.desc))));
+    }
+  });
+
+  saveState(all);
+  return { ok:true, msg:`Gasto fixo <b>${escapeHtml(removed.desc)}</b> removido do sistema.` };
+}
+
+function tryRemoveInvestFixo(cmd, all){
+  const t = normalizeText(cmd);
+  if(!(t.includes("remover investimento fixo") || t.includes("apagar investimento fixo") || t.includes("deletar investimento fixo") || t.includes("excluir investimento fixo"))) return null;
+
+  const nome = cleanDesc(t);
+  if(!nome) return { ok:false, msg:"Não entendi qual investimento fixo você quer remover." };
+
+  const idx = all.investFixos.findIndex(it => normalizeText(it.nome).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.nome)));
+  if(idx === -1){
+    return { ok:false, msg:`Não encontrei investimento fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
+  }
+
+  const removed = all.investFixos[idx];
+  all.investFixos.splice(idx,1);
+
+  Object.keys(all.state.meses || {}).forEach(m=>{
+    const d = all.state.meses[m];
+    if(d){
+      if(d.investStatus && removed.id) delete d.investStatus[removed.id];
+      if(Array.isArray(d.saved)){
+        d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===removed.id));
       }
+      if(Array.isArray(d.items)){
+        d.items = d.items.filter(it => !(it.isInvestFixo && (it.invId === removed.id || it.id === removed.id)));
+      }
+    }
+  });
 
-      const { desc, amount, category } = parsed;
-      const d = getDataMes(mesAtual);
-      d.items.push(ensureItemDefaults({
-        desc,
-        amount,
-        category,
-        isFixo:false,
-        isInvestFixo:false,
-        paid:false
-      }));
-      saveAll();
+  saveState(all);
+  return { ok:true, msg:`Investimento fixo <b>${escapeHtml(removed.nome)}</b> removido do sistema.` };
+}
 
-      fetch(API+"/addGasto",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc, amount, category })
-      }).catch(()=>{});
+function tryShowSummary(cmd, all){
+  const t = normalizeText(cmd);
+  if(!(t.includes("mostrar resumo do mes") || t.includes("resumo do mes") || t.includes("mostrar meu resumo"))) return null;
+  return { ok:true, msg: monthSummaryHtml(all) };
+}
 
-      setVoiceUI("Status: comando executado", false);
-      setReply("Anotado");
-      if(btn) btn.disabled = false;
-    };
+function tryOpenNotifications(cmd){
+  const t = normalizeText(cmd);
+  if(!(t.includes("abrir notificacoes") || t.includes("ativar notificacoes") || t.includes("notificacoes"))) return null;
+  requestNotificationPermission();
+  return { ok:true, msg:`Abrindo permissão de <b>notificações</b>.` };
+}
 
-    voiceRec.onerror = (e) => {
-      setVoiceUI("Status: erro no microfone", false);
-      setReply("Erro");
-      if(btn) btn.disabled = false;
-    };
-
-    voiceRec.onend = () => {
-      if(btn) btn.disabled = false;
-      const current = document.getElementById("voiceReply").value || "";
-      if(!current) setVoiceUI("Status: pronto", false);
-    };
+function executeVoiceCommand(){
+  if(!USER_ID){
+    setResult(`<span class="err">Faça login primeiro.</span>`);
+    return;
   }
 
-  try{
-    voiceRec.start();
-  }catch(e){
-    setVoiceUI("Status: não foi possível iniciar", false);
-    setReply("Erro");
-    if(btn) btn.disabled = false;
+  const cmd = lastTranscript.trim();
+  if(!cmd){
+    setResult(`<span class="warn">Nenhum comando para executar.</span>`);
+    return;
+  }
+
+  const all = loadState();
+  let res = null;
+
+  res = tryShowSummary(cmd, all);
+  if(res === null) res = tryOpenNotifications(cmd);
+  if(res === null) res = tryAddCategoria(cmd, all);
+  if(res === null) res = tryAddGastoFixo(cmd, all);
+  if(res === null) res = tryAddInvestimentoFixo(cmd, all);
+  if(res === null) res = tryUnmarkAsPaid(cmd, all);
+  if(res === null) res = tryMarkAsPaid(cmd, all);
+  if(res === null) res = tryRemoveGastoFixo(cmd, all);
+  if(res === null) res = tryRemoveInvestFixo(cmd, all);
+  if(res === null) res = tryRemoveGastoNormal(cmd, all);
+  if(res === null) res = tryAddGastoNormal(cmd, all);
+
+  if(res === null){
+    setResult(`<span class="err">Não consegui entender esse comando.</span><br><br>Tente falar de forma parecida com os exemplos da tela.`);
+    dbg("Comando não reconhecido: " + cmd);
+    return;
+  }
+
+  if(res.ok){
+    setResult(`<span class="ok">Comando executado.</span><br><br>${res.msg}`);
+    dbg("OK: " + cmd);
+  }else{
+    setResult(`<span class="warn">Não foi possível concluir.</span><br><br>${res.msg}`);
+    dbg("Falha: " + cmd);
   }
 }
 
@@ -475,13 +1119,12 @@ async function initFirebase(){
   }
 
   try{
-    if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    if(!firebase.apps || !firebase.apps.length){
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
   }catch(e){}
 
   auth = firebase.auth();
-  try{
-    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-  }catch(e){}
 
   auth.onAuthStateChanged((u)=>{
     USER = u || null;
@@ -493,19 +1136,21 @@ async function initFirebase(){
 
     USER_ID = USER.uid;
 
-    const t = localStorage.getItem("theme");
-    if(t==="light") document.body.classList.add("light");
+    const savedTheme = localStorage.getItem("theme");
+    if(savedTheme === "light"){
+      document.body.classList.add("light");
+    }
 
-    loadAll();
-    clearVoiceFields();
+    dbg("Usuário autenticado: " + (USER.email || USER.uid));
   });
 
   return true;
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
-  setVoiceUI("Status: pronto", false);
-  await initFirebase();
+  const ok = await initFirebase();
+  if(!ok) return;
+  ensureSpeech();
 });
 </script>
 </body>
