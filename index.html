@@ -555,7 +555,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
             <h3>Lista do mês</h3>
             <div class="small" style="margin-bottom:10px">
               Toque em <b>Pendente/Pago</b> para marcar se você já pagou.
-              <br>✅ Investimentos fixos aparecem como <b>Juntar</b> e começam como <b>Pendente</b>.
+              <br>✅ Investimentos fixos aparecem como <b>Juntar</b>, com <b>dia de vencimento</b>, e começam como <b>Pendente</b>.
               <br>✅ Ao marcar “Pago” em “Juntar”, o valor entra automaticamente no <b>Guardado</b>.
             </div>
             <table class="list" id="list"></table>
@@ -823,19 +823,20 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="card">
         <h3>Como funciona</h3>
         <div class="small">
-          Você informa <b>Nome</b>, <b>Meta final (R$)</b> e <b>Prazo (meses)</b>.
+          Você informa <b>Nome</b>, <b>Meta final (R$)</b>, <b>Prazo (meses)</b> e <b>até que dia pagar</b>.
           O app calcula automaticamente o <b>valor mensal</b> (meta ÷ meses).
           Esse valor aparece em <b>todos os meses</b> como “Juntar” na tela principal.
-          ✅ Começa como <b>Pendente</b>
-          ✅ Ao marcar <b>Pago</b>, entra automaticamente no <b>Guardado</b>.
+          ✅ Começa como <b>Pendente</b><br>
+          ✅ Ao marcar <b>Pago</b>, entra automaticamente no <b>Guardado</b><br>
+          ✅ Quando estiver perto do prazo, o sistema mostra uma <b>notificação</b>.
         </div>
       </div>
 
       <div class="card" style="margin-top:12px">
         <h3>Adicionar investimento fixo</h3>
 
-        <label>Nome (ex.: Reserva, Carro, Casa)</label>
-        <input id="invNome" placeholder="Ex: Reserva">
+        <label>Nome (ex.: Internet, Reserva, Carro, Casa)</label>
+        <input id="invNome" placeholder="Ex: Internet">
 
         <div class="grid2" style="margin-top:10px">
           <div>
@@ -848,12 +849,26 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           </div>
         </div>
 
+        <div class="grid2" style="margin-top:10px">
+          <div>
+            <label>Até que dia deve pagar</label>
+            <input id="invDiaPagar" type="number" min="1" max="31" placeholder="Ex: 11" value="10">
+          </div>
+          <div class="note">
+            <div style="font-weight:900">Lembrete</div>
+            <div class="small">O app avisa quando faltar 3, 2, 1 dias e no dia do prazo.</div>
+          </div>
+        </div>
+
         <div class="note" style="margin-top:10px">
           <div style="font-weight:900">Mensal automático</div>
           <div class="small" id="invResumo">Preencha Meta e Prazo para ver o valor por mês.</div>
         </div>
 
-        <button class="btn primary" style="margin-top:10px" onclick="addInvestFixo()">Adicionar</button>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" onclick="requestNotificationPermission()" style="flex:1">🔔 Ativar notificações</button>
+          <button class="btn primary" onclick="addInvestFixo()" style="flex:1">Adicionar</button>
+        </div>
 
         <div class="hr"></div>
         <div id="listaInvestFixos" class="small"></div>
@@ -887,17 +902,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
             <option value="fixo">Taxa fixa mensal (%)</option>
           </select>
 
-          <div class="grid2" style="margin-top:10px">
-            <div>
-              <label>Valor inicial</label>
-              <input id="valorInvestimento" type="number" placeholder="Ex: 1000">
-            </div>
-            <div>
-              <label>Meses</label>
-              <input id="mesesInvestimento" type="number" placeholder="Ex: 12">
-            </div>
-          </div>
-
           <div class="grid2" style="margin-top:10px" id="investExtra">
             <div>
               <label id="investExtraLabel">Parâmetro</label>
@@ -906,6 +910,17 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
             <div class="note">
               <div class="small">Dica</div>
               <div class="small" id="investHint">Escolha o tipo para ver o parâmetro.</div>
+            </div>
+          </div>
+
+          <div class="grid2" style="margin-top:10px">
+            <div>
+              <label>Valor inicial</label>
+              <input id="valorInvestimento" type="number" placeholder="Ex: 1000">
+            </div>
+            <div>
+              <label>Meses</label>
+              <input id="mesesInvestimento" type="number" placeholder="Ex: 12">
             </div>
           </div>
 
@@ -1185,6 +1200,11 @@ function openVoicePage(){
    THEME
 ========================= */
 const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
+const NOTIF_KEYS = {
+  permAsked: "notif_perm_asked_v1",
+  sentPrefix: "notif_sent_v1"
+};
+
 const THEME_PRESETS = {
   default: {
     dark:  { bg:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
@@ -1207,6 +1227,110 @@ const THEME_PRESETS = {
     light: { bg:"#ffffff", g1:"rgba(0,0,0,.06)", g2:"rgba(0,0,0,.04)", g3:"rgba(0,0,0,.03)" }
   }
 };
+
+function kNotifSent(invId, mes, tag){
+  return `${NOTIF_KEYS.sentPrefix}_${USER_ID || "guest"}_${invId}_${mes}_${tag}`;
+}
+
+function requestNotificationPermission(){
+  if(!("Notification" in window)){
+    alert("Seu navegador não suporta notificações.");
+    return;
+  }
+
+  Notification.requestPermission().then((perm)=>{
+    if(perm === "granted"){
+      alert("Notificações ativadas com sucesso.");
+      localStorage.setItem(NOTIF_KEYS.permAsked, "1");
+      checkDueNotifications();
+    }else{
+      alert("Notificações não foram permitidas.");
+    }
+  }).catch(()=>{});
+}
+
+function daysUntilDue(day, baseDate = new Date()){
+  const y = baseDate.getFullYear();
+  const m = baseDate.getMonth();
+  const maxDay = new Date(y, m + 1, 0).getDate();
+  const dueDay = Math.min(Math.max(Number(day || 1), 1), maxDay);
+
+  const today = new Date(y, m, baseDate.getDate());
+  const due = new Date(y, m, dueDay);
+
+  const diffMs = due.getTime() - today.getTime();
+  return Math.floor(diffMs / 86400000);
+}
+
+function currentMonthKeyFromDate(baseDate = new Date()){
+  const y = baseDate.getFullYear();
+  const m = String(baseDate.getMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`;
+}
+
+function showBrowserNotification(title, body){
+  if(!("Notification" in window)) return;
+  if(Notification.permission !== "granted") return;
+
+  try{
+    new Notification(title, {
+      body,
+      icon: "icons/icon-192.png",
+      badge: "icons/icon-192.png",
+      tag: "gastos-pro-prazo"
+    });
+  }catch(e){}
+}
+
+function checkDueNotifications(){
+  if(!USER_ID) return;
+  if(!("Notification" in window)) return;
+  if(Notification.permission !== "granted") return;
+
+  const now = new Date();
+  const mes = currentMonthKeyFromDate(now);
+  const d = getDataMes(mes);
+  ensureMonthInvestStatus(d);
+
+  (investFixos || []).forEach(inv=>{
+    if(!inv || !inv.id) return;
+
+    const dueDay = Number(inv.diaPagar || 0);
+    if(!dueDay || dueDay < 1) return;
+
+    const paid = !!d.investStatus[inv.id];
+    if(paid) return;
+
+    const diff = daysUntilDue(dueDay, now);
+
+    if(diff < 0 || diff > 3) return;
+
+    const tag = `faltam_${diff}_dias`;
+    const alreadySent = localStorage.getItem(kNotifSent(inv.id, mes, tag)) === "1";
+    if(alreadySent) return;
+
+    let body = "";
+    if(diff === 0){
+      body = `O prazo para pagar ${inv.nome} é hoje (dia ${dueDay}).`;
+    }else if(diff === 1){
+      body = `O prazo para pagar ${inv.nome} está chegando. Falta 1 dia (vence dia ${dueDay}).`;
+    }else{
+      body = `O prazo para pagar ${inv.nome} está chegando. Faltam ${diff} dias (vence dia ${dueDay}).`;
+    }
+
+    showBrowserNotification("Controle de Gastos PRO", body);
+    localStorage.setItem(kNotifSent(inv.id, mes, tag), "1");
+  });
+}
+
+function startDueNotificationWatcher(){
+  checkDueNotifications();
+
+  if(window.__dueNotifInterval) clearInterval(window.__dueNotifInterval);
+  window.__dueNotifInterval = setInterval(()=>{
+    checkDueNotifications();
+  }, 60 * 60 * 1000);
+}
 
 function isLightMode(){
   return document.body.classList.contains("light");
@@ -1520,6 +1644,7 @@ function getDataMes(m){
       isFixo:true,
       isInvestFixo:true,
       invId: inv.id,
+      diaPagar: Number(inv.diaPagar || 0),
       paid
     }));
     present.add(fk);
@@ -1672,13 +1797,22 @@ function updateInvResumo(){
   const nome = (document.getElementById("invNome").value||"").trim();
   const metaFinal = Number(document.getElementById("invMetaFinal").value||0);
   const prazoMeses = Number(document.getElementById("invPrazoMeses").value||0) || 12;
+  const diaPagar = Number(document.getElementById("invDiaPagar").value||0);
   const out = document.getElementById("invResumo");
   if(!out) return;
+
   if(!nome){ out.textContent="Digite o Nome."; return; }
   if(!metaFinal || metaFinal<=0){ out.textContent="Digite a Meta final (R$)."; return; }
   if(!prazoMeses || prazoMeses<=0){ out.textContent="Digite o Prazo (meses)."; return; }
+
   const mensal = calcMensalAuto(metaFinal, prazoMeses);
-  out.textContent = `Para juntar ${money(metaFinal)} em ${prazoMeses} meses, o valor mensal fica: ${money(mensal)} (meta ÷ meses).`;
+  let txt = `Para juntar ${money(metaFinal)} em ${prazoMeses} meses, o valor mensal fica: ${money(mensal)} (meta ÷ meses).`;
+
+  if(diaPagar >= 1 && diaPagar <= 31){
+    txt += ` Prazo de pagamento: até o dia ${diaPagar} de cada mês.`;
+  }
+
+  out.textContent = txt;
 }
 function renderInvestFixos(){
   const div = document.getElementById("listaInvestFixos");
@@ -1689,12 +1823,15 @@ function renderInvestFixos(){
     const meta = Number(inv.metaFinal||0);
     const meses = Number(inv.prazoMeses||12) || 12;
     const mensal = Number(inv.mensal||0);
+    const diaPagar = Number(inv.diaPagar||0);
+
     return `
       <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div>
           <div style="font-weight:950">📌 ${escapeHtml(inv.nome)}</div>
           <div class="small" style="margin-top:6px">Meta: <b>${money(meta)}</b> • Prazo: <b>${meses} meses</b></div>
           <div class="small">Mensal automático: <b class="successText">${money(mensal)}</b></div>
+          <div class="small">Prazo para pagar: <b>dia ${diaPagar || "—"}</b></div>
           <div class="small">✅ Na tela principal, começa <b>Pendente</b> e ao marcar <b>Pago</b> soma no <b>Guardado</b>.</div>
         </div>
         <button class="btn icon mini" title="Remover do cadastro (todos os meses)" onclick="removeInvestFixo(${idx})">✕</button>
@@ -1803,16 +1940,28 @@ function removeFixo(idx){
 
 function addInvestFixo(){
   if(!USER_ID){ alert("Faça login primeiro"); return; }
+
   const nome = (document.getElementById("invNome").value||"").trim();
   const metaFinal = Number(document.getElementById("invMetaFinal").value||0);
   const prazoMeses = Number(document.getElementById("invPrazoMeses").value||0) || 12;
+  const diaPagar = Number(document.getElementById("invDiaPagar").value||0);
+
   if(!nome) return alert("Digite o Nome.");
   if(!metaFinal || metaFinal<=0) return alert("Digite a Meta final (R$).");
   if(!prazoMeses || prazoMeses<=0) return alert("Digite o Prazo (meses).");
-  const mensal = calcMensalAuto(metaFinal, prazoMeses);
+  if(!diaPagar || diaPagar < 1 || diaPagar > 31) return alert("Digite um dia válido entre 1 e 31.");
 
+  const mensal = calcMensalAuto(metaFinal, prazoMeses);
   const id = uid();
-  investFixos.push({ id, nome, metaFinal, prazoMeses, mensal });
+
+  investFixos.push({
+    id,
+    nome,
+    metaFinal,
+    prazoMeses,
+    mensal,
+    diaPagar
+  });
 
   const d = getDataMes(mesAtual);
   ensureMonthInvestStatus(d);
@@ -1821,11 +1970,13 @@ function addInvestFixo(){
   document.getElementById("invNome").value="";
   document.getElementById("invMetaFinal").value="";
   document.getElementById("invPrazoMeses").value="12";
+  document.getElementById("invDiaPagar").value="10";
   updateInvResumo();
 
   saveAll();
   renderInvestFixos();
   render();
+  checkDueNotifications();
 }
 function removeInvestFixo(idx){
   if(idx<0 || idx>=investFixos.length) return;
@@ -2059,6 +2210,9 @@ function renderList(){
     const paid = !!i.paid;
     const statusBadge = paid ? `<span class="badge good">Pago</span>` : `<span class="badge warn">Pendente</span>`;
     const fixBadge = i.isInvestFixo ? `<span class="badge">Juntar</span>` : (i.isFixo ? `<span class="badge">Fixo</span>` : ``);
+    const dueBadge = (i.isInvestFixo && i.diaPagar)
+      ? `<span class="badge warn">Vence dia ${escapeHtml(i.diaPagar)}</span>`
+      : ``;
     const btnPaidClass = paid ? "good" : "warn";
     const btnPaidText = paid ? "✅ Pago" : "⏳ Pendente";
 
@@ -2068,6 +2222,7 @@ function renderList(){
           <div style="font-weight:900">
             ${escapeHtml(i.desc||"")}
             ${fixBadge}
+            ${dueBadge}
             <span class="badge">${escapeHtml(i.category||"Outros")}</span>
             ${statusBadge}
           </div>
@@ -2663,7 +2818,7 @@ async function gerarPDFCompleto(){
             ? (investFixos||[]).map(inv=>{
                 return `<div style="padding:6px 0;border-bottom:1px dashed #eee">
                   <div style="font-weight:800">${escapeHtml(inv.nome)}</div>
-                  <div style="font-size:12px;color:#444">Meta: ${money(inv.metaFinal)} • Prazo: ${escapeHtml(inv.prazoMeses)} meses • Mensal: <b>${money(inv.mensal)}</b></div>
+                  <div style="font-size:12px;color:#444">Meta: ${money(inv.metaFinal)} • Prazo: ${escapeHtml(inv.prazoMeses)} meses • Mensal: <b>${money(inv.mensal)}</b> • Dia: <b>${escapeHtml(inv.diaPagar || "—")}</b></div>
                 </div>`;
               }).join("")
             : `<div style="font-size:12px;color:#444">Nenhum investimento fixo cadastrado.</div>`
@@ -2679,7 +2834,7 @@ async function gerarPDFCompleto(){
                 return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee">
                   <div style="min-width:0">
                     <div style="font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(it.desc||"")}</div>
-                    <div style="font-size:12px;color:#444">${escapeHtml(it.category||"Outros")} • ${escapeHtml(st)}${it.isInvestFixo ? " • Juntar" : (it.isFixo ? " • Fixo" : "")}</div>
+                    <div style="font-size:12px;color:#444">${escapeHtml(it.category||"Outros")} • ${escapeHtml(st)}${it.isInvestFixo ? " • Juntar" : (it.isFixo ? " • Fixo" : "")}${it.diaPagar ? (" • Vence dia " + escapeHtml(it.diaPagar)) : ""}</div>
                   </div>
                   <div style="font-weight:900">${money(it.amount||0)}</div>
                 </div>`;
@@ -2769,6 +2924,13 @@ async function initFirebase(){
     updateInvResumo();
     buildPdfSelectors();
 
+    if(("Notification" in window) && Notification.permission === "default" && localStorage.getItem(NOTIF_KEYS.permAsked) !== "1"){
+      localStorage.setItem(NOTIF_KEYS.permAsked, "1");
+      setTimeout(()=>{ requestNotificationPermission(); }, 1200);
+    }
+
+    startDueNotificationWatcher();
+
     const tipoSel = document.getElementById("tipoSimulacao");
     if(tipoSel && !tipoSel.dataset.bound){
       tipoSel.addEventListener("change", ()=>{
@@ -2785,7 +2947,7 @@ async function initFirebase(){
       investSel.dataset.bound = "1";
     }
 
-    ["invNome","invMetaFinal","invPrazoMeses"].forEach(id=>{
+    ["invNome","invMetaFinal","invPrazoMeses","invDiaPagar"].forEach(id=>{
       const el=document.getElementById(id);
       if(el && !el.dataset.bound){
         el.addEventListener("input", updateInvResumo);
