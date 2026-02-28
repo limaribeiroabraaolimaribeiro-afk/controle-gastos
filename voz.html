@@ -65,6 +65,7 @@
       justify-content:space-between;
       gap:12px;
       margin-bottom:14px;
+      flex-wrap:wrap;
     }
 
     .titleBox h1{
@@ -162,6 +163,7 @@
       justify-content:space-between;
       gap:12px;
       margin-bottom:10px;
+      flex-wrap:wrap;
     }
 
     .bigMicWrap{
@@ -247,6 +249,8 @@
       background:rgba(255,255,255,.08);
       color:var(--muted);
       font-size:12px;
+      cursor:pointer;
+      user-select:none;
     }
 
     .actions{
@@ -321,10 +325,16 @@
             <br>• marca internet como pago
             <br>• tira internet do pago
             <br>• remove o gasto mercado
-            <br>• gera pdf de março de 2026
-            <br>• muda o tema para roxo
             <br>• abre histórico
-            <br>• abrir simuladores
+            <br>• abre configurações
+            <br>• abre categorias
+            <br>• abre gastos fixos
+            <br>• abre investimentos fixos
+            <br>• abre simuladores
+            <br>• abre ia
+            <br>• resumo do ano 2026
+            <br>• pdf do mês março de 2026
+            <br>• muda o tema para roxo
           </div>
         </div>
 
@@ -346,16 +356,14 @@
       <div class="box" id="transcriptBox">Nenhum comando ainda.</div>
 
       <div class="chips">
-        <div class="chip">Gasto natural</div>
-        <div class="chip">Fixo</div>
-        <div class="chip">Investimento fixo</div>
-        <div class="chip">Guardado</div>
-        <div class="chip">Tema</div>
-        <div class="chip">PDF</div>
-        <div class="chip">Resumo</div>
-        <div class="chip">Histórico</div>
-        <div class="chip">Simuladores</div>
-        <div class="chip">Notificações</div>
+        <div class="chip" onclick="setTranscript('abre histórico')">Histórico</div>
+        <div class="chip" onclick="setTranscript('abre configurações')">Configurações</div>
+        <div class="chip" onclick="setTranscript('abre categorias')">Categorias</div>
+        <div class="chip" onclick="setTranscript('abre gastos fixos')">Fixos</div>
+        <div class="chip" onclick="setTranscript('abre investimentos fixos')">Investimentos</div>
+        <div class="chip" onclick="setTranscript('resumo do ano 2026')">Resumo do ano</div>
+        <div class="chip" onclick="setTranscript('pdf do mês março de 2026')">PDF do mês</div>
+        <div class="chip" onclick="setTranscript('muda o tema para roxo')">Tema</div>
       </div>
 
       <div class="actions">
@@ -389,8 +397,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
@@ -408,6 +414,7 @@
 
     const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
     const THEME_KEYS = { preset:"theme_preset_v1", accent:"theme_accent_v1" };
+    const VOICE_PENDING_ACTION_KEY = "gastos_voice_pending_action_v1";
 
     const THEME_PRESETS = {
       default:{ dark:{bg:"#07101f",g1:"rgba(86,156,255,.22)",g2:"rgba(57,217,138,.16)",g3:"rgba(255,93,93,.12)"}, light:{bg:"#f4f6ff",g1:"rgba(86,156,255,.14)",g2:"rgba(57,217,138,.10)",g3:"rgba(255,93,93,.08)"} },
@@ -506,6 +513,12 @@
     function kCat(){ return "categorias_" + USER_ID; }
     function kFix(){ return "fixos_" + USER_ID; }
     function kInv(){ return "inv_fixos_" + USER_ID; }
+
+    function savePendingVoiceAction(obj){
+      try{
+        localStorage.setItem(VOICE_PENDING_ACTION_KEY, JSON.stringify(obj));
+      }catch(e){}
+    }
 
     function loadState(){
       let state = { meses:{} };
@@ -720,10 +733,6 @@
       location.href = "./index.html";
     }
 
-    function openRoute(route){
-      location.href = route;
-    }
-
     function parseCategory(text, categorias){
       const normalized = normalizeText(text);
       for(const c of categorias){
@@ -921,174 +930,6 @@
       }
     }
 
-    async function renderPdfAndSaveFromElement(wrap, filename){
-      const canvas = await html2canvas(wrap, { scale: 2, backgroundColor:"#ffffff" });
-      const imgData = canvas.toDataURL("image/png");
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF("p","mm","a4");
-
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const imgW = pageW;
-      const imgH = (canvas.height * imgW) / canvas.width;
-
-      let y = 0;
-      let remaining = imgH;
-      pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
-      remaining -= pageH;
-
-      while(remaining > 0){
-        pdf.addPage();
-        y = -(imgH - remaining);
-        pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
-        remaining -= pageH;
-      }
-
-      pdf.save(filename);
-    }
-
-    function monthsOfYear(all, year){
-      return Object.keys(all.state.meses || {}).filter(m => m.startsWith(String(year) + "-")).sort();
-    }
-
-    function aggregateYear(all, year){
-      const months = monthsOfYear(all, year);
-      const byCat = {};
-      const byMonth = [];
-
-      months.forEach(m=>{
-        const d = ensureMonthItems(all, m);
-        const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
-        const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
-        const salary = Number(d.salary || 0);
-        byMonth.push({ m, salary, spent, saved });
-        (d.items || []).forEach(it=>{
-          const c = it.category || "Outros";
-          byCat[c] = (byCat[c] || 0) + Number(it.amount || 0);
-        });
-      });
-
-      const catsSorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-      const topCat = catsSorted[0] ? { cat: catsSorted[0][0], value: catsSorted[0][1] } : { cat:"—", value:0 };
-      return { months, byCat, byMonth, topCat };
-    }
-
-    async function generateYearSummaryPDF(all, year){
-      const agg = aggregateYear(all, year);
-
-      const wrap = document.createElement("div");
-      wrap.style.position = "fixed";
-      wrap.style.left = "-9999px";
-      wrap.style.top = "0";
-      wrap.style.width = "900px";
-      wrap.style.padding = "16px";
-      wrap.style.background = "#fff";
-      wrap.style.color = "#111";
-      wrap.style.fontFamily = "system-ui, sans-serif";
-
-      wrap.innerHTML = `
-        <div style="font-size:22px;font-weight:900">Resumo do Ano • Controle de Gastos PRO</div>
-        <div style="font-size:13px;color:#444">Ano: <b>${escapeHtml(year)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
-        <div style="margin-top:10px;font-size:14px;font-weight:900">Mais gastou no ano: ${escapeHtml(agg.topCat.cat)} • ${money(agg.topCat.value)}</div>
-        <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
-        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Tabela do ano</div>
-          <table style="width:100%;border-collapse:collapse;font-size:12px">
-            <thead>
-              <tr>
-                <th style="text-align:left;border-bottom:1px solid #ddd;padding:8px">Mês</th>
-                <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Salário</th>
-                <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Gastos</th>
-                <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Guardado</th>
-                <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Sobra</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${agg.byMonth.map(x=>{
-                const sobra = Number(x.salary||0) - Number(x.spent||0);
-                const label = new Date(x.m+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"short",year:"numeric"});
-                return `<tr>
-                  <td style="padding:7px;border-bottom:1px solid #eee">${escapeHtml(label)}</td>
-                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.salary)}</td>
-                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.spent)}</td>
-                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.saved)}</td>
-                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(sobra)}</td>
-                </tr>`;
-              }).join("") || `<tr><td colspan="5" style="padding:10px">Sem dados no ano.</td></tr>`}
-            </tbody>
-          </table>
-        </div>
-      `;
-
-      document.body.appendChild(wrap);
-      await new Promise(r=>setTimeout(r,200));
-      await renderPdfAndSaveFromElement(wrap, `resumo_ano_${year}.pdf`);
-      wrap.remove();
-    }
-
-    async function generateMonthPDF(all, monthKey){
-      const d = ensureMonthItems(all, monthKey);
-      const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
-      const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
-      const salary = Number(d.salary || 0);
-      const left = salary - spent;
-
-      const wrap = document.createElement("div");
-      wrap.style.position = "fixed";
-      wrap.style.left = "-9999px";
-      wrap.style.top = "0";
-      wrap.style.width = "900px";
-      wrap.style.padding = "16px";
-      wrap.style.background = "#fff";
-      wrap.style.color = "#111";
-      wrap.style.fontFamily = "system-ui, sans-serif";
-
-      const monthLabel = new Date(monthKey + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
-
-      wrap.innerHTML = `
-        <div style="font-size:22px;font-weight:900">PDF do Mês • Controle de Gastos PRO</div>
-        <div style="font-size:13px;color:#444">Mês: <b>${escapeHtml(monthLabel)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
-        <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-            <div style="font-weight:900;margin-bottom:8px">Resumo</div>
-            <div>Salário: <b>${money(salary)}</b></div>
-            <div>Gastos: <b>${money(spent)}</b></div>
-            <div>Guardado: <b>${money(saved)}</b></div>
-            <div>Sobra: <b>${money(left)}</b></div>
-          </div>
-          <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-            <div style="font-weight:900;margin-bottom:8px">Totais</div>
-            <div>Itens anotados: <b>${(d.items || []).length}</b></div>
-            <div>Entradas guardadas: <b>${(d.saved || []).length}</b></div>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Itens do mês</div>
-          ${(d.items || []).length ? (d.items || []).map(it=>`
-            <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee">
-              <div>
-                <div style="font-weight:800">${escapeHtml(it.desc || "")}</div>
-                <div style="font-size:12px;color:#444">
-                  ${escapeHtml(it.category || "Outros")} • ${it.paid ? "Pago" : "Pendente"}
-                  ${it.isFixo ? " • Fixo" : ""}
-                  ${it.isInvestFixo ? " • Juntar" : ""}
-                  ${it.diaPagar ? (" • Vence dia " + escapeHtml(it.diaPagar)) : ""}
-                </div>
-              </div>
-              <div style="font-weight:900">${money(it.amount || 0)}</div>
-            </div>
-          `).join("") : `<div style="padding:8px 0">Sem itens no mês.</div>`}
-        </div>
-      `;
-
-      document.body.appendChild(wrap);
-      await new Promise(r=>setTimeout(r,200));
-      await renderPdfAndSaveFromElement(wrap, `pdf_mes_${monthKey}.pdf`);
-      wrap.remove();
-    }
-
     function requestNotificationPermission(){
       if(!("Notification" in window)){
         setResult(`<span class="err">Seu navegador não suporta notificações.</span>`);
@@ -1102,40 +943,53 @@
       });
     }
 
+    function openIndexByVoiceAction(action, extra = {}){
+      savePendingVoiceAction({ action, ...extra });
+      const params = new URLSearchParams();
+      params.set("voice_action", action);
+      if(extra.month) params.set("month", extra.month);
+      if(extra.year) params.set("year", extra.year);
+      location.href = "./index.html?" + params.toString();
+    }
+
     function tryOpenScreenCommand(text){
       const t = normalizeText(text);
 
-      if(t.includes("abrir ia") || t.includes("abrir inteligência") || t.includes("abrir assistente")){
-        openRoute("./ia.html");
+      if(t.includes("abrir ia") || t.includes("abre ia") || t.includes("abrir inteligência") || t.includes("abrir assistente")){
+        location.href = "./ia.html";
         return { ok:true, html:`Abrindo a <b>IA</b>.` };
       }
-      if(t.includes("voltar inicio") || t.includes("voltar início") || t.includes("abrir inicio") || t.includes("abrir tela principal") || t.includes("abrir home")){
-        openRoute("./index.html");
+      if(t.includes("voltar inicio") || t.includes("voltar início") || t.includes("abrir inicio") || t.includes("abrir tela principal") || t.includes("abrir home") || t.includes("ir para inicio") || t.includes("ir para início")){
+        openIndexByVoiceAction("open_home");
         return { ok:true, html:`Voltando para a <b>tela principal</b>.` };
       }
-      if(t.includes("abrir historico") || t.includes("abrir histórico")){
-        openRoute("./index.html");
-        return { ok:true, html:`Abrindo a tela principal para você entrar no <b>Histórico</b>.` };
+      if(t.includes("abrir historico") || t.includes("abrir histórico") || t.includes("abre historico") || t.includes("abre histórico")){
+        openIndexByVoiceAction("open_history");
+        return { ok:true, html:`Abrindo <b>Histórico</b>.` };
       }
-      if(t.includes("abrir simuladores") || t.includes("abrir simulador")){
-        openRoute("./index.html");
-        return { ok:true, html:`Abrindo a tela principal para acessar <b>Simuladores</b>.` };
+      if(t.includes("abrir simuladores") || t.includes("abrir simulador") || t.includes("abre simuladores") || t.includes("abre simulador")){
+        openIndexByVoiceAction("open_simulators");
+        return { ok:true, html:`Abrindo <b>Simuladores</b>.` };
       }
-      if(t.includes("abrir categorias") || t.includes("abrir minhas categorias")){
-        openRoute("./index.html");
-        return { ok:true, html:`Abrindo a tela principal para acessar <b>Minhas Categorias</b>.` };
+      if(t.includes("abrir categorias") || t.includes("abrir minhas categorias") || t.includes("abre categorias")){
+        openIndexByVoiceAction("open_categories");
+        return { ok:true, html:`Abrindo <b>Minhas Categorias</b>.` };
       }
-      if(t.includes("abrir gastos fixos") || t.includes("abrir fixos")){
-        openRoute("./index.html");
-        return { ok:true, html:`Abrindo a tela principal para acessar <b>Gastos Fixos</b>.` };
+      if(t.includes("abrir gastos fixos") || t.includes("abrir fixos") || t.includes("abre gastos fixos") || t.includes("abre fixos")){
+        openIndexByVoiceAction("open_fixed_expenses");
+        return { ok:true, html:`Abrindo <b>Gastos Fixos</b>.` };
       }
-      if(t.includes("abrir investimentos fixos") || t.includes("abrir investimento fixo")){
-        openRoute("./index.html");
-        return { ok:true, html:`Abrindo a tela principal para acessar <b>Investimentos Fixos</b>.` };
+      if(t.includes("abrir investimentos fixos") || t.includes("abrir investimento fixo") || t.includes("abre investimentos fixos") || t.includes("abre investimento fixo")){
+        openIndexByVoiceAction("open_fixed_investments");
+        return { ok:true, html:`Abrindo <b>Investimentos Fixos</b>.` };
       }
-      if(t.includes("abrir configuracoes") || t.includes("abrir configurações")){
-        openRoute("./index.html");
-        return { ok:true, html:`Abrindo a tela principal para acessar <b>Configurações</b>.` };
+      if(t.includes("abrir configuracoes") || t.includes("abrir configurações") || t.includes("abre configuracoes") || t.includes("abre configurações")){
+        openIndexByVoiceAction("open_config");
+        return { ok:true, html:`Abrindo <b>Configurações</b>.` };
+      }
+      if(t.includes("abrir pdf") || t.includes("abrir imprimir pdf") || t.includes("abre pdf") || t.includes("imprimir em pdf")){
+        openIndexByVoiceAction("open_pdf");
+        return { ok:true, html:`Abrindo <b>Imprimir em PDF</b>.` };
       }
 
       return null;
@@ -1149,6 +1003,20 @@
 
       if(t.includes("mostrar resumo do mes") || t.includes("resumo do mes") || t.includes("resumo do mês")){
         return { ok:true, html: monthSummaryHtml(all, currentMonthKey()) };
+      }
+
+      if(t.includes("resumo do ano")){
+        const yearMatch = t.match(/\b(20\d{2})\b/);
+        const year = yearMatch ? yearMatch[1] : String(new Date().getFullYear());
+        openIndexByVoiceAction("generate_year_summary_pdf", { year });
+        return { ok:true, html:`Gerando <b>Resumo do ano ${escapeHtml(year)}</b> no index.` };
+      }
+
+      if(t.includes("pdf do mes") || t.includes("pdf do mês") || t.includes("gera pdf") || t.includes("gerar pdf") || t.includes("imprimir pdf do mes") || t.includes("imprimir pdf do mês")){
+        const parsed = parseMonthYearFromText(t);
+        const monthKey = `${parsed.year}-${parsed.month}`;
+        openIndexByVoiceAction("generate_month_pdf", { month: monthKey, year: parsed.year });
+        return { ok:true, html:`Gerando <b>PDF do mês ${escapeHtml(monthKey)}</b> no index.` };
       }
 
       if(t.includes("abrir notificacoes") || t.includes("ativar notificacoes") || t.includes("ativar notificações") || t === "notificacoes" || t === "notificações"){
@@ -1390,14 +1258,6 @@
         return { ok:true, html:`Gasto <b>${escapeHtml(removed.desc)}</b> removido do mês atual.` };
       }
 
-      if(t.includes("pdf do mes") || t.includes("gera pdf") || t.includes("gerar pdf") || t.includes("imprimir pdf do mes")){
-        return { ok:true, asyncAction:"generate_month_pdf" };
-      }
-
-      if(t.includes("resumo do ano") || t.includes("pdf do ano") || t.includes("gerar resumo do ano")){
-        return { ok:true, asyncAction:"generate_year_summary_pdf" };
-      }
-
       return null;
     }
 
@@ -1444,7 +1304,7 @@ Ações permitidas:
 - unknown
 
 Para open_screen, use:
-{"action":"open_screen","screen":"home|ia|history|simulators|categories|fixed_expenses|fixed_investments|settings"}
+{"action":"open_screen","screen":"home|ia|history|simulators|categories|fixed_expenses|fixed_investments|settings|pdf"}
 
 Regras:
 1) Sempre devolva um único objeto JSON.
@@ -1521,10 +1381,45 @@ ${userText}
 
       if(action === "open_screen"){
         const screen = String(parsed.screen || "").toLowerCase();
-        if(screen === "ia"){ openRoute("./ia.html"); return { ok:true, html:`Abrindo a <b>IA</b>.` }; }
-        if(screen === "home"){ openRoute("./index.html"); return { ok:true, html:`Voltando para a <b>tela principal</b>.` }; }
-        openRoute("./index.html");
-        return { ok:true, html:`Abrindo a tela principal para acessar <b>${escapeHtml(screen)}</b>.` };
+
+        if(screen === "ia"){
+          location.href = "./ia.html";
+          return { ok:true, html:`Abrindo a <b>IA</b>.` };
+        }
+        if(screen === "home"){
+          openIndexByVoiceAction("open_home");
+          return { ok:true, html:`Voltando para a <b>tela principal</b>.` };
+        }
+        if(screen === "history"){
+          openIndexByVoiceAction("open_history");
+          return { ok:true, html:`Abrindo <b>Histórico</b>.` };
+        }
+        if(screen === "simulators"){
+          openIndexByVoiceAction("open_simulators");
+          return { ok:true, html:`Abrindo <b>Simuladores</b>.` };
+        }
+        if(screen === "categories"){
+          openIndexByVoiceAction("open_categories");
+          return { ok:true, html:`Abrindo <b>Minhas Categorias</b>.` };
+        }
+        if(screen === "fixed_expenses"){
+          openIndexByVoiceAction("open_fixed_expenses");
+          return { ok:true, html:`Abrindo <b>Gastos Fixos</b>.` };
+        }
+        if(screen === "fixed_investments"){
+          openIndexByVoiceAction("open_fixed_investments");
+          return { ok:true, html:`Abrindo <b>Investimentos Fixos</b>.` };
+        }
+        if(screen === "settings"){
+          openIndexByVoiceAction("open_config");
+          return { ok:true, html:`Abrindo <b>Configurações</b>.` };
+        }
+        if(screen === "pdf"){
+          openIndexByVoiceAction("open_pdf");
+          return { ok:true, html:`Abrindo <b>Imprimir em PDF</b>.` };
+        }
+
+        return { ok:false, html:`Tela não suportada: <b>${escapeHtml(screen)}</b>` };
       }
 
       if(action === "show_summary"){
@@ -1711,15 +1606,14 @@ ${userText}
 
       if(action === "generate_month_pdf"){
         const monthKey = String(parsed.month || currentMonthKey());
-        await generateMonthPDF(all, monthKey);
-        const label = new Date(monthKey + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
-        return { ok:true, html:`PDF do mês <b>${escapeHtml(label)}</b> gerado com sucesso.` };
+        openIndexByVoiceAction("generate_month_pdf", { month: monthKey, year: monthKey.slice(0,4) });
+        return { ok:true, html:`Gerando <b>PDF do mês ${escapeHtml(monthKey)}</b> no index.` };
       }
 
       if(action === "generate_year_summary_pdf"){
         const year = String(parsed.year || new Date().getFullYear());
-        await generateYearSummaryPDF(all, year);
-        return { ok:true, html:`PDF <b>resumo do ano ${escapeHtml(year)}</b> gerado com sucesso.` };
+        openIndexByVoiceAction("generate_year_summary_pdf", { year });
+        return { ok:true, html:`Gerando <b>Resumo do ano ${escapeHtml(year)}</b> no index.` };
       }
 
       return { ok:false, html:`Ação não suportada: <b>${escapeHtml(action)}</b>` };
@@ -1744,25 +1638,6 @@ ${userText}
 
         const local = tryLocalRule(cmd, all);
         if(local){
-          if(local.asyncAction === "generate_month_pdf"){
-            const parsed = parseMonthYearFromText(cmd);
-            const monthKey = `${parsed.year}-${parsed.month}`;
-            await generateMonthPDF(all, monthKey);
-            const label = new Date(monthKey + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
-            setResult(`<span class="ok">Comando executado.</span><br><br>PDF do mês <b>${escapeHtml(label)}</b> gerado com sucesso.`);
-            dbg("Local OK PDF mês: " + cmd);
-            return;
-          }
-
-          if(local.asyncAction === "generate_year_summary_pdf"){
-            const yearMatch = normalizeText(cmd).match(/\b(20\d{2})\b/);
-            const year = yearMatch ? yearMatch[1] : String(new Date().getFullYear());
-            await generateYearSummaryPDF(all, year);
-            setResult(`<span class="ok">Comando executado.</span><br><br>PDF <b>resumo do ano ${escapeHtml(year)}</b> gerado com sucesso.`);
-            dbg("Local OK PDF ano: " + cmd);
-            return;
-          }
-
           if(local.ok){
             setResult(`<span class="ok">Comando executado.</span><br><br>${local.html}`);
             dbg("Local OK: " + cmd);
