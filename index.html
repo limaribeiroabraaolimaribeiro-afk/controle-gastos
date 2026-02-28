@@ -182,6 +182,21 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
               linear-gradient(135deg, rgba(57,217,138,.98), rgba(57,217,138,.55));
   color:#062114; font-size:30px; font-weight:900;
 }
+.fab.ai{
+  background:
+    radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+    linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 15%), color-mix(in srgb, var(--accent), #000 20%));
+  color:#04152c;
+  font-weight:1000;
+  letter-spacing:.8px;
+  font-size:12px;
+  line-height:1.05;
+  text-align:center;
+}
+.light .fab.ai{color:#04152c}
+.fab.ai span{display:block;font-weight:950;font-size:13px}
+.fab.ai em{font-style:normal;font-weight:900;font-size:11px;opacity:.9}
+
 .fab.voice{
   background:
     radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
@@ -400,6 +415,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
 
       <div class="grid1">
+        <button class="btn" onclick="openIA()">🤖 IA</button>
         <button class="btn" id="menuVoiceBtn" onclick="openVoicePage()">🎙️ Comando de voz</button>
         <button class="btn" onclick="openScreen('screen-config')">⚙️ Configurações</button>
         <button class="btn" onclick="openScreen('screen-simulators')">🧠 Simuladores</button>
@@ -797,6 +813,10 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   </div>
 
   <div class="fabWrap">
+    <div class="fab ai" onclick="openIA()" title="Abrir IA">
+      <span>IA</span>
+      <em>PRO</em>
+    </div>
     <div class="fab voice hidden" id="fabVoice" onclick="openVoicePage()" title="Comando de voz">🎙️</div>
     <div class="fab add" onclick="openAddExpense()" title="Adicionar gasto">+</div>
   </div>
@@ -912,6 +932,15 @@ function applyVoiceVisibility(){
   }
 }
 function toggleVoiceEnabled(){ setVoiceEnabled(!isVoiceEnabled()); }
+
+function openIA(){
+  if(!USER_ID){
+    alert("Faça login primeiro");
+    return;
+  }
+  location.href = "./ia.html";
+}
+
 function openVoicePage(){
   if(!USER_ID){ alert("Faça login primeiro"); return; }
   if(!isVoiceEnabled()){ alert("O sistema de voz está bloqueado. Ative em Configurações."); return; }
