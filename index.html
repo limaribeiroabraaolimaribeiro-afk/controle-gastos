@@ -34,7 +34,6 @@
   --pad: 14px;
   --glass: blur(14px);
 }
-
 .light{
   --panel: rgba(0,0,0,.04);
   --panel2: rgba(0,0,0,.06);
@@ -43,7 +42,6 @@
   --muted: rgba(13,18,34,.68);
   --shadow: 0 18px 60px rgba(0,0,0,.12);
 }
-
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -53,10 +51,9 @@ body{
     radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
     var(--bg);
   color:var(--text);
-  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
   min-height:100vh;
 }
-
 a{color:inherit}
 .wrap{max-width:980px;margin:auto;padding:16px;padding-bottom:120px}
 h1{margin:0;font-size:20px;letter-spacing:.2px}
@@ -71,7 +68,7 @@ h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
   box-shadow: var(--shadow);
   backdrop-filter: var(--glass);
 }
-.row{display:flex;gap:10px;align-items:center}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .row > *{flex:1}
 .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .grid1{display:grid;grid-template-columns:1fr;gap:12px}
@@ -97,7 +94,7 @@ h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
 .btn.warn{
   background: var(--warn);
   border-color: color-mix(in srgb, var(--warn), transparent 55%);
-  color:#281a00
+  color:#281a00;
 }
 .btn.danger{
   background: var(--danger);
@@ -106,7 +103,10 @@ h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
 }
 .btn.ghost{background: transparent}
 .btn.mini{padding:9px 10px;border-radius:12px;font-size:13px}
-.btn.icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0;border-radius:16px}
+.btn.icon{
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  padding:0;border-radius:16px;flex:0 0 auto;
+}
 .btn:active{transform: translateY(1px)}
 input,select,textarea{
   width:100%;
@@ -159,7 +159,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
 .list{width:100%;border-collapse:separate;border-spacing:0 10px}
 .list tr{background: rgba(255,255,255,.06);border:1px solid var(--stroke)}
-.list td{padding:12px}
+.list td{padding:12px;vertical-align:top}
 .list tr td:first-child{border-top-left-radius:16px;border-bottom-left-radius:16px}
 .list tr td:last-child{border-top-right-radius:16px;border-bottom-right-radius:16px}
 
@@ -191,17 +191,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   text-align:center;
 }
 .light .fab.ai{ color:#04152c; }
-.fab.ai span{
-  display:block;
-  font-weight:950;
-  font-size:13px;
-}
-.fab.ai em{
-  font-style:normal;
-  font-weight:900;
-  font-size:11px;
-  opacity:.9;
-}
+.fab.ai span{display:block;font-weight:950;font-size:13px}
+.fab.ai em{font-style:normal;font-weight:900;font-size:11px;opacity:.9}
 .fab.voice{
   background:
     radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
@@ -239,7 +230,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .modalBody{padding:14px}
 .modalFooter{
   padding:14px;border-top:1px solid var(--stroke);
-  display:flex;gap:10px;justify-content:flex-end;
+  display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;
 }
 .closeX{
   width:42px;height:42px;border-radius:14px;
@@ -251,7 +242,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 }
 .screen{display:none}
 .screen.active{display:block}
-.backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .backBtn{display:flex;align-items:center;gap:8px;border-radius:16px;padding:10px 12px;font-weight:850}
 .hr{height:1px;background:var(--stroke);margin:12px 0}
 .note{
@@ -290,6 +281,12 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   background: rgba(255,255,255,.06);
   font-weight:900;
   user-select:none;
+}
+
+@media (max-width:700px){
+  .grid2{grid-template-columns:1fr}
+  .topbar{flex-direction:column;align-items:flex-start}
+  .topbar .right{width:100%}
 }
 </style>
 </head>
@@ -413,8 +410,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
 
       <div class="grid1">
-        <button class="btn" onclick="openIA()">🤖 IA</button>
-        <button class="btn" id="menuVoiceBtn" onclick="openVoicePage()">🎙️ Comando de voz</button>
         <button class="btn" onclick="openScreen('screen-config')">⚙️ Configurações</button>
         <button class="btn" onclick="openScreen('screen-simulators')">🧠 Simuladores</button>
         <button class="btn" onclick="openScreen('screen-categories')">📂 Minhas Categorias</button>
@@ -477,7 +472,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <div class="note" style="margin-bottom:10px">
           <div style="font-weight:950">🔔 Notificações</div>
           <div class="small" style="margin-top:6px">
-            Ative para receber aviso de prazo dos <b>gastos fixos</b> e dos <b>investimentos fixos</b>.
+            Ative aqui. Quando você cadastrar um prazo em gasto fixo ou investimento fixo, o app já tenta usar essa permissão automaticamente.
           </div>
           <div class="hr"></div>
           <button class="btn good" onclick="requestNotificationPermission()">Ativar notificações</button>
@@ -498,7 +493,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <div class="small">
           Você pode gerar:
           <br>• <b>Resumo do ano inteiro</b>
-          <br>• <b>Relatório completo</b>
+          <br>• <b>Relatório completo do mês</b>
         </div>
 
         <div class="hr"></div>
@@ -509,7 +504,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
             <select id="pdfYear"></select>
           </div>
           <div>
-            <label>Mês para “Anotações”</label>
+            <label>Mês do relatório</label>
             <select id="pdfMonth"></select>
           </div>
         </div>
@@ -518,7 +513,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
         <div class="row">
           <button class="btn" onclick="gerarPDFResumoAno()">📘 Resumo do ano</button>
-          <button class="btn primary" onclick="gerarPDFCompleto()">📄 Completo (ano + mês)</button>
+          <button class="btn primary" onclick="gerarPDFCompleto()">📄 PDF do mês</button>
         </div>
 
         <div class="small" id="pdfStatus" style="margin-top:10px"></div>
@@ -631,13 +626,12 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
             <input id="diaFixo" type="number" min="1" max="31" placeholder="Ex: 11" value="10">
           </div>
           <div class="note">
-            <div style="font-weight:900">Notificação</div>
-            <div class="small">O app pode avisar quando faltarem 3, 2, 1 dias e no dia do vencimento.</div>
+            <div style="font-weight:900">Notificação automática</div>
+            <div class="small">Se você já liberou notificações em Configurações, o app usa esse prazo automaticamente.</div>
           </div>
         </div>
 
         <div class="row" style="margin-top:10px">
-          <button class="btn" onclick="requestNotificationPermission()">🔔 Ativar notificações</button>
           <button class="btn primary" onclick="addFixo()">Adicionar</button>
         </div>
 
@@ -685,8 +679,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
             <input id="invDiaPagar" type="number" min="1" max="31" placeholder="Ex: 11" value="10">
           </div>
           <div class="note">
-            <div style="font-weight:900">Lembrete</div>
-            <div class="small">O app avisa quando faltar 3, 2, 1 dias e no dia do prazo.</div>
+            <div style="font-weight:900">Lembrete automático</div>
+            <div class="small">Se notificações já estiverem liberadas, o app usa o prazo automaticamente.</div>
           </div>
         </div>
 
@@ -696,7 +690,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         </div>
 
         <div class="row" style="margin-top:10px">
-          <button class="btn" onclick="requestNotificationPermission()">🔔 Ativar notificações</button>
           <button class="btn primary" onclick="addInvestFixo()">Adicionar</button>
         </div>
 
@@ -704,8 +697,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <div id="listaInvestFixos" class="small"></div>
       </div>
     </div>
-
-    <div class="screen" id="screen-simulators">
+        <div class="screen" id="screen-simulators">
       <div class="backRow">
         <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
         <div style="font-weight:900">Simuladores</div>
@@ -750,6 +742,20 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
             <div>
               <label>Meses</label>
               <input id="mesesInvestimento" type="number" placeholder="Ex: 12">
+            </div>
+          </div>
+
+          <div class="grid2" style="margin-top:10px">
+            <div>
+              <label>Aporte mensal</label>
+              <input id="aporteMensalInvest" type="number" placeholder="Ex: 300">
+            </div>
+            <div>
+              <label>Vai colocar esse valor todo mês?</label>
+              <select id="aporteRecorrenteInvest">
+                <option value="nao">Não</option>
+                <option value="sim">Sim</option>
+              </select>
             </div>
           </div>
 
@@ -808,6 +814,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <div id="historyList"></div>
       </div>
     </div>
+
   </div>
 
   <div class="fabWrap">
@@ -815,7 +822,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <span>IA</span>
       <em>PRO</em>
     </div>
-    <div class="fab voice hidden" id="fabVoice" onclick="openVoicePage()" title="Comando de voz">🎙️</div>
+    <div class="fab voice" id="fabVoice" onclick="openVoicePage()" title="Comando de voz">🎙️</div>
     <div class="fab add" onclick="openAddExpense()" title="Adicionar gasto">+</div>
   </div>
 </div>
@@ -876,29 +883,12 @@ const FIREBASE_CONFIG = {
   authDomain:"controle-gastos-pro.firebaseapp.com",
   projectId:"controle-gastos-pro"
 };
-const API = "https://api-rf1w.onrender.com";
 
 let auth = null;
 let USER = null;
 let USER_ID = null;
 
 const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
-let regras = [
-  {palavra:"aluguel", categoria:"Casa"},
-  {palavra:"luz", categoria:"Casa"},
-  {palavra:"agua", categoria:"Casa"},
-  {palavra:"água", categoria:"Casa"},
-  {palavra:"mercado", categoria:"Alimentação"},
-  {palavra:"padaria", categoria:"Alimentação"},
-  {palavra:"gasolina", categoria:"Transporte"},
-  {palavra:"uber", categoria:"Transporte"},
-  {palavra:"ração", categoria:"Pets"},
-  {palavra:"pet", categoria:"Pets"},
-  {palavra:"cdb", categoria:"Investimentos"},
-  {palavra:"tesouro", categoria:"Investimentos"},
-  {palavra:"invest", categoria:"Investimentos"}
-];
-
 let categorias = [...DEFAULT_CATEGORIAS];
 let fixos = [];
 let investFixos = [];
@@ -910,40 +900,10 @@ let graficoEvolucao = null;
 let lastNonHistoryScreen = "screen-home";
 
 const VOICE_KEYS = { enabled: "voice_enabled_v1" };
-function kVoiceEnabled(){ return `${VOICE_KEYS.enabled}_${USER_ID || "guest"}`; }
-function isVoiceEnabled(){ return localStorage.getItem(kVoiceEnabled()) === "1"; }
-function setVoiceEnabled(on){ localStorage.setItem(kVoiceEnabled(), on ? "1" : "0"); applyVoiceVisibility(); }
-function applyVoiceVisibility(){
-  const fab = document.getElementById("fabVoice");
-  const menuBtn = document.getElementById("menuVoiceBtn");
-  const status = document.getElementById("voiceEnableStatus");
-  const toggleBtn = document.getElementById("btnToggleVoiceEnabled");
-  const enabled = isVoiceEnabled();
-  if(fab) fab.classList.toggle("hidden", !enabled);
-  if(menuBtn) menuBtn.style.display = enabled ? "" : "none";
-  if(status) status.textContent = enabled ? "Ativado" : "Bloqueado";
-  if(toggleBtn){
-    toggleBtn.textContent = enabled ? "Bloquear" : "Ativar";
-    toggleBtn.className = "btn " + (enabled ? "danger" : "good");
-  }
-}
-function toggleVoiceEnabled(){ setVoiceEnabled(!isVoiceEnabled()); }
-
-function openIA(){
-  if(!USER_ID){
-    alert("Faça login primeiro");
-    return;
-  }
-  location.href = "./ia.html";
-}
-
-function openVoicePage(){
-  if(!USER_ID){ alert("Faça login primeiro"); return; }
-  if(!isVoiceEnabled()){ alert("O sistema de voz está bloqueado. Ative em Configurações."); return; }
-  location.href = "./voz.html";
-}
-
+const NOTIF_KEYS = { permAsked: "notif_perm_asked_v1", sentPrefix: "notif_sent_v1" };
 const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
+const VOICE_PENDING_ACTION_KEY = "gastos_voice_pending_action_v1";
+
 const THEME_PRESETS = {
   default:{ dark:{bg:"#07101f",g1:"rgba(86,156,255,.22)",g2:"rgba(57,217,138,.16)",g3:"rgba(255,93,93,.12)"}, light:{bg:"#f4f6ff",g1:"rgba(86,156,255,.14)",g2:"rgba(57,217,138,.10)",g3:"rgba(255,93,93,.08)"} },
   purple:{ dark:{bg:"#0d0a1f",g1:"rgba(170,110,255,.25)",g2:"rgba(86,156,255,.12)",g3:"rgba(57,217,138,.10)"}, light:{bg:"#fbf8ff",g1:"rgba(170,110,255,.16)",g2:"rgba(86,156,255,.10)",g3:"rgba(57,217,138,.08)"} },
@@ -960,114 +920,17 @@ const HOME_SECTIONS = [
   { id:"lista", title:"Lista do mês" }
 ];
 
-/* PONTE COM O voz.html */
-const VOICE_PENDING_ACTION_KEY = "gastos_voice_pending_action_v1";
-function getVoicePendingAction(){
-  try{
-    const params = new URLSearchParams(location.search);
-    const voiceAction = params.get("voice_action");
-    if(voiceAction){
-      return {
-        action: voiceAction,
-        month: params.get("month") || "",
-        year: params.get("year") || ""
-      };
-    }
-  }catch(e){}
-
-  try{
-    const raw = localStorage.getItem(VOICE_PENDING_ACTION_KEY);
-    if(raw) return JSON.parse(raw);
-  }catch(e){}
-
-  return null;
-}
-function clearVoicePendingAction(){
-  try{ localStorage.removeItem(VOICE_PENDING_ACTION_KEY); }catch(e){}
-}
-async function consumeVoicePendingAction(){
-  const cmd = getVoicePendingAction();
-  if(!cmd || !cmd.action) return;
-
-  clearVoicePendingAction();
-
-  const action = String(cmd.action || "").toLowerCase();
-  const month = String(cmd.month || "");
-  const year = String(cmd.year || "");
-
-  try{
-    if(action === "open_home"){
-      goHome();
-      return;
-    }
-    if(action === "open_history"){
-      openHistory();
-      return;
-    }
-    if(action === "open_config"){
-      openScreen("screen-config");
-      return;
-    }
-    if(action === "open_categories"){
-      openScreen("screen-categories");
-      return;
-    }
-    if(action === "open_fixed_expenses"){
-      openScreen("screen-fixos");
-      return;
-    }
-    if(action === "open_fixed_investments"){
-      openScreen("screen-investfixos");
-      return;
-    }
-    if(action === "open_simulators"){
-      openScreen("screen-simulators");
-      return;
-    }
-    if(action === "open_pdf"){
-      openPdfScreen();
-      return;
-    }
-    if(action === "open_ia"){
-      openIA();
-      return;
-    }
-
-    if(action === "generate_year_summary_pdf"){
-      openPdfScreen();
-      buildPdfSelectors();
-      if(year){
-        const pdfYear = document.getElementById("pdfYear");
-        if(pdfYear) pdfYear.value = year;
-      }
-      await gerarPDFResumoAno();
-      return;
-    }
-
-    if(action === "generate_month_pdf"){
-      openPdfScreen();
-      buildPdfSelectors();
-
-      if(month){
-        const y = month.slice(0,4);
-        const pdfYear = document.getElementById("pdfYear");
-        const pdfMonth = document.getElementById("pdfMonth");
-        if(pdfYear && y) pdfYear.value = y;
-        if(pdfMonth) pdfMonth.value = month;
-      }
-
-      await gerarPDFCompleto();
-      return;
-    }
-  }catch(e){
-    dbg("Erro ao consumir comando de voz: " + (e.message || e));
-  }
-}
-  function money(n){ return Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}); }
+function money(n){ return Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}); }
 function uid(){ return Math.random().toString(16).slice(2) + Date.now().toString(16); }
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 function escapeHtml(s){
   return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+function normalizeText(s){
+  return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+}
+function titleCase(s){
+  return String(s||"").split(" ").filter(Boolean).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(" ");
 }
 
 function showLoading(){ document.getElementById("app").style.display="none"; document.getElementById("loading").style.display="flex"; }
@@ -1086,6 +949,15 @@ function openMenu(){ openScreen("screen-menu"); }
 function openHistory(){ buildHistoryUI(); showScreen("screen-history"); }
 function goBackFromHistory(){ showScreen(lastNonHistoryScreen || "screen-home"); }
 
+function openIA(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  location.href = "./ia.html";
+}
+function openVoicePage(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  location.href = "./voz.html";
+}
+
 function toggleTheme(){
   document.body.classList.toggle("light");
   localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
@@ -1093,8 +965,8 @@ function toggleTheme(){
 }
 function openModal(id){ const o=document.getElementById(id); if(o) o.style.display="flex"; }
 function closeModal(id){ const o=document.getElementById(id); if(o) o.style.display="none"; }
-
 function isLightMode(){ return document.body.classList.contains("light"); }
+
 function applyThemeSettings(){
   const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
   const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
@@ -1194,7 +1066,7 @@ function loadAll(){
     const raw = localStorage.getItem(kCat());
     categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
     if(!Array.isArray(categorias) || !categorias.length) categorias = [...DEFAULT_CATEGORIAS];
-    if(!categorias.some(c=>String(c).toLowerCase()==="investimentos")) categorias.splice(categorias.length-1,0,"Investimentos");
+    if(!categorias.some(c=>normalizeText(c)==="investimentos")) categorias.splice(categorias.length-1,0,"Investimentos");
   }catch(e){ categorias=[...DEFAULT_CATEGORIAS]; }
   try{
     const raw = localStorage.getItem(kFix());
@@ -1214,10 +1086,12 @@ function loadAll(){
     investFixos = investFixos.map(inv=>({
       ...inv,
       id: inv.id || uid(),
-      diaPagar: Number(inv.diaPagar || 0)
+      diaPagar: Number(inv.diaPagar || 0),
+      metaFinal: Number(inv.metaFinal || 0),
+      prazoMeses: Number(inv.prazoMeses || 0),
+      mensal: Number(inv.mensal || 0)
     }));
   }catch(e){ investFixos=[]; }
-
   if(!state || typeof state!=="object") state={meses:{}};
   if(!state.meses || typeof state.meses!=="object") state.meses={};
 }
@@ -1226,12 +1100,6 @@ function saveAll(){
   localStorage.setItem(kCat(), JSON.stringify(categorias));
   localStorage.setItem(kFix(), JSON.stringify(fixos));
   localStorage.setItem(kInv(), JSON.stringify(investFixos));
-}
-
-function detectarCategoria(desc){
-  const txt = (desc||"").toLowerCase();
-  for(const r of regras){ if(txt.includes(r.palavra)) return r.categoria; }
-  return "Outros";
 }
 
 function ensureMonthInvestStatus(d){
@@ -1248,20 +1116,11 @@ function ensureItemDefaults(it){
   if(typeof it.isFixo !== "boolean") it.isFixo = false;
   if(typeof it.isInvestFixo !== "boolean") it.isInvestFixo = false;
   it.diaPagar = Number(it.diaPagar || 0);
+  it.id = it.id || uid();
   return it;
 }
 function fixKey(desc, amount, category){
   return `${String(desc||"").toLowerCase()}|${Number(amount||0)}|${String(category||"").toLowerCase()}`;
-}
-function hasAutoSavedForInv(d, invId, month){
-  return ensureSavedArray(d).some(s => s && s.source==="investFixo" && s.invId===invId && s.month===month);
-}
-function addAutoSavedForInv(d, invId, month, value, desc){
-  if(hasAutoSavedForInv(d, invId, month)) return;
-  ensureSavedArray(d).unshift({ value:Number(value||0), desc:desc || "Investimento fixo", date:todayISO(), source:"investFixo", invId, month });
-}
-function removeAutoSavedForInv(d, invId, month){
-  d.saved = ensureSavedArray(d).filter(s => !(s && s.source==="investFixo" && s.invId===invId && s.month===month));
 }
 
 function getDataMes(m){
@@ -1281,13 +1140,13 @@ function getDataMes(m){
     const fk = fixKey(f.desc, f.amount, f.category);
     if(hidden.has(fk) || present.has(fk)) continue;
     d.items.unshift(ensureItemDefaults({
-      id: f.id,
-      desc: f.desc,
-      amount: Number(f.amount||0),
-      category: f.category || "Outros",
+      id:f.id,
+      desc:f.desc,
+      amount:Number(f.amount||0),
+      category:f.category || "Outros",
       isFixo:true,
       isInvestFixo:false,
-      diaPagar: Number(f.diaPagar || 0),
+      diaPagar:Number(f.diaPagar || 0),
       paid:false
     }));
     present.add(fk);
@@ -1300,15 +1159,15 @@ function getDataMes(m){
     if(hidden.has(fk) || present.has(fk)) continue;
     if(typeof d.investStatus[inv.id] !== "boolean") d.investStatus[inv.id] = false;
     d.items.unshift(ensureItemDefaults({
-      id: inv.id,
+      id:inv.id,
+      invId:inv.id,
       desc,
       amount,
       category:"Investimentos",
       isFixo:true,
       isInvestFixo:true,
-      invId: inv.id,
-      diaPagar: Number(inv.diaPagar || 0),
-      paid: !!d.investStatus[inv.id]
+      diaPagar:Number(inv.diaPagar || 0),
+      paid:!!d.investStatus[inv.id]
     }));
     present.add(fk);
   }
@@ -1367,7 +1226,7 @@ function renderCategorias(){
 
   if(list){
     list.innerHTML = categorias.map((c,idx)=>{
-      const lower = String(c).toLowerCase();
+      const lower = normalizeText(c);
       const isLocked = lower === "investimentos";
       return `
         <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
@@ -1382,20 +1241,31 @@ function renderCategorias(){
   if(selF) selF.innerHTML = opts;
   if(selM) selM.innerHTML = opts;
 }
-function removeCategoria(idx){
+
+function addCategoria(){
   if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const input = document.getElementById("novaCategoria");
+  const nome = titleCase((input.value||"").trim());
+  if(!nome) return alert("Digite o nome da categoria.");
+  if(categorias.some(c=>normalizeText(c)===normalizeText(nome))) return alert("Essa categoria já existe.");
+  categorias.push(nome);
+  input.value = "";
+  saveAll();
+  renderCategorias();
+}
+function removeCategoria(idx){
   if(idx<0 || idx>=categorias.length) return;
   const cat = categorias[idx];
-  if(String(cat).toLowerCase()==="investimentos") return alert("A categoria Investimentos não pode ser removida.");
+  if(normalizeText(cat)==="investimentos") return alert("A categoria Investimentos não pode ser removida.");
 
   if(!confirm(`Remover a categoria "${cat}"? Gastos dessa categoria vão para "Outros".`)) return;
   categorias.splice(idx,1);
 
-  fixos = fixos.map(f=>String(f.category||"")===cat ? { ...f, category:"Outros" } : f);
+  fixos = fixos.map(f=>normalizeText(f.category||"")===normalizeText(cat) ? { ...f, category:"Outros" } : f);
   Object.keys(state.meses||{}).forEach(m=>{
     const d = state.meses[m];
     if(Array.isArray(d.items)){
-      d.items = d.items.map(it=>String(it.category||"")===cat ? { ...it, category:"Outros" } : it);
+      d.items = d.items.map(it=>normalizeText(it.category||"")===normalizeText(cat) ? { ...it, category:"Outros" } : it);
     }
   });
 
@@ -1409,7 +1279,6 @@ function renderFixos(){
   const div = document.getElementById("listaFixos");
   if(!div) return;
   if(!fixos.length){ div.innerHTML = "<div class='small'>Nenhum gasto fixo cadastrado.</div>"; return; }
-
   div.innerHTML = fixos.map((f,idx)=>`
     <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
       <div>
@@ -1420,6 +1289,54 @@ function renderFixos(){
       <button class="btn icon mini" onclick="removeFixo(${idx})">✕</button>
     </div>
   `).join("");
+}
+function addFixo(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const desc = (document.getElementById("descFixo").value||"").trim();
+  const valor = Number(document.getElementById("valorFixo").value||0);
+  const categoria = document.getElementById("categoriaFixo").value || "Outros";
+  const diaPagar = Number(document.getElementById("diaFixo").value||0);
+
+  if(!desc) return alert("Digite a descrição.");
+  if(!valor || valor<=0) return alert("Digite um valor válido.");
+  if(diaPagar && (diaPagar < 1 || diaPagar > 31)) return alert("Digite um dia válido entre 1 e 31.");
+
+  fixos.push({
+    id:uid(),
+    desc,
+    amount:valor,
+    category:categoria,
+    diaPagar:diaPagar || 0,
+    isFixo:true
+  });
+
+  document.getElementById("descFixo").value="";
+  document.getElementById("valorFixo").value="";
+  document.getElementById("diaFixo").value="10";
+
+  saveAll();
+  renderFixos();
+  render();
+  if(diaPagar) autoEnableNotificationsIfNeeded();
+}
+function removeFixo(idx){
+  if(idx<0 || idx>=fixos.length) return;
+  const fixed = fixos[idx];
+
+  Object.keys(state.meses||{}).forEach(m=>{
+    const d = state.meses[m];
+    if(!d || !Array.isArray(d.items)) return;
+    d.items = d.items.filter(it=>{
+      if(!it.isFixo || it.isInvestFixo) return true;
+      if(fixed.id && it.id === fixed.id) return false;
+      return !(it.desc===fixed.desc && Number(it.amount||0)===Number(fixed.amount||0) && it.category===fixed.category);
+    });
+  });
+
+  fixos.splice(idx,1);
+  saveAll();
+  renderFixos();
+  render();
 }
 
 function calcMensalAuto(metaFinal, prazoMeses){
@@ -1446,7 +1363,6 @@ function renderInvestFixos(){
   const div = document.getElementById("listaInvestFixos");
   if(!div) return;
   if(!investFixos.length){ div.innerHTML="<div class='small'>Nenhum investimento fixo cadastrado.</div>"; return; }
-
   div.innerHTML = investFixos.map((inv,idx)=>`
     <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
       <div>
@@ -1488,15 +1404,17 @@ function addInvestFixo(){
   saveAll();
   renderInvestFixos();
   render();
-  checkDueNotifications();
+  autoEnableNotificationsIfNeeded();
 }
 function removeInvestFixo(idx){
   if(idx<0 || idx>=investFixos.length) return;
   const inv = investFixos[idx];
   Object.keys(state.meses||{}).forEach(m=>{
     const d = state.meses[m];
-    if(d && d.investStatus && inv && inv.id) delete d.investStatus[inv.id];
-    if(d && inv && inv.id) removeAutoSavedForInv(d, inv.id, m);
+    if(d && d.investStatus && inv.id) delete d.investStatus[inv.id];
+    if(d && Array.isArray(d.saved)){
+      d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===inv.id));
+    }
     if(d && Array.isArray(d.items)){
       d.items = d.items.filter(it=>!(it.isInvestFixo && it.invId===inv.id));
     }
@@ -1506,8 +1424,7 @@ function removeInvestFixo(idx){
   renderInvestFixos();
   render();
 }
-
-function addSaved(){
+  function addSaved(){
   if(!USER_ID){ alert("Faça login primeiro"); return; }
   const v = Number(document.getElementById("savedValue").value||0);
   const desc = (document.getElementById("savedDesc").value||"").trim();
@@ -1516,7 +1433,9 @@ function addSaved(){
   ensureSavedArray(d).unshift({ value:v, desc, date:todayISO(), source:"manual" });
   document.getElementById("savedValue").value="";
   document.getElementById("savedDesc").value="";
-  saveAll(); renderSaved(); renderKPIs();
+  saveAll();
+  renderSaved();
+  renderKPIs();
 }
 function removeSaved(idx){
   const d = getDataMes(mesAtual);
@@ -1531,73 +1450,7 @@ function saveSettings(){
   d.salary = Number(document.getElementById("salary").value||0);
   d.meta = Number(document.getElementById("meta").value||0);
   saveAll();
-
-  fetch(API+"/salvarMes",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ userId: USER_ID, mes: mesAtual, salary: d.salary, meta: d.meta })
-  }).catch(()=>{});
-
   render();
-}
-
-function togglePaid(idx){
-  const d = getDataMes(mesAtual);
-  const it = d.items[idx];
-  if(!it) return;
-  it.paid = !it.paid;
-
-  if(it.isInvestFixo && it.invId){
-    ensureMonthInvestStatus(d);
-    d.investStatus[it.invId] = !!it.paid;
-    if(it.paid) addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
-    else removeAutoSavedForInv(d, it.invId, mesAtual);
-  }
-
-  saveAll();
-  renderSaved();
-  renderList();
-  renderKPIs();
-}
-
-function hideFixoOnlyThisMonth(it){
-  const d = getDataMes(mesAtual);
-  const fk = fixKey(it.desc, it.amount, it.category);
-  if(!d.hiddenFixos.includes(fk)) d.hiddenFixos.push(fk);
-  d.items = d.items.filter(x=>{
-    if(it.id && x.id && x.id===it.id && x.isFixo===it.isFixo && x.isInvestFixo===it.isInvestFixo) return false;
-    return fixKey(x.desc,x.amount,x.category)!==fk;
-  });
-
-  if(it.isInvestFixo && it.invId){
-    removeAutoSavedForInv(d, it.invId, mesAtual);
-    ensureMonthInvestStatus(d);
-    d.investStatus[it.invId] = false;
-  }
-
-  saveAll();
-}
-function delItemMonthOnly(idx){
-  const d = getDataMes(mesAtual);
-  const it = d.items[idx];
-  if(!it) return;
-  d.items.splice(idx,1);
-  saveAll();
-
-  if(!it.isFixo){
-    fetch(API+"/delGasto",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc: it.desc, amount: it.amount })
-    }).catch(()=>{});
-  }
-}
-function delItemSmart(idx){
-  const d = getDataMes(mesAtual);
-  const it = d.items[idx];
-  if(!it) return;
-  if(it.isFixo){ hideFixoOnlyThisMonth(it); render(); return; }
-  delItemMonthOnly(idx); render();
 }
 
 function renderSaved(){
@@ -1630,24 +1483,80 @@ function openAddExpense(){
 function confirmAddExpense(){
   const desc = (document.getElementById("mDesc").value||"").trim();
   const amount = Number(document.getElementById("mValor").value||0);
-  let cat = document.getElementById("mCategoria").value || "Outros";
+  const cat = document.getElementById("mCategoria").value || "Outros";
   if(!desc) return alert("Preencha a descrição.");
   if(!amount || amount<=0) return alert("Preencha o valor (maior que 0).");
-  const sug = detectarCategoria(desc);
-  if(cat==="Outros" && sug!=="Outros") cat = sug;
 
   const d = getDataMes(mesAtual);
-  d.items.push(ensureItemDefaults({ desc, amount, category:cat, isFixo:false, isInvestFixo:false }));
+  d.items.push(ensureItemDefaults({ id:uid(), desc, amount, category:cat, isFixo:false, isInvestFixo:false, paid:false }));
   saveAll();
-
-  fetch(API+"/addGasto",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc, amount, category: cat })
-  }).catch(()=>{});
 
   closeModal("overlay-addExpense");
   render();
+}
+
+function togglePaid(idx){
+  const d = getDataMes(mesAtual);
+  const it = d.items[idx];
+  if(!it) return;
+  it.paid = !it.paid;
+
+  if(it.isInvestFixo && it.invId){
+    ensureMonthInvestStatus(d);
+    d.investStatus[it.invId] = !!it.paid;
+
+    if(it.paid){
+      const exists = d.saved.some(s => s && s.source==="investFixo" && s.invId===it.invId && s.month===mesAtual);
+      if(!exists){
+        d.saved.unshift({
+          value:Number(it.amount||0),
+          desc:`Automático: ${it.desc}`,
+          date:todayISO(),
+          source:"investFixo",
+          invId:it.invId,
+          month:mesAtual
+        });
+      }
+    }else{
+      d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===it.invId && s.month===mesAtual));
+    }
+  }
+
+  saveAll();
+  renderSaved();
+  renderList();
+  renderKPIs();
+}
+
+function hideFixoOnlyThisMonth(it){
+  const d = getDataMes(mesAtual);
+  const fk = fixKey(it.desc, it.amount, it.category);
+  if(!d.hiddenFixos.includes(fk)) d.hiddenFixos.push(fk);
+  d.items = d.items.filter(x=>{
+    if(it.id && x.id && x.id===it.id && x.isFixo===it.isFixo && x.isInvestFixo===it.isInvestFixo) return false;
+    return fixKey(x.desc,x.amount,x.category)!==fk;
+  });
+
+  if(it.isInvestFixo && it.invId){
+    d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===it.invId && s.month===mesAtual));
+    ensureMonthInvestStatus(d);
+    d.investStatus[it.invId] = false;
+  }
+  saveAll();
+}
+function delItemMonthOnly(idx){
+  const d = getDataMes(mesAtual);
+  const it = d.items[idx];
+  if(!it) return;
+  d.items.splice(idx,1);
+  saveAll();
+}
+function delItemSmart(idx){
+  const d = getDataMes(mesAtual);
+  const it = d.items[idx];
+  if(!it) return;
+  if(it.isFixo){ hideFixoOnlyThisMonth(it); render(); return; }
+  delItemMonthOnly(idx); render();
 }
 
 function drawChart(items){
@@ -1735,87 +1644,64 @@ function renderKPIs(){
 function render(){
   if(!USER_ID) return;
   buildMonthSelect();
-  const d = getDataMes(mesAtual);
-
-  ensureMonthInvestStatus(d);
-  d.items.forEach(it=>{
-    if(it && it.isInvestFixo && it.invId){
-      if(typeof d.investStatus[it.invId] !== "boolean") d.investStatus[it.invId] = false;
-      it.paid = !!d.investStatus[it.invId];
-      if(it.paid) addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
-      else removeAutoSavedForInv(d, it.invId, mesAtual);
-    }
-  });
+  getDataMes(mesAtual);
   saveAll();
-
   applyHomeLayoutToDOM();
   renderKPIs();
   renderSaved();
   renderList();
-  drawChart(d.items||[]);
+  drawChart(getDataMes(mesAtual).items || []);
   drawEvolucao();
+  renderCategorias();
+  renderFixos();
+  renderInvestFixos();
+}
 
-  fetch(API+"/mes/"+USER_ID+"/"+mesAtual)
-    .then(r=>r.json())
-    .then(data=>{
-      if(!Array.isArray(data)) return;
+function buildHistoryUI(){
+  const div = document.getElementById("historyList");
+  if(!div) return;
+  const meses = Object.keys(state.meses||{}).sort().reverse();
+  if(!meses.length){ div.innerHTML = `<div class="small">Nenhum mês salvo ainda.</div>`; return; }
 
-      if(data.length){
-        const first = data[0] || {};
-        if(first.salary!=null) d.salary = Number(first.salary||d.salary||0);
-        if(first.meta!=null) d.meta = Number(first.meta||d.meta||0);
-      }
-
-      const apiItems = data.filter(x=>x && x.desc).map(x=>ensureItemDefaults({
-        desc: x.desc,
-        amount: Number(x.amount||0),
-        category: (x.category && categorias.includes(x.category)) ? x.category : (x.category || detectarCategoria(x.desc)),
-        isFixo:false,
-        isInvestFixo:false
-      }));
-
-      const hidden = new Set((d.hiddenFixos||[]).map(String));
-      const merged = [];
-      const seen = new Set();
-      const fresh = getDataMes(mesAtual);
-
-      for(const it of (fresh.items||[]).filter(x=>x.isFixo)){
-        const fk = fixKey(it.desc,it.amount,it.category);
-        if(hidden.has(fk)) continue;
-        const k = fk + "|fix";
-        if(!seen.has(k)){ merged.push(it); seen.add(k); }
-      }
-
-      for(const it of (d.items||[]).filter(x=>!x.isFixo)){
-        const k = fixKey(it.desc,it.amount,it.category) + "|loc";
-        if(!seen.has(k)){ merged.push(it); seen.add(k); }
-      }
-
-      for(const it of apiItems){
-        const k = fixKey(it.desc,it.amount,it.category) + "|api";
-        if(!seen.has(k)){ merged.push(it); seen.add(k); }
-      }
-
-      d.items = merged.map(ensureItemDefaults);
-
-      ensureMonthInvestStatus(d);
-      d.items.forEach(it=>{
-        if(it && it.isInvestFixo && it.invId){
-          if(typeof d.investStatus[it.invId] !== "boolean") d.investStatus[it.invId] = false;
-          it.paid = !!d.investStatus[it.invId];
-          if(it.paid) addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
-          else removeAutoSavedForInv(d, it.invId, mesAtual);
-        }
-      });
-
-      saveAll();
-      renderKPIs();
-      renderSaved();
-      renderList();
-      drawChart(d.items||[]);
-      drawEvolucao();
-    })
-    .catch(()=>{});
+  div.innerHTML = meses.map(m=>{
+    const d = getDataMes(m);
+    const total = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+    const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
+    const left = Number(d.salary||0) - total;
+    const label = new Date(m+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+    return `
+      <div class="note" style="cursor:pointer;margin-bottom:10px" onclick="openMonthFromHistory('${m}')">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+          <div style="font-weight:950;text-transform:capitalize">${escapeHtml(label)}</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="badge">${money(left)} sobra</span>
+            <button class="btn icon mini" onclick="event.stopPropagation(); deleteMonth('${m}')">✕</button>
+          </div>
+        </div>
+        <div class="small" style="margin-top:6px">
+          Salário: <b>${money(d.salary||0)}</b> • Gasto: <b>${money(total)}</b> • Guardado: <b>${money(saved)}</b>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+function openMonthFromHistory(m){
+  mesAtual = m;
+  const sel = document.getElementById("monthSelect");
+  if(sel) sel.value = mesAtual;
+  goHome();
+  render();
+}
+function deleteMonth(m){
+  if(!state.meses || !state.meses[m]) return;
+  const label = new Date(m+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+  if(!confirm(`Deletar o mês de ${label} do histórico?`)) return;
+  delete state.meses[m];
+  saveAll();
+  if(mesAtual === m) mesAtual = new Date().toISOString().slice(0,7);
+  buildMonthSelect();
+  buildHistoryUI();
+  render();
 }
 
 function updateInvestUI(){
@@ -1847,18 +1733,30 @@ function simularInvestimento(){
   const valor = Number(document.getElementById("valorInvestimento").value||0);
   const meses = Number(document.getElementById("mesesInvestimento").value||0);
   const extra = Number(document.getElementById("investExtraValue").value||0);
+  const aporteMensal = Number(document.getElementById("aporteMensalInvest").value||0);
+  const recorrente = document.getElementById("aporteRecorrenteInvest").value === "sim";
+
   if(!valor || valor<=0) return alert("Informe o valor inicial.");
   if(!meses || meses<=0) return alert("Informe os meses.");
+
   let taxaMensal = 0;
   if(tipo==="poupanca") taxaMensal = (extra||0.5)/100;
   else if(tipo==="cdb") taxaMensal = 0.009*((extra||100)/100);
   else if(tipo==="tesouro") taxaMensal = (extra||0.9)/100;
   else taxaMensal = (extra||1.2)/100;
 
-  const total = valor * Math.pow(1+taxaMensal, meses);
-  const lucro = total - valor;
+  let total = valor;
+  for(let i=1;i<=meses;i++){
+    total = total * (1 + taxaMensal);
+    if(recorrente && aporteMensal > 0) total += aporteMensal;
+  }
+
+  const investido = valor + (recorrente ? aporteMensal * meses : 0);
+  const lucro = total - investido;
+
   document.getElementById("resultadoInvestimento").innerHTML =
     `Valor final: <span class="successText">${money(total)}</span><br>` +
+    `Valor investido: <b>${money(investido)}</b><br>` +
     `Lucro estimado: <span class="successText">${money(lucro)}</span><br>` +
     `<div class="small">*Estimativa simples. Não é recomendação financeira.</div>`;
 }
@@ -1924,6 +1822,26 @@ function aggregateYear(year){
   const topCat = catsSorted[0] ? { cat: catsSorted[0][0], value: catsSorted[0][1] } : { cat:"—", value:0 };
   return { months, byCat, byMonth, topCat };
 }
+
+async function createChartImage(labels, values, type="bar"){
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200;
+  canvas.height = 500;
+  const ctx = canvas.getContext("2d");
+  new Chart(ctx,{
+    type,
+    data:{ labels, datasets:[{ data: values }] },
+    options:{
+      animation:false,
+      responsive:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:true } }
+    }
+  });
+  await new Promise(r=>setTimeout(r,100));
+  return canvas.toDataURL("image/png");
+}
+
 async function renderPdfAndSave(wrap, filename){
   const canvas = await html2canvas(wrap, { scale: 2, backgroundColor:"#ffffff" });
   const imgData = canvas.toDataURL("image/png");
@@ -1938,6 +1856,7 @@ async function renderPdfAndSave(wrap, filename){
   let remaining = imgH;
   pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
   remaining -= pageH;
+
   while(remaining > 0){
     pdf.addPage();
     y = -(imgH - remaining);
@@ -1946,12 +1865,21 @@ async function renderPdfAndSave(wrap, filename){
   }
   pdf.save(filename);
 }
+
 async function gerarPDFResumoAno(){
   const status = document.getElementById("pdfStatus");
   try{
     status.textContent = "Gerando resumo do ano…";
     const year = document.getElementById("pdfYear").value;
     const agg = aggregateYear(year);
+
+    const labelsCat = Object.keys(agg.byCat);
+    const valuesCat = Object.values(agg.byCat);
+    const labelsMonth = agg.byMonth.map(x=>x.m);
+    const valuesMonth = agg.byMonth.map(x=>x.spent);
+
+    const chartCat = labelsCat.length ? await createChartImage(labelsCat, valuesCat, "bar") : "";
+    const chartMonth = labelsMonth.length ? await createChartImage(labelsMonth, valuesMonth, "line") : "";
 
     const wrap = document.createElement("div");
     wrap.style.position = "fixed";
@@ -1967,21 +1895,10 @@ async function gerarPDFResumoAno(){
       <div style="font-size:22px;font-weight:900">Resumo do Ano • Controle de Gastos PRO</div>
       <div style="font-size:13px;color:#444">Ano: <b>${escapeHtml(year)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
       <div style="margin-top:10px;font-size:14px;font-weight:900">Mais gastou no ano: ${escapeHtml(agg.topCat.cat)} • ${money(agg.topCat.value)}</div>
-      <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Categorias do ano</div>
-          <div style="font-size:12px;color:#444">
-            ${Object.entries(agg.byCat).map(([c,v])=>`<div>${escapeHtml(c)}: <b>${money(v)}</b></div>`).join("") || "Sem dados"}
-          </div>
-        </div>
-        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Evolução mensal</div>
-          <div style="font-size:12px;color:#444">
-            ${agg.byMonth.map(x=>`<div>${escapeHtml(x.m)}: <b>${money(x.spent)}</b></div>`).join("") || "Sem dados"}
-          </div>
-        </div>
-      </div>
+
+      ${chartCat ? `<div style="margin-top:16px"><div style="font-weight:900;margin-bottom:8px">Gráfico por categoria</div><img src="${chartCat}" style="width:100%;border:1px solid #ddd;border-radius:12px"></div>` : ``}
+      ${chartMonth ? `<div style="margin-top:16px"><div style="font-weight:900;margin-bottom:8px">Evolução do ano</div><img src="${chartMonth}" style="width:100%;border:1px solid #ddd;border-radius:12px"></div>` : ``}
+
       <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
         <div style="font-weight:900;margin-bottom:8px">Tabela do ano</div>
         <table style="width:100%;border-collapse:collapse;font-size:12px">
@@ -2019,14 +1936,29 @@ async function gerarPDFResumoAno(){
     status.textContent = "Erro ao gerar resumo do ano: " + (e.message||e);
   }
 }
+
 async function gerarPDFCompleto(){
   const status = document.getElementById("pdfStatus");
   try{
-    status.textContent = "Gerando relatório completo…";
-    const year = document.getElementById("pdfYear").value;
+    status.textContent = "Gerando PDF do mês…";
     const monthNotes = document.getElementById("pdfMonth").value;
-    const agg = aggregateYear(year);
+    const year = monthNotes.slice(0,4);
     const notesData = getDataMes(monthNotes);
+
+    const byCat = {};
+    (notesData.items||[]).forEach(it=>{
+      const c = it.category || "Outros";
+      byCat[c] = (byCat[c] || 0) + Number(it.amount || 0);
+    });
+
+    const labelsCat = Object.keys(byCat);
+    const valuesCat = Object.values(byCat);
+    const chartCat = labelsCat.length ? await createChartImage(labelsCat, valuesCat, "bar") : "";
+
+    const salary = Number(notesData.salary||0);
+    const spent = (notesData.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+    const saved = (notesData.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
+    const left = salary - spent;
 
     const wrap = document.createElement("div");
     wrap.style.position = "fixed";
@@ -2039,21 +1971,20 @@ async function gerarPDFCompleto(){
     wrap.style.fontFamily = "system-ui, sans-serif";
 
     wrap.innerHTML = `
-      <div style="font-size:22px;font-weight:900">Relatório Completo • Controle de Gastos PRO</div>
-      <div style="font-size:13px;color:#444">Ano: <b>${escapeHtml(year)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
-      <div style="margin-top:10px;font-size:14px;font-weight:900">Mais gastou no ano: ${escapeHtml(agg.topCat.cat)} • ${money(agg.topCat.value)}</div>
-      <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
-      <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
-        <div style="font-weight:900;margin-bottom:8px">Investimentos fixos cadastrados</div>
-        ${(investFixos||[]).length ? investFixos.map(inv=>`
-          <div style="padding:6px 0;border-bottom:1px dashed #eee">
-            <div style="font-weight:800">${escapeHtml(inv.nome)}</div>
-            <div style="font-size:12px;color:#444">Meta: ${money(inv.metaFinal)} • Prazo: ${escapeHtml(inv.prazoMeses)} meses • Mensal: <b>${money(inv.mensal)}</b> • Dia: <b>${escapeHtml(inv.diaPagar || "—")}</b></div>
-          </div>
-        `).join("") : `<div style="font-size:12px;color:#444">Nenhum investimento fixo cadastrado.</div>`}
+      <div style="font-size:22px;font-weight:900">Relatório do Mês • Controle de Gastos PRO</div>
+      <div style="font-size:13px;color:#444">Mês: <b>${escapeHtml(monthNotes)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px">
+        <div style="border:1px solid #ddd;border-radius:12px;padding:10px"><div style="font-size:12px;color:#555">Salário</div><div style="font-weight:900">${money(salary)}</div></div>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:10px"><div style="font-size:12px;color:#555">Gastos</div><div style="font-weight:900">${money(spent)}</div></div>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:10px"><div style="font-size:12px;color:#555">Guardado</div><div style="font-weight:900">${money(saved)}</div></div>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:10px"><div style="font-size:12px;color:#555">Sobra</div><div style="font-weight:900">${money(left)}</div></div>
       </div>
+
+      ${chartCat ? `<div style="margin-top:16px"><div style="font-weight:900;margin-bottom:8px">Gráfico do mês por categoria</div><img src="${chartCat}" style="width:100%;border:1px solid #ddd;border-radius:12px"></div>` : ``}
+
       <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
-        <div style="font-weight:900;margin-bottom:8px">Anotações do mês (${escapeHtml(monthNotes)})</div>
+        <div style="font-weight:900;margin-bottom:8px">Anotações do mês</div>
         ${(notesData.items||[]).length ? notesData.items.map(it=>`
           <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee">
             <div>
@@ -2064,15 +1995,27 @@ async function gerarPDFCompleto(){
           </div>
         `).join("") : `<div style="font-size:12px;color:#444">Nenhuma anotação neste mês.</div>`}
       </div>
+
+      <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
+        <div style="font-weight:900;margin-bottom:8px">Guardado do mês</div>
+        ${(notesData.saved||[]).length ? notesData.saved.map(s=>`
+          <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee">
+            <div>
+              <div style="font-weight:800">${escapeHtml(s.desc || "Guardado")}</div>
+              <div style="font-size:12px;color:#444">${escapeHtml(s.date || "")}</div>
+            </div>
+            <div style="font-weight:900">${money(s.value||0)}</div>
+          </div>
+        `).join("") : `<div style="font-size:12px;color:#444">Nada guardado neste mês.</div>`}
+      </div>
     `;
     document.body.appendChild(wrap);
-
     await new Promise(r=>setTimeout(r,250));
-    await renderPdfAndSave(wrap, `relatorio_completo_${year}_${monthNotes}.pdf`);
+    await renderPdfAndSave(wrap, `relatorio_mes_${monthNotes}.pdf`);
     wrap.remove();
-    status.textContent = "Relatório completo gerado ✅";
+    status.textContent = "PDF do mês gerado ✅";
   }catch(e){
-    status.textContent = "Erro ao gerar relatório completo: " + (e.message||e);
+    status.textContent = "Erro ao gerar PDF do mês: " + (e.message||e);
   }
 }
 
@@ -2099,8 +2042,8 @@ function showBrowserNotification(title, body){
   try{
     new Notification(title, {
       body,
-      icon: "icons/icon-192.png",
-      badge: "icons/icon-192.png",
+      icon: "icon-192.png",
+      badge: "icon-192.png",
       tag: "gastos-pro-prazo"
     });
   }catch(e){}
@@ -2117,6 +2060,19 @@ function requestNotificationPermission(){
     }
   }).catch(()=>{});
 }
+function autoEnableNotificationsIfNeeded(){
+  if(!("Notification" in window)) return;
+  if(Notification.permission === "default"){
+    Notification.requestPermission().then((perm)=>{
+      if(perm === "granted"){
+        localStorage.setItem(NOTIF_KEYS.permAsked, "1");
+        checkDueNotifications();
+      }
+    }).catch(()=>{});
+  }else if(Notification.permission === "granted"){
+    checkDueNotifications();
+  }
+}
 function checkDueNotifications(){
   if(!USER_ID) return;
   if(!("Notification" in window)) return;
@@ -2125,7 +2081,6 @@ function checkDueNotifications(){
   const now = new Date();
   const mes = currentMonthKeyFromDate(now);
   const d = getDataMes(mes);
-  ensureMonthInvestStatus(d);
 
   (d.items || []).forEach(it=>{
     if(!it || !it.isFixo) return;
@@ -2143,13 +2098,9 @@ function checkDueNotifications(){
     if(localStorage.getItem(storageKey) === "1") return;
 
     let body = "";
-    if(diff === 0){
-      body = `O prazo para pagar ${it.desc} é hoje (dia ${dueDay}).`;
-    }else if(diff === 1){
-      body = `O prazo para pagar ${it.desc} está chegando. Falta 1 dia (vence dia ${dueDay}).`;
-    }else{
-      body = `O prazo para pagar ${it.desc} está chegando. Faltam ${diff} dias (vence dia ${dueDay}).`;
-    }
+    if(diff === 0) body = `O prazo para pagar ${it.desc} é hoje (dia ${dueDay}).`;
+    else if(diff === 1) body = `O prazo para pagar ${it.desc} está chegando. Falta 1 dia (vence dia ${dueDay}).`;
+    else body = `O prazo para pagar ${it.desc} está chegando. Faltam ${diff} dias (vence dia ${dueDay}).`;
 
     showBrowserNotification("Controle de Gastos PRO", body);
     localStorage.setItem(storageKey, "1");
@@ -2161,6 +2112,96 @@ function startDueNotificationWatcher(){
   window.__dueNotifInterval = setInterval(checkDueNotifications, 60 * 60 * 1000);
 }
 
+function getVoicePendingAction(){
+  try{
+    const params = new URLSearchParams(location.search);
+    const voiceAction = params.get("voice_action");
+    if(voiceAction){
+      return {
+        action: voiceAction,
+        month: params.get("month") || "",
+        year: params.get("year") || ""
+      };
+    }
+  }catch(e){}
+  try{
+    const raw = localStorage.getItem(VOICE_PENDING_ACTION_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+function clearVoicePendingAction(){
+  try{ localStorage.removeItem(VOICE_PENDING_ACTION_KEY); }catch(e){}
+}
+async function consumeVoicePendingAction(){
+  const cmd = getVoicePendingAction();
+  if(!cmd || !cmd.action) return;
+
+  clearVoicePendingAction();
+
+  const action = String(cmd.action || "").toLowerCase();
+  const month = String(cmd.month || "");
+  const year = String(cmd.year || "");
+
+  try{
+    if(action === "open_home"){ goHome(); return; }
+    if(action === "open_history"){ openHistory(); return; }
+    if(action === "open_config"){ openScreen("screen-config"); return; }
+    if(action === "open_categories"){ openScreen("screen-categories"); return; }
+    if(action === "open_fixed_expenses"){ openScreen("screen-fixos"); return; }
+    if(action === "open_fixed_investments"){ openScreen("screen-investfixos"); return; }
+    if(action === "open_simulators"){ openScreen("screen-simulators"); return; }
+    if(action === "open_pdf"){ openPdfScreen(); return; }
+    if(action === "open_themes"){ openScreen("screen-themes"); return; }
+    if(action === "open_home_editor"){ openHomeEditor(); return; }
+    if(action === "open_ia"){ openIA(); return; }
+
+    if(action === "generate_year_summary_pdf"){
+      openPdfScreen();
+      buildPdfSelectors();
+      if(year){
+        const pdfYear = document.getElementById("pdfYear");
+        if(pdfYear) pdfYear.value = year;
+      }
+      await gerarPDFResumoAno();
+      return;
+    }
+
+    if(action === "generate_month_pdf"){
+      openPdfScreen();
+      buildPdfSelectors();
+      if(month){
+        const y = month.slice(0,4);
+        const pdfYear = document.getElementById("pdfYear");
+        const pdfMonth = document.getElementById("pdfMonth");
+        if(pdfYear && y) pdfYear.value = y;
+        if(pdfMonth) pdfMonth.value = month;
+      }
+      await gerarPDFCompleto();
+      return;
+    }
+  }catch(e){
+    dbg("Erro ao consumir comando de voz: " + (e.message || e));
+  }
+}
+
+function kVoiceEnabled(){ return `${VOICE_KEYS.enabled}_${USER_ID || "guest"}`; }
+function isVoiceEnabled(){ return localStorage.getItem(kVoiceEnabled()) !== "0"; }
+function setVoiceEnabled(on){ localStorage.setItem(kVoiceEnabled(), on ? "1" : "0"); applyVoiceVisibility(); }
+function applyVoiceVisibility(){
+  const fab = document.getElementById("fabVoice");
+  const status = document.getElementById("voiceEnableStatus");
+  const toggleBtn = document.getElementById("btnToggleVoiceEnabled");
+  const enabled = isVoiceEnabled();
+  if(fab) fab.classList.toggle("hidden", !enabled);
+  if(status) status.textContent = enabled ? "Ativado" : "Bloqueado";
+  if(toggleBtn){
+    toggleBtn.textContent = enabled ? "Bloquear" : "Ativar";
+    toggleBtn.className = "btn " + (enabled ? "danger" : "good");
+  }
+}
+function toggleVoiceEnabled(){ setVoiceEnabled(!isVoiceEnabled()); }
+
 async function initFirebase(){
   if(!window.firebase){
     dbg("Firebase não carregou.");
@@ -2170,7 +2211,6 @@ async function initFirebase(){
     if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
   }catch(e){}
   auth = firebase.auth();
-  try{ await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); }catch(e){}
 
   auth.onAuthStateChanged(async (u)=>{
     USER = u || null;
@@ -2190,16 +2230,16 @@ async function initFirebase(){
     loadAll();
     saveAll();
 
-    if(localStorage.getItem(kVoiceEnabled()) == null) localStorage.setItem(kVoiceEnabled(), "0");
+    if(localStorage.getItem(kVoiceEnabled()) == null) localStorage.setItem(kVoiceEnabled(), "1");
     applyVoiceVisibility();
 
     buildMonthSelect();
+    buildPdfSelectors();
     renderCategorias();
     renderFixos();
     renderInvestFixos();
-    updateInvestUI();
     updateInvResumo();
-    buildPdfSelectors();
+    updateInvestUI();
 
     const tipoSel = document.getElementById("tipoSimulacao");
     if(tipoSel && !tipoSel.dataset.bound){
@@ -2228,7 +2268,7 @@ async function initFirebase(){
     showApp();
     goHome();
     render();
-
+    startDueNotificationWatcher();
     await consumeVoicePendingAction();
   });
 
