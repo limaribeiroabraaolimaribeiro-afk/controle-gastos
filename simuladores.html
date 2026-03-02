@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Simuladores • Controle de Gastos PRO</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#569cff">
+
+<style>
+:root{
+  --bg:#07101f;
+  --grad1: rgba(86,156,255,.22);
+  --grad2: rgba(57,217,138,.16);
+  --grad3: rgba(255,93,93,.12);
+
+  --panel: rgba(255,255,255,.06);
+  --panel2: rgba(255,255,255,.08);
+  --stroke: rgba(255,255,255,.10);
+  --text:#eaf0ff;
+  --muted: rgba(234,240,255,.72);
+
+  --accent:#569cff;
+  --good:#39d98a;
+  --warn:#ffd166;
+  --danger:#ff5d5d;
+
+  --shadow: 0 18px 60px rgba(0,0,0,.45);
+  --glass: blur(14px);
+  --radius: 22px;
+}
+.light{
+  --panel: rgba(0,0,0,.04);
+  --panel2: rgba(0,0,0,.06);
+  --stroke: rgba(0,0,0,.08);
+  --text:#0d1222;
+  --muted: rgba(13,18,34,.68);
+  --shadow: 0 18px 60px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-height:100vh;
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+  background:
+    radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
+    radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
+    radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
+    var(--bg);
+}
+.wrap{max-width:980px;margin:auto;padding:16px;padding-bottom:120px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+h1{margin:0;font-size:20px;letter-spacing:.2px}
+h2{margin:0;font-size:16px}
+h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:700}
+.small{font-size:12px;color:var(--muted)}
+.card{
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  padding:14px;
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--glass);
+}
+.row{display:flex;gap:10px;align-items:center}
+.row > *{flex:1}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.btn{
+  appearance:none;border:0;cursor:pointer;
+  background:rgba(255,255,255,.10);
+  color:var(--text);
+  padding:12px 12px;border-radius:14px;
+  border:1px solid var(--stroke);
+  font-weight:750;
+  box-shadow:0 10px 26px rgba(0,0,0,.18);
+  text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn.primary{
+  background:var(--accent);
+  border-color:color-mix(in srgb, var(--accent), transparent 55%);
+  color:#fff;
+}
+.btn.icon{
+  width:42px;height:42px;padding:0;border-radius:14px
+}
+input,select{
+  width:100%;
+  padding:12px 12px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  outline:none;
+  background:rgba(0,0,0,.15);
+  color:var(--text);
+  font-size:14px;
+}
+.light input,.light select{background:rgba(255,255,255,.75)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+.badge{
+  display:inline-flex;gap:6px;align-items:center;
+  padding:4px 10px;border-radius:999px;
+  background:rgba(255,255,255,.10);
+  border:1px solid var(--stroke);
+  font-size:12px;color:var(--muted);
+}
+.note{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  padding:12px;border-radius:16px;
+}
+.hr{height:1px;background:var(--stroke);margin:12px 0}
+.backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.backBtn{font-weight:850}
+#loading{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px;text-align:center;
+}
+.kpiGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpi{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  border-radius:18px;
+  padding:12px;
+}
+.kpi .v{font-size:18px;font-weight:850;margin-top:6px}
+.successText{color:var(--good);font-weight:800}
+.warnText{color:var(--warn);font-weight:800}
+.dangerText{color:var(--danger);font-weight:900}
+.resultBox{
+  margin-top:12px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.06);
+}
+.tableList{
+  display:grid;
+  gap:8px;
+  margin-top:10px;
+}
+.tableLine{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.05);
+}
+.hidden{display:none !important}
+#debugBox{
+  position:fixed; left:12px; right:12px; bottom:12px;
+  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
+  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
+}
+@media (max-width:720px){
+  .grid2,.grid3,.kpiGrid{grid-template-columns:1fr}
+  .topbar{align-items:flex-start;flex-direction:column}
+  .tableLine{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="card" style="max-width:520px;width:100%">
+    <h2 style="font-weight:900;margin-bottom:6px">Carregando simuladores…</h2>
+    <div class="small">Validando login e preparando seus dados.</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="wrap">
+    <div class="backRow">
+      <a class="btn backBtn" href="./index.html">← Voltar</a>
+      <div style="font-weight:900">Simuladores</div>
+    </div>
+
+    <div class="topbar">
+      <div>
+        <h1>Controle de Gastos PRO</h1>
+        <div class="small">Simule investimentos e empréstimos usando o contexto do seu mês.</div>
+      </div>
+      <div class="row" style="flex:0 0 auto">
+        <button class="btn" onclick="toggleTheme()">🌙/☀️</button>
+      </div>
+    </div>
+
+    <div class="kpiGrid">
+      <div class="kpi">
+        <div class="small">Salário do mês</div>
+        <div class="v" id="kpiSalary">R$ 0,00</div>
+      </div>
+      <div class="kpi">
+        <div class="small">Gasto do mês</div>
+        <div class="v" id="kpiSpent">R$ 0,00</div>
+      </div>
+      <div class="kpi">
+        <div class="small">Sobra do mês</div>
+        <div class="v" id="kpiLeft">R$ 0,00</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>Escolha o simulador</h3>
+      <select id="tipoSimulacao" onchange="toggleSimulator()">
+        <option value="investimento">Investimento</option>
+        <option value="emprestimo">Empréstimo / Compra</option>
+      </select>
+    </div>
+
+    <div class="card" id="areaInvestimento" style="margin-top:12px">
+      <h2 style="font-weight:900;margin-bottom:10px">📈 Investimento</h2>
+
+      <label>Tipo de investimento</label>
+      <select id="investTipo" onchange="updateInvestUI()">
+        <option value="poupanca">Poupança (estimativa)</option>
+        <option value="cdb">CDB/LCI/LCA (% do CDI)</option>
+        <option value="tesouro">Tesouro Selic (estimativa)</option>
+        <option value="fixo">Taxa fixa mensal (%)</option>
+      </select>
+
+      <div class="grid2" style="margin-top:10px" id="investExtra">
+        <div>
+          <label id="investExtraLabel">Parâmetro</label>
+          <input id="investExtraValue" type="number" inputmode="decimal" placeholder="Ex: 100">
+        </div>
+        <div class="note">
+          <div class="small">Dica</div>
+          <div class="small" id="investHint">Escolha o tipo para ver o parâmetro.</div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Valor inicial</label>
+          <input id="valorInvestimento" type="number" inputmode="decimal" placeholder="Ex: 1000">
+        </div>
+        <div>
+          <label>Meses</label>
+          <input id="mesesInvestimento" type="number" inputmode="numeric" placeholder="Ex: 12">
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Aporte mensal opcional</label>
+          <input id="aporteMensal" type="number" inputmode="decimal" placeholder="Ex: 200">
+        </div>
+        <div class="note">
+          <div style="font-weight:900">Leitura do mês</div>
+          <div class="small">A IA do resultado considera salário, gastos e sobra para te orientar.</div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn" onclick="clearInvestimento()">Limpar</button>
+        <button class="btn primary" onclick="simularInvestimento()">Calcular</button>
+      </div>
+
+      <div id="resultadoInvestimento" class="resultBox hidden"></div>
+    </div>
+
+    <div class="card hidden" id="areaEmprestimo" style="margin-top:12px">
+      <h2 style="font-weight:900;margin-bottom:10px">💳 Empréstimo / Compra</h2>
+
+      <label>Modelo</label>
+      <select id="loanTipo">
+        <option value="price">PRICE (parcela fixa)</option>
+        <option value="sac">SAC (parcela decrescente)</option>
+      </select>
+
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Valor</label>
+          <input id="loanValor" type="number" inputmode="decimal" placeholder="Ex: 10000">
+        </div>
+        <div>
+          <label>Parcelas</label>
+          <input id="loanParcelas" type="number" inputmode="numeric" placeholder="Ex: 24">
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Juros mensal (%)</label>
+          <input id="loanJuros" type="number" inputmode="decimal" placeholder="Ex: 2.5">
+        </div>
+        <div class="note">
+          <div style="font-weight:900">Leitura do mês</div>
+          <div class="small">O resultado mostra se a parcela cabe ou aperta seu orçamento atual.</div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn" onclick="clearEmprestimo()">Limpar</button>
+        <button class="btn primary" onclick="simularEmprestimo()">Calcular</button>
+      </div>
+
+      <div id="resultadoEmprestimo" class="resultBox hidden"></div>
+      <div id="tabelaEmprestimo" class="tableList hidden"></div>
+    </div>
+  </div>
+</div>
+
+<div id="debugBox"></div>
+
+<script>
+function dbg(msg){
+  const box = document.getElementById("debugBox");
+  box.style.display = "block";
+  box.textContent = String(msg);
+}
+window.addEventListener("error", (e)=>{
+  dbg("Erro JS:\\n" + (e.message || e.type) + "\\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+});
+window.addEventListener("unhandledrejection", (e)=>{
+  dbg("Promise rejeitada:\\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+});
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="./config.js"></script>
+
+<script>
+const FIREBASE_CONFIG = {
+  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+  authDomain:"controle-gastos-pro.firebaseapp.com",
+  projectId:"controle-gastos-pro"
+};
+
+const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
+
+const THEME_PRESETS = {
+  default: {
+    dark:  { bg:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
+    light: { bg:"#f4f6ff", g1:"rgba(86,156,255,.14)", g2:"rgba(57,217,138,.10)", g3:"rgba(255,93,93,.08)" }
+  },
+  purple: {
+    dark:  { bg:"#0d0a1f", g1:"rgba(170,110,255,.25)", g2:"rgba(86,156,255,.12)", g3:"rgba(57,217,138,.10)" },
+    light: { bg:"#fbf8ff", g1:"rgba(170,110,255,.16)", g2:"rgba(86,156,255,.10)", g3:"rgba(57,217,138,.08)" }
+  },
+  green: {
+    dark:  { bg:"#061a14", g1:"rgba(57,217,138,.28)", g2:"rgba(86,156,255,.10)", g3:"rgba(255,209,102,.10)" },
+    light: { bg:"#f7fffb", g1:"rgba(57,217,138,.16)", g2:"rgba(86,156,255,.08)", g3:"rgba(255,209,102,.10)" }
+  },
+  sunset: {
+    dark:  { bg:"#1a0b0b", g1:"rgba(255,93,93,.22)", g2:"rgba(255,209,102,.18)", g3:"rgba(86,156,255,.10)" },
+    light: { bg:"#fff7f2", g1:"rgba(255,93,93,.14)", g2:"rgba(255,209,102,.14)", g3:"rgba(86,156,255,.08)" }
+  },
+  mono: {
+    dark:  { bg:"#05070c", g1:"rgba(255,255,255,.10)", g2:"rgba(255,255,255,.06)", g3:"rgba(255,255,255,.04)" },
+    light: { bg:"#ffffff", g1:"rgba(0,0,0,.06)", g2:"rgba(0,0,0,.04)", g3:"rgba(0,0,0,.03)" }
+  }
+};
+
+let auth = null;
+let USER = null;
+let USER_ID = null;
+let state = { meses:{} };
+let mesAtual = new Date().toISOString().slice(0,7);
+
+function money(n){
+  return Number(n || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+}
+function showLoading(){
+  document.getElementById("loading").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+}
+function showApp(){
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+
+function kMes(){ return "gastos_pro_state_" + USER_ID; }
+
+function isLightMode(){
+  return document.body.classList.contains("light");
+}
+function applyThemeSettings(){
+  const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
+  const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
+  const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
+  const mode = isLightMode() ? "light" : "dark";
+  const colors = p[mode] || p.dark;
+
+  document.documentElement.style.setProperty("--accent", accent);
+  document.documentElement.style.setProperty("--bg", colors.bg);
+  document.documentElement.style.setProperty("--grad1", colors.g1);
+  document.documentElement.style.setProperty("--grad2", colors.g2);
+  document.documentElement.style.setProperty("--grad3", colors.g3);
+
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", accent);
+}
+function toggleTheme(){
+  document.body.classList.toggle("light");
+  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+  applyThemeSettings();
+}
+
+function loadAll(){
+  try{
+    const raw = localStorage.getItem(kMes());
+    state = raw ? JSON.parse(raw) : { meses:{} };
+  }catch(e){
+    state = { meses:{} };
+  }
+  if(!state || typeof state !== "object") state = { meses:{} };
+  if(!state.meses || typeof state.meses !== "object") state.meses = {};
+
+  const opened = localStorage.getItem("mes_aberto");
+  if(opened) mesAtual = opened;
+}
+function getDataMes(m){
+  const mm = m || mesAtual;
+  if(!state.meses[mm]) state.meses[mm] = { salary:0, meta:0, items:[], saved:[], hiddenFixos:[], investStatus:{} };
+  const d = state.meses[mm];
+  if(!Array.isArray(d.items)) d.items = [];
+  if(!Array.isArray(d.saved)) d.saved = [];
+  if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos = [];
+  if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
+  return d;
+}
+
+function renderKPIs(){
+  const d = getDataMes(mesAtual);
+  const salary = Number(d.salary || 0);
+  const spent = (d.items || []).reduce((a,b)=>a + Number(b.amount || 0), 0);
+  const left = salary - spent;
+
+  document.getElementById("kpiSalary").textContent = money(salary);
+  document.getElementById("kpiSpent").textContent = money(spent);
+  document.getElementById("kpiLeft").textContent = money(left);
+
+  const leftEl = document.getElementById("kpiLeft");
+  leftEl.classList.remove("successText","warnText","dangerText");
+  if(left > 0) leftEl.classList.add("successText");
+  else if(left === 0) leftEl.classList.add("warnText");
+  else leftEl.classList.add("dangerText");
+}
+
+function toggleSimulator(){
+  const tipo = document.getElementById("tipoSimulacao").value;
+  document.getElementById("areaInvestimento").classList.toggle("hidden", tipo !== "investimento");
+  document.getElementById("areaEmprestimo").classList.toggle("hidden", tipo !== "emprestimo");
+}
+
+function updateInvestUI(){
+  const tipo = document.getElementById("investTipo").value;
+  const lab = document.getElementById("investExtraLabel");
+  const hint = document.getElementById("investHint");
+  const val = document.getElementById("investExtraValue");
+
+  if(tipo === "poupanca"){
+    lab.textContent = "Taxa mensal (%) estimada";
+    hint.textContent = "Ex.: 0,5% ao mês. Se deixar vazio, usa 0,5.";
+    if(!val.value) val.value = "0.5";
+  }else if(tipo === "cdb"){
+    lab.textContent = "% do CDI";
+    hint.textContent = "Ex.: 100 para 100% do CDI. Se vazio, usa 100.";
+    if(!val.value) val.value = "100";
+  }else if(tipo === "tesouro"){
+    lab.textContent = "Taxa mensal (%) estimada";
+    hint.textContent = "Ex.: 0,9% ao mês. Se vazio, usa 0,9.";
+    if(!val.value) val.value = "0.9";
+  }else{
+    lab.textContent = "Taxa fixa mensal (%)";
+    hint.textContent = "Ex.: 1,2% ao mês. Se vazio, usa 1,2.";
+    if(!val.value) val.value = "1.2";
+  }
+}
+
+function clearInvestimento(){
+  document.getElementById("valorInvestimento").value = "";
+  document.getElementById("mesesInvestimento").value = "";
+  document.getElementById("aporteMensal").value = "";
+  document.getElementById("resultadoInvestimento").classList.add("hidden");
+  document.getElementById("resultadoInvestimento").innerHTML = "";
+}
+function clearEmprestimo(){
+  document.getElementById("loanValor").value = "";
+  document.getElementById("loanParcelas").value = "";
+  document.getElementById("loanJuros").value = "";
+  document.getElementById("resultadoEmprestimo").classList.add("hidden");
+  document.getElementById("resultadoEmprestimo").innerHTML = "";
+  document.getElementById("tabelaEmprestimo").classList.add("hidden");
+  document.getElementById("tabelaEmprestimo").innerHTML = "";
+}
+
+function simularInvestimento(){
+  const tipo = document.getElementById("investTipo").value;
+  const valor = Number(document.getElementById("valorInvestimento").value || 0);
+  const meses = Number(document.getElementById("mesesInvestimento").value || 0);
+  const extra = Number(document.getElementById("investExtraValue").value || 0);
+  const aporteMensal = Number(document.getElementById("aporteMensal").value || 0);
+
+  if(!valor || valor <= 0) return alert("Informe o valor inicial.");
+  if(!meses || meses <= 0) return alert("Informe a quantidade de meses.");
+
+  let taxaMensal = 0;
+  if(tipo === "poupanca") taxaMensal = (extra || 0.5) / 100;
+  else if(tipo === "cdb"){
+    const cdiMensal = 0.009;
+    taxaMensal = cdiMensal * ((extra || 100) / 100);
+  }else if(tipo === "tesouro") taxaMensal = (extra || 0.9) / 100;
+  else taxaMensal = (extra || 1.2) / 100;
+
+  let saldo = valor;
+  for(let i=1;i<=meses;i++){
+    saldo = saldo * (1 + taxaMensal);
+    if(aporteMensal > 0) saldo += aporteMensal;
+  }
+
+  const totalInvestido = valor + (aporteMensal * meses);
+  const lucro = saldo - totalInvestido;
+
+  const d = getDataMes(mesAtual);
+  const salary = Number(d.salary || 0);
+  const spent = (d.items || []).reduce((a,b)=>a + Number(b.amount || 0), 0);
+  const left = salary - spent;
+
+  let leitura = "";
+  let classe = "warnText";
+
+  if(aporteMensal <= 0){
+    leitura = "Sem aporte mensal, o crescimento depende só do valor inicial e da taxa usada.";
+  }else if(left <= 0){
+    leitura = "Seu mês está apertado. Um aporte mensal desse valor pode pesar no orçamento atual.";
+    classe = "dangerText";
+  }else if(aporteMensal > left){
+    leitura = "O aporte mensal está acima da sua sobra atual do mês. Isso tende a apertar seu caixa.";
+    classe = "dangerText";
+  }else if(aporteMensal > left * 0.7){
+    leitura = "O aporte mensal cabe, mas consome grande parte da sua sobra do mês.";
+    classe = "warnText";
+  }else{
+    leitura = "O aporte mensal parece saudável para sua sobra atual do mês.";
+    classe = "successText";
+  }
+
+  const box = document.getElementById("resultadoInvestimento");
+  box.classList.remove("hidden");
+  box.innerHTML = `
+    <div style="font-weight:950;font-size:16px;margin-bottom:8px">Resultado da simulação</div>
+    <div class="grid3">
+      <div class="note">
+        <div class="small">Valor final</div>
+        <div class="successText" style="font-size:18px;font-weight:900;margin-top:6px">${money(saldo)}</div>
+      </div>
+      <div class="note">
+        <div class="small">Total investido</div>
+        <div style="font-size:18px;font-weight:900;margin-top:6px">${money(totalInvestido)}</div>
+      </div>
+      <div class="note">
+        <div class="small">Lucro estimado</div>
+        <div class="successText" style="font-size:18px;font-weight:900;margin-top:6px">${money(lucro)}</div>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <div class="${classe}" style="font-weight:900">${leitura}</div>
+    <div class="small" style="margin-top:8px">
+      Tipo: <b>${tipo}</b> • Taxa mensal usada: <b>${(taxaMensal * 100).toFixed(2)}%</b> • Meses: <b>${meses}</b> • Aporte mensal: <b>${money(aporteMensal)}</b>
+    </div>
+    <div class="small" style="margin-top:8px">*Estimativa simples. Não é recomendação financeira.</div>
+  `;
+}
+
+function simularEmprestimo(){
+  const modelo = document.getElementById("loanTipo").value;
+  const valor = Number(document.getElementById("loanValor").value || 0);
+  const n = Number(document.getElementById("loanParcelas").value || 0);
+  const juros = Number(document.getElementById("loanJuros").value || 0) / 100;
+
+  if(!valor || valor <= 0) return alert("Informe o valor.");
+  if(!n || n <= 0) return alert("Informe a quantidade de parcelas.");
+  if(juros < 0) return alert("Juros inválido.");
+
+  const d = getDataMes(mesAtual);
+  const gastos = (d.items || []).reduce((a,b)=>a + Number(b.amount || 0), 0);
+  const salario = Number(d.salary || 0);
+
+  let primeira = 0;
+  let totalPago = 0;
+  const preview = [];
+
+  if(modelo === "price"){
+    const p = juros === 0 ? (valor / n) : (valor * (juros / (1 - Math.pow(1 + juros, -n))));
+    primeira = p;
+    totalPago = p * n;
+
+    for(let i=1;i<=Math.min(n, 12);i++){
+      preview.push({ num:i, valor:p });
+    }
+  }else{
+    const amort = valor / n;
+    let saldo = valor;
+
+    for(let i=1;i<=n;i++){
+      const j = saldo * juros;
+      const parcela = amort + j;
+      if(i === 1) primeira = parcela;
+      totalPago += parcela;
+      saldo -= amort;
+
+      if(i <= 12){
+        preview.push({ num:i, valor:parcela });
+      }
+    }
+  }
+
+  const sobraApos = salario - gastos - primeira;
+
+  let selo = "🟡 Apertado";
+  let cor = "warnText";
+  if(sobraApos > salario * 0.30){
+    selo = "🟢 Folga";
+    cor = "successText";
+  }else if(sobraApos <= 0){
+    selo = "🔴 Não cabe";
+    cor = "dangerText";
+  }
+
+  const box = document.getElementById("resultadoEmprestimo");
+  box.classList.remove("hidden");
+  box.innerHTML = `
+    <div style="font-weight:950;font-size:16px;margin-bottom:8px">Resultado da simulação</div>
+    <div class="grid3">
+      <div class="note">
+        <div class="small">Primeira parcela</div>
+        <div class="${cor}" style="font-size:18px;font-weight:900;margin-top:6px">${money(primeira)}</div>
+      </div>
+      <div class="note">
+        <div class="small">Total pago</div>
+        <div style="font-size:18px;font-weight:900;margin-top:6px">${money(totalPago)}</div>
+      </div>
+      <div class="note">
+        <div class="small">Sobra após 1ª parcela</div>
+        <div class="${cor}" style="font-size:18px;font-weight:900;margin-top:6px">${money(sobraApos)}</div>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <div class="${cor}" style="font-weight:900">${selo}</div>
+    <div class="small" style="margin-top:8px">
+      Modelo: <b>${modelo.toUpperCase()}</b> • Juros mensal: <b>${(juros * 100).toFixed(2)}%</b> • Parcelas: <b>${n}</b>
+    </div>
+  `;
+
+  const tabela = document.getElementById("tabelaEmprestimo");
+  tabela.classList.remove("hidden");
+  tabela.innerHTML = preview.map(item=>`
+    <div class="tableLine">
+      <div>Parcela ${item.num}</div>
+      <div><b>${money(item.valor)}</b></div>
+    </div>
+  `).join("") + (n > 12 ? `<div class="small" style="margin-top:6px">… mostrando 12 de ${n} parcelas.</div>` : "");
+}
+
+function setupVoiceBridge(){
+  window.addEventListener("storage", (e)=>{
+    if(e.key === "voice_cmd") handleVoiceCommand(e.newValue || "");
+  });
+
+  const cached = localStorage.getItem("voice_cmd");
+  if(cached) handleVoiceCommand(cached);
+}
+function consumeVoiceCommand(){
+  localStorage.removeItem("voice_cmd");
+  localStorage.setItem("voice_last_page", "simuladores.html");
+}
+function handleVoiceCommand(raw){
+  const cmd = String(raw || "").trim().toLowerCase();
+  if(!cmd) return;
+
+  if(
+    cmd.includes("abrir simuladores") ||
+    cmd.includes("abrir simulador") ||
+    cmd.includes("ir para simuladores")
+  ){
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(
+    cmd.includes("voltar") ||
+    cmd.includes("abrir início") ||
+    cmd.includes("abrir tela principal") ||
+    cmd.includes("abrir dashboard") ||
+    cmd.includes("ir para home")
+  ){
+    consumeVoiceCommand();
+    location.href = "./index.html";
+    return;
+  }
+
+  if(cmd.includes("tema claro")){
+    if(!document.body.classList.contains("light")) toggleTheme();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("tema escuro") || cmd.includes("tema normal")){
+    if(document.body.classList.contains("light")) toggleTheme();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("abrir investimento")){
+    document.getElementById("tipoSimulacao").value = "investimento";
+    toggleSimulator();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("abrir empréstimo") || cmd.includes("abrir emprestimo") || cmd.includes("abrir compra")){
+    document.getElementById("tipoSimulacao").value = "emprestimo";
+    toggleSimulator();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("calcular investimento")){
+    simularInvestimento();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("calcular empréstimo") || cmd.includes("calcular emprestimo")){
+    simularEmprestimo();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("limpar investimento")){
+    clearInvestimento();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("limpar empréstimo") || cmd.includes("limpar emprestimo")){
+    clearEmprestimo();
+    consumeVoiceCommand();
+    return;
+  }
+}
+
+async function initFirebase(){
+  if(!window.firebase){
+    dbg("Firebase não carregou.");
+    return false;
+  }
+
+  try{
+    if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  }catch(e){}
+
+  auth = firebase.auth();
+  try{
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  }catch(e){}
+
+  auth.onAuthStateChanged((u)=>{
+    USER = u || null;
+
+    if(!USER){
+      USER_ID = null;
+      location.replace("./login.html");
+      return;
+    }
+
+    USER_ID = USER.uid;
+
+    const t = localStorage.getItem("theme");
+    if(t === "light") document.body.classList.add("light");
+    applyThemeSettings();
+
+    loadAll();
+    renderKPIs();
+    updateInvestUI();
+    toggleSimulator();
+    setupVoiceBridge();
+
+    showApp();
+  });
+
+  return true;
+}
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  showLoading();
+  applyThemeSettings();
+  await initFirebase();
+});
+</script>
+</body>
+</html>
