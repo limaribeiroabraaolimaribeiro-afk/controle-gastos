@@ -1,1857 +1,1839 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>Controle de Gastos PRO</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Comando de Voz • Controle de Gastos PRO</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#569cff">
+  <meta name="theme-color" content="#569cff" />
+  <link rel="manifest" href="manifest.json" />
 
-<script>
-  window.API_BASE_URL = "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
-  window.APP_KEY = "GastosPro@2026!";
-</script>
+  <style>
+    :root{
+      --bg:#07101f;
+      --grad1:rgba(86,156,255,.22);
+      --grad2:rgba(57,217,138,.16);
+      --grad3:rgba(255,93,93,.12);
+      --panel:rgba(255,255,255,.07);
+      --panel2:rgba(255,255,255,.09);
+      --stroke:rgba(255,255,255,.10);
+      --text:#eaf0ff;
+      --muted:rgba(234,240,255,.72);
+      --accent:#569cff;
+      --good:#39d98a;
+      --warn:#ffd166;
+      --danger:#ff5d5d;
+      --shadow:0 18px 60px rgba(0,0,0,.45);
+      --glass:blur(14px);
+      --radius:24px;
+    }
 
-<style>
-:root{
-  --bg:#07101f;
-  --bg2:#0a1730;
-  --panel:rgba(255,255,255,.07);
-  --panel2:rgba(255,255,255,.10);
-  --stroke:rgba(255,255,255,.12);
-  --text:#eaf0ff;
-  --muted:rgba(234,240,255,.72);
-  --accent:#5f9cff;
-  --good:#39d98a;
-  --warn:#ffd166;
-  --danger:#ff5d5d;
-  --shadow:0 18px 60px rgba(0,0,0,.42);
-  --radius:22px;
-  --radius2:26px;
-}
-.light{
-  --bg:#f3f7ff;
-  --bg2:#e9f0ff;
-  --panel:rgba(255,255,255,.86);
-  --panel2:rgba(255,255,255,.96);
-  --stroke:rgba(0,0,0,.08);
-  --text:#121826;
-  --muted:rgba(18,24,38,.68);
-  --shadow:0 18px 40px rgba(0,0,0,.10);
-}
+    .light{
+      --panel:rgba(0,0,0,.04);
+      --panel2:rgba(0,0,0,.06);
+      --stroke:rgba(0,0,0,.08);
+      --text:#0d1222;
+      --muted:rgba(13,18,34,.68);
+      --shadow:0 18px 60px rgba(0,0,0,.12);
+    }
 
-*{box-sizing:border-box}
-html,body{margin:0}
-body{
-  min-height:100vh;
-  color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-  background:
-    radial-gradient(900px 700px at 15% 8%, rgba(86,156,255,.18), transparent 58%),
-    radial-gradient(700px 600px at 80% 30%, rgba(57,217,138,.11), transparent 60%),
-    radial-gradient(700px 560px at 70% 92%, rgba(255,209,102,.07), transparent 60%),
-    linear-gradient(180deg,var(--bg),var(--bg2));
-}
-.wrap{max-width:980px;margin:auto;padding:16px;padding-bottom:120px}
-.card{
-  background:linear-gradient(180deg,var(--panel2),var(--panel));
-  border:1px solid var(--stroke);
-  border-radius:var(--radius2);
-  box-shadow:var(--shadow);
-  backdrop-filter:blur(16px);
-  padding:14px;
-}
-h1,h2,h3,p{margin:0}
-.small{font-size:12px;color:var(--muted)}
-.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media (max-width:700px){
-  .grid2,.grid4{grid-template-columns:1fr}
-}
-input,select,textarea{
-  width:100%;
-  border:1px solid var(--stroke);
-  background:rgba(6,16,34,.18);
-  color:var(--text);
-  border-radius:18px;
-  padding:14px 16px;
-  font-size:16px;
-  outline:none;
-}
-.light input,.light select,.light textarea{background:rgba(255,255,255,.92)}
-label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-.btn{
-  appearance:none;border:1px solid var(--stroke);cursor:pointer;
-  background:rgba(255,255,255,.10);color:var(--text);
-  border-radius:20px;padding:15px 16px;font-weight:800;
-  box-shadow:0 10px 24px rgba(0,0,0,.16);
-}
-.btn.primary{
-  background:var(--accent);color:#fff;
-  border-color:color-mix(in srgb,var(--accent), transparent 50%);
-}
-.btn.good{
-  background:var(--good);color:#062114;
-  border-color:color-mix(in srgb,var(--good), transparent 50%);
-}
-.btn.warn{
-  background:var(--warn);color:#2b1d00;
-  border-color:color-mix(in srgb,var(--warn), transparent 50%);
-}
-.btn.icon{
-  width:44px;height:44px;padding:0;border-radius:16px;
-  display:flex;align-items:center;justify-content:center;
-}
-.badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 10px;border-radius:999px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.08);
-  font-size:12px;color:var(--muted);
-}
-.badge.good{color:var(--good);background:rgba(57,217,138,.10);border-color:rgba(57,217,138,.25)}
-.badge.warn{color:var(--warn);background:rgba(255,209,102,.10);border-color:rgba(255,209,102,.25)}
-.topbar{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;
-}
-.topbar .right{display:flex;gap:12px;align-items:center}
-.pill{
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  min-width:184px;padding:16px 18px;border-radius:22px;
-  background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);
-  box-shadow:0 12px 28px rgba(0,0,0,.18);
-  font-weight:900;font-size:18px;
-}
-@media (max-width:700px){
-  .topbar{flex-direction:column}
-  .topbar .right{width:100%;justify-content:space-between}
-  .pill{min-width:0;flex:1}
-}
-.screen{display:none}
-.screen.active{display:block}
-.backRow{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.sectionTitle{font-size:18px;font-weight:900;margin-bottom:10px}
-.kpi{
-  background:linear-gradient(180deg, rgba(57,217,138,.06), rgba(255,255,255,.04));
-  border:1px solid var(--stroke);border-radius:22px;padding:14px;
-}
-.kpi .t{font-size:13px;color:var(--muted)}
-.kpi .v{font-size:22px;font-weight:900;margin-top:6px}
-.hr{height:1px;background:var(--stroke);margin:14px 0}
-.note{
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--stroke);
-  border-radius:18px;padding:12px;
-}
-.itemCard{
-  display:flex;justify-content:space-between;gap:12px;align-items:center;
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--stroke);
-  border-radius:22px;padding:14px;margin-bottom:10px;
-}
-.itemTitle{font-size:18px;font-weight:900}
-.itemMeta{font-size:13px;color:var(--muted);margin-top:4px}
-.listActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.fabWrap{
-  position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:12px;z-index:999;
-}
-.fab{
-  width:78px;height:78px;border-radius:50%;
-  border:1px solid rgba(255,255,255,.20);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 18px 40px rgba(0,0,0,.28);
-  cursor:pointer;user-select:none;
-}
-.fab.ai{
-  background:radial-gradient(90px 80px at 30% 18%, rgba(255,255,255,.25), transparent 60%),
-             linear-gradient(135deg,#8ec0ff,#5f9cff);
-  color:#062040;font-weight:1000;font-size:16px;
-}
-.fab.voice{
-  background:radial-gradient(90px 80px at 30% 18%, rgba(255,255,255,.25), transparent 60%),
-             linear-gradient(135deg,#f1c27a,#d88967);
-  color:#2a1400;font-size:28px;font-weight:1000;
-}
-.fab.add{
-  background:radial-gradient(90px 80px at 30% 18%, rgba(255,255,255,.25), transparent 60%),
-             linear-gradient(135deg,#73f0b0,#39d98a);
-  color:#062114;font-size:42px;font-weight:1000;
-}
-.overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;
-  align-items:center;justify-content:center;padding:16px;z-index:2000;
-}
-.modal{
-  width:min(520px,100%);
-  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.06));
-  border:1px solid var(--stroke);border-radius:24px;box-shadow:var(--shadow);overflow:hidden;
-}
-.modalHeader,.modalFooter{padding:14px;border-bottom:1px solid var(--stroke)}
-.modalFooter{border-bottom:0;border-top:1px solid var(--stroke);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-.modalBody{padding:14px}
-.closeX{
-  width:44px;height:44px;border-radius:16px;border:1px solid var(--stroke);
-  background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-weight:900;
-}
-#loading{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
-}
-#debugBox{
-  position:fixed;left:12px;right:12px;bottom:12px;background:rgba(0,0,0,.82);
-  color:#fff;padding:10px;border-radius:14px;z-index:9999;font-size:12px;display:none;white-space:pre-wrap;
-}
-</style>
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      min-height:100%;
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+      background:
+        radial-gradient(900px 680px at 15% 8%, var(--grad1), transparent 55%),
+        radial-gradient(860px 640px at 85% 30%, var(--grad2), transparent 60%),
+        radial-gradient(700px 520px at 70% 92%, var(--grad3), transparent 60%),
+        var(--bg);
+      overflow-x:hidden;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:760px;
+      margin:0 auto;
+      padding:16px;
+      padding-bottom:40px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .titleBox h1{
+      margin:0;
+      font-size:28px;
+      line-height:1.02;
+      letter-spacing:.2px;
+    }
+
+    .small{font-size:12px;color:var(--muted);line-height:1.45}
+
+    .card{
+      background:linear-gradient(180deg, var(--panel2), var(--panel));
+      border:1px solid var(--stroke);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+      backdrop-filter:var(--glass);
+      margin-bottom:14px;
+      width:100%;
+      overflow:hidden;
+    }
+
+    .hero{
+      padding:18px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.10);
+      color:var(--text);
+      padding:13px 14px;
+      border-radius:18px;
+      cursor:pointer;
+      font-weight:850;
+      box-shadow:0 10px 26px rgba(0,0,0,.18);
+      min-height:50px;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      background:var(--accent);
+      color:#fff;
+      border-color:color-mix(in srgb, var(--accent), transparent 55%);
+    }
+    .btn.good{
+      background:var(--good);
+      color:#062114;
+      border-color:color-mix(in srgb, var(--good), transparent 55%);
+    }
+    .btn.warn{
+      background:var(--warn);
+      color:#2a1a00;
+      border-color:color-mix(in srgb, var(--warn), transparent 55%);
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.10);
+      border:1px solid var(--stroke);
+      color:var(--muted);
+      font-size:12px;
+      max-width:100%;
+    }
+
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background:var(--warn);
+      box-shadow:0 0 0 4px rgba(255,209,102,.12);
+      flex:0 0 auto;
+    }
+    .dot.ok{
+      background:var(--good);
+      box-shadow:0 0 0 4px rgba(57,217,138,.12);
+    }
+    .dot.err{
+      background:var(--danger);
+      box-shadow:0 0 0 4px rgba(255,93,93,.12);
+    }
+
+    .heroTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .bigMicWrap{
+      display:flex;
+      justify-content:center;
+      margin:18px 0 10px;
+    }
+
+    .bigMic{
+      width:168px;
+      height:168px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:66px;
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+      box-shadow:0 24px 60px rgba(0,0,0,.35);
+      background:
+        radial-gradient(130px 100px at 30% 20%, rgba(255,255,255,.28), transparent 60%),
+        linear-gradient(135deg, rgba(86,156,255,.98), rgba(57,217,138,.58));
+      color:#04152c;
+      transition:transform .15s ease, box-shadow .15s ease;
+      flex:0 0 auto;
+    }
+    .bigMic:active{transform:scale(.985)}
+    .bigMic.listening{
+      animation:pulse 1.2s infinite;
+      background:
+        radial-gradient(130px 100px at 30% 20%, rgba(255,255,255,.30), transparent 60%),
+        linear-gradient(135deg, rgba(255,93,93,.98), rgba(255,209,102,.65));
+      color:#1d1200;
+    }
+    @keyframes pulse{
+      0%{ box-shadow:0 0 0 0 rgba(255,93,93,.38), 0 24px 60px rgba(0,0,0,.35);}
+      70%{ box-shadow:0 0 0 18px rgba(255,93,93,0), 0 24px 60px rgba(0,0,0,.35);}
+      100%{ box-shadow:0 0 0 0 rgba(255,93,93,0), 0 24px 60px rgba(0,0,0,.35);}
+    }
+
+    .box{
+      width:100%;
+      min-height:92px;
+      white-space:pre-wrap;
+      line-height:1.5;
+      font-size:15px;
+      padding:14px;
+      border-radius:18px;
+      border:1px dashed var(--stroke);
+      background:rgba(255,255,255,.04);
+      overflow-wrap:anywhere;
+    }
+
+    .result{
+      width:100%;
+      min-height:136px;
+      white-space:pre-wrap;
+      line-height:1.55;
+      font-size:15px;
+      padding:14px;
+      border-radius:18px;
+      border:1px dashed var(--stroke);
+      background:rgba(255,255,255,.04);
+      overflow-wrap:anywhere;
+    }
+
+    .ok{color:var(--good);font-weight:900}
+    .warn{color:var(--warn);font-weight:900}
+    .err{color:var(--danger);font-weight:900}
+
+    .chips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .chip{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.08);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .list{
+      display:grid;
+      gap:10px;
+    }
+    .item{
+      padding:12px;
+      border-radius:18px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06);
+      line-height:1.5;
+      overflow-wrap:anywhere;
+    }
+
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      font-size:12px;
+      white-space:pre-wrap;
+      line-height:1.5;
+      overflow-wrap:anywhere;
+    }
+
+    .sectionTitle{
+      font-weight:900;
+      margin-bottom:10px;
+    }
+
+    @media (max-width:640px){
+      .wrap{padding:12px}
+      .titleBox h1{font-size:22px}
+      .topbar{flex-direction:column}
+      .heroTop{flex-direction:column}
+      .bigMic{width:152px;height:152px;font-size:58px}
+      .actions{grid-template-columns:1fr}
+      .btn{width:100%}
+    }
+  </style>
 </head>
 <body>
-
-<div id="loading">
-  <div class="card" style="max-width:520px;width:100%">
-    <h2 style="font-size:20px;font-weight:900">Carregando…</h2>
-    <div class="small" style="margin-top:8px">Validando login e preparando seus dados.</div>
-  </div>
-</div>
-
-<div id="app" style="display:none">
   <div class="wrap">
-
     <div class="topbar">
-      <div>
-        <h1 style="font-size:28px;font-weight:1000;line-height:1.04">Controle de<br>Gastos PRO</h1>
-        <div class="small" style="font-size:17px;max-width:270px;margin-top:8px">
-          Aqui fica só o essencial. Para editar categorias, fixos, PDF e simuladores, use o Menu.
+      <div class="titleBox">
+        <h1>Comando de Voz</h1>
+        <div class="small">
+          Fale naturalmente. O sistema tenta palavras-chave primeiro e, se precisar, manda para sua IA interpretar e executar sozinho.
         </div>
       </div>
-      <div class="right">
-        <button class="pill" onclick="openMenu()">☰ <span>Menu</span></button>
-        <button class="pill" onclick="toggleTheme()">🌙/☀️</button>
-      </div>
-    </div>
 
-    <div class="screen active" id="screen-home">
-      <div id="homeContainer">
-
-        <div class="card" style="padding:18px">
-          <div class="sectionTitle" style="font-size:24px">Resumo do mês</div>
-
-          <div class="grid2">
-            <div>
-              <label>Mês</label>
-              <select id="monthSelect"></select>
-            </div>
-            <div>
-              <label>Salário</label>
-              <input id="salary" type="number" placeholder="2107">
-            </div>
-            <div>
-              <label>Meta</label>
-              <input id="meta" type="number" placeholder="500">
-            </div>
-            <div>
-              <label>Guardado (adicionar)</label>
-              <input id="savedValue" type="number" placeholder="Ex: 1000">
-            </div>
-          </div>
-
-          <div class="grid2" style="margin-top:12px">
-            <div>
-              <label>Descrição do guardado (opcional)</label>
-              <input id="savedDesc" placeholder="Ex: Reserva, CDB, Tesouro...">
-            </div>
-            <div style="display:flex;align-items:flex-end">
-              <button class="btn primary" style="width:100%;font-size:18px" onclick="addSaved()">Adicionar</button>
-            </div>
-          </div>
-
-          <div id="savedList" style="margin-top:12px"></div>
-
-          <div class="row" style="margin-top:14px">
-            <button class="btn primary" style="font-size:18px" onclick="saveSettings()">Salvar</button>
-            <button class="btn" style="font-size:18px" onclick="openHistory()">📅 Histórico</button>
-          </div>
-        </div>
-
-        <div class="grid4" style="margin-top:14px">
-          <div class="kpi">
-            <div class="t">Salário</div>
-            <div class="v" id="kpiSalary">R$ 0,00</div>
-          </div>
-          <div class="kpi">
-            <div class="t">Gasto</div>
-            <div class="v" id="kpiSpent">R$ 0,00</div>
-          </div>
-          <div class="kpi">
-            <div class="t">Sobra</div>
-            <div class="v" id="kpiLeft">R$ 0,00</div>
-          </div>
-          <div class="kpi">
-            <div class="t">Guardado</div>
-            <div class="v" id="kpiSaved">R$ 0,00</div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:14px">
-          <h3 style="font-size:16px;margin-bottom:10px">Gastos por categoria</h3>
-          <canvas id="chart" style="width:100%;height:220px"></canvas>
-        </div>
-
-        <div class="card" style="margin-top:14px">
-          <h3 style="font-size:16px;margin-bottom:10px">Evolução</h3>
-          <canvas id="chartEvolucao" style="width:100%;height:220px"></canvas>
-        </div>
-
-        <div class="card" style="margin-top:14px">
-          <h3 style="font-size:16px;margin-bottom:10px">Lista do mês</h3>
-          <div class="small" style="font-size:14px;margin-bottom:10px">
-            Toque em <b>Pendente/Pago</b> para marcar se você já pagou.
-            <br>✅ Gastos fixos e investimentos fixos podem ter <b>dia de vencimento</b>.
-            <br>✅ Quando faltar 3, 2, 1 dias ou vencer hoje, o app pode te avisar por <b>notificação</b>.
-          </div>
-          <div id="list"></div>
-        </div>
-
+      <div class="row" style="width:100%;max-width:230px">
+        <button class="btn" style="flex:1" onclick="goBack()">← Voltar</button>
+        <button class="btn" style="flex:1" onclick="toggleTheme()">🌙/☀️</button>
       </div>
     </div>
 
-    <div class="screen" id="screen-menu">
-      <div class="backRow">
-        <button class="btn" onclick="goHome()">← Voltar</button>
-        <div style="font-size:18px;font-weight:900">Menu</div>
-      </div>
-
-      <div class="card">
-        <div class="row" style="flex-direction:column;align-items:stretch">
-          <button class="btn" onclick="openScreen('screen-config')">⚙️ Configurações</button>
-          <button class="btn" onclick="openScreen('screen-simulators')">🧠 Simuladores</button>
-          <button class="btn" onclick="openScreen('screen-categories')">📂 Minhas Categorias</button>
-          <button class="btn" onclick="openScreen('screen-fixos')">📌 Gastos Fixos</button>
-          <button class="btn" onclick="openScreen('screen-investfixos')">📈 Investimentos Fixos</button>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:14px">
-        <h3>Conta</h3>
-        <div class="row">
-          <div>
-            <div style="font-weight:900;font-size:18px" id="userName">—</div>
-            <div class="small" style="font-size:15px" id="userEmail">—</div>
-          </div>
-          <button class="btn" onclick="logout()">Sair</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-config">
-      <div class="backRow">
-        <button class="btn" onclick="openMenu()">← Voltar</button>
-        <div style="font-size:18px;font-weight:900">Configurações</div>
-      </div>
-
-      <div class="card">
-        <div class="row" style="flex-direction:column;align-items:stretch">
-          <button class="btn" onclick="openScreen('screen-themes')">🎨 Temas</button>
-          <button class="btn" onclick="openPdfScreen()">🖨️ Imprimir em PDF</button>
-          <button class="btn" onclick="openHistory()">📅 Histórico</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="note">
-          <div style="font-weight:900">🔔 Notificações</div>
-          <div class="small" style="margin-top:6px">Ative aqui. Quando você cadastrar um prazo em gasto fixo ou investimento fixo, o app já tenta usar essa permissão automaticamente.</div>
-          <div style="margin-top:10px">
-            <button class="btn good" onclick="requestNotificationPermission()">Ativar notificações</button>
-          </div>
-        </div>
-
-        <div class="note" style="margin-top:12px">
-          <div style="font-weight:900">🎙️ Sistema de voz</div>
-          <div class="small" style="margin-top:6px">Quando bloqueado, o botão de voz some da tela principal.</div>
-          <div class="row" style="margin-top:10px">
-            <div>
-              <div class="small">Status</div>
-              <div style="font-weight:900" id="voiceEnableStatus">—</div>
-            </div>
-            <button class="btn" id="btnToggleVoiceEnabled" onclick="toggleVoiceEnabled()">—</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-themes">
-      <div class="backRow">
-        <button class="btn" onclick="openScreen('screen-config')">← Voltar</button>
-        <div style="font-size:18px;font-weight:900">Temas</div>
-      </div>
-
-      <div class="card">
-        <label>Preset</label>
-        <select id="themePreset" onchange="saveThemePreset()">
-          <option value="default">Padrão</option>
-          <option value="purple">Roxo</option>
-          <option value="green">Verde</option>
-          <option value="sunset">Pôr do sol</option>
-          <option value="mono">Minimal</option>
-        </select>
-
-        <div class="hr"></div>
-
-        <label>Cor dos botões</label>
-        <input id="accentPicker" type="color" value="#5f9cff" onchange="saveAccentColor()">
-
-        <div style="margin-top:12px">
-          <button class="btn" onclick="resetThemes()">↩️ Voltar ao padrão</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-categories">
-      <div class="backRow">
-        <button class="btn" onclick="openMenu()">← Voltar</button>
-        <div style="font-size:18px;font-weight:900">Minhas Categorias</div>
-      </div>
-
-      <div class="card">
-        <h3 style="font-size:18px;margin-bottom:10px">Adicionar categoria</h3>
-        <div class="row">
-          <input id="novaCategoria" placeholder="Nome da categoria">
-          <button class="btn primary" style="flex:0 0 auto" onclick="addCategoria()">Adicionar</button>
-        </div>
-        <div class="hr"></div>
-        <div class="small">⚠️ O X remove a categoria. Gastos dessa categoria vão para “Outros”.</div>
-        <div class="hr"></div>
-        <div id="listaCategorias"></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-fixos">
-      <div class="backRow">
-        <button class="btn" onclick="openMenu()">← Voltar</button>
-        <div style="font-size:18px;font-weight:900">Gastos Fixos</div>
-      </div>
-
-      <div class="card">
-        <h3 style="font-size:18px;margin-bottom:10px">Adicionar gasto fixo</h3>
-
-        <label>Descrição</label>
-        <input id="descFixo" placeholder="Casa">
-
-        <div class="grid2" style="margin-top:12px">
-          <div>
-            <label>Valor</label>
-            <input id="valorFixo" type="number" placeholder="750">
-          </div>
-          <div>
-            <label>Categoria</label>
-            <select id="categoriaFixo"></select>
-          </div>
-        </div>
-
-        <div class="grid2" style="margin-top:12px">
-          <div>
-            <label>Até que dia deve pagar</label>
-            <input id="diaFixo" type="number" min="1" max="31" placeholder="7">
-          </div>
-          <div class="note">
-            <div style="font-weight:900;font-size:18px">Notificação</div>
-            <div class="small" style="margin-top:6px;font-size:14px">O app pode avisar quando faltarem 3, 2, 1 dias e no dia do vencimento.</div>
-          </div>
-        </div>
-
-        <div style="margin-top:14px">
-          <button class="btn primary" style="width:100%;font-size:18px" onclick="addFixo()">Adicionar</button>
-        </div>
-
-        <div class="hr"></div>
-        <div class="small">⚠️ O X aqui remove do sistema. Na lista do mês (Home), o X remove só daquele mês.</div>
-        <div class="hr"></div>
-        <div id="listaFixos"></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-investfixos">
-      <div class="backRow">
-        <button class="btn" onclick="openMenu()">← Voltar</button>
-        <div style="font-size:18px;font-weight:900">Investimentos Fixos</div>
-      </div>
-
-      <div class="card">
-        <h3 style="font-size:18px">Como funciona</h3>
-        <div class="small" style="margin-top:6px;font-size:16px">
-          Você informa <b>Nome</b>, <b>Meta final (R$)</b>, <b>Prazo (meses)</b> e <b>até que dia pagar</b>. O app calcula automaticamente o valor mensal.
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:14px">
-        <h3 style="font-size:18px;margin-bottom:10px">Adicionar investimento fixo</h3>
-
-        <label>Nome</label>
-        <input id="invNome" placeholder="Ex: Internet">
-
-        <div class="grid2" style="margin-top:12px">
-          <div>
-            <label>Meta final (R$)</label>
-            <input id="invMetaFinal" type="number" placeholder="Ex: 10000">
-          </div>
-          <div>
-            <label>Prazo (meses)</label>
-            <input id="invPrazoMeses" type="number" placeholder="12">
-          </div>
-        </div>
-
-        <div class="grid2" style="margin-top:12px">
-          <div>
-            <label>Até que dia deve pagar</label>
-            <input id="invDiaPagar" type="number" min="1" max="31" placeholder="10">
-          </div>
-          <div class="note">
-            <div style="font-weight:900;font-size:18px">Lembrete</div>
-            <div class="small" style="margin-top:6px;font-size:14px">O app avisa quando faltar 3, 2, 1 dias e no dia do prazo.</div>
-          </div>
-        </div>
-
-        <div class="note" style="margin-top:12px">
-          <div style="font-weight:900;font-size:18px">Mensal automático</div>
-          <div class="small" id="invResumo" style="margin-top:6px;font-size:14px">Digite o Nome.</div>
-        </div>
-
-        <div style="margin-top:14px">
-          <button class="btn primary" style="width:100%;font-size:18px" onclick="addInvestFixo()">Adicionar</button>
-        </div>
-
-        <div class="hr"></div>
-        <div id="listaInvestFixos"></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-simulators">
-      <div class="backRow">
-        <button class="btn" onclick="openMenu()">← Voltar</button>
-        <div style="font-size:18px;font-weight:900">Simuladores</div>
-      </div>
-
-      <div class="card">
-        <label>Escolha</label>
-        <select id="tipoSimulacao">
-          <option value="investimento">Investimento</option>
-          <option value="emprestimo">Empréstimo / Compra</option>
-        </select>
-
-        <div class="hr"></div>
-
-        <div id="areaInvestimento">
-          <h3 style="font-size:18px;margin-bottom:10px">📈 Investimento</h3>
-
-          <label>Tipo de investimento</label>
-          <select id="investTipo">
-            <option value="poupanca">Poupança (estimativa)</option>
-            <option value="cdb">CDB/LCI/LCA (% do CDI)</option>
-            <option value="tesouro">Tesouro Selic (estimativa)</option>
-            <option value="fixo">Taxa fixa mensal (%)</option>
-          </select>
-
-          <div class="grid2" style="margin-top:12px">
-            <div>
-              <label id="investExtraLabel">Parâmetro</label>
-              <input id="investExtraValue" type="number" placeholder="Ex: 100">
-            </div>
-            <div class="note">
-              <div class="small" id="investHint">Escolha o tipo para ver o parâmetro.</div>
-            </div>
-          </div>
-
-          <div class="grid2" style="margin-top:12px">
-            <div>
-              <label>Valor inicial</label>
-              <input id="valorInvestimento" type="number" placeholder="Ex: 1000">
-            </div>
-            <div>
-              <label>Meses</label>
-              <input id="mesesInvestimento" type="number" placeholder="Ex: 12">
-            </div>
-          </div>
-
-          <div class="grid2" style="margin-top:12px">
-            <div>
-              <label>Aporte mensal</label>
-              <input id="aporteMensalInvest" type="number" placeholder="Ex: 300">
-            </div>
-            <div>
-              <label>Vai colocar esse valor todo mês?</label>
-              <select id="aporteRecorrenteInvest">
-                <option value="nao">Não</option>
-                <option value="sim">Sim</option>
-              </select>
-            </div>
-          </div>
-
-          <div style="margin-top:14px">
-            <button class="btn primary" style="width:100%" onclick="simularInvestimento()">Calcular</button>
-          </div>
-          <div id="resultadoInvestimento" style="margin-top:12px;font-weight:900"></div>
-        </div>
-
-        <div id="areaEmprestimo" style="display:none">
-          <h3 style="font-size:18px;margin-bottom:10px">💳 Empréstimo / Compra</h3>
-
-          <label>Modelo</label>
-          <select id="loanTipo">
-            <option value="price">PRICE (parcela fixa)</option>
-            <option value="sac">SAC (parcela decrescente)</option>
-          </select>
-
-          <div class="grid2" style="margin-top:12px">
-            <div>
-              <label>Valor</label>
-              <input id="loanValor" type="number" placeholder="Ex: 10000">
-            </div>
-            <div>
-              <label>Parcelas</label>
-              <input id="loanParcelas" type="number" placeholder="Ex: 24">
-            </div>
-          </div>
-
-          <div class="grid2" style="margin-top:12px">
-            <div>
-              <label>Juros mensal (%)</label>
-              <input id="loanJuros" type="number" placeholder="Ex: 2.5">
-            </div>
-            <div class="note">
-              <div class="small">O sistema considera salário, gastos e meta.</div>
-            </div>
-          </div>
-
-          <div style="margin-top:14px">
-            <button class="btn primary" style="width:100%" onclick="simularEmprestimo()">Calcular</button>
-          </div>
-          <div id="resultadoEmprestimo" style="margin-top:12px;font-weight:900"></div>
-          <div id="tabelaEmprestimo" class="small" style="margin-top:10px"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-history">
-      <div class="backRow">
-        <button class="btn" onclick="goHome()">← Voltar</button>
-        <div style="font-size:18px;font-weight:900">Histórico</div>
-      </div>
-
-      <div class="card">
-        <h3 style="font-size:18px;margin-bottom:10px">Seus meses salvos</h3>
-        <div class="small">Toque em um mês para abrir na tela principal. Use o ✕ para deletar o mês do histórico.</div>
-        <div class="hr"></div>
-        <div id="historyList"></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen-pdf">
-      <div class="backRow">
-        <button class="btn" onclick="openScreen('screen-config')">← Voltar</button>
-        <div style="font-size:18px;font-weight:900">Imprimir em PDF</div>
-      </div>
-
-      <div class="card">
-        <label>Ano</label>
-        <select id="pdfYear"></select>
-
-        <div style="margin-top:12px">
-          <label>Mês do relatório</label>
-          <select id="pdfMonth"></select>
-        </div>
-
-        <div class="row" style="margin-top:14px">
-          <button class="btn" onclick="gerarPDFResumoAno()">📘 Resumo do ano</button>
-          <button class="btn primary" onclick="gerarPDFCompleto()">📄 PDF do mês</button>
-        </div>
-
-        <div class="small" id="pdfStatus" style="margin-top:10px"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="fabWrap">
-    <div class="fab ai" onclick="openIA()">IAPRO</div>
-    <div class="fab voice" id="fabVoice" onclick="openVoicePage()">🎙️</div>
-    <div class="fab add" onclick="openAddExpense()">+</div>
-  </div>
-</div>
-
-<div id="debugBox"></div>
-
-<div class="overlay" id="overlay-addExpense">
-  <div class="modal">
-    <div class="modalHeader row" style="justify-content:space-between">
-      <div style="font-weight:900;font-size:18px">➕ Adicionar gasto</div>
-      <div class="closeX" onclick="closeModal('overlay-addExpense')">✕</div>
-    </div>
-    <div class="modalBody">
-      <label>Descrição</label>
-      <input id="mDesc" placeholder="Ex: Mercado">
-      <div class="grid2" style="margin-top:12px">
+    <div class="card hero">
+      <div class="heroTop">
         <div>
-          <label>Valor</label>
-          <input id="mValor" type="number" placeholder="Ex: 120.50">
+          <div class="sectionTitle">Fale normalmente</div>
+          <div class="small">
+            Exemplos:
+            <br>• anota que paguei 50 no mercado hoje
+            <br>• coloca internet 99 fixo vencendo dia 11
+            <br>• quero guardar 300 pro tablet
+            <br>• marca internet como pago
+            <br>• tira internet do pago
+            <br>• remove o gasto mercado
+            <br>• gera pdf de março de 2026
+            <br>• muda o tema para roxo
+            <br>• abre histórico
+            <br>• abrir simuladores
+          </div>
         </div>
-        <div>
-          <label>Categoria</label>
-          <select id="mCategoria"></select>
+
+        <div class="badge">
+          <span class="dot" id="micDot"></span>
+          <span id="micStatus">Parado</span>
         </div>
       </div>
+
+      <div class="bigMicWrap">
+        <button class="bigMic" id="bigMic" onclick="toggleRecording()" title="Gravar comando">🎙️</button>
+      </div>
+
+      <div class="small" id="hintText" style="text-align:center;margin-bottom:10px">
+        Toque no áudio. Quando terminar de falar, a IA já tenta entender e executar automaticamente.
+      </div>
+
+      <div class="small" style="margin-bottom:6px">Texto reconhecido</div>
+      <div class="box" id="transcriptBox">Nenhum comando ainda.</div>
+
+      <div class="chips">
+        <div class="chip">Gasto natural</div>
+        <div class="chip">Fixo</div>
+        <div class="chip">Investimento fixo</div>
+        <div class="chip">Guardado</div>
+        <div class="chip">Tema</div>
+        <div class="chip">PDF</div>
+        <div class="chip">Resumo</div>
+        <div class="chip">Histórico</div>
+        <div class="chip">Simuladores</div>
+        <div class="chip">Notificações</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="clearTranscript()">Limpar</button>
+        <button class="btn warn" onclick="toggleRecording()">Áudio</button>
+        <button class="btn good" onclick="executeVoiceCommand()">Executar comando</button>
+      </div>
     </div>
-    <div class="modalFooter">
-      <button class="btn" onclick="closeModal('overlay-addExpense')">Cancelar</button>
-      <button class="btn good" onclick="confirmAddExpense()">Adicionar</button>
+
+    <div class="card">
+      <div class="sectionTitle">Último resultado</div>
+      <div id="resultBox" class="result">Nenhuma ação executada ainda.</div>
+    </div>
+
+    <div class="card">
+      <div class="sectionTitle">Comandos que ele entende</div>
+      <div class="list small">
+        <div class="item"><b>Gastos:</b> adicionar, gastar, pagar, remover, marcar como pago, voltar para pendente.</div>
+        <div class="item"><b>Fixos:</b> adicionar gasto fixo, remover gasto fixo, vencimento, dia de pagar.</div>
+        <div class="item"><b>Investimentos fixos:</b> meta, meses, valor mensal, prazo.</div>
+        <div class="item"><b>Guardado:</b> guardar valor, anotar guardado, juntar para algo.</div>
+        <div class="item"><b>Tema:</b> mudar para roxo, verde, azul, pôr do sol, minimal, trocar cor.</div>
+        <div class="item"><b>PDF:</b> pdf do mês, resumo do ano.</div>
+        <div class="item"><b>Telas do app:</b> abrir histórico, abrir IA, abrir categorias, abrir gastos fixos, abrir investimentos fixos, abrir simuladores, abrir configurações, voltar início.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sectionTitle">Diagnóstico</div>
+      <div id="debugBox" class="mono">Aguardando...</div>
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
-<script>
-const FIREBASE_CONFIG = {
-  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-  authDomain:"controle-gastos-pro.firebaseapp.com",
-  projectId:"controle-gastos-pro"
-};
+  <script>
+    window.API_BASE_URL = window.API_BASE_URL || "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
+    window.APP_KEY = window.APP_KEY || "GastosPro@2026!";
+  </script>
 
-let auth = null;
-let USER = null;
-let USER_ID = null;
-let categorias = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
-let fixos = [];
-let investFixos = [];
-let state = { meses:{} };
-let mesAtual = new Date().toISOString().slice(0,7);
-let grafico = null;
-let graficoEvolucao = null;
+  <script>
+    const FIREBASE_CONFIG = {
+      apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+      authDomain:"controle-gastos-pro.firebaseapp.com",
+      projectId:"controle-gastos-pro"
+    };
 
-const NOTIF_KEYS = { sentPrefix: "notif_sent_v1" };
-const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
+    const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
+    const THEME_KEYS = { preset:"theme_preset_v1", accent:"theme_accent_v1" };
 
-const THEME_PRESETS = {
-  default:{ dark:{bg:"#07101f"}, light:{bg:"#f3f7ff"} },
-  purple:{ dark:{bg:"#0e0b21"}, light:{bg:"#faf7ff"} },
-  green:{ dark:{bg:"#081711"}, light:{bg:"#f6fff9"} },
-  sunset:{ dark:{bg:"#1a0c0a"}, light:{bg:"#fff8f2"} },
-  mono:{ dark:{bg:"#05070c"}, light:{bg:"#fff"} }
-};
+    const THEME_PRESETS = {
+      default:{ dark:{bg:"#07101f",g1:"rgba(86,156,255,.22)",g2:"rgba(57,217,138,.16)",g3:"rgba(255,93,93,.12)"}, light:{bg:"#f4f6ff",g1:"rgba(86,156,255,.14)",g2:"rgba(57,217,138,.10)",g3:"rgba(255,93,93,.08)"} },
+      purple:{ dark:{bg:"#0d0a1f",g1:"rgba(170,110,255,.25)",g2:"rgba(86,156,255,.12)",g3:"rgba(57,217,138,.10)"}, light:{bg:"#fbf8ff",g1:"rgba(170,110,255,.16)",g2:"rgba(86,156,255,.10)",g3:"rgba(57,217,138,.08)"} },
+      green:{ dark:{bg:"#061a14",g1:"rgba(57,217,138,.28)",g2:"rgba(86,156,255,.10)",g3:"rgba(255,209,102,.10)"}, light:{bg:"#f7fffb",g1:"rgba(57,217,138,.16)",g2:"rgba(86,156,255,.08)",g3:"rgba(255,209,102,.10)"} },
+      sunset:{ dark:{bg:"#1a0b0b",g1:"rgba(255,93,93,.22)",g2:"rgba(255,209,102,.18)",g3:"rgba(86,156,255,.10)"}, light:{bg:"#fff7f2",g1:"rgba(255,93,93,.14)",g2:"rgba(255,209,102,.14)",g3:"rgba(86,156,255,.08)"} },
+      mono:{ dark:{bg:"#05070c",g1:"rgba(255,255,255,.10)",g2:"rgba(255,255,255,.06)",g3:"rgba(255,255,255,.04)"}, light:{bg:"#ffffff",g1:"rgba(0,0,0,.06)",g2:"rgba(0,0,0,.04)",g3:"rgba(0,0,0,.03)"} }
+    };
 
-function dbg(msg){
-  const box = document.getElementById("debugBox");
-  box.style.display = "block";
-  box.textContent = String(msg);
-}
-window.addEventListener("error", (e)=>{
-  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
-});
+    const COLOR_MAP = {
+      azul:"#569cff", blue:"#569cff",
+      verde:"#39d98a", green:"#39d98a",
+      vermelho:"#ff5d5d", red:"#ff5d5d",
+      amarelo:"#ffd166", yellow:"#ffd166",
+      roxo:"#aa6eff", purple:"#aa6eff",
+      rosa:"#ff69b4", pink:"#ff69b4",
+      laranja:"#ff8c42", orange:"#ff8c42",
+      ciano:"#00c2ff", preto:"#222222",
+      branco:"#f5f5f5"
+    };
 
-function money(n){ return Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}); }
-function uid(){ return Math.random().toString(16).slice(2) + Date.now().toString(16); }
-function todayISO(){ return new Date().toISOString().slice(0,10); }
-function escapeHtml(s){ return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
-function normalizeText(s){ return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim(); }
-function titleCase(s){ return String(s||"").split(" ").filter(Boolean).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(" "); }
-function monthLabel(m){ return new Date(m + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"short",year:"numeric"}); }
-function onlyMonthLabel(m){ return new Date(m + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"short"}); }
+    const MONTHS_PT = {
+      janeiro:"01",
+      fevereiro:"02",
+      marco:"03",
+      "março":"03",
+      abril:"04",
+      maio:"05",
+      junho:"06",
+      julho:"07",
+      agosto:"08",
+      setembro:"09",
+      outubro:"10",
+      novembro:"11",
+      dezembro:"12"
+    };
 
-function showLoading(){ document.getElementById("app").style.display="none"; document.getElementById("loading").style.display="flex"; }
-function showApp(){ document.getElementById("loading").style.display="none"; document.getElementById("app").style.display="block"; }
-function openModal(id){ const el=document.getElementById(id); if(el) el.style.display="flex"; }
-function closeModal(id){ const el=document.getElementById(id); if(el) el.style.display="none"; }
+    let auth = null;
+    let USER = null;
+    let USER_ID = null;
+    let recognition = null;
+    let listening = false;
+    let lastTranscript = "";
+    let autoExecuteAfterSpeech = true;
 
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  const el = document.getElementById(id);
-  if(el) el.classList.add("active");
-}
-function goHome(){ showScreen("screen-home"); }
-function openMenu(){ showScreen("screen-menu"); }
-function openScreen(id){ showScreen(id); }
-function openHistory(){ buildHistoryUI(); showScreen("screen-history"); }
-function openPdfScreen(){ buildPdfSelectors(); showScreen("screen-pdf"); }
+    function dbg(msg){
+      document.getElementById("debugBox").textContent = String(msg);
+    }
 
-function openIA(){ if(!USER_ID) return alert("Faça login primeiro"); location.href="./ia.html"; }
-function openVoicePage(){ if(!USER_ID) return alert("Faça login primeiro"); location.href="./voz.html"; }
+    function setResult(html){
+      document.getElementById("resultBox").innerHTML = html;
+    }
 
-function toggleTheme(){
-  document.body.classList.toggle("light");
-  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
-  applyThemeSettings();
-}
-function applyThemeSettings(){
-  const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
-  const accent = localStorage.getItem(THEME_KEYS.accent) || "#5f9cff";
-  const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
-  const mode = document.body.classList.contains("light") ? "light" : "dark";
-  document.documentElement.style.setProperty("--accent", accent);
-  document.documentElement.style.setProperty("--bg", p[mode].bg);
-  document.documentElement.style.setProperty("--bg2", p[mode].bg);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute("content", accent);
-  const tp = document.getElementById("themePreset");
-  const ac = document.getElementById("accentPicker");
-  if(tp) tp.value = preset;
-  if(ac) ac.value = accent;
-}
-function saveThemePreset(){ localStorage.setItem(THEME_KEYS.preset, document.getElementById("themePreset").value); applyThemeSettings(); }
-function saveAccentColor(){ localStorage.setItem(THEME_KEYS.accent, document.getElementById("accentPicker").value); applyThemeSettings(); }
-function resetThemes(){ localStorage.removeItem(THEME_KEYS.preset); localStorage.removeItem(THEME_KEYS.accent); applyThemeSettings(); }
+    function escapeHtml(s){
+      return String(s || "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
 
-function kMes(){ return "gastos_pro_state_" + USER_ID; }
-function kCat(){ return "categorias_" + USER_ID; }
-function kFix(){ return "fixos_" + USER_ID; }
-function kInv(){ return "inv_fixos_" + USER_ID; }
-function kVoiceEnabled(){ return `voice_enabled_v1_${USER_ID || "guest"}`; }
+    function normalizeText(s){
+      return String(s || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
 
-function loadAll(){
-  try{ const raw = localStorage.getItem(kMes()); if(raw) state = JSON.parse(raw) || { meses:{} }; }catch(e){}
-  try{ const raw = localStorage.getItem(kCat()); if(raw) categorias = JSON.parse(raw) || categorias; }catch(e){}
-  try{ const raw = localStorage.getItem(kFix()); if(raw) fixos = JSON.parse(raw) || []; }catch(e){}
-  try{ const raw = localStorage.getItem(kInv()); if(raw) investFixos = JSON.parse(raw) || []; }catch(e){}
-  if(!state.meses) state.meses = {};
-}
-function saveAll(){
-  localStorage.setItem(kMes(), JSON.stringify(state));
-  localStorage.setItem(kCat(), JSON.stringify(categorias));
-  localStorage.setItem(kFix(), JSON.stringify(fixos));
-  localStorage.setItem(kInv(), JSON.stringify(investFixos));
-}
-function getDataMes(m){
-  const key = m || mesAtual;
-  if(!state.meses[key]) state.meses[key] = { salary:0, meta:0, items:[], saved:[], investStatus:{}, hiddenFixos:[] };
-  const d = state.meses[key];
-  if(!Array.isArray(d.items)) d.items = [];
-  if(!Array.isArray(d.saved)) d.saved = [];
-  if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos = [];
-  if(!d.investStatus) d.investStatus = {};
-  return d;
-}
+    function titleCase(s){
+      return String(s || "")
+        .split(" ")
+        .filter(Boolean)
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+        .join(" ");
+    }
 
-function buildMonthSelect(){
-  const sel = document.getElementById("monthSelect");
-  const set = new Set(Object.keys(state.meses || {}));
-  const now = new Date();
-  for(let i=0;i<36;i++){
-    const dt = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    set.add(dt.toISOString().slice(0,7));
-  }
-  const months = Array.from(set).sort().reverse();
-  sel.innerHTML = months.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join("");
-  if(!months.includes(mesAtual)) mesAtual = months[0] || new Date().toISOString().slice(0,7);
-  sel.value = mesAtual;
-  sel.onchange = ()=>{ mesAtual = sel.value; render(); };
-}
-function buildPdfSelectors(){
-  const yearSel = document.getElementById("pdfYear");
-  const monthSel = document.getElementById("pdfMonth");
-  const months = Object.keys(state.meses || {}).sort().reverse();
-  const years = Array.from(new Set(months.map(m=>m.slice(0,4)).concat([String(new Date().getFullYear())]))).sort().reverse();
-  yearSel.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join("");
-  monthSel.innerHTML = months.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join("");
-  yearSel.value = mesAtual.slice(0,4);
-  if(months.length) monthSel.value = mesAtual;
-}
+    function money(n){
+      return Number(n || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+    }
 
-function renderCategorias(){
-  const div = document.getElementById("listaCategorias");
-  const selF = document.getElementById("categoriaFixo");
-  const selM = document.getElementById("mCategoria");
+    function uid(){
+      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    }
 
-  div.innerHTML = categorias.map((c,idx)=>`
-    <div class="itemCard">
-      <div style="font-weight:900">• ${escapeHtml(c)}</div>
-      <button class="btn icon" ${normalizeText(c)==="investimentos" ? "disabled" : ""} onclick="removeCategoria(${idx})">✕</button>
-    </div>
-  `).join("");
+    function todayISO(){
+      return new Date().toISOString().slice(0,10);
+    }
 
-  const opts = categorias.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
-  if(selF) selF.innerHTML = opts;
-  if(selM) selM.innerHTML = opts;
-}
-function addCategoria(){
-  const input = document.getElementById("novaCategoria");
-  const nome = titleCase((input.value||"").trim());
-  if(!nome) return alert("Digite o nome da categoria.");
-  if(categorias.some(c=>normalizeText(c)===normalizeText(nome))) return alert("Essa categoria já existe.");
-  categorias.push(nome);
-  input.value = "";
-  saveAll();
-  renderCategorias();
-}
-function removeCategoria(idx){
-  const cat = categorias[idx];
-  if(!cat || normalizeText(cat)==="investimentos") return;
-  if(!confirm(`Remover a categoria "${cat}"?`)) return;
-  categorias.splice(idx,1);
-  fixos = fixos.map(f=>normalizeText(f.category||"")===normalizeText(cat) ? {...f, category:"Outros"} : f);
-  Object.keys(state.meses||{}).forEach(m=>{
-    const d = getDataMes(m);
-    d.items = d.items.map(it=>normalizeText(it.category||"")===normalizeText(cat) ? {...it, category:"Outros"} : it);
-  });
-  saveAll();
-  renderCategorias();
-  renderFixos();
-  render();
-}
+    function currentMonthKey(){
+      return new Date().toISOString().slice(0,7);
+    }
 
-function renderFixos(){
-  const div = document.getElementById("listaFixos");
-  div.innerHTML = fixos.length ? fixos.map((f,idx)=>`
-    <div class="itemCard">
-      <div>
-        <div class="itemTitle">${escapeHtml(f.desc)}</div>
-        <div class="itemMeta">${money(f.amount)} <span class="badge">${escapeHtml(f.category)}</span></div>
-        <div class="itemMeta">Vence: <b>${f.diaPagar ? "dia " + escapeHtml(f.diaPagar) : "sem prazo"}</b></div>
-      </div>
-      <button class="btn icon" onclick="removeFixo(${idx})">✕</button>
-    </div>
-  `).join("") : `<div class="small">Nenhum gasto fixo cadastrado.</div>`;
-}
-function addFixo(){
-  const desc = (document.getElementById("descFixo").value||"").trim();
-  const amount = Number(document.getElementById("valorFixo").value||0);
-  const category = document.getElementById("categoriaFixo").value || "Outros";
-  const diaPagar = Number(document.getElementById("diaFixo").value||0);
-  if(!desc) return alert("Digite a descrição.");
-  if(!amount || amount<=0) return alert("Digite um valor válido.");
-  if(diaPagar && (diaPagar<1 || diaPagar>31)) return alert("Dia inválido.");
-  fixos.push({ id:uid(), desc, amount, category, diaPagar });
-  document.getElementById("descFixo").value="";
-  document.getElementById("valorFixo").value="";
-  document.getElementById("diaFixo").value="";
-  saveAll();
-  renderFixos();
-  render();
-  if(diaPagar) autoEnableNotificationsIfNeeded();
-}
-function removeFixo(idx){
-  const item = fixos[idx];
-  if(!item) return;
-  Object.keys(state.meses||{}).forEach(m=>{
-    const d = getDataMes(m);
-    d.items = d.items.filter(it=>!(it.isFixo && !it.isInvestFixo && (it.id===item.id || (it.desc===item.desc && Number(it.amount||0)===Number(item.amount||0) && it.category===item.category))));
-  });
-  fixos.splice(idx,1);
-  saveAll();
-  renderFixos();
-  render();
-}
+    function kMes(){ return "gastos_pro_state_" + USER_ID; }
+    function kCat(){ return "categorias_" + USER_ID; }
+    function kFix(){ return "fixos_" + USER_ID; }
+    function kInv(){ return "inv_fixos_" + USER_ID; }
 
-function calcMensal(meta,prazo){
-  meta=Number(meta||0); prazo=Number(prazo||0);
-  if(!meta || !prazo || prazo<=0) return 0;
-  return Math.round((meta/prazo)*100)/100;
-}
-function updateInvResumo(){
-  const nome = (document.getElementById("invNome").value||"").trim();
-  const meta = Number(document.getElementById("invMetaFinal").value||0);
-  const prazo = Number(document.getElementById("invPrazoMeses").value||0);
-  const dia = Number(document.getElementById("invDiaPagar").value||0);
-  const el = document.getElementById("invResumo");
-  if(!nome){ el.textContent = "Digite o Nome."; return; }
-  if(!meta){ el.textContent = "Digite a Meta final."; return; }
-  if(!prazo){ el.textContent = "Digite o Prazo."; return; }
-  const mensal = calcMensal(meta,prazo);
-  el.textContent = `Meta ${money(meta)} • Prazo ${prazo} meses • Mensal ${money(mensal)}${dia ? ` • Dia ${dia}` : ""}`;
-}
-function renderInvestFixos(){
-  const div = document.getElementById("listaInvestFixos");
-  div.innerHTML = investFixos.length ? investFixos.map((inv,idx)=>`
-    <div class="itemCard">
-      <div>
-        <div class="itemTitle">${escapeHtml(inv.nome)}</div>
-        <div class="itemMeta">Meta: ${money(inv.metaFinal)} • Prazo: ${escapeHtml(inv.prazoMeses)} meses</div>
-        <div class="itemMeta">Mensal: <b>${money(inv.mensal)}</b> • Prazo: <b>${inv.diaPagar ? "dia " + escapeHtml(inv.diaPagar) : "—"}</b></div>
-      </div>
-      <button class="btn icon" onclick="removeInvestFixo(${idx})">✕</button>
-    </div>
-  `).join("") : `<div class="small">Nenhum investimento fixo cadastrado.</div>`;
-}
-function addInvestFixo(){
-  const nome = (document.getElementById("invNome").value||"").trim();
-  const metaFinal = Number(document.getElementById("invMetaFinal").value||0);
-  const prazoMeses = Number(document.getElementById("invPrazoMeses").value||0);
-  const diaPagar = Number(document.getElementById("invDiaPagar").value||0);
-  if(!nome) return alert("Digite o nome.");
-  if(!metaFinal || metaFinal<=0) return alert("Digite a meta final.");
-  if(!prazoMeses || prazoMeses<=0) return alert("Digite o prazo.");
-  if(!diaPagar || diaPagar<1 || diaPagar>31) return alert("Digite o dia.");
-  const mensal = calcMensal(metaFinal,prazoMeses);
-  investFixos.push({ id:uid(), nome, metaFinal, prazoMeses, mensal, diaPagar });
-  document.getElementById("invNome").value="";
-  document.getElementById("invMetaFinal").value="";
-  document.getElementById("invPrazoMeses").value="";
-  document.getElementById("invDiaPagar").value="";
-  updateInvResumo();
-  saveAll();
-  renderInvestFixos();
-  render();
-  autoEnableNotificationsIfNeeded();
-}
-function removeInvestFixo(idx){
-  const inv = investFixos[idx];
-  if(!inv) return;
-  Object.keys(state.meses||{}).forEach(m=>{
-    const d = getDataMes(m);
-    d.items = d.items.filter(it=>!(it.isInvestFixo && (it.invId===inv.id || it.id===inv.id)));
-    d.saved = d.saved.filter(s=>!(s && s.source==="investFixo" && s.invId===inv.id));
-    if(d.investStatus) delete d.investStatus[inv.id];
-  });
-  investFixos.splice(idx,1);
-  saveAll();
-  renderInvestFixos();
-  render();
-}
+    function loadState(){
+      let state = { meses:{} };
+      let categorias = [...DEFAULT_CATEGORIAS];
+      let fixos = [];
+      let investFixos = [];
 
-function ensureFixedItems(d){
-  if(!Array.isArray(d.items)) d.items = [];
-  if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos = [];
-  if(!d.investStatus) d.investStatus = {};
-  if(!Array.isArray(d.saved)) d.saved = [];
+      try{
+        const raw = localStorage.getItem(kMes());
+        if(raw) state = JSON.parse(raw) || { meses:{} };
+      }catch(e){}
 
-  const hidden = new Set(d.hiddenFixos.map(String));
-  const exists = new Set(d.items.map(it => `${it.desc}|${Number(it.amount||0)}|${it.category}`));
+      try{
+        const raw = localStorage.getItem(kCat());
+        if(raw){
+          const parsed = JSON.parse(raw);
+          if(Array.isArray(parsed) && parsed.length) categorias = parsed;
+        }
+      }catch(e){}
 
-  fixos.forEach(f=>{
-    const key = `${f.desc}|${Number(f.amount||0)}|${f.category}`;
-    if(hidden.has(key) || exists.has(key)) return;
-    d.items.unshift({
-      id:f.id, desc:f.desc, amount:Number(f.amount||0), category:f.category||"Outros",
-      isFixo:true, isInvestFixo:false, diaPagar:Number(f.diaPagar||0), paid:false
-    });
-    exists.add(key);
-  });
+      try{
+        const raw = localStorage.getItem(kFix());
+        if(raw){
+          const parsed = JSON.parse(raw);
+          if(Array.isArray(parsed)) fixos = parsed;
+        }
+      }catch(e){}
 
-  investFixos.forEach(inv=>{
-    const desc = `Juntar: ${inv.nome}`;
-    const amount = Number(inv.mensal||0);
-    const key = `${desc}|${amount}|Investimentos`;
-    if(hidden.has(key) || exists.has(key)) return;
-    if(typeof d.investStatus[inv.id] !== "boolean") d.investStatus[inv.id] = false;
-    d.items.unshift({
-      id:inv.id, invId:inv.id, desc, amount, category:"Investimentos",
-      isFixo:true, isInvestFixo:true, diaPagar:Number(inv.diaPagar||0), paid:!!d.investStatus[inv.id]
-    });
-    exists.add(key);
-  });
-}
+      try{
+        const raw = localStorage.getItem(kInv());
+        if(raw){
+          const parsed = JSON.parse(raw);
+          if(Array.isArray(parsed)) investFixos = parsed;
+        }
+      }catch(e){}
 
-function addSaved(){
-  const value = Number(document.getElementById("savedValue").value||0);
-  const desc = (document.getElementById("savedDesc").value||"").trim();
-  if(!value || value<=0) return alert("Digite um valor para guardar.");
-  const d = getDataMes(mesAtual);
-  d.saved.unshift({ value, desc, date:todayISO(), source:"manual" });
-  document.getElementById("savedValue").value="";
-  document.getElementById("savedDesc").value="";
-  saveAll();
-  render();
-}
-function removeSaved(idx){
-  const d = getDataMes(mesAtual);
-  if(!d.saved[idx]) return;
-  d.saved.splice(idx,1);
-  saveAll();
-  render();
-}
-function saveSettings(){
-  const d = getDataMes(mesAtual);
-  d.salary = Number(document.getElementById("salary").value||0);
-  d.meta = Number(document.getElementById("meta").value||0);
-  saveAll();
-  render();
-}
-function openAddExpense(){
-  document.getElementById("mDesc").value="";
-  document.getElementById("mValor").value="";
-  document.getElementById("mCategoria").value = categorias.includes("Outros") ? "Outros" : categorias[0];
-  openModal("overlay-addExpense");
-}
-function confirmAddExpense(){
-  const desc = (document.getElementById("mDesc").value||"").trim();
-  const amount = Number(document.getElementById("mValor").value||0);
-  const category = document.getElementById("mCategoria").value || "Outros";
-  if(!desc) return alert("Preencha a descrição.");
-  if(!amount || amount<=0) return alert("Preencha o valor.");
-  const d = getDataMes(mesAtual);
-  d.items.push({ id:uid(), desc, amount, category, isFixo:false, isInvestFixo:false, diaPagar:0, paid:false });
-  saveAll();
-  closeModal("overlay-addExpense");
-  render();
-}
-function togglePaid(idx){
-  const d = getDataMes(mesAtual);
-  const it = d.items[idx];
-  if(!it) return;
-  it.paid = !it.paid;
-  if(it.isInvestFixo && it.invId){
-    d.investStatus[it.invId] = !!it.paid;
-    if(it.paid){
-      const exists = d.saved.some(s=>s && s.source==="investFixo" && s.invId===it.invId && s.month===mesAtual);
-      if(!exists){
-        d.saved.unshift({
-          value:Number(it.amount||0),
-          desc:`Automático: ${it.desc}`,
-          date:todayISO(),
-          source:"investFixo",
-          invId:it.invId,
-          month:mesAtual
-        });
+      if(!categorias.some(c=>normalizeText(c)==="investimentos")){
+        categorias.splice(categorias.length-1,0,"Investimentos");
       }
-    }else{
-      d.saved = d.saved.filter(s=>!(s && s.source==="investFixo" && s.invId===it.invId && s.month===mesAtual));
-    }
-  }
-  saveAll();
-  render();
-}
-function deleteItem(idx){
-  const d = getDataMes(mesAtual);
-  const it = d.items[idx];
-  if(!it) return;
-  if(it.isFixo){
-    const key = `${it.desc}|${Number(it.amount||0)}|${it.category}`;
-    if(!d.hiddenFixos.includes(key)) d.hiddenFixos.push(key);
-  }
-  if(it.isInvestFixo && it.invId){
-    d.saved = d.saved.filter(s=>!(s && s.source==="investFixo" && s.invId===it.invId && s.month===mesAtual));
-    d.investStatus[it.invId] = false;
-  }
-  d.items.splice(idx,1);
-  saveAll();
-  render();
-}
 
-function renderSavedList(){
-  const d = getDataMes(mesAtual);
-  const div = document.getElementById("savedList");
-  div.innerHTML = (d.saved||[]).map((s,idx)=>`
-    <div class="itemCard">
-      <div>
-        <div class="itemTitle">🏦 ${money(s.value)}</div>
-        <div class="itemMeta">Data: ${escapeHtml(s.date || "")}${s.desc ? " • " + escapeHtml(s.desc) : ""}</div>
-      </div>
-      <button class="btn icon" onclick="removeSaved(${idx})">✕</button>
-    </div>
-  `).join("");
-}
+      if(!state.meses || typeof state.meses !== "object") state.meses = {};
 
-function renderKPIs(){
-  const d = getDataMes(mesAtual);
-  const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-  const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
-  const salary = Number(d.salary||0);
-  const left = salary - spent;
+      fixos = (fixos || []).map(f => ({
+        ...f,
+        id: f.id || uid(),
+        diaPagar: Number(f.diaPagar || 0),
+        isFixo:true
+      }));
 
-  document.getElementById("salary").value = salary || "";
-  document.getElementById("meta").value = d.meta || "";
+      investFixos = (investFixos || []).map(inv => ({
+        ...inv,
+        id: inv.id || uid(),
+        diaPagar: Number(inv.diaPagar || 0),
+        metaFinal: Number(inv.metaFinal || 0),
+        prazoMeses: Number(inv.prazoMeses || 0),
+        mensal: Number(inv.mensal || 0)
+      }));
 
-  document.getElementById("kpiSalary").textContent = money(salary);
-  document.getElementById("kpiSpent").textContent = money(spent);
-  document.getElementById("kpiLeft").textContent = money(left);
-  document.getElementById("kpiSaved").textContent = money(saved);
-}
-function renderList(){
-  const d = getDataMes(mesAtual);
-  const div = document.getElementById("list");
-  if(!(d.items||[]).length){
-    div.innerHTML = `<div class="small">Nenhum gasto neste mês. Toque em “+” para adicionar.</div>`;
-    return;
-  }
-  div.innerHTML = d.items.map((it,idx)=>`
-    <div class="itemCard">
-      <div>
-        <div class="itemTitle">
-          ${escapeHtml(it.desc)}
-          ${it.isFixo ? `<span class="badge">Fixo</span>` : ``}
-          ${it.isInvestFixo ? `<span class="badge">Juntar</span>` : ``}
-        </div>
-        <div class="itemMeta">
-          ${money(it.amount)} • ${escapeHtml(it.category || "Outros")}
-          ${it.diaPagar ? ` • Vence dia ${escapeHtml(it.diaPagar)}` : ``}
-        </div>
-        <div class="listActions" style="margin-top:8px">
-          <button class="btn ${it.paid ? "good" : "warn"}" onclick="togglePaid(${idx})">${it.paid ? "✅ Pago" : "⏳ Pendente"}</button>
-        </div>
-      </div>
-      <button class="btn icon" onclick="deleteItem(${idx})">✕</button>
-    </div>
-  `).join("");
-}
-
-function drawChart(){
-  const d = getDataMes(mesAtual);
-  const byCat = {};
-  (d.items||[]).forEach(it=>{
-    const c = it.category || "Outros";
-    byCat[c] = (byCat[c]||0) + Number(it.amount||0);
-  });
-  const labels = Object.keys(byCat);
-  const values = Object.values(byCat);
-  if(grafico) grafico.destroy();
-  grafico = new Chart(document.getElementById("chart"),{
-    type:"doughnut",
-    data:{ labels, datasets:[{ data: values }] },
-    options:{ plugins:{ legend:{ labels:{ color:getComputedStyle(document.body).getPropertyValue("--text") } } } }
-  });
-}
-function drawEvolution(){
-  const months = Object.keys(state.meses||{}).sort();
-  const values = months.map(m=>{
-    const d = getDataMes(m);
-    return (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-  });
-  if(graficoEvolucao) graficoEvolucao.destroy();
-  graficoEvolucao = new Chart(document.getElementById("chartEvolucao"),{
-    type:"line",
-    data:{ labels: months.map(onlyMonthLabel), datasets:[{ data: values }] },
-    options:{ plugins:{ legend:{ display:false } } }
-  });
-}
-
-function buildHistoryUI(){
-  const div = document.getElementById("historyList");
-  const months = Object.keys(state.meses||{}).sort().reverse();
-  div.innerHTML = months.length ? months.map(m=>{
-    const d = getDataMes(m);
-    const total = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-    const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
-    const sobra = Number(d.salary||0) - total;
-    return `
-      <div class="itemCard" onclick="openMonthFromHistory('${m}')" style="cursor:pointer">
-        <div>
-          <div class="itemTitle" style="text-transform:capitalize">${escapeHtml(monthLabel(m))}</div>
-          <div class="itemMeta">Salário: ${money(d.salary||0)} • Gasto: ${money(total)} • Guardado: ${money(saved)} • Sobra: ${money(sobra)}</div>
-        </div>
-        <button class="btn icon" onclick="event.stopPropagation(); deleteMonth('${m}')">✕</button>
-      </div>
-    `;
-  }).join("") : `<div class="small">Nenhum mês salvo ainda.</div>`;
-}
-function openMonthFromHistory(m){
-  mesAtual = m;
-  goHome();
-  render();
-}
-function deleteMonth(m){
-  if(!confirm("Deletar este mês do histórico?")) return;
-  delete state.meses[m];
-  saveAll();
-  buildMonthSelect();
-  buildHistoryUI();
-  render();
-}
-
-function updateInvestUI(){
-  const tipo = document.getElementById("investTipo").value;
-  const lab = document.getElementById("investExtraLabel");
-  const hint= document.getElementById("investHint");
-  const val = document.getElementById("investExtraValue");
-
-  if(tipo==="poupanca"){
-    lab.textContent = "Taxa mensal (%)";
-    hint.textContent = "Ex.: 0,5% ao mês.";
-    if(!val.value) val.value = "0.5";
-  }else if(tipo==="cdb"){
-    lab.textContent = "% do CDI";
-    hint.textContent = "Ex.: 100% CDI.";
-    if(!val.value) val.value = "100";
-  }else if(tipo==="tesouro"){
-    lab.textContent = "Taxa mensal (%)";
-    hint.textContent = "Ex.: 0,9% ao mês.";
-    if(!val.value) val.value = "0.9";
-  }else{
-    lab.textContent = "Taxa fixa mensal (%)";
-    hint.textContent = "Ex.: 1,2% ao mês.";
-    if(!val.value) val.value = "1.2";
-  }
-}
-function simularInvestimento(){
-  const tipo = document.getElementById("investTipo").value;
-  const valor = Number(document.getElementById("valorInvestimento").value||0);
-  const meses = Number(document.getElementById("mesesInvestimento").value||0);
-  const extra = Number(document.getElementById("investExtraValue").value||0);
-  const aporte = Number(document.getElementById("aporteMensalInvest").value||0);
-  const recorrente = document.getElementById("aporteRecorrenteInvest").value === "sim";
-  if(!valor || valor<=0) return alert("Informe o valor inicial.");
-  if(!meses || meses<=0) return alert("Informe os meses.");
-
-  let taxa = 0;
-  if(tipo==="poupanca") taxa = (extra||0.5)/100;
-  else if(tipo==="cdb") taxa = 0.009*((extra||100)/100);
-  else if(tipo==="tesouro") taxa = (extra||0.9)/100;
-  else taxa = (extra||1.2)/100;
-
-  let total = valor;
-  for(let i=1;i<=meses;i++){
-    total = total * (1 + taxa);
-    if(recorrente && aporte > 0) total += aporte;
-  }
-  const investido = valor + (recorrente ? aporte*meses : 0);
-  const lucro = total - investido;
-  document.getElementById("resultadoInvestimento").innerHTML =
-    `Valor final: <span style="color:var(--good)">${money(total)}</span><br>` +
-    `Valor investido: <b>${money(investido)}</b><br>` +
-    `Lucro estimado: <span style="color:var(--good)">${money(lucro)}</span>`;
-}
-function simularEmprestimo(){
-  const modelo = document.getElementById("loanTipo").value;
-  const valor = Number(document.getElementById("loanValor").value||0);
-  const n = Number(document.getElementById("loanParcelas").value||0);
-  const juros = Number(document.getElementById("loanJuros").value||0)/100;
-  if(!valor || valor<=0) return alert("Informe o valor.");
-  if(!n || n<=0) return alert("Informe as parcelas.");
-  const d = getDataMes(mesAtual);
-  const gastos = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-  const salario = Number(d.salary||0);
-
-  let primeira=0,totalPago=0,rows="";
-  if(modelo==="price"){
-    const p = juros===0 ? valor/n : (valor * (juros / (1 - Math.pow(1+juros, -n))));
-    primeira = p; totalPago = p*n;
-    for(let i=1;i<=Math.min(n,12);i++) rows += `<div>Parcela ${i}: <b>${money(p)}</b></div>`;
-  }else{
-    const amort = valor/n; let saldo = valor;
-    for(let i=1;i<=n;i++){
-      const parcela = amort + saldo*juros;
-      if(i===1) primeira = parcela;
-      totalPago += parcela; saldo -= amort;
-      if(i<=12) rows += `<div>Parcela ${i}: <b>${money(parcela)}</b></div>`;
-    }
-  }
-  const sobra = salario - gastos - primeira;
-  document.getElementById("resultadoEmprestimo").innerHTML =
-    `Primeira parcela: <b>${money(primeira)}</b><br>Total pago: <b>${money(totalPago)}</b><br>Sobra após pagar 1ª: <b>${money(sobra)}</b>`;
-  document.getElementById("tabelaEmprestimo").innerHTML = rows;
-}
-
-function requestNotificationPermission(){
-  if(!("Notification" in window)) return alert("Seu navegador não suporta notificações.");
-  Notification.requestPermission().then(perm=>{
-    if(perm==="granted"){
-      alert("Notificações ativadas com sucesso.");
-      checkDueNotifications();
-    }else{
-      alert("Notificações não foram permitidas.");
-    }
-  });
-}
-function autoEnableNotificationsIfNeeded(){
-  if(!("Notification" in window)) return;
-  if(Notification.permission === "default"){
-    Notification.requestPermission().then(perm=>{
-      if(perm==="granted") checkDueNotifications();
-    }).catch(()=>{});
-  }else if(Notification.permission === "granted"){
-    checkDueNotifications();
-  }
-}
-function daysUntilDue(day, baseDate = new Date()){
-  const y = baseDate.getFullYear();
-  const m = baseDate.getMonth();
-  const maxDay = new Date(y, m+1, 0).getDate();
-  const dueDay = Math.min(Math.max(Number(day||1),1), maxDay);
-  const today = new Date(y, m, baseDate.getDate());
-  const due = new Date(y, m, dueDay);
-  return Math.floor((due.getTime() - today.getTime()) / 86400000);
-}
-function showBrowserNotification(title, body){
-  if(!("Notification" in window)) return;
-  if(Notification.permission !== "granted") return;
-  try{
-    new Notification(title, { body, icon:"icon-192.png", badge:"icon-192.png" });
-  }catch(e){}
-}
-function checkDueNotifications(){
-  if(!("Notification" in window) || Notification.permission !== "granted") return;
-  const d = getDataMes(new Date().toISOString().slice(0,7));
-  ensureFixedItems(d);
-  d.items.forEach(it=>{
-    if(!it.isFixo || !it.diaPagar || it.paid) return;
-    const diff = daysUntilDue(it.diaPagar);
-    if(diff < 0 || diff > 3) return;
-    const key = `${NOTIF_KEYS.sentPrefix}_${USER_ID}_${it.id}_${new Date().toISOString().slice(0,7)}_${diff}`;
-    if(localStorage.getItem(key)==="1") return;
-    const msg = diff===0
-      ? `O prazo para pagar ${it.desc} é hoje.`
-      : `O prazo para pagar ${it.desc} está chegando. Faltam ${diff} dias.`;
-    showBrowserNotification("Controle de Gastos PRO", msg);
-    localStorage.setItem(key,"1");
-  });
-}
-
-function isVoiceEnabled(){ return localStorage.getItem(kVoiceEnabled()) !== "0"; }
-function applyVoiceVisibility(){
-  const fab = document.getElementById("fabVoice");
-  const enabled = isVoiceEnabled();
-  if(fab) fab.style.display = enabled ? "flex" : "none";
-  const st = document.getElementById("voiceEnableStatus");
-  const bt = document.getElementById("btnToggleVoiceEnabled");
-  if(st) st.textContent = enabled ? "Ativado" : "Bloqueado";
-  if(bt){
-    bt.textContent = enabled ? "Bloquear" : "Ativar";
-    bt.className = "btn " + (enabled ? "danger" : "good");
-  }
-}
-function toggleVoiceEnabled(){
-  localStorage.setItem(kVoiceEnabled(), isVoiceEnabled() ? "0" : "1");
-  applyVoiceVisibility();
-}
-
-function buildCategorySummary(items){
-  const byCat = {};
-  (items||[]).forEach(it=>{
-    const c = it.category || "Outros";
-    byCat[c] = (byCat[c] || 0) + Number(it.amount||0);
-  });
-  return byCat;
-}
-function getTopCategory(items){
-  const byCat = buildCategorySummary(items);
-  const arr = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-  return arr[0] || ["—",0];
-}
-function getMonthNumbers(d){
-  const salary = Number(d.salary||0);
-  const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-  const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
-  const left = salary - spent;
-  return { salary, spent, saved, left };
-}
-function getYearSummary(year){
-  const months = Object.keys(state.meses||{}).filter(m=>m.startsWith(String(year)+"-")).sort();
-  const rows = [];
-  const byCat = {};
-  months.forEach(m=>{
-    const d = getDataMes(m);
-    ensureFixedItems(d);
-    const nums = getMonthNumbers(d);
-    rows.push({ month:m, ...nums, items:d.items, savedList:d.saved });
-    d.items.forEach(it=>{
-      const c = it.category || "Outros";
-      byCat[c] = (byCat[c] || 0) + Number(it.amount||0);
-    });
-  });
-  const totals = rows.reduce((acc,r)=>{
-    acc.salary += r.salary;
-    acc.spent += r.spent;
-    acc.saved += r.saved;
-    acc.left += r.left;
-    return acc;
-  }, {salary:0, spent:0, saved:0, left:0});
-  const topCat = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0] || ["—",0];
-  return { months, rows, byCat, totals, topCat };
-}
-
-async function createChartImage(labels, values, type="bar", options={}){
-  const canvas = document.createElement("canvas");
-  canvas.width = options.width || 1200;
-  canvas.height = options.height || 520;
-  const ctx = canvas.getContext("2d");
-  new Chart(ctx,{
-    type,
-    data:{
-      labels,
-      datasets:[{
-        data: values,
-        borderWidth:2,
-        tension:0.35,
-        fill:false
-      }]
-    },
-    options:{
-      animation:false,
-      responsive:false,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{ display:type==="doughnut" || type==="pie" },
-        title:{ display:false }
-      },
-      scales:(type==="line" || type==="bar") ? {
-        y:{ beginAtZero:true, ticks:{ callback:(v)=>money(v) } }
-      } : {}
-    }
-  });
-  await new Promise(r=>setTimeout(r,120));
-  return canvas.toDataURL("image/png");
-}
-async function renderPdfAndSave(wrap, filename){
-  const canvas = await html2canvas(wrap, { scale:2, backgroundColor:"#ffffff", useCORS:true });
-  const img = canvas.toDataURL("image/png");
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p","mm","a4");
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  const imgW = pageW;
-  const imgH = (canvas.height * imgW) / canvas.width;
-  let heightLeft = imgH;
-  let position = 0;
-
-  pdf.addImage(img,"PNG",0,position,imgW,imgH);
-  heightLeft -= pageH;
-
-  while(heightLeft > 0){
-    position = heightLeft - imgH;
-    pdf.addPage();
-    pdf.addImage(img,"PNG",0,position,imgW,imgH);
-    heightLeft -= pageH;
-  }
-  pdf.save(filename);
-}
-function pdfCardStyle(title, body){
-  return `
-    <div style="border:1px solid #e5e7eb;border-radius:18px;padding:14px;background:#fff;">
-      <div style="font-weight:800;font-size:17px;margin-bottom:10px;color:#111827;">${title}</div>
-      ${body}
-    </div>
-  `;
-}
-function createPdfBase(title, subtitle, rightInfo){
-  const wrap = document.createElement("div");
-  wrap.style.position = "fixed";
-  wrap.style.left = "-99999px";
-  wrap.style.top = "0";
-  wrap.style.width = "1120px";
-  wrap.style.padding = "20px";
-  wrap.style.background = "#ffffff";
-  wrap.style.color = "#111827";
-  wrap.style.fontFamily = "Arial, sans-serif";
-  wrap.style.lineHeight = "1.35";
-  wrap.innerHTML = `
-    <div style="border:1px solid #e5e7eb;border-radius:22px;padding:18px;background:#fff;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:18px;">
-        <div>
-          <div style="font-size:30px;font-weight:900;color:#111827;">${title}</div>
-          <div style="margin-top:6px;font-size:13px;color:#6b7280;">${subtitle}</div>
-          <div style="margin-top:3px;font-size:13px;color:#6b7280;">Usuário: ${escapeHtml((USER && (USER.displayName || USER.email)) || "Usuário")}</div>
-        </div>
-        <div style="text-align:right;font-size:13px;color:#6b7280;">
-          ${rightInfo}
-        </div>
-      </div>
-      <div id="pdfContentArea" style="margin-top:16px;"></div>
-      <div style="margin-top:16px;font-size:11px;color:#9ca3af;">Observação: Este relatório é um resumo do seu controle. Não é recomendação financeira.</div>
-    </div>
-  `;
-  document.body.appendChild(wrap);
-  return wrap;
-}
-
-async function gerarPDFResumoAno(){
-  const status = document.getElementById("pdfStatus");
-  try{
-    status.textContent = "Gerando resumo do ano…";
-    const year = document.getElementById("pdfYear").value;
-    const info = getYearSummary(year);
-
-    if(!info.months.length){
-      status.textContent = "Não há dados salvos nesse ano.";
-      return;
+      return { state, categorias, fixos, investFixos };
     }
 
-    const chartCat = Object.keys(info.byCat).length
-      ? await createChartImage(Object.keys(info.byCat), Object.values(info.byCat), "doughnut", {width:900,height:460})
-      : "";
-    const chartLine = info.rows.length
-      ? await createChartImage(info.rows.map(r=>onlyMonthLabel(r.month)), info.rows.map(r=>r.spent), "line", {width:1100,height:420})
-      : "";
-    const chartSaved = info.rows.length
-      ? await createChartImage(info.rows.map(r=>onlyMonthLabel(r.month)), info.rows.map(r=>r.saved), "bar", {width:1100,height:420})
-      : "";
+    function saveState(all){
+      localStorage.setItem(kMes(), JSON.stringify(all.state));
+      localStorage.setItem(kCat(), JSON.stringify(all.categorias));
+      localStorage.setItem(kFix(), JSON.stringify(all.fixos));
+      localStorage.setItem(kInv(), JSON.stringify(all.investFixos));
+    }
 
-    const firstMonth = info.months[0];
-    const sampleMonth = getDataMes(firstMonth);
-    const topRows = Object.entries(info.byCat).sort((a,b)=>b[1]-a[1]);
+    function getMesData(all, monthKey){
+      const m = monthKey || currentMonthKey();
+      if(!all.state.meses[m]){
+        all.state.meses[m] = {
+          salary:0,
+          meta:0,
+          items:[],
+          saved:[],
+          hiddenFixos:[],
+          investStatus:{}
+        };
+      }
+      const d = all.state.meses[m];
+      if(!Array.isArray(d.items)) d.items = [];
+      if(!Array.isArray(d.saved)) d.saved = [];
+      if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos = [];
+      if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
+      d.items = d.items.map(it => ({
+        ...it,
+        id: it.id || uid(),
+        paid: !!it.paid,
+        isFixo: !!it.isFixo,
+        isInvestFixo: !!it.isInvestFixo,
+        diaPagar: Number(it.diaPagar || 0)
+      }));
+      return d;
+    }
 
-    const wrap = createPdfBase(
-      "Relatório • Controle de Gastos PRO",
-      `Ano: ${escapeHtml(year)} • Gerado em: ${escapeHtml(todayISO())}`,
-      `Mais gastou no ano<br><b style="color:#111827;font-size:16px;">${escapeHtml(info.topCat[0])} • ${money(info.topCat[1])}</b>`
-    );
+    function fixKey(desc, amount, category){
+      return `${String(desc||"").toLowerCase()}|${Number(amount||0)}|${String(category||"").toLowerCase()}`;
+    }
 
-    const area = wrap.querySelector("#pdfContentArea");
-    area.innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-        ${pdfCardStyle("Salário total", `<div style="font-size:28px;font-weight:900;">${money(info.totals.salary)}</div>`)}
-        ${pdfCardStyle("Gastos totais", `<div style="font-size:28px;font-weight:900;">${money(info.totals.spent)}</div>`)}
-        ${pdfCardStyle("Guardado total", `<div style="font-size:28px;font-weight:900;">${money(info.totals.saved)}</div>`)}
-        ${pdfCardStyle("Sobra acumulada", `<div style="font-size:28px;font-weight:900;">${money(info.totals.left)}</div>`)}
-      </div>
+    function ensureMonthItems(all, monthKey){
+      const d = getMesData(all, monthKey);
+      const hidden = new Set((d.hiddenFixos || []).map(String));
+      const present = new Set(d.items.map(it => fixKey(it.desc, it.amount, it.category)));
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-        ${pdfCardStyle("Gráfico • Categorias do ano", chartCat ? `<img src="${chartCat}" style="width:100%;display:block;">` : `<div style="color:#6b7280;">Sem dados</div>`)}
-        ${pdfCardStyle("Top categorias", `
-          <div style="font-size:13px;color:#6b7280;margin-bottom:8px;">As categorias com maior gasto no ano.</div>
-          ${topRows.length ? topRows.slice(0,8).map((x,i)=>`
-            <div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0f0;">
-              <div><b>${i+1}.</b> ${escapeHtml(x[0])}</div>
-              <div style="font-weight:800;">${money(x[1])}</div>
-            </div>
-          `).join("") : `<div style="color:#6b7280;">Sem dados</div>`}
-        `)}
-      </div>
+      (all.fixos || []).forEach(f=>{
+        const fk = fixKey(f.desc, f.amount, f.category);
+        if(hidden.has(fk) || present.has(fk)) return;
+        d.items.unshift({
+          id:f.id,
+          desc:f.desc,
+          amount:Number(f.amount || 0),
+          category:f.category || "Outros",
+          isFixo:true,
+          isInvestFixo:false,
+          diaPagar:Number(f.diaPagar || 0),
+          paid:false
+        });
+        present.add(fk);
+      });
 
-      <div style="margin-top:12px;">
-        ${pdfCardStyle("Gráfico • Evolução mensal dos gastos", chartLine ? `<img src="${chartLine}" style="width:100%;display:block;">` : `<div style="color:#6b7280;">Sem dados</div>`)}
-      </div>
+      (all.investFixos || []).forEach(inv=>{
+        const desc = `Juntar: ${inv.nome}`;
+        const amount = Number(inv.mensal || 0);
+        const fk = fixKey(desc, amount, "Investimentos");
+        if(hidden.has(fk) || present.has(fk)) return;
+        if(typeof d.investStatus[inv.id] !== "boolean") d.investStatus[inv.id] = false;
+        d.items.unshift({
+          id:inv.id,
+          invId:inv.id,
+          desc,
+          amount,
+          category:"Investimentos",
+          isFixo:true,
+          isInvestFixo:true,
+          diaPagar:Number(inv.diaPagar || 0),
+          paid:!!d.investStatus[inv.id]
+        });
+        present.add(fk);
+      });
 
-      <div style="margin-top:12px;">
-        ${pdfCardStyle("Gráfico • Evolução mensal do guardado", chartSaved ? `<img src="${chartSaved}" style="width:100%;display:block;">` : `<div style="color:#6b7280;">Sem dados</div>`)}
-      </div>
+      return d;
+    }
 
-      <div style="margin-top:12px;">
-        ${pdfCardStyle("Tabela do ano", `
-          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    function monthSummaryHtml(all, monthKey){
+      const d = ensureMonthItems(all, monthKey || currentMonthKey());
+      const salary = Number(d.salary || 0);
+      const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
+      const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
+      const left = salary - spent;
+
+      const byCat = {};
+      (d.items || []).forEach(it=>{
+        const c = it.category || "Outros";
+        byCat[c] = (byCat[c] || 0) + Number(it.amount || 0);
+      });
+
+      const topCats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+      return (
+        `<span class="ok">Resumo do mês.</span><br><br>` +
+        `• Salário: <b>${money(salary)}</b><br>` +
+        `• Gastos: <b>${money(spent)}</b><br>` +
+        `• Guardado: <b>${money(saved)}</b><br>` +
+        `• Sobra: <b>${money(left)}</b><br><br>` +
+        `${topCats.length ? `Top categorias:<br>${topCats.map(([c,v])=>`• ${escapeHtml(c)}: <b>${money(v)}</b>`).join("<br>")}` : `Sem categorias registradas no mês.`}`
+      );
+    }
+
+    function setMicStatus(text, type){
+      document.getElementById("micStatus").textContent = text;
+      const dot = document.getElementById("micDot");
+      dot.classList.remove("ok","err");
+      if(type === "ok") dot.classList.add("ok");
+      if(type === "err") dot.classList.add("err");
+    }
+
+    function setTranscript(text){
+      lastTranscript = String(text || "").trim();
+      document.getElementById("transcriptBox").textContent = lastTranscript || "Nenhum comando ainda.";
+    }
+
+    function clearTranscript(){
+      setTranscript("");
+      setResult("Nenhuma ação executada ainda.");
+    }
+
+    function applyThemeToPage(){
+      const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
+      const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
+      const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
+      const light = document.body.classList.contains("light");
+      const colors = light ? p.light : p.dark;
+
+      document.documentElement.style.setProperty("--accent", accent);
+      document.documentElement.style.setProperty("--bg", colors.bg);
+      document.documentElement.style.setProperty("--grad1", colors.g1);
+      document.documentElement.style.setProperty("--grad2", colors.g2);
+      document.documentElement.style.setProperty("--grad3", colors.g3);
+
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if(meta) meta.setAttribute("content", accent);
+    }
+
+    function toggleTheme(){
+      document.body.classList.toggle("light");
+      localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+      applyThemeToPage();
+    }
+
+    function goBack(){
+      location.href = "./index.html";
+    }
+
+    function openRoute(route){
+      location.href = route;
+    }
+
+    function parseCategory(text, categorias){
+      const normalized = normalizeText(text);
+      for(const c of categorias){
+        const nc = normalizeText(c);
+        if(normalized.includes("categoria " + nc)) return c;
+      }
+      if(normalized.includes("casa")) return "Casa";
+      if(normalized.includes("alimentacao")) return "Alimentação";
+      if(normalized.includes("transporte")) return "Transporte";
+      if(normalized.includes("lazer")) return "Lazer";
+      if(normalized.includes("pets")) return "Pets";
+      if(normalized.includes("investimentos")) return "Investimentos";
+      if(normalized.includes("mercado")) return "Alimentação";
+      if(normalized.includes("farmacia")) return "Outros";
+      return "Outros";
+    }
+
+    function extractAmount(text){
+      const t = normalizeText(text).replace(/,/g, ".");
+      const matches = t.match(/\d+(\.\d+)?/g);
+      if(!matches || !matches.length) return 0;
+      return Number(matches[0] || 0);
+    }
+
+    function extractAllNumbers(text){
+      const t = normalizeText(text).replace(/,/g, ".");
+      const matches = t.match(/\d+(\.\d+)?/g);
+      return (matches || []).map(Number).filter(n => !Number.isNaN(n));
+    }
+
+    function extractDueDay(text){
+      const t = normalizeText(text);
+      const m =
+        t.match(/vence dia (\d{1,2})/) ||
+        t.match(/vencimento dia (\d{1,2})/) ||
+        t.match(/vencendo dia (\d{1,2})/) ||
+        t.match(/ate dia (\d{1,2})/) ||
+        t.match(/até dia (\d{1,2})/) ||
+        t.match(/dia (\d{1,2})/);
+      return m ? Number(m[1]) : 0;
+    }
+
+    function extractMonths(text){
+      const t = normalizeText(text);
+      const m = t.match(/em (\d{1,3}) meses?/) || t.match(/(\d{1,3}) meses?/);
+      return m ? Number(m[1]) : 0;
+    }
+
+    function cleanDesc(raw){
+      let t = normalizeText(raw);
+
+      t = t
+        .replace(/^adicionar\s+/, "")
+        .replace(/^criar\s+/, "")
+        .replace(/^anotar\s+/, "")
+        .replace(/^colocar\s+/, "")
+        .replace(/^coloca\s+/, "")
+        .replace(/^novo\s+/, "")
+        .replace(/^nova\s+/, "")
+        .replace(/^uma\s+/, "")
+        .replace(/^um\s+/, "")
+        .replace(/^remover\s+/, "")
+        .replace(/^remove\s+/, "")
+        .replace(/^apagar\s+/, "")
+        .replace(/^deletar\s+/, "")
+        .replace(/^excluir\s+/, "")
+        .replace(/^marcar\s+/, "")
+        .replace(/^marca\s+/, "")
+        .replace(/^desmarcar\s+/, "")
+        .replace(/^gastei\s+/, "")
+        .replace(/^paguei\s+/, "")
+        .replace(/^guardei\s+/, "")
+        .replace(/^quero guardar\s+/, "")
+        .replace(/^quero juntar\s+/, "")
+        .replace(/^quero\s+/, "")
+        .replace(/^anota que\s+/, "")
+        .replace(/^anote que\s+/, "");
+
+      t = t
+        .replace(/\bgasto fixo\b/g, "")
+        .replace(/\bgasto\b/g, "")
+        .replace(/\binvestimento fixo\b/g, "")
+        .replace(/\binvestimento\b/g, "")
+        .replace(/\bcategoria\b/g, "")
+        .replace(/\bfixo\b/g, "")
+        .replace(/\bguardado\b/g, "")
+        .replace(/\bguardar\b/g, "")
+        .replace(/\bcomo pago\b/g, "")
+        .replace(/\bpago\b/g, "")
+        .replace(/\bpendente\b/g, "")
+        .replace(/\bvencer\b/g, "")
+        .replace(/\bvencendo\b/g, "")
+        .replace(/\bvence\b/g, "")
+        .replace(/\bdia \d{1,2}\b/g, "")
+        .replace(/\bem \d{1,3} meses?\b/g, "")
+        .replace(/\bhoje\b/g, "")
+        .replace(/\bno\b/g, " ")
+        .replace(/\bna\b/g, " ")
+        .replace(/\bpro\b/g, " ")
+        .replace(/\bpra\b/g, " ")
+        .replace(/\d+(\.\d+)?/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      return titleCase(t);
+    }
+
+    function parseMonthYearFromText(cmd){
+      const t = normalizeText(cmd);
+      const yearMatch = t.match(/\b(20\d{2})\b/);
+      const year = yearMatch ? yearMatch[1] : String(new Date().getFullYear());
+
+      for(const [name, num] of Object.entries(MONTHS_PT)){
+        if(t.includes(name)) return { year, month:num };
+      }
+
+      const current = currentMonthKey();
+      return { year: current.slice(0,4), month: current.slice(5,7) };
+    }
+
+    function findCurrentMonthItemByName(all, name, monthKey){
+      const d = ensureMonthItems(all, monthKey || currentMonthKey());
+      const n = normalizeText(name);
+      return d.items.find(it => {
+        const itemName = normalizeText(it.desc);
+        return itemName.includes(n) || n.includes(itemName);
+      });
+    }
+
+    function ensureSpeech(){
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SR){
+        setMicStatus("Sem suporte", "err");
+        dbg("SpeechRecognition não suportado neste navegador.");
+        return false;
+      }
+
+      recognition = new SR();
+      recognition.lang = "pt-BR";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        listening = true;
+        document.getElementById("bigMic").classList.add("listening");
+        document.getElementById("hintText").textContent = "Ouvindo... fale seu pedido normalmente.";
+        setMicStatus("Ouvindo...", "ok");
+      };
+
+      recognition.onresult = (event) => {
+        let finalText = "";
+        let partialText = "";
+        for(let i = event.resultIndex; i < event.results.length; i++){
+          const txt = event.results[i][0].transcript || "";
+          if(event.results[i].isFinal) finalText += txt + " ";
+          else partialText += txt + " ";
+        }
+        const merged = (finalText || partialText).trim();
+        if(merged) setTranscript(merged);
+      };
+
+      recognition.onerror = (event) => {
+        listening = false;
+        document.getElementById("bigMic").classList.remove("listening");
+        document.getElementById("hintText").textContent = "Erro ao ouvir. Tente novamente.";
+        setMicStatus("Erro", "err");
+        dbg("Erro SpeechRecognition: " + (event.error || "desconhecido"));
+      };
+
+      recognition.onend = async () => {
+        listening = false;
+        document.getElementById("bigMic").classList.remove("listening");
+        if(lastTranscript){
+          document.getElementById("hintText").textContent = "Texto capturado. Executando automaticamente...";
+          setMicStatus("Pronto", "ok");
+          if(autoExecuteAfterSpeech){
+            await executeVoiceCommand();
+          }
+        }else{
+          document.getElementById("hintText").textContent = "Nenhuma fala detectada. Tente novamente.";
+          setMicStatus("Parado", "");
+        }
+      };
+
+      return true;
+    }
+
+    function toggleRecording(){
+      if(!recognition && !ensureSpeech()) return;
+      try{
+        if(listening) recognition.stop();
+        else recognition.start();
+      }catch(e){
+        dbg("Falha ao iniciar/parar gravação: " + e.message);
+      }
+    }
+
+    async function renderPdfAndSaveFromElement(wrap, filename){
+      const canvas = await html2canvas(wrap, { scale: 2, backgroundColor:"#ffffff" });
+      const imgData = canvas.toDataURL("image/png");
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p","mm","a4");
+
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgW = pageW;
+      const imgH = (canvas.height * imgW) / canvas.width;
+
+      let y = 0;
+      let remaining = imgH;
+      pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+      remaining -= pageH;
+
+      while(remaining > 0){
+        pdf.addPage();
+        y = -(imgH - remaining);
+        pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+        remaining -= pageH;
+      }
+
+      pdf.save(filename);
+    }
+
+    function monthsOfYear(all, year){
+      return Object.keys(all.state.meses || {}).filter(m => m.startsWith(String(year) + "-")).sort();
+    }
+
+    function aggregateYear(all, year){
+      const months = monthsOfYear(all, year);
+      const byCat = {};
+      const byMonth = [];
+
+      months.forEach(m=>{
+        const d = ensureMonthItems(all, m);
+        const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
+        const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
+        const salary = Number(d.salary || 0);
+        byMonth.push({ m, salary, spent, saved });
+        (d.items || []).forEach(it=>{
+          const c = it.category || "Outros";
+          byCat[c] = (byCat[c] || 0) + Number(it.amount || 0);
+        });
+      });
+
+      const catsSorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+      const topCat = catsSorted[0] ? { cat: catsSorted[0][0], value: catsSorted[0][1] } : { cat:"—", value:0 };
+      return { months, byCat, byMonth, topCat };
+    }
+
+    async function generateYearSummaryPDF(all, year){
+      const agg = aggregateYear(all, year);
+
+      const wrap = document.createElement("div");
+      wrap.style.position = "fixed";
+      wrap.style.left = "-9999px";
+      wrap.style.top = "0";
+      wrap.style.width = "900px";
+      wrap.style.padding = "16px";
+      wrap.style.background = "#fff";
+      wrap.style.color = "#111";
+      wrap.style.fontFamily = "system-ui, sans-serif";
+
+      wrap.innerHTML = `
+        <div style="font-size:22px;font-weight:900">Resumo do Ano • Controle de Gastos PRO</div>
+        <div style="font-size:13px;color:#444">Ano: <b>${escapeHtml(year)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
+        <div style="margin-top:10px;font-size:14px;font-weight:900">Mais gastou no ano: ${escapeHtml(agg.topCat.cat)} • ${money(agg.topCat.value)}</div>
+        <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Tabela do ano</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
             <thead>
               <tr>
-                <th style="text-align:left;padding:10px;border-bottom:1px solid #d1d5db;">Mês</th>
-                <th style="text-align:right;padding:10px;border-bottom:1px solid #d1d5db;">Salário</th>
-                <th style="text-align:right;padding:10px;border-bottom:1px solid #d1d5db;">Gastos</th>
-                <th style="text-align:right;padding:10px;border-bottom:1px solid #d1d5db;">Guardado</th>
-                <th style="text-align:right;padding:10px;border-bottom:1px solid #d1d5db;">Sobra</th>
+                <th style="text-align:left;border-bottom:1px solid #ddd;padding:8px">Mês</th>
+                <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Salário</th>
+                <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Gastos</th>
+                <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Guardado</th>
+                <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Sobra</th>
               </tr>
             </thead>
             <tbody>
-              ${info.rows.map(r=>`
-                <tr>
-                  <td style="padding:10px;border-bottom:1px solid #f1f5f9;">${escapeHtml(monthLabel(r.month))}</td>
-                  <td style="padding:10px;border-bottom:1px solid #f1f5f9;text-align:right;">${money(r.salary)}</td>
-                  <td style="padding:10px;border-bottom:1px solid #f1f5f9;text-align:right;">${money(r.spent)}</td>
-                  <td style="padding:10px;border-bottom:1px solid #f1f5f9;text-align:right;">${money(r.saved)}</td>
-                  <td style="padding:10px;border-bottom:1px solid #f1f5f9;text-align:right;">${money(r.left)}</td>
-                </tr>
-              `).join("")}
+              ${agg.byMonth.map(x=>{
+                const sobra = Number(x.salary||0) - Number(x.spent||0);
+                const label = new Date(x.m+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"short",year:"numeric"});
+                return `<tr>
+                  <td style="padding:7px;border-bottom:1px solid #eee">${escapeHtml(label)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.salary)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.spent)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(x.saved)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(sobra)}</td>
+                </tr>`;
+              }).join("") || `<tr><td colspan="5" style="padding:10px">Sem dados no ano.</td></tr>`}
             </tbody>
           </table>
-        `)}
-      </div>
+        </div>
+      `;
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-        ${pdfCardStyle("Investimentos fixos cadastrados", investFixos.length ? investFixos.map(inv=>`
-          <div style="padding:9px 0;border-bottom:1px solid #f1f5f9;">
-            <div style="font-weight:800;">${escapeHtml(inv.nome)}</div>
-            <div style="font-size:12px;color:#6b7280;">Meta: ${money(inv.metaFinal)} • Prazo: ${escapeHtml(inv.prazoMeses)} meses • Mensal: ${money(inv.mensal)}</div>
-          </div>
-        `).join("") : `<div style="font-size:13px;color:#6b7280;">Nenhum investimento fixo cadastrado.</div>`)}
-        ${pdfCardStyle(`Anotações do mês (${escapeHtml(firstMonth)})`, (sampleMonth.items||[]).length ? sampleMonth.items.map(it=>`
-          <div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;">
-            <div>
-              <div style="font-weight:800;">${escapeHtml(it.desc)}</div>
-              <div style="font-size:12px;color:#6b7280;">${escapeHtml(it.category)} • ${it.paid ? "Pago" : "Pendente"}${it.isFixo ? " • Fixo" : ""}</div>
-            </div>
-            <div style="font-weight:800;">${money(it.amount)}</div>
-          </div>
-        `).join("") : `<div style="font-size:13px;color:#6b7280;">Sem anotações.</div>`)}
-      </div>
-    `;
-
-    await new Promise(r=>setTimeout(r,250));
-    await renderPdfAndSave(wrap, `resumo_ano_${year}.pdf`);
-    wrap.remove();
-    status.textContent = "Resumo do ano gerado ✅";
-  }catch(e){
-    status.textContent = "Erro ao gerar resumo do ano: " + (e.message || e);
-  }
-}
-
-async function gerarPDFCompleto(){
-  const status = document.getElementById("pdfStatus");
-  try{
-    status.textContent = "Gerando PDF do mês…";
-    const month = document.getElementById("pdfMonth").value;
-    const d = getDataMes(month);
-    ensureFixedItems(d);
-
-    const nums = getMonthNumbers(d);
-    const byCat = buildCategorySummary(d.items);
-    const topCat = getTopCategory(d.items);
-    const itemsSorted = [...d.items].sort((a,b)=>Number(b.amount||0)-Number(a.amount||0));
-
-    const chartCat = Object.keys(byCat).length
-      ? await createChartImage(Object.keys(byCat), Object.values(byCat), "doughnut", {width:900,height:460})
-      : "";
-
-    const lastSix = Object.keys(state.meses||{}).sort().slice(-6);
-    const chartEvoMonth = lastSix.length
-      ? await createChartImage(
-          lastSix.map(onlyMonthLabel),
-          lastSix.map(m=>(getDataMes(m).items||[]).reduce((a,b)=>a+Number(b.amount||0),0)),
-          "line",
-          {width:1100,height:420}
-        )
-      : "";
-
-    const chartCurrentMonthBars = d.items.length
-      ? await createChartImage(
-          itemsSorted.slice(0,8).map(x=>x.desc.length > 18 ? x.desc.slice(0,18)+"..." : x.desc),
-          itemsSorted.slice(0,8).map(x=>Number(x.amount||0)),
-          "bar",
-          {width:1100,height:420}
-        )
-      : "";
-
-    const wrap = createPdfBase(
-      "Relatório • Controle de Gastos PRO",
-      `Mês: ${escapeHtml(month)} • Gerado em: ${escapeHtml(todayISO())}`,
-      `Mais gastou no mês<br><b style="color:#111827;font-size:16px;">${escapeHtml(topCat[0])} • ${money(topCat[1])}</b>`
-    );
-
-    const area = wrap.querySelector("#pdfContentArea");
-    area.innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-        ${pdfCardStyle("Salário", `<div style="font-size:28px;font-weight:900;">${money(nums.salary)}</div>`)}
-        ${pdfCardStyle("Gastos", `<div style="font-size:28px;font-weight:900;">${money(nums.spent)}</div>`)}
-        ${pdfCardStyle("Guardado", `<div style="font-size:28px;font-weight:900;">${money(nums.saved)}</div>`)}
-        ${pdfCardStyle("Sobra", `<div style="font-size:28px;font-weight:900;">${money(nums.left)}</div>`)}
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-        ${pdfCardStyle("Gráfico • Categorias do mês", chartCat ? `<img src="${chartCat}" style="width:100%;display:block;">` : `<div style="color:#6b7280;">Sem dados</div>`)}
-        ${pdfCardStyle("Top categorias do mês", `
-          <div style="font-size:13px;color:#6b7280;margin-bottom:8px;">Categorias que mais pesaram no mês.</div>
-          ${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,8).map((x,i)=>`
-            <div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0f0;">
-              <div><b>${i+1}.</b> ${escapeHtml(x[0])}</div>
-              <div style="font-weight:800;">${money(x[1])}</div>
-            </div>
-          `).join("") || `<div style="color:#6b7280;">Sem dados</div>`}
-        `)}
-      </div>
-
-      <div style="margin-top:12px;">
-        ${pdfCardStyle("Gráfico • Evolução dos gastos", chartEvoMonth ? `<img src="${chartEvoMonth}" style="width:100%;display:block;">` : `<div style="color:#6b7280;">Sem dados</div>`)}
-      </div>
-
-      <div style="margin-top:12px;">
-        ${pdfCardStyle("Gráfico • Maiores gastos do mês", chartCurrentMonthBars ? `<img src="${chartCurrentMonthBars}" style="width:100%;display:block;">` : `<div style="color:#6b7280;">Sem dados</div>`)}
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-        ${pdfCardStyle("Investimentos fixos cadastrados", investFixos.length ? investFixos.map(inv=>`
-          <div style="padding:9px 0;border-bottom:1px solid #f1f5f9;">
-            <div style="font-weight:800;">${escapeHtml(inv.nome)}</div>
-            <div style="font-size:12px;color:#6b7280;">Meta: ${money(inv.metaFinal)} • Prazo: ${escapeHtml(inv.prazoMeses)} meses • Mensal: ${money(inv.mensal)}</div>
-          </div>
-        `).join("") : `<div style="font-size:13px;color:#6b7280;">Nenhum investimento fixo cadastrado.</div>`)}
-        ${pdfCardStyle(`Anotações do mês (${escapeHtml(month)})`, d.items.length ? d.items.map(it=>`
-          <div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;">
-            <div>
-              <div style="font-weight:800;">${escapeHtml(it.desc)}</div>
-              <div style="font-size:12px;color:#6b7280;">${escapeHtml(it.category)} • ${it.paid ? "Pago" : "Pendente"}${it.isFixo ? " • Fixo" : ""}</div>
-            </div>
-            <div style="font-weight:800;">${money(it.amount)}</div>
-          </div>
-        `).join("") : `<div style="font-size:13px;color:#6b7280;">Sem anotações.</div>`)}
-      </div>
-
-      <div style="margin-top:12px;">
-        ${pdfCardStyle("Tabela detalhada do mês", `
-          <table style="width:100%;border-collapse:collapse;font-size:13px;">
-            <thead>
-              <tr>
-                <th style="text-align:left;padding:10px;border-bottom:1px solid #d1d5db;">Descrição</th>
-                <th style="text-align:left;padding:10px;border-bottom:1px solid #d1d5db;">Categoria</th>
-                <th style="text-align:left;padding:10px;border-bottom:1px solid #d1d5db;">Status</th>
-                <th style="text-align:right;padding:10px;border-bottom:1px solid #d1d5db;">Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${d.items.length ? d.items.map(it=>`
-                <tr>
-                  <td style="padding:10px;border-bottom:1px solid #f1f5f9;">${escapeHtml(it.desc)}</td>
-                  <td style="padding:10px;border-bottom:1px solid #f1f5f9;">${escapeHtml(it.category || "Outros")}</td>
-                  <td style="padding:10px;border-bottom:1px solid #f1f5f9;">${it.paid ? "Pago" : "Pendente"}${it.isFixo ? " • Fixo" : ""}</td>
-                  <td style="padding:10px;border-bottom:1px solid #f1f5f9;text-align:right;">${money(it.amount)}</td>
-                </tr>
-              `).join("") : `<tr><td colspan="4" style="padding:10px;color:#6b7280;">Sem dados no mês.</td></tr>`}
-            </tbody>
-          </table>
-        `)}
-      </div>
-    `;
-
-    await new Promise(r=>setTimeout(r,250));
-    await renderPdfAndSave(wrap, `relatorio_mes_${month}.pdf`);
-    wrap.remove();
-    status.textContent = "PDF do mês gerado ✅";
-  }catch(e){
-    status.textContent = "Erro ao gerar PDF do mês: " + (e.message || e);
-  }
-}
-
-async function initFirebase(){
-  try{
-    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-  }catch(e){}
-  auth = firebase.auth();
-
-  auth.onAuthStateChanged((u)=>{
-    USER = u || null;
-    if(!USER){
-      location.replace("./login.html");
-      return;
+      document.body.appendChild(wrap);
+      await new Promise(r=>setTimeout(r,200));
+      await renderPdfAndSaveFromElement(wrap, `resumo_ano_${year}.pdf`);
+      wrap.remove();
     }
-    USER_ID = USER.uid;
-    document.getElementById("userName").textContent = USER.displayName || "Usuário";
-    document.getElementById("userEmail").textContent = USER.email || "";
-    if(localStorage.getItem("theme")==="light") document.body.classList.add("light");
-    loadAll();
-    applyThemeSettings();
-    if(localStorage.getItem(kVoiceEnabled()) == null) localStorage.setItem(kVoiceEnabled(),"1");
-    applyVoiceVisibility();
-    buildMonthSelect();
-    buildPdfSelectors();
-    renderCategorias();
-    renderFixos();
-    renderInvestFixos();
-    updateInvResumo();
-    updateInvestUI();
-    document.getElementById("tipoSimulacao").addEventListener("change", ()=>{
-      const v = document.getElementById("tipoSimulacao").value;
-      document.getElementById("areaInvestimento").style.display = v==="investimento" ? "block" : "none";
-      document.getElementById("areaEmprestimo").style.display = v==="emprestimo" ? "block" : "none";
+
+    async function generateMonthPDF(all, monthKey){
+      const d = ensureMonthItems(all, monthKey);
+      const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
+      const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
+      const salary = Number(d.salary || 0);
+      const left = salary - spent;
+
+      const wrap = document.createElement("div");
+      wrap.style.position = "fixed";
+      wrap.style.left = "-9999px";
+      wrap.style.top = "0";
+      wrap.style.width = "900px";
+      wrap.style.padding = "16px";
+      wrap.style.background = "#fff";
+      wrap.style.color = "#111";
+      wrap.style.fontFamily = "system-ui, sans-serif";
+
+      const monthLabel = new Date(monthKey + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+
+      wrap.innerHTML = `
+        <div style="font-size:22px;font-weight:900">PDF do Mês • Controle de Gastos PRO</div>
+        <div style="font-size:13px;color:#444">Mês: <b>${escapeHtml(monthLabel)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
+        <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+            <div style="font-weight:900;margin-bottom:8px">Resumo</div>
+            <div>Salário: <b>${money(salary)}</b></div>
+            <div>Gastos: <b>${money(spent)}</b></div>
+            <div>Guardado: <b>${money(saved)}</b></div>
+            <div>Sobra: <b>${money(left)}</b></div>
+          </div>
+          <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+            <div style="font-weight:900;margin-bottom:8px">Totais</div>
+            <div>Itens anotados: <b>${(d.items || []).length}</b></div>
+            <div>Entradas guardadas: <b>${(d.saved || []).length}</b></div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Itens do mês</div>
+          ${(d.items || []).length ? (d.items || []).map(it=>`
+            <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee">
+              <div>
+                <div style="font-weight:800">${escapeHtml(it.desc || "")}</div>
+                <div style="font-size:12px;color:#444">
+                  ${escapeHtml(it.category || "Outros")} • ${it.paid ? "Pago" : "Pendente"}
+                  ${it.isFixo ? " • Fixo" : ""}
+                  ${it.isInvestFixo ? " • Juntar" : ""}
+                  ${it.diaPagar ? (" • Vence dia " + escapeHtml(it.diaPagar)) : ""}
+                </div>
+              </div>
+              <div style="font-weight:900">${money(it.amount || 0)}</div>
+            </div>
+          `).join("") : `<div style="padding:8px 0">Sem itens no mês.</div>`}
+        </div>
+      `;
+
+      document.body.appendChild(wrap);
+      await new Promise(r=>setTimeout(r,200));
+      await renderPdfAndSaveFromElement(wrap, `pdf_mes_${monthKey}.pdf`);
+      wrap.remove();
+    }
+
+    function requestNotificationPermission(){
+      if(!("Notification" in window)){
+        setResult(`<span class="err">Seu navegador não suporta notificações.</span>`);
+        return;
+      }
+      Notification.requestPermission().then((perm)=>{
+        if(perm === "granted") setResult(`<span class="ok">Notificações ativadas com sucesso.</span>`);
+        else setResult(`<span class="warn">Notificações não foram permitidas.</span>`);
+      }).catch(()=>{
+        setResult(`<span class="err">Não foi possível ativar notificações.</span>`);
+      });
+    }
+
+    function tryOpenScreenCommand(text){
+      const t = normalizeText(text);
+
+      if(t.includes("abrir ia") || t.includes("abrir inteligência") || t.includes("abrir assistente")){
+        openRoute("./ia.html");
+        return { ok:true, html:`Abrindo a <b>IA</b>.` };
+      }
+      if(t.includes("voltar inicio") || t.includes("voltar início") || t.includes("abrir inicio") || t.includes("abrir tela principal") || t.includes("abrir home")){
+        openRoute("./index.html");
+        return { ok:true, html:`Voltando para a <b>tela principal</b>.` };
+      }
+      if(t.includes("abrir historico") || t.includes("abrir histórico")){
+        openRoute("./index.html");
+        return { ok:true, html:`Abrindo a tela principal para você entrar no <b>Histórico</b>.` };
+      }
+      if(t.includes("abrir simuladores") || t.includes("abrir simulador")){
+        openRoute("./index.html");
+        return { ok:true, html:`Abrindo a tela principal para acessar <b>Simuladores</b>.` };
+      }
+      if(t.includes("abrir categorias") || t.includes("abrir minhas categorias")){
+        openRoute("./index.html");
+        return { ok:true, html:`Abrindo a tela principal para acessar <b>Minhas Categorias</b>.` };
+      }
+      if(t.includes("abrir gastos fixos") || t.includes("abrir fixos")){
+        openRoute("./index.html");
+        return { ok:true, html:`Abrindo a tela principal para acessar <b>Gastos Fixos</b>.` };
+      }
+      if(t.includes("abrir investimentos fixos") || t.includes("abrir investimento fixo")){
+        openRoute("./index.html");
+        return { ok:true, html:`Abrindo a tela principal para acessar <b>Investimentos Fixos</b>.` };
+      }
+      if(t.includes("abrir configuracoes") || t.includes("abrir configurações")){
+        openRoute("./index.html");
+        return { ok:true, html:`Abrindo a tela principal para acessar <b>Configurações</b>.` };
+      }
+
+      return null;
+    }
+
+    function tryLocalRule(cmd, all){
+      const openCmd = tryOpenScreenCommand(cmd);
+      if(openCmd) return openCmd;
+
+      const t = normalizeText(cmd);
+
+      if(t.includes("mostrar resumo do mes") || t.includes("resumo do mes") || t.includes("resumo do mês")){
+        return { ok:true, html: monthSummaryHtml(all, currentMonthKey()) };
+      }
+
+      if(t.includes("abrir notificacoes") || t.includes("ativar notificacoes") || t.includes("ativar notificações") || t === "notificacoes" || t === "notificações"){
+        requestNotificationPermission();
+        return { ok:true, html:`Abrindo permissão de <b>notificações</b>.` };
+      }
+
+      if(t.includes("anotar guardado") || t.includes("guardar ") || t.includes("guardei ") || t.includes("quero guardar ") || t.includes("quero juntar ")){
+        const valor = extractAmount(t);
+        let desc = cleanDesc(t);
+        if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor do guardado." };
+        if(!desc) desc = "Guardado";
+        const d = ensureMonthItems(all, currentMonthKey());
+        d.saved.unshift({ value:valor, desc, date:todayISO(), source:"manual" });
+        saveState(all);
+        return { ok:true, html:`Valor guardado anotado:<br>• Valor: <b>${money(valor)}</b><br>• Descrição: <b>${escapeHtml(desc)}</b>` };
+      }
+
+      if(t.includes("mudar tema") || t.includes("trocar tema") || t.includes("mudar cor") || t.includes("trocar cor") || t.includes("mude tema") || t.includes("mude o tema")){
+        let changed = [];
+
+        const presetMap = {
+          roxo:"purple", purple:"purple",
+          verde:"green", green:"green",
+          azul:"default",
+          padrao:"default", padrão:"default", normal:"default",
+          laranja:"sunset", "por do sol":"sunset", sunset:"sunset",
+          minimal:"mono", mono:"mono"
+        };
+
+        for(const [name, preset] of Object.entries(presetMap)){
+          if(t.includes(name)){
+            localStorage.setItem(THEME_KEYS.preset, preset);
+            changed.push(`Tema alterado para <b>${escapeHtml(preset)}</b>`);
+            break;
+          }
+        }
+
+        for(const [name, hex] of Object.entries(COLOR_MAP)){
+          if(t.includes(name)){
+            localStorage.setItem(THEME_KEYS.accent, hex);
+            changed.push(`Cor principal alterada para <b>${escapeHtml(name)}</b>`);
+            break;
+          }
+        }
+
+        if(!changed.length) return { ok:false, html:"Não entendi qual cor/tema você quer usar." };
+        applyThemeToPage();
+        return { ok:true, html:changed.join("<br>") };
+      }
+
+      if((t.includes("marcar") || t.includes("marca ")) && t.includes("como pago") && !t.includes("desmarcar") && !t.includes("tirar")){
+        let nome = t.replace("marcar","").replace("marca","").replace("como pago","").trim();
+        const target = findCurrentMonthItemByName(all, nome, currentMonthKey());
+        if(!target) return { ok:false, html:`Não encontrei item parecido com "<b>${escapeHtml(nome)}</b>".` };
+        target.paid = true;
+        const d = ensureMonthItems(all, currentMonthKey());
+        if(target.isInvestFixo && target.invId){
+          d.investStatus[target.invId] = true;
+          const exists = d.saved.some(s => s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey());
+          if(!exists){
+            d.saved.unshift({
+              value:Number(target.amount || 0),
+              desc:`Automático: ${target.desc}`,
+              date:todayISO(),
+              source:"investFixo",
+              invId:target.invId,
+              month:currentMonthKey()
+            });
+          }
+        }
+        saveState(all);
+        return { ok:true, html:`Item <b>${escapeHtml(target.desc)}</b> marcado como <b>Pago</b>.` };
+      }
+
+      if((t.includes("desmarcar") && t.includes("pago")) || t.includes("tirar") && t.includes("do pago") || t.includes("voltar pendente")){
+        let nome = t
+          .replace("desmarcar","")
+          .replace("como pago","")
+          .replace("tirar","")
+          .replace("do pago","")
+          .replace("voltar pendente","")
+          .replace("pago","")
+          .trim();
+
+        const target = findCurrentMonthItemByName(all, nome, currentMonthKey());
+        if(!target) return { ok:false, html:`Não encontrei item parecido com "<b>${escapeHtml(nome)}</b>".` };
+        target.paid = false;
+        const d = ensureMonthItems(all, currentMonthKey());
+        if(target.isInvestFixo && target.invId){
+          d.investStatus[target.invId] = false;
+          d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey()));
+        }
+        saveState(all);
+        return { ok:true, html:`Item <b>${escapeHtml(target.desc)}</b> voltou para <b>Pendente</b>.` };
+      }
+
+      if(t.startsWith("gastei ") || t.startsWith("paguei ") || t.includes("anota que paguei")){
+        const valor = extractAmount(t);
+        if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor gasto." };
+        let desc = cleanDesc(t);
+        if(!desc) desc = "Gasto";
+        const categoria = parseCategory(t, all.categorias);
+        const d = ensureMonthItems(all, currentMonthKey());
+        d.items.push({
+          id:uid(),
+          desc,
+          amount:valor,
+          category:categoria,
+          isFixo:false,
+          isInvestFixo:false,
+          paid:true
+        });
+        saveState(all);
+        return { ok:true, html:`Gasto anotado:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(valor)}</b><br>• Categoria: <b>${escapeHtml(categoria)}</b><br>• Status: <b>Pago</b>` };
+      }
+
+      if(t.includes("adicionar gasto") || t.includes("anotar gasto") || t.startsWith("gasto ")){
+        if(t.includes("gasto fixo")) return null;
+        const valor = extractAmount(t);
+        const categoria = parseCategory(t, all.categorias);
+        const desc = cleanDesc(t);
+        if(!desc) return { ok:false, html:"Não entendi a descrição do gasto." };
+        if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor do gasto." };
+        const d = ensureMonthItems(all, currentMonthKey());
+        d.items.push({
+          id:uid(),
+          desc,
+          amount:valor,
+          category:categoria,
+          isFixo:false,
+          isInvestFixo:false,
+          paid:false
+        });
+        saveState(all);
+        return { ok:true, html:`Gasto adicionado:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(valor)}</b><br>• Categoria: <b>${escapeHtml(categoria)}</b>` };
+      }
+
+      if(t.includes("gasto fixo") || (t.includes("fixo") && extractAmount(t) && !t.includes("investimento"))){
+        const valor = extractAmount(t);
+        const categoria = parseCategory(t, all.categorias);
+        const dueDay = extractDueDay(t);
+        const desc = cleanDesc(t);
+        if(!desc) return { ok:false, html:"Não entendi a descrição do gasto fixo." };
+        if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor do gasto fixo." };
+
+        all.fixos.push({
+          id:uid(),
+          desc,
+          amount:valor,
+          category:categoria,
+          diaPagar:dueDay || 0,
+          isFixo:true
+        });
+        saveState(all);
+        return { ok:true, html:`Gasto fixo adicionado:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(valor)}</b><br>• Categoria: <b>${escapeHtml(categoria)}</b><br>• Vence: <b>${dueDay ? ("dia " + dueDay) : "sem prazo"}</b>` };
+      }
+
+      if(t.includes("investimento fixo")){
+        const nums = extractAllNumbers(t);
+        const goalAmount = nums[0] || 0;
+        const months = extractMonths(t) || nums[1] || 0;
+        const dueDay = extractDueDay(t);
+        const name = cleanDesc(t);
+        if(!name) return { ok:false, html:"Não entendi o nome do investimento fixo." };
+        if(!goalAmount || goalAmount <= 0) return { ok:false, html:"Não entendi a meta final." };
+        if(!months || months <= 0) return { ok:false, html:"Não entendi o prazo em meses." };
+        const mensal = Math.round((goalAmount / months) * 100) / 100;
+        const id = uid();
+        all.investFixos.push({
+          id,
+          nome:name,
+          metaFinal:goalAmount,
+          prazoMeses:months,
+          mensal,
+          diaPagar:dueDay || 0
+        });
+        const d = ensureMonthItems(all, currentMonthKey());
+        d.investStatus[id] = false;
+        saveState(all);
+        return { ok:true, html:`Investimento fixo adicionado:<br>• <b>${escapeHtml(name)}</b><br>• Meta final: <b>${money(goalAmount)}</b><br>• Prazo: <b>${months} meses</b><br>• Mensal: <b>${money(mensal)}</b>` };
+      }
+
+      if(t.includes("adicionar categoria") || t.includes("criar categoria")){
+        let nome = t.replace("adicionar categoria","").replace("criar categoria","").trim();
+        if(!nome) return { ok:false, html:"Não entendi o nome da categoria." };
+        nome = titleCase(nome);
+        if(all.categorias.some(c => normalizeText(c) === normalizeText(nome))){
+          return { ok:false, html:`A categoria "${escapeHtml(nome)}" já existe.` };
+        }
+        all.categorias.push(nome);
+        saveState(all);
+        return { ok:true, html:`Categoria <b>${escapeHtml(nome)}</b> adicionada com sucesso.` };
+      }
+
+      if(t.includes("remover gasto fixo") || t.includes("remove gasto fixo") || t.includes("apagar gasto fixo")){
+        const nome = cleanDesc(t);
+        const idx = all.fixos.findIndex(it => normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc)));
+        if(idx === -1) return { ok:false, html:`Não encontrei gasto fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
+        const removed = all.fixos[idx];
+        all.fixos.splice(idx,1);
+        Object.keys(all.state.meses || {}).forEach(m=>{
+          const d = all.state.meses[m];
+          if(d && Array.isArray(d.items)){
+            d.items = d.items.filter(it => !(it.isFixo && !it.isInvestFixo && (it.id === removed.id || normalizeText(it.desc) === normalizeText(removed.desc))));
+          }
+        });
+        saveState(all);
+        return { ok:true, html:`Gasto fixo <b>${escapeHtml(removed.desc)}</b> removido do sistema.` };
+      }
+
+      if(t.includes("remover investimento fixo") || t.includes("remove investimento fixo") || t.includes("apagar investimento fixo")){
+        const nome = cleanDesc(t);
+        const idx = all.investFixos.findIndex(it => normalizeText(it.nome).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.nome)));
+        if(idx === -1) return { ok:false, html:`Não encontrei investimento fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
+        const removed = all.investFixos[idx];
+        all.investFixos.splice(idx,1);
+        Object.keys(all.state.meses || {}).forEach(m=>{
+          const d = all.state.meses[m];
+          if(d){
+            if(d.investStatus && removed.id) delete d.investStatus[removed.id];
+            if(Array.isArray(d.saved)) d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===removed.id));
+            if(Array.isArray(d.items)) d.items = d.items.filter(it => !(it.isInvestFixo && (it.invId === removed.id || it.id === removed.id)));
+          }
+        });
+        saveState(all);
+        return { ok:true, html:`Investimento fixo <b>${escapeHtml(removed.nome)}</b> removido do sistema.` };
+      }
+
+      if(t.includes("remover gasto") || t.includes("remove o gasto") || t.includes("remove gasto") || t.includes("apagar gasto")){
+        if(t.includes("gasto fixo")) return null;
+        const nome = cleanDesc(t);
+        const d = ensureMonthItems(all, currentMonthKey());
+        const idx = d.items.findIndex(it => !it.isFixo && (normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc))));
+        if(idx === -1) return { ok:false, html:`Não encontrei gasto parecido com "<b>${escapeHtml(nome)}</b>".` };
+        const removed = d.items[idx];
+        d.items.splice(idx,1);
+        saveState(all);
+        return { ok:true, html:`Gasto <b>${escapeHtml(removed.desc)}</b> removido do mês atual.` };
+      }
+
+      if(t.includes("pdf do mes") || t.includes("gera pdf") || t.includes("gerar pdf") || t.includes("imprimir pdf do mes")){
+        return { ok:true, asyncAction:"generate_month_pdf" };
+      }
+
+      if(t.includes("resumo do ano") || t.includes("pdf do ano") || t.includes("gerar resumo do ano")){
+        return { ok:true, asyncAction:"generate_year_summary_pdf" };
+      }
+
+      return null;
+    }
+
+    function buildVoiceAIPrompt(userText, all){
+      const month = currentMonthKey();
+      const d = ensureMonthItems(all, month);
+
+      const context = {
+        currentMonth: month,
+        categories: all.categorias,
+        fixedExpenses: all.fixos.map(f=>({
+          desc:f.desc, amount:Number(f.amount||0), category:f.category || "Outros", dueDay:Number(f.diaPagar||0)
+        })),
+        fixedInvestments: all.investFixos.map(inv=>({
+          name:inv.nome, goalAmount:Number(inv.metaFinal||0), months:Number(inv.prazoMeses||0), monthlyAmount:Number(inv.mensal||0), dueDay:Number(inv.diaPagar||0)
+        })),
+        currentMonthItems: d.items.map(it=>({
+          desc:it.desc, amount:Number(it.amount||0), category:it.category || "Outros",
+          paid:!!it.paid, isFixed:!!it.isFixo, isFixedInvestment:!!it.isInvestFixo, dueDay:Number(it.diaPagar||0)
+        }))
+      };
+
+      return `
+Você é um interpretador de intenção para um app de finanças pessoais.
+Converta o pedido do usuário em UM JSON executável.
+Responda SOMENTE JSON puro, sem markdown, sem explicação.
+
+Ações permitidas:
+- add_expense
+- add_fixed_expense
+- add_fixed_investment
+- mark_paid
+- mark_pending
+- remove_expense
+- remove_fixed_expense
+- remove_fixed_investment
+- add_saved
+- change_theme
+- generate_month_pdf
+- generate_year_summary_pdf
+- show_summary
+- request_notifications
+- open_screen
+- unknown
+
+Para open_screen, use:
+{"action":"open_screen","screen":"home|ia|history|simulators|categories|fixed_expenses|fixed_investments|settings"}
+
+Regras:
+1) Sempre devolva um único objeto JSON.
+2) Se faltar algo essencial, complete com o melhor palpite.
+3) Se não entender, use {"action":"unknown","raw":"...","reason":"..."}.
+4) generate_month_pdf usa month no formato YYYY-MM.
+5) generate_year_summary_pdf usa year no formato YYYY.
+6) mark_paid e mark_pending usam "target".
+7) remove_* usam "target".
+8) add_saved usa "amount" e "desc".
+9) add_fixed_investment usa:
+   {"action":"add_fixed_investment","name":"...","goalAmount":3000,"months":12,"dueDay":10}
+10) add_fixed_expense usa:
+   {"action":"add_fixed_expense","desc":"...","amount":99,"category":"Casa","dueDay":11}
+11) add_expense usa:
+   {"action":"add_expense","desc":"...","amount":50,"category":"Alimentação","paid":true}
+
+Contexto do app:
+${JSON.stringify(context, null, 2)}
+
+Pedido do usuário:
+${userText}
+      `.trim();
+    }
+
+    function extractJsonFromText(text){
+      const raw = String(text || "").trim();
+      try{
+        return JSON.parse(raw);
+      }catch(e){}
+
+      const match = raw.match(/\{[\s\S]*\}/);
+      if(match){
+        try{
+          return JSON.parse(match[0]);
+        }catch(e){}
+      }
+      throw new Error("A IA não retornou JSON válido.");
+    }
+
+    async function askAIToInterpret(userText, all){
+      const base = (window.API_BASE_URL || "").replace(/\/$/, "");
+      if(!base) throw new Error("API_BASE_URL não configurada.");
+
+      const prompt = buildVoiceAIPrompt(userText, all);
+
+      const resp = await fetch(base + "/api/chat", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "x-app-key": window.APP_KEY || ""
+        },
+        body:JSON.stringify({ prompt }),
+        cache:"no-store",
+        mode:"cors"
+      });
+
+      if(!resp.ok){
+        const txt = await resp.text().catch(()=> "");
+        throw new Error(`Falha na IA (${resp.status}): ${txt || "sem detalhe"}`);
+      }
+
+      const data = await resp.json();
+      const aiText = data.response || data.text || data.message || "";
+      return extractJsonFromText(aiText);
+    }
+
+    async function executeParsedAction(parsed, all){
+      const action = String(parsed.action || "").trim();
+
+      if(action === "unknown" || !action){
+        return { ok:false, html:`A IA não conseguiu identificar a ação.<br><br>${escapeHtml(parsed.reason || "Sem motivo informado.")}` };
+      }
+
+      if(action === "open_screen"){
+        const screen = String(parsed.screen || "").toLowerCase();
+        if(screen === "ia"){ openRoute("./ia.html"); return { ok:true, html:`Abrindo a <b>IA</b>.` }; }
+        if(screen === "home"){ openRoute("./index.html"); return { ok:true, html:`Voltando para a <b>tela principal</b>.` }; }
+        openRoute("./index.html");
+        return { ok:true, html:`Abrindo a tela principal para acessar <b>${escapeHtml(screen)}</b>.` };
+      }
+
+      if(action === "show_summary"){
+        return { ok:true, html: monthSummaryHtml(all, currentMonthKey()) };
+      }
+
+      if(action === "request_notifications"){
+        requestNotificationPermission();
+        return { ok:true, html:`Abrindo permissão de <b>notificações</b>.` };
+      }
+
+      if(action === "add_saved"){
+        const d = ensureMonthItems(all, currentMonthKey());
+        const amount = Number(parsed.amount || 0);
+        const desc = titleCase(parsed.desc || "Guardado");
+        if(!amount || amount <= 0) return { ok:false, html:"Ação add_saved veio sem valor válido." };
+        d.saved.unshift({ value:amount, desc, date:todayISO(), source:"manual" });
+        saveState(all);
+        return { ok:true, html:`Valor guardado anotado:<br>• Valor: <b>${money(amount)}</b><br>• Descrição: <b>${escapeHtml(desc)}</b>` };
+      }
+
+      if(action === "add_expense"){
+        const d = ensureMonthItems(all, currentMonthKey());
+        const desc = titleCase(parsed.desc || "Gasto");
+        const amount = Number(parsed.amount || 0);
+        const category = parsed.category ? titleCase(parsed.category) : "Outros";
+        const paid = !!parsed.paid;
+        if(!amount || amount <= 0) return { ok:false, html:"Ação add_expense veio sem valor válido." };
+        d.items.push({
+          id:uid(),
+          desc,
+          amount,
+          category,
+          isFixo:false,
+          isInvestFixo:false,
+          paid
+        });
+        saveState(all);
+        return { ok:true, html:`Gasto adicionado pela IA:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(amount)}</b><br>• Categoria: <b>${escapeHtml(category)}</b><br>• Status: <b>${paid ? "Pago" : "Pendente"}</b>` };
+      }
+
+      if(action === "add_fixed_expense"){
+        const desc = titleCase(parsed.desc || "Fixo");
+        const amount = Number(parsed.amount || 0);
+        const category = parsed.category ? titleCase(parsed.category) : "Outros";
+        const dueDay = Number(parsed.dueDay || 0);
+        if(!amount || amount <= 0) return { ok:false, html:"Ação add_fixed_expense veio sem valor válido." };
+
+        all.fixos.push({
+          id:uid(),
+          desc,
+          amount,
+          category,
+          diaPagar:dueDay || 0,
+          isFixo:true
+        });
+        saveState(all);
+        return { ok:true, html:`Gasto fixo adicionado pela IA:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(amount)}</b><br>• Categoria: <b>${escapeHtml(category)}</b><br>• Vence: <b>${dueDay ? ("dia " + dueDay) : "sem prazo"}</b>` };
+      }
+
+      if(action === "add_fixed_investment"){
+        const name = titleCase(parsed.name || parsed.desc || "Investimento");
+        const goalAmount = Number(parsed.goalAmount || parsed.metaFinal || 0);
+        const months = Number(parsed.months || parsed.prazoMeses || 0);
+        const dueDay = Number(parsed.dueDay || 0);
+        if(!goalAmount || goalAmount <= 0) return { ok:false, html:"Ação add_fixed_investment veio sem meta válida." };
+        if(!months || months <= 0) return { ok:false, html:"Ação add_fixed_investment veio sem prazo válido." };
+        const mensal = Math.round((goalAmount / months) * 100) / 100;
+        const id = uid();
+
+        all.investFixos.push({
+          id,
+          nome:name,
+          metaFinal:goalAmount,
+          prazoMeses:months,
+          mensal,
+          diaPagar:dueDay || 0
+        });
+
+        const dm = ensureMonthItems(all, currentMonthKey());
+        dm.investStatus[id] = false;
+        saveState(all);
+
+        return { ok:true, html:`Investimento fixo adicionado pela IA:<br>• <b>${escapeHtml(name)}</b><br>• Meta: <b>${money(goalAmount)}</b><br>• Prazo: <b>${months} meses</b><br>• Mensal: <b>${money(mensal)}</b>` };
+      }
+
+      if(action === "mark_paid"){
+        const target = parsed.target || parsed.desc || "";
+        const item = findCurrentMonthItemByName(all, target, currentMonthKey());
+        if(!item) return { ok:false, html:`Não encontrei item para marcar como pago: <b>${escapeHtml(target)}</b>` };
+        item.paid = true;
+
+        const dc = ensureMonthItems(all, currentMonthKey());
+        if(item.isInvestFixo && item.invId){
+          dc.investStatus[item.invId] = true;
+          const exists = dc.saved.some(s => s && s.source==="investFixo" && s.invId===item.invId && s.month===currentMonthKey());
+          if(!exists){
+            dc.saved.unshift({
+              value:Number(item.amount || 0),
+              desc:`Automático: ${item.desc}`,
+              date:todayISO(),
+              source:"investFixo",
+              invId:item.invId,
+              month:currentMonthKey()
+            });
+          }
+        }
+        saveState(all);
+        return { ok:true, html:`Item <b>${escapeHtml(item.desc)}</b> marcado como <b>Pago</b>.` };
+      }
+
+      if(action === "mark_pending"){
+        const target = parsed.target || parsed.desc || "";
+        const item = findCurrentMonthItemByName(all, target, currentMonthKey());
+        if(!item) return { ok:false, html:`Não encontrei item para voltar a pendente: <b>${escapeHtml(target)}</b>` };
+        item.paid = false;
+        const dc = ensureMonthItems(all, currentMonthKey());
+        if(item.isInvestFixo && item.invId){
+          dc.investStatus[item.invId] = false;
+          dc.saved = dc.saved.filter(s => !(s && s.source==="investFixo" && s.invId===item.invId && s.month===currentMonthKey()));
+        }
+        saveState(all);
+        return { ok:true, html:`Item <b>${escapeHtml(item.desc)}</b> voltou para <b>Pendente</b>.` };
+      }
+
+      if(action === "remove_expense"){
+        const target = parsed.target || parsed.desc || "";
+        const d = ensureMonthItems(all, currentMonthKey());
+        const idx = d.items.findIndex(it => !it.isFixo && (normalizeText(it.desc).includes(normalizeText(target)) || normalizeText(target).includes(normalizeText(it.desc))));
+        if(idx === -1) return { ok:false, html:`Não encontrei gasto para remover: <b>${escapeHtml(target)}</b>` };
+        const removed = d.items[idx];
+        d.items.splice(idx,1);
+        saveState(all);
+        return { ok:true, html:`Gasto <b>${escapeHtml(removed.desc)}</b> removido do mês atual.` };
+      }
+
+      if(action === "remove_fixed_expense"){
+        const target = parsed.target || parsed.desc || "";
+        const idx = all.fixos.findIndex(it => normalizeText(it.desc).includes(normalizeText(target)) || normalizeText(target).includes(normalizeText(it.desc)));
+        if(idx === -1) return { ok:false, html:`Não encontrei gasto fixo para remover: <b>${escapeHtml(target)}</b>` };
+        const removed = all.fixos[idx];
+        all.fixos.splice(idx,1);
+
+        Object.keys(all.state.meses || {}).forEach(m=>{
+          const dm = all.state.meses[m];
+          if(dm && Array.isArray(dm.items)){
+            dm.items = dm.items.filter(it => !(it.isFixo && !it.isInvestFixo && (it.id === removed.id || normalizeText(it.desc) === normalizeText(removed.desc))));
+          }
+        });
+
+        saveState(all);
+        return { ok:true, html:`Gasto fixo <b>${escapeHtml(removed.desc)}</b> removido do sistema.` };
+      }
+
+      if(action === "remove_fixed_investment"){
+        const target = parsed.target || parsed.name || parsed.desc || "";
+        const idx = all.investFixos.findIndex(it => normalizeText(it.nome).includes(normalizeText(target)) || normalizeText(target).includes(normalizeText(it.nome)));
+        if(idx === -1) return { ok:false, html:`Não encontrei investimento fixo para remover: <b>${escapeHtml(target)}</b>` };
+        const removed = all.investFixos[idx];
+        all.investFixos.splice(idx,1);
+
+        Object.keys(all.state.meses || {}).forEach(m=>{
+          const dm = all.state.meses[m];
+          if(dm){
+            if(dm.investStatus && removed.id) delete dm.investStatus[removed.id];
+            if(Array.isArray(dm.saved)) dm.saved = dm.saved.filter(s => !(s && s.source==="investFixo" && s.invId===removed.id));
+            if(Array.isArray(dm.items)) dm.items = dm.items.filter(it => !(it.isInvestFixo && (it.invId === removed.id || it.id === removed.id)));
+          }
+        });
+
+        saveState(all);
+        return { ok:true, html:`Investimento fixo <b>${escapeHtml(removed.nome)}</b> removido do sistema.` };
+      }
+
+      if(action === "change_theme"){
+        if(parsed.preset) localStorage.setItem(THEME_KEYS.preset, String(parsed.preset));
+        if(parsed.accent) localStorage.setItem(THEME_KEYS.accent, String(parsed.accent));
+        if(parsed.colorName && COLOR_MAP[normalizeText(parsed.colorName)]){
+          localStorage.setItem(THEME_KEYS.accent, COLOR_MAP[normalizeText(parsed.colorName)]);
+        }
+        applyThemeToPage();
+        return { ok:true, html:`Tema alterado pela IA com sucesso.` };
+      }
+
+      if(action === "generate_month_pdf"){
+        const monthKey = String(parsed.month || currentMonthKey());
+        await generateMonthPDF(all, monthKey);
+        const label = new Date(monthKey + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+        return { ok:true, html:`PDF do mês <b>${escapeHtml(label)}</b> gerado com sucesso.` };
+      }
+
+      if(action === "generate_year_summary_pdf"){
+        const year = String(parsed.year || new Date().getFullYear());
+        await generateYearSummaryPDF(all, year);
+        return { ok:true, html:`PDF <b>resumo do ano ${escapeHtml(year)}</b> gerado com sucesso.` };
+      }
+
+      return { ok:false, html:`Ação não suportada: <b>${escapeHtml(action)}</b>` };
+    }
+
+    async function executeVoiceCommand(){
+      if(!USER_ID){
+        setResult(`<span class="err">Faça login primeiro.</span>`);
+        return;
+      }
+
+      const cmd = lastTranscript.trim();
+      if(!cmd){
+        setResult(`<span class="warn">Nenhum comando para executar.</span>`);
+        return;
+      }
+
+      const all = loadState();
+
+      try{
+        setResult("Analisando comando...");
+
+        const local = tryLocalRule(cmd, all);
+        if(local){
+          if(local.asyncAction === "generate_month_pdf"){
+            const parsed = parseMonthYearFromText(cmd);
+            const monthKey = `${parsed.year}-${parsed.month}`;
+            await generateMonthPDF(all, monthKey);
+            const label = new Date(monthKey + "-01T00:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+            setResult(`<span class="ok">Comando executado.</span><br><br>PDF do mês <b>${escapeHtml(label)}</b> gerado com sucesso.`);
+            dbg("Local OK PDF mês: " + cmd);
+            return;
+          }
+
+          if(local.asyncAction === "generate_year_summary_pdf"){
+            const yearMatch = normalizeText(cmd).match(/\b(20\d{2})\b/);
+            const year = yearMatch ? yearMatch[1] : String(new Date().getFullYear());
+            await generateYearSummaryPDF(all, year);
+            setResult(`<span class="ok">Comando executado.</span><br><br>PDF <b>resumo do ano ${escapeHtml(year)}</b> gerado com sucesso.`);
+            dbg("Local OK PDF ano: " + cmd);
+            return;
+          }
+
+          if(local.ok){
+            setResult(`<span class="ok">Comando executado.</span><br><br>${local.html}`);
+            dbg("Local OK: " + cmd);
+          }else{
+            setResult(`<span class="warn">Não foi possível concluir.</span><br><br>${local.html}`);
+            dbg("Local falhou: " + cmd);
+          }
+          return;
+        }
+
+        setResult("Enviando para a IA interpretar...");
+        const parsed = await askAIToInterpret(cmd, all);
+        const execResult = await executeParsedAction(parsed, all);
+
+        if(execResult.ok){
+          setResult(`<span class="ok">Comando executado pela IA.</span><br><br>${execResult.html}`);
+          dbg("IA OK: " + JSON.stringify(parsed));
+        }else{
+          setResult(`<span class="warn">A IA respondeu, mas não consegui concluir.</span><br><br>${execResult.html}`);
+          dbg("IA falhou: " + JSON.stringify(parsed));
+        }
+      }catch(e){
+        setResult(
+          `<span class="err">Erro ao executar comando.</span><br><br>` +
+          `${escapeHtml(e.message || String(e))}<br><br>` +
+          `<span class="small">Se aparecer "Failed to fetch", normalmente é problema de URL da IA, CORS, domínio bloqueado ou endpoint fora do ar.</span>`
+        );
+        dbg("Erro comando: " + (e.message || e));
+      }
+    }
+
+    async function initFirebase(){
+      if(!window.firebase){
+        dbg("Firebase não carregou.");
+        return false;
+      }
+
+      try{
+        if(!firebase.apps || !firebase.apps.length){
+          firebase.initializeApp(FIREBASE_CONFIG);
+        }
+      }catch(e){}
+
+      auth = firebase.auth();
+
+      auth.onAuthStateChanged((u)=>{
+        USER = u || null;
+        if(!USER){
+          USER_ID = null;
+          location.replace("./login.html");
+          return;
+        }
+
+        USER_ID = USER.uid;
+
+        const savedTheme = localStorage.getItem("theme");
+        if(savedTheme === "light") document.body.classList.add("light");
+
+        applyThemeToPage();
+        dbg("Usuário autenticado: " + (USER.email || USER.uid));
+      });
+
+      return true;
+    }
+
+    document.addEventListener("DOMContentLoaded", async ()=>{
+      const ok = await initFirebase();
+      if(!ok) return;
+      ensureSpeech();
+      applyThemeToPage();
     });
-    document.getElementById("investTipo").addEventListener("change", updateInvestUI);
-    ["invNome","invMetaFinal","invPrazoMeses","invDiaPagar"].forEach(id=>{
-      document.getElementById(id).addEventListener("input", updateInvResumo);
-    });
-
-    showApp();
-    render();
-    checkDueNotifications();
-  });
-}
-
-function render(){
-  const d = getDataMes(mesAtual);
-  ensureFixedItems(d);
-  renderSavedList();
-  renderKPIs();
-  renderList();
-  renderCategorias();
-  renderFixos();
-  renderInvestFixos();
-  drawChart();
-  drawEvolution();
-  buildPdfSelectors();
-}
-async function logout(){
-  try{ await auth.signOut(); }catch(e){}
-  location.replace("./login.html");
-}
-
-document.addEventListener("DOMContentLoaded", ()=>{
-  applyThemeSettings();
-  showLoading();
-  initFirebase();
-});
-</script>
+  </script>
 </body>
 </html>
