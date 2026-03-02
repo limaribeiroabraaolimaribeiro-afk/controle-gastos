@@ -1,1714 +1,542 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Comando de Voz • Controle de Gastos PRO</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Comando de Voz • Controle de Gastos PRO</title>
 
-  <meta name="theme-color" content="#569cff" />
-  <link rel="manifest" href="manifest.json" />
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#569cff">
+<link rel="stylesheet" href="./ui.css">
 
-  <style>
-    :root{
-      --bg:#07101f;
-      --grad1:rgba(86,156,255,.22);
-      --grad2:rgba(57,217,138,.16);
-      --grad3:rgba(255,93,93,.12);
-      --panel:rgba(255,255,255,.07);
-      --panel2:rgba(255,255,255,.09);
-      --stroke:rgba(255,255,255,.10);
-      --text:#eaf0ff;
-      --muted:rgba(234,240,255,.72);
-      --accent:#569cff;
-      --good:#39d98a;
-      --warn:#ffd166;
-      --danger:#ff5d5d;
-      --shadow:0 18px 60px rgba(0,0,0,.45);
-      --glass:blur(14px);
-      --radius:24px;
-    }
-
-    .light{
-      --panel:rgba(0,0,0,.04);
-      --panel2:rgba(0,0,0,.06);
-      --stroke:rgba(0,0,0,.08);
-      --text:#0d1222;
-      --muted:rgba(13,18,34,.68);
-      --shadow:0 18px 60px rgba(0,0,0,.12);
-    }
-
-    *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      min-height:100%;
-      color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-      background:
-        radial-gradient(900px 680px at 15% 8%, var(--grad1), transparent 55%),
-        radial-gradient(860px 640px at 85% 30%, var(--grad2), transparent 60%),
-        radial-gradient(700px 520px at 70% 92%, var(--grad3), transparent 60%),
-        var(--bg);
-      overflow-x:hidden;
-    }
-
-    .wrap{
-      width:100%;
-      max-width:760px;
-      margin:0 auto;
-      padding:16px;
-      padding-bottom:40px;
-    }
-
-    .topbar{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:14px;
-      flex-wrap:wrap;
-    }
-
-    .titleBox h1{
-      margin:0;
-      font-size:28px;
-      line-height:1.02;
-      letter-spacing:.2px;
-    }
-
-    .small{font-size:12px;color:var(--muted);line-height:1.45}
-
-    .card{
-      background:linear-gradient(180deg, var(--panel2), var(--panel));
-      border:1px solid var(--stroke);
-      border-radius:var(--radius);
-      padding:16px;
-      box-shadow:var(--shadow);
-      backdrop-filter:var(--glass);
-      margin-bottom:14px;
-      width:100%;
-      overflow:hidden;
-    }
-
-    .hero{
-      padding:18px;
-    }
-
-    .row{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .btn{
-      appearance:none;
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.10);
-      color:var(--text);
-      padding:13px 14px;
-      border-radius:18px;
-      cursor:pointer;
-      font-weight:850;
-      box-shadow:0 10px 26px rgba(0,0,0,.18);
-      min-height:50px;
-    }
-    .btn:active{transform:translateY(1px)}
-    .btn.primary{
-      background:var(--accent);
-      color:#fff;
-      border-color:color-mix(in srgb, var(--accent), transparent 55%);
-    }
-    .btn.good{
-      background:var(--good);
-      color:#062114;
-      border-color:color-mix(in srgb, var(--good), transparent 55%);
-    }
-    .btn.warn{
-      background:var(--warn);
-      color:#2a1a00;
-      border-color:color-mix(in srgb, var(--warn), transparent 55%);
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 12px;
-      border-radius:999px;
-      background:rgba(255,255,255,.10);
-      border:1px solid var(--stroke);
-      color:var(--muted);
-      font-size:12px;
-      max-width:100%;
-    }
-
-    .dot{
-      width:10px;height:10px;border-radius:999px;
-      background:var(--warn);
-      box-shadow:0 0 0 4px rgba(255,209,102,.12);
-      flex:0 0 auto;
-    }
-    .dot.ok{
-      background:var(--good);
-      box-shadow:0 0 0 4px rgba(57,217,138,.12);
-    }
-    .dot.err{
-      background:var(--danger);
-      box-shadow:0 0 0 4px rgba(255,93,93,.12);
-    }
-
-    .heroTop{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:10px;
-      flex-wrap:wrap;
-    }
-
-    .bigMicWrap{
-      display:flex;
-      justify-content:center;
-      margin:18px 0 10px;
-    }
-
-    .bigMic{
-      width:168px;
-      height:168px;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:66px;
-      font-weight:900;
-      cursor:pointer;
-      user-select:none;
-      box-shadow:0 24px 60px rgba(0,0,0,.35);
-      background:
-        radial-gradient(130px 100px at 30% 20%, rgba(255,255,255,.28), transparent 60%),
-        linear-gradient(135deg, rgba(86,156,255,.98), rgba(57,217,138,.58));
-      color:#04152c;
-      transition:transform .15s ease, box-shadow .15s ease;
-      flex:0 0 auto;
-    }
-    .bigMic:active{transform:scale(.985)}
-    .bigMic.listening{
-      animation:pulse 1.2s infinite;
-      background:
-        radial-gradient(130px 100px at 30% 20%, rgba(255,255,255,.30), transparent 60%),
-        linear-gradient(135deg, rgba(255,93,93,.98), rgba(255,209,102,.65));
-      color:#1d1200;
-    }
-    @keyframes pulse{
-      0%{ box-shadow:0 0 0 0 rgba(255,93,93,.38), 0 24px 60px rgba(0,0,0,.35);}
-      70%{ box-shadow:0 0 0 18px rgba(255,93,93,0), 0 24px 60px rgba(0,0,0,.35);}
-      100%{ box-shadow:0 0 0 0 rgba(255,93,93,0), 0 24px 60px rgba(0,0,0,.35);}
-    }
-
-    .box{
-      width:100%;
-      min-height:92px;
-      white-space:pre-wrap;
-      line-height:1.5;
-      font-size:15px;
-      padding:14px;
-      border-radius:18px;
-      border:1px dashed var(--stroke);
-      background:rgba(255,255,255,.04);
-      overflow-wrap:anywhere;
-    }
-
-    .result{
-      width:100%;
-      min-height:136px;
-      white-space:pre-wrap;
-      line-height:1.55;
-      font-size:15px;
-      padding:14px;
-      border-radius:18px;
-      border:1px dashed var(--stroke);
-      background:rgba(255,255,255,.04);
-      overflow-wrap:anywhere;
-    }
-
-    .ok{color:var(--good);font-weight:900}
-    .warn{color:var(--warn);font-weight:900}
-    .err{color:var(--danger);font-weight:900}
-
-    .chips{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:12px;
-    }
-    .chip{
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.08);
-      color:var(--muted);
-      font-size:12px;
-      cursor:pointer;
-      user-select:none;
-    }
-
-    .actions{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:10px;
-      margin-top:14px;
-    }
-
-    .list{
-      display:grid;
-      gap:10px;
-    }
-    .item{
-      padding:12px;
-      border-radius:18px;
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.06);
-      line-height:1.5;
-      overflow-wrap:anywhere;
-    }
-
-    .mono{
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-      font-size:12px;
-      white-space:pre-wrap;
-      line-height:1.5;
-      overflow-wrap:anywhere;
-    }
-
-    .sectionTitle{
-      font-weight:900;
-      margin-bottom:10px;
-    }
-
-    @media (max-width:640px){
-      .wrap{padding:12px}
-      .titleBox h1{font-size:22px}
-      .topbar{flex-direction:column}
-      .heroTop{flex-direction:column}
-      .bigMic{width:152px;height:152px;font-size:58px}
-      .actions{grid-template-columns:1fr}
-      .btn{width:100%}
-    }
-  </style>
+<style>
+.voiceWrap{
+  max-width:860px;
+  margin:auto;
+  padding:16px;
+  padding-bottom:120px;
+}
+.voiceHero{
+  border-radius:26px;
+  border:1px solid color-mix(in srgb, var(--stroke), transparent 20%);
+  background:
+    radial-gradient(1200px 800px at 15% 0%, color-mix(in srgb, var(--accent), transparent 80%), transparent 60%),
+    radial-gradient(900px 700px at 85% 10%, rgba(57,217,138,.10), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--glass);
+  overflow:hidden;
+}
+.voiceTop{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px;border-bottom:1px solid var(--stroke);
+}
+.voiceBrand{
+  display:flex;align-items:center;gap:12px;min-width:0;
+}
+.voiceLogo{
+  width:52px;height:52px;border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(60px 50px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
+    linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 14px 38px rgba(0,0,0,.28);
+  font-size:24px;
+}
+.voiceTitle .t{
+  font-weight:950;
+  letter-spacing:.2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.voiceTitle .s{
+  font-size:12px;color:var(--muted);margin-top:2px;
+}
+.voiceStatusPill{
+  display:inline-flex;gap:8px;align-items:center;
+  padding:8px 10px;border-radius:999px;
+  background:rgba(255,255,255,.10);
+  border:1px solid var(--stroke);
+  font-size:12px;color:var(--muted);
+}
+.voiceStatusDot{
+  width:10px;height:10px;border-radius:999px;
+  background:var(--warn);
+  box-shadow:0 0 0 4px rgba(255,209,102,.12);
+}
+.voiceStatusDot.ok{
+  background:var(--good);
+  box-shadow:0 0 0 4px rgba(57,217,138,.12);
+}
+.voiceBody{padding:16px}
+.voiceOrbWrap{
+  display:flex;justify-content:center;align-items:center;
+  padding:18px 0 8px;
+}
+.voiceOrb{
+  width:170px;height:170px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(120px 120px at 30% 20%, rgba(255,255,255,.22), transparent 60%),
+    linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 20px 60px rgba(0,0,0,.30);
+  font-size:64px;
+  transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.voiceOrb.listening{
+  transform:scale(1.04);
+  box-shadow:0 24px 70px rgba(255,209,102,.20), 0 20px 60px rgba(0,0,0,.30);
+  filter:saturate(1.08);
+}
+.voiceState{
+  text-align:center;
+  font-weight:950;
+  font-size:18px;
+  margin-top:10px;
+}
+.voiceHint{
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  margin-top:6px;
+}
+.voiceActions{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:18px;
+}
+.voiceConsole{
+  margin-top:16px;
+  border-radius:20px;
+  border:1px solid var(--stroke);
+  background:
+    radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.10), transparent 55%),
+    radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.08), transparent 60%),
+    rgba(0,0,0,.12);
+  padding:14px;
+}
+.light .voiceConsole{
+  background:
+    radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.10), transparent 55%),
+    radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.08), transparent 60%),
+    rgba(255,255,255,.60);
+}
+.voiceField{
+  margin-top:12px;
+}
+.voiceField:first-child{margin-top:0}
+.voiceField label{
+  display:block;
+  margin-bottom:6px;
+}
+.voiceText{
+  min-height:56px;
+}
+.voiceLog{
+  display:grid;
+  gap:10px;
+  margin-top:10px;
+  max-height:240px;
+  overflow:auto;
+}
+.voiceItem{
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.06);
+  border-radius:16px;
+  padding:10px 12px;
+}
+.voiceItem .top{
+  display:flex;justify-content:space-between;gap:10px;align-items:center;
+}
+.voiceItem .cmd{
+  font-weight:850;
+  margin-top:8px;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.voiceExamples{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;
+}
+.voiceChip{
+  padding:8px 10px;border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--stroke);
+  font-size:12px;color:var(--muted);
+  cursor:pointer;user-select:none;
+}
+.voiceChip:active{transform:translateY(1px)}
+@media (max-width:720px){
+  .voiceActions{grid-template-columns:1fr}
+  .voiceTop{align-items:flex-start;flex-direction:column}
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="titleBox">
-        <h1>Comando de Voz</h1>
-        <div class="small">
-          Fale naturalmente. O sistema tenta palavras-chave primeiro e, se precisar, manda para sua IA interpretar e executar sozinho.
-        </div>
-      </div>
 
-      <div class="row" style="width:100%;max-width:230px">
-        <button class="btn" style="flex:1" onclick="goBack()">← Voltar</button>
-        <button class="btn" style="flex:1" onclick="toggleTheme()">🌙/☀️</button>
-      </div>
+<div id="loading">
+  <div class="card" style="max-width:520px;width:100%">
+    <h2 style="font-weight:900;margin-bottom:6px">Carregando comando de voz…</h2>
+    <div class="small">Validando login e preparando o sistema.</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="voiceWrap">
+    <div class="backRow">
+      <a class="btn backBtn" href="./index.html">← Voltar</a>
+      <div style="font-weight:900">Comando de Voz</div>
     </div>
 
-    <div class="card hero">
-      <div class="heroTop">
-        <div>
-          <div class="sectionTitle">Fale normalmente</div>
-          <div class="small">
-            Exemplos:
-            <br>• anota que paguei 50 no mercado hoje
-            <br>• coloca internet 99 fixo vencendo dia 11
-            <br>• quero guardar 300 pro tablet
-            <br>• marca internet como pago
-            <br>• tira internet do pago
-            <br>• remove o gasto mercado
-            <br>• abre histórico
-            <br>• abre configurações
-            <br>• abre categorias
-            <br>• abre gastos fixos
-            <br>• abre investimentos fixos
-            <br>• abre simuladores
-            <br>• abre ia
-            <br>• resumo do ano 2026
-            <br>• pdf do mês março de 2026
-            <br>• muda o tema para roxo
+    <div class="voiceHero">
+      <div class="voiceTop">
+        <div class="voiceBrand">
+          <div class="voiceLogo">🎙️</div>
+          <div class="voiceTitle">
+            <div class="t">Controle de Gastos PRO • Voz</div>
+            <div class="s">Fale um comando e o app executa na tela correta.</div>
           </div>
         </div>
 
-        <div class="badge">
-          <span class="dot" id="micDot"></span>
-          <span id="micStatus">Parado</span>
+        <div class="voiceStatusPill">
+          <span class="voiceStatusDot" id="voiceDot"></span>
+          <span id="voiceStatus">Aguardando…</span>
         </div>
       </div>
 
-      <div class="bigMicWrap">
-        <button class="bigMic" id="bigMic" onclick="toggleRecording()" title="Gravar comando">🎙️</button>
+      <div class="voiceBody">
+        <div class="voiceOrbWrap">
+          <div class="voiceOrb" id="voiceOrb">🎤</div>
+        </div>
+
+        <div class="voiceState" id="voiceState">Pronto para ouvir</div>
+        <div class="voiceHint" id="voiceHint">Toque em “Ouvir comando” e fale naturalmente.</div>
+
+        <div class="voiceActions">
+          <button class="btn warn" id="btnListen" onclick="startListening()">🎤 Ouvir comando</button>
+          <button class="btn" id="btnStop" onclick="stopListening()">⏹️ Parar</button>
+          <button class="btn primary" onclick="sendTypedCommand()">📤 Enviar texto</button>
+        </div>
+
+        <div class="voiceConsole">
+          <div class="voiceField">
+            <label>Comando reconhecido</label>
+            <textarea id="recognizedText" class="voiceText" placeholder="O texto reconhecido aparece aqui…"></textarea>
+          </div>
+
+          <div class="voiceField">
+            <label>Retorno do sistema</label>
+            <div class="note">
+              <div style="font-weight:850" id="ackTitle">Nenhum retorno ainda</div>
+              <div class="small" id="ackText" style="margin-top:6px">Depois de enviar um comando, o resultado aparece aqui.</div>
+            </div>
+          </div>
+
+          <div class="voiceField">
+            <label>Exemplos rápidos</label>
+            <div class="voiceExamples">
+              <div class="voiceChip" onclick="fillExample('abrir gastos fixos')">abrir gastos fixos</div>
+              <div class="voiceChip" onclick="fillExample('abrir investimentos fixos')">abrir investimentos fixos</div>
+              <div class="voiceChip" onclick="fillExample('abrir categorias')">abrir categorias</div>
+              <div class="voiceChip" onclick="fillExample('abrir histórico')">abrir histórico</div>
+              <div class="voiceChip" onclick="fillExample('abrir simuladores')">abrir simuladores</div>
+              <div class="voiceChip" onclick="fillExample('abrir ia')">abrir ia</div>
+              <div class="voiceChip" onclick="fillExample('abrir menu')">abrir menu</div>
+              <div class="voiceChip" onclick="fillExample('abrir adicionar gasto')">abrir adicionar gasto</div>
+              <div class="voiceChip" onclick="fillExample('tema roxo')">tema roxo</div>
+              <div class="voiceChip" onclick="fillExample('tema padrão')">tema padrão</div>
+            </div>
+          </div>
+
+          <div class="voiceField">
+            <label>Últimos comandos</label>
+            <div class="voiceLog" id="voiceLog"></div>
+          </div>
+        </div>
       </div>
-
-      <div class="small" id="hintText" style="text-align:center;margin-bottom:10px">
-        Toque no áudio. Quando terminar de falar, a IA já tenta entender e executar automaticamente.
-      </div>
-
-      <div class="small" style="margin-bottom:6px">Texto reconhecido</div>
-      <div class="box" id="transcriptBox">Nenhum comando ainda.</div>
-
-      <div class="chips">
-        <div class="chip" onclick="setTranscript('abre histórico')">Histórico</div>
-        <div class="chip" onclick="setTranscript('abre configurações')">Configurações</div>
-        <div class="chip" onclick="setTranscript('abre categorias')">Categorias</div>
-        <div class="chip" onclick="setTranscript('abre gastos fixos')">Fixos</div>
-        <div class="chip" onclick="setTranscript('abre investimentos fixos')">Investimentos</div>
-        <div class="chip" onclick="setTranscript('resumo do ano 2026')">Resumo do ano</div>
-        <div class="chip" onclick="setTranscript('pdf do mês março de 2026')">PDF do mês</div>
-        <div class="chip" onclick="setTranscript('muda o tema para roxo')">Tema</div>
-      </div>
-
-      <div class="actions">
-        <button class="btn" onclick="clearTranscript()">Limpar</button>
-        <button class="btn warn" onclick="toggleRecording()">Áudio</button>
-        <button class="btn good" onclick="executeVoiceCommand()">Executar comando</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="sectionTitle">Último resultado</div>
-      <div id="resultBox" class="result">Nenhuma ação executada ainda.</div>
-    </div>
-
-    <div class="card">
-      <div class="sectionTitle">Comandos que ele entende</div>
-      <div class="list small">
-        <div class="item"><b>Gastos:</b> adicionar, gastar, pagar, remover, marcar como pago, voltar para pendente.</div>
-        <div class="item"><b>Fixos:</b> adicionar gasto fixo, remover gasto fixo, vencimento, dia de pagar.</div>
-        <div class="item"><b>Investimentos fixos:</b> meta, meses, valor mensal, prazo.</div>
-        <div class="item"><b>Guardado:</b> guardar valor, anotar guardado, juntar para algo.</div>
-        <div class="item"><b>Tema:</b> mudar para roxo, verde, azul, pôr do sol, minimal, trocar cor.</div>
-        <div class="item"><b>PDF:</b> pdf do mês, resumo do ano.</div>
-        <div class="item"><b>Telas do app:</b> abrir histórico, abrir IA, abrir categorias, abrir gastos fixos, abrir investimentos fixos, abrir simuladores, abrir configurações, voltar início.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="sectionTitle">Diagnóstico</div>
-      <div id="debugBox" class="mono">Aguardando...</div>
     </div>
   </div>
+</div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<div id="debugBox"></div>
 
-  <script>
-    window.API_BASE_URL = window.API_BASE_URL || "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
-    window.APP_KEY = window.APP_KEY || "GastosPro@2026!";
-  </script>
+<script>
+function dbg(msg){
+  const box = document.getElementById("debugBox");
+  if(!box) return;
+  box.style.display = "block";
+  box.textContent = String(msg);
+}
+window.addEventListener("error", (e)=>{
+  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+});
+window.addEventListener("unhandledrejection", (e)=>{
+  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+});
+</script>
 
-  <script>
-    const FIREBASE_CONFIG = {
-      apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-      authDomain:"controle-gastos-pro.firebaseapp.com",
-      projectId:"controle-gastos-pro"
-    };
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="./config.js"></script>
+<script src="./app.js"></script>
 
-    const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
-    const THEME_KEYS = { preset:"theme_preset_v1", accent:"theme_accent_v1" };
-    const VOICE_PENDING_ACTION_KEY = "gastos_voice_pending_action_v1";
+<script>
+let recognition = null;
+let isListening = false;
+let ackWatcher = null;
 
-    const THEME_PRESETS = {
-      default:{ dark:{bg:"#07101f",g1:"rgba(86,156,255,.22)",g2:"rgba(57,217,138,.16)",g3:"rgba(255,93,93,.12)"}, light:{bg:"#f4f6ff",g1:"rgba(86,156,255,.14)",g2:"rgba(57,217,138,.10)",g3:"rgba(255,93,93,.08)"} },
-      purple:{ dark:{bg:"#0d0a1f",g1:"rgba(170,110,255,.25)",g2:"rgba(86,156,255,.12)",g3:"rgba(57,217,138,.10)"}, light:{bg:"#fbf8ff",g1:"rgba(170,110,255,.16)",g2:"rgba(86,156,255,.10)",g3:"rgba(57,217,138,.08)"} },
-      green:{ dark:{bg:"#061a14",g1:"rgba(57,217,138,.28)",g2:"rgba(86,156,255,.10)",g3:"rgba(255,209,102,.10)"}, light:{bg:"#f7fffb",g1:"rgba(57,217,138,.16)",g2:"rgba(86,156,255,.08)",g3:"rgba(255,209,102,.10)"} },
-      sunset:{ dark:{bg:"#1a0b0b",g1:"rgba(255,93,93,.22)",g2:"rgba(255,209,102,.18)",g3:"rgba(86,156,255,.10)"}, light:{bg:"#fff7f2",g1:"rgba(255,93,93,.14)",g2:"rgba(255,209,102,.14)",g3:"rgba(86,156,255,.08)"} },
-      mono:{ dark:{bg:"#05070c",g1:"rgba(255,255,255,.10)",g2:"rgba(255,255,255,.06)",g3:"rgba(255,255,255,.04)"}, light:{bg:"#ffffff",g1:"rgba(0,0,0,.06)",g2:"rgba(0,0,0,.04)",g3:"rgba(0,0,0,.03)"} }
-    };
+const VOICE_CMD_KEY = "voice_cmd";
+const VOICE_ACK_KEY = "voice_cmd_ack";
+const VOICE_QUEUE_KEY = "voice_queue";
 
-    const COLOR_MAP = {
-      azul:"#569cff", blue:"#569cff",
-      verde:"#39d98a", green:"#39d98a",
-      vermelho:"#ff5d5d", red:"#ff5d5d",
-      amarelo:"#ffd166", yellow:"#ffd166",
-      roxo:"#aa6eff", purple:"#aa6eff",
-      rosa:"#ff69b4", pink:"#ff69b4",
-      laranja:"#ff8c42", orange:"#ff8c42",
-      ciano:"#00c2ff", preto:"#222222",
-      branco:"#f5f5f5"
-    };
+function setVoiceStatus(text, ok){
+  const status = document.getElementById("voiceStatus");
+  const dot = document.getElementById("voiceDot");
+  if(status) status.textContent = text;
+  if(dot) dot.classList.toggle("ok", !!ok);
+}
 
-    const MONTHS_PT = {
-      janeiro:"01",
-      fevereiro:"02",
-      marco:"03",
-      "março":"03",
-      abril:"04",
-      maio:"05",
-      junho:"06",
-      julho:"07",
-      agosto:"08",
-      setembro:"09",
-      outubro:"10",
-      novembro:"11",
-      dezembro:"12"
-    };
+function setVoiceState(text, hint){
+  const state = document.getElementById("voiceState");
+  const hintEl = document.getElementById("voiceHint");
+  if(state) state.textContent = text;
+  if(hintEl) hintEl.textContent = hint || "";
+}
 
-    let auth = null;
-    let USER = null;
-    let USER_ID = null;
-    let recognition = null;
-    let listening = false;
-    let lastTranscript = "";
-    let autoExecuteAfterSpeech = true;
+function setListeningUI(on){
+  isListening = !!on;
+  const orb = document.getElementById("voiceOrb");
+  const btnListen = document.getElementById("btnListen");
+  const btnStop = document.getElementById("btnStop");
 
-    function dbg(msg){
-      document.getElementById("debugBox").textContent = String(msg);
+  if(orb) orb.classList.toggle("listening", on);
+  if(btnListen) btnListen.disabled = on;
+  if(btnStop) btnStop.disabled = !on;
+
+  if(on){
+    setVoiceStatus("Ouvindo…", true);
+    setVoiceState("Escutando seu comando", "Fale agora. Quando terminar, o texto será enviado para o app.");
+  }else{
+    setVoiceStatus("Pronto", true);
+    setVoiceState("Pronto para ouvir", "Toque em “Ouvir comando” e fale naturalmente.");
+  }
+}
+
+function normalize(text){
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function loadAck(){
+  const raw = localStorage.getItem(VOICE_ACK_KEY);
+  if(!raw){
+    document.getElementById("ackTitle").textContent = "Nenhum retorno ainda";
+    document.getElementById("ackText").textContent = "Depois de enviar um comando, o resultado aparece aqui.";
+    return;
+  }
+
+  try{
+    const data = JSON.parse(raw);
+    const ok = !!data.ok;
+    document.getElementById("ackTitle").textContent = ok ? "Comando processado" : "Comando não processado";
+    document.getElementById("ackTitle").className = ok ? "successText" : "warnText";
+    document.getElementById("ackText").textContent =
+      `${data.message || "Sem mensagem"}${data.page ? " • Tela: " + data.page : ""}${data.time ? " • " + new Date(data.time).toLocaleString("pt-BR") : ""}`;
+  }catch(e){
+    document.getElementById("ackTitle").textContent = "Retorno inválido";
+    document.getElementById("ackText").textContent = "Não foi possível ler o retorno do sistema.";
+  }
+}
+
+function renderLog(){
+  const div = document.getElementById("voiceLog");
+  const raw = localStorage.getItem(VOICE_QUEUE_KEY);
+  const list = raw ? JSON.parse(raw) : [];
+
+  if(!Array.isArray(list) || !list.length){
+    div.innerHTML = `<div class="empty">Nenhum comando enviado ainda.</div>`;
+    return;
+  }
+
+  const ordered = [...list].reverse().slice(0, 12);
+
+  div.innerHTML = ordered.map(item=>{
+    const cmd = item && item.cmd ? item.cmd : "";
+    const page = item && item.page ? item.page : "—";
+    const time = item && item.time ? new Date(item.time).toLocaleString("pt-BR") : "—";
+    return `
+      <div class="voiceItem">
+        <div class="top">
+          <span class="badge">${page}</span>
+          <span class="small">${time}</span>
+        </div>
+        <div class="cmd">${escapeHtml(cmd)}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function escapeHtml(s){
+  return String(s || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function fillExample(text){
+  document.getElementById("recognizedText").value = text;
+}
+
+function pushCommand(cmd){
+  const text = String(cmd || "").trim();
+  if(!text) return;
+
+  document.getElementById("recognizedText").value = text;
+  localStorage.removeItem(VOICE_ACK_KEY);
+  localStorage.setItem(VOICE_CMD_KEY, text);
+
+  setVoiceStatus("Enviado", true);
+  setVoiceState("Comando enviado", "Se a tela correspondente estiver aberta, ela processa imediatamente. Se não estiver, abra a tela desejada ou use comandos de navegação como “abrir gastos fixos”.");
+  setTimeout(()=>{
+    loadAck();
+    renderLog();
+  }, 250);
+}
+
+function sendTypedCommand(){
+  const text = (document.getElementById("recognizedText").value || "").trim();
+  if(!text){
+    alert("Digite ou dite um comando antes de enviar.");
+    return;
+  }
+  pushCommand(text);
+}
+
+function createRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+
+  const rec = new SR();
+  rec.lang = "pt-BR";
+  rec.interimResults = true;
+  rec.continuous = false;
+  rec.maxAlternatives = 1;
+
+  rec.onstart = ()=>{
+    setListeningUI(true);
+  };
+
+  rec.onresult = (event)=>{
+    let finalText = "";
+    let interimText = "";
+
+    for(let i = event.resultIndex; i < event.results.length; i++){
+      const transcript = event.results[i][0].transcript || "";
+      if(event.results[i].isFinal) finalText += transcript;
+      else interimText += transcript;
     }
 
-    function setResult(html){
-      document.getElementById("resultBox").innerHTML = html;
+    const combined = (finalText || interimText || "").trim();
+    document.getElementById("recognizedText").value = combined;
+
+    if(finalText.trim()){
+      pushCommand(finalText.trim());
+    }
+  };
+
+  rec.onerror = (event)=>{
+    setListeningUI(false);
+
+    if(event.error === "not-allowed" || event.error === "service-not-allowed"){
+      setVoiceStatus("Permissão negada", false);
+      setVoiceState("Microfone bloqueado", "Permita o uso do microfone no navegador para usar o comando de voz.");
+      return;
     }
 
-    function escapeHtml(s){
-      return String(s || "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    if(event.error === "no-speech"){
+      setVoiceStatus("Sem fala detectada", false);
+      setVoiceState("Não ouvi nada", "Tente novamente e fale mais perto do microfone.");
+      return;
     }
 
-    function normalizeText(s){
-      return String(s || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
+    setVoiceStatus("Erro", false);
+    setVoiceState("Falha ao ouvir", "Erro de voz: " + event.error);
+  };
+
+  rec.onend = ()=>{
+    setListeningUI(false);
+  };
+
+  return rec;
+}
+
+function startListening(){
+  if(!App.isVoiceEnabled()){
+    alert("O sistema de voz está bloqueado. Ative na tela principal em Configurações.");
+    return;
+  }
+
+  if(!recognition){
+    recognition = createRecognition();
+  }
+
+  if(!recognition){
+    alert("Seu navegador não suporta reconhecimento de voz.");
+    return;
+  }
+
+  try{
+    recognition.start();
+  }catch(e){
+    setVoiceStatus("Erro", false);
+    setVoiceState("Não foi possível iniciar", "Feche e tente novamente.");
+  }
+}
+
+function stopListening(){
+  if(recognition){
+    try{ recognition.stop(); }catch(e){}
+  }
+  setListeningUI(false);
+}
+
+function startAckWatcher(){
+  if(ackWatcher) clearInterval(ackWatcher);
+  ackWatcher = setInterval(()=>{
+    loadAck();
+    renderLog();
+  }, 800);
+}
+
+function bindManualShortcuts(){
+  document.getElementById("recognizedText").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      sendTypedCommand();
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  await App.boot(()=>{
+    if(!App.isVoiceEnabled()){
+      alert("O sistema de voz está bloqueado. Ative na tela principal em Configurações.");
     }
 
-    function titleCase(s){
-      return String(s || "")
-        .split(" ")
-        .filter(Boolean)
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join(" ");
-    }
-
-    function money(n){
-      return Number(n || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-    }
-
-    function uid(){
-      return Math.random().toString(16).slice(2) + Date.now().toString(16);
-    }
-
-    function todayISO(){
-      return new Date().toISOString().slice(0,10);
-    }
-
-    function currentMonthKey(){
-      return new Date().toISOString().slice(0,7);
-    }
-
-    function kMes(){ return "gastos_pro_state_" + USER_ID; }
-    function kCat(){ return "categorias_" + USER_ID; }
-    function kFix(){ return "fixos_" + USER_ID; }
-    function kInv(){ return "inv_fixos_" + USER_ID; }
-
-    function savePendingVoiceAction(obj){
-      try{
-        localStorage.setItem(VOICE_PENDING_ACTION_KEY, JSON.stringify(obj));
-      }catch(e){}
-    }
-
-    function loadState(){
-      let state = { meses:{} };
-      let categorias = [...DEFAULT_CATEGORIAS];
-      let fixos = [];
-      let investFixos = [];
-
-      try{
-        const raw = localStorage.getItem(kMes());
-        if(raw) state = JSON.parse(raw) || { meses:{} };
-      }catch(e){}
-
-      try{
-        const raw = localStorage.getItem(kCat());
-        if(raw){
-          const parsed = JSON.parse(raw);
-          if(Array.isArray(parsed) && parsed.length) categorias = parsed;
-        }
-      }catch(e){}
-
-      try{
-        const raw = localStorage.getItem(kFix());
-        if(raw){
-          const parsed = JSON.parse(raw);
-          if(Array.isArray(parsed)) fixos = parsed;
-        }
-      }catch(e){}
-
-      try{
-        const raw = localStorage.getItem(kInv());
-        if(raw){
-          const parsed = JSON.parse(raw);
-          if(Array.isArray(parsed)) investFixos = parsed;
-        }
-      }catch(e){}
-
-      if(!categorias.some(c=>normalizeText(c)==="investimentos")){
-        categorias.splice(categorias.length-1,0,"Investimentos");
-      }
-
-      if(!state.meses || typeof state.meses !== "object") state.meses = {};
-
-      fixos = (fixos || []).map(f => ({
-        ...f,
-        id: f.id || uid(),
-        diaPagar: Number(f.diaPagar || 0),
-        isFixo:true
-      }));
-
-      investFixos = (investFixos || []).map(inv => ({
-        ...inv,
-        id: inv.id || uid(),
-        diaPagar: Number(inv.diaPagar || 0),
-        metaFinal: Number(inv.metaFinal || 0),
-        prazoMeses: Number(inv.prazoMeses || 0),
-        mensal: Number(inv.mensal || 0)
-      }));
-
-      return { state, categorias, fixos, investFixos };
-    }
-
-    function saveState(all){
-      localStorage.setItem(kMes(), JSON.stringify(all.state));
-      localStorage.setItem(kCat(), JSON.stringify(all.categorias));
-      localStorage.setItem(kFix(), JSON.stringify(all.fixos));
-      localStorage.setItem(kInv(), JSON.stringify(all.investFixos));
-    }
-
-    function getMesData(all, monthKey){
-      const m = monthKey || currentMonthKey();
-      if(!all.state.meses[m]){
-        all.state.meses[m] = {
-          salary:0,
-          meta:0,
-          items:[],
-          saved:[],
-          hiddenFixos:[],
-          investStatus:{}
-        };
-      }
-      const d = all.state.meses[m];
-      if(!Array.isArray(d.items)) d.items = [];
-      if(!Array.isArray(d.saved)) d.saved = [];
-      if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos = [];
-      if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
-      d.items = d.items.map(it => ({
-        ...it,
-        id: it.id || uid(),
-        paid: !!it.paid,
-        isFixo: !!it.isFixo,
-        isInvestFixo: !!it.isInvestFixo,
-        diaPagar: Number(it.diaPagar || 0)
-      }));
-      return d;
-    }
-
-    function fixKey(desc, amount, category){
-      return `${String(desc||"").toLowerCase()}|${Number(amount||0)}|${String(category||"").toLowerCase()}`;
-    }
-
-    function ensureMonthItems(all, monthKey){
-      const d = getMesData(all, monthKey);
-      const hidden = new Set((d.hiddenFixos || []).map(String));
-      const present = new Set(d.items.map(it => fixKey(it.desc, it.amount, it.category)));
-
-      (all.fixos || []).forEach(f=>{
-        const fk = fixKey(f.desc, f.amount, f.category);
-        if(hidden.has(fk) || present.has(fk)) return;
-        d.items.unshift({
-          id:f.id,
-          desc:f.desc,
-          amount:Number(f.amount || 0),
-          category:f.category || "Outros",
-          isFixo:true,
-          isInvestFixo:false,
-          diaPagar:Number(f.diaPagar || 0),
-          paid:false
-        });
-        present.add(fk);
-      });
-
-      (all.investFixos || []).forEach(inv=>{
-        const desc = `Juntar: ${inv.nome}`;
-        const amount = Number(inv.mensal || 0);
-        const fk = fixKey(desc, amount, "Investimentos");
-        if(hidden.has(fk) || present.has(fk)) return;
-        if(typeof d.investStatus[inv.id] !== "boolean") d.investStatus[inv.id] = false;
-        d.items.unshift({
-          id:inv.id,
-          invId:inv.id,
-          desc,
-          amount,
-          category:"Investimentos",
-          isFixo:true,
-          isInvestFixo:true,
-          diaPagar:Number(inv.diaPagar || 0),
-          paid:!!d.investStatus[inv.id]
-        });
-        present.add(fk);
-      });
-
-      return d;
-    }
-
-    function monthSummaryHtml(all, monthKey){
-      const d = ensureMonthItems(all, monthKey || currentMonthKey());
-      const salary = Number(d.salary || 0);
-      const spent = (d.items || []).reduce((a,b)=>a+Number(b.amount||0),0);
-      const saved = (d.saved || []).reduce((a,b)=>a+Number(b.value||0),0);
-      const left = salary - spent;
-
-      const byCat = {};
-      (d.items || []).forEach(it=>{
-        const c = it.category || "Outros";
-        byCat[c] = (byCat[c] || 0) + Number(it.amount || 0);
-      });
-
-      const topCats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,3);
-
-      return (
-        `<span class="ok">Resumo do mês.</span><br><br>` +
-        `• Salário: <b>${money(salary)}</b><br>` +
-        `• Gastos: <b>${money(spent)}</b><br>` +
-        `• Guardado: <b>${money(saved)}</b><br>` +
-        `• Sobra: <b>${money(left)}</b><br><br>` +
-        `${topCats.length ? `Top categorias:<br>${topCats.map(([c,v])=>`• ${escapeHtml(c)}: <b>${money(v)}</b>`).join("<br>")}` : `Sem categorias registradas no mês.`}`
-      );
-    }
-
-    function setMicStatus(text, type){
-      document.getElementById("micStatus").textContent = text;
-      const dot = document.getElementById("micDot");
-      dot.classList.remove("ok","err");
-      if(type === "ok") dot.classList.add("ok");
-      if(type === "err") dot.classList.add("err");
-    }
-
-    function setTranscript(text){
-      lastTranscript = String(text || "").trim();
-      document.getElementById("transcriptBox").textContent = lastTranscript || "Nenhum comando ainda.";
-    }
-
-    function clearTranscript(){
-      setTranscript("");
-      setResult("Nenhuma ação executada ainda.");
-    }
-
-    function applyThemeToPage(){
-      const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
-      const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
-      const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
-      const light = document.body.classList.contains("light");
-      const colors = light ? p.light : p.dark;
-
-      document.documentElement.style.setProperty("--accent", accent);
-      document.documentElement.style.setProperty("--bg", colors.bg);
-      document.documentElement.style.setProperty("--grad1", colors.g1);
-      document.documentElement.style.setProperty("--grad2", colors.g2);
-      document.documentElement.style.setProperty("--grad3", colors.g3);
-
-      const meta = document.querySelector('meta[name="theme-color"]');
-      if(meta) meta.setAttribute("content", accent);
-    }
-
-    function toggleTheme(){
-      document.body.classList.toggle("light");
-      localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
-      applyThemeToPage();
-    }
-
-    function goBack(){
-      location.href = "./index.html";
-    }
-
-    function parseCategory(text, categorias){
-      const normalized = normalizeText(text);
-      for(const c of categorias){
-        const nc = normalizeText(c);
-        if(normalized.includes("categoria " + nc)) return c;
-      }
-      if(normalized.includes("casa")) return "Casa";
-      if(normalized.includes("alimentacao")) return "Alimentação";
-      if(normalized.includes("transporte")) return "Transporte";
-      if(normalized.includes("lazer")) return "Lazer";
-      if(normalized.includes("pets")) return "Pets";
-      if(normalized.includes("investimentos")) return "Investimentos";
-      if(normalized.includes("mercado")) return "Alimentação";
-      if(normalized.includes("farmacia")) return "Outros";
-      return "Outros";
-    }
-
-    function extractAmount(text){
-      const t = normalizeText(text).replace(/,/g, ".");
-      const matches = t.match(/\d+(\.\d+)?/g);
-      if(!matches || !matches.length) return 0;
-      return Number(matches[0] || 0);
-    }
-
-    function extractAllNumbers(text){
-      const t = normalizeText(text).replace(/,/g, ".");
-      const matches = t.match(/\d+(\.\d+)?/g);
-      return (matches || []).map(Number).filter(n => !Number.isNaN(n));
-    }
-
-    function extractDueDay(text){
-      const t = normalizeText(text);
-      const m =
-        t.match(/vence dia (\d{1,2})/) ||
-        t.match(/vencimento dia (\d{1,2})/) ||
-        t.match(/vencendo dia (\d{1,2})/) ||
-        t.match(/ate dia (\d{1,2})/) ||
-        t.match(/até dia (\d{1,2})/) ||
-        t.match(/dia (\d{1,2})/);
-      return m ? Number(m[1]) : 0;
-    }
-
-    function extractMonths(text){
-      const t = normalizeText(text);
-      const m = t.match(/em (\d{1,3}) meses?/) || t.match(/(\d{1,3}) meses?/);
-      return m ? Number(m[1]) : 0;
-    }
-
-    function cleanDesc(raw){
-      let t = normalizeText(raw);
-
-      t = t
-        .replace(/^adicionar\s+/, "")
-        .replace(/^criar\s+/, "")
-        .replace(/^anotar\s+/, "")
-        .replace(/^colocar\s+/, "")
-        .replace(/^coloca\s+/, "")
-        .replace(/^novo\s+/, "")
-        .replace(/^nova\s+/, "")
-        .replace(/^uma\s+/, "")
-        .replace(/^um\s+/, "")
-        .replace(/^remover\s+/, "")
-        .replace(/^remove\s+/, "")
-        .replace(/^apagar\s+/, "")
-        .replace(/^deletar\s+/, "")
-        .replace(/^excluir\s+/, "")
-        .replace(/^marcar\s+/, "")
-        .replace(/^marca\s+/, "")
-        .replace(/^desmarcar\s+/, "")
-        .replace(/^gastei\s+/, "")
-        .replace(/^paguei\s+/, "")
-        .replace(/^guardei\s+/, "")
-        .replace(/^quero guardar\s+/, "")
-        .replace(/^quero juntar\s+/, "")
-        .replace(/^quero\s+/, "")
-        .replace(/^anota que\s+/, "")
-        .replace(/^anote que\s+/, "");
-
-      t = t
-        .replace(/\bgasto fixo\b/g, "")
-        .replace(/\bgasto\b/g, "")
-        .replace(/\binvestimento fixo\b/g, "")
-        .replace(/\binvestimento\b/g, "")
-        .replace(/\bcategoria\b/g, "")
-        .replace(/\bfixo\b/g, "")
-        .replace(/\bguardado\b/g, "")
-        .replace(/\bguardar\b/g, "")
-        .replace(/\bcomo pago\b/g, "")
-        .replace(/\bpago\b/g, "")
-        .replace(/\bpendente\b/g, "")
-        .replace(/\bvencer\b/g, "")
-        .replace(/\bvencendo\b/g, "")
-        .replace(/\bvence\b/g, "")
-        .replace(/\bdia \d{1,2}\b/g, "")
-        .replace(/\bem \d{1,3} meses?\b/g, "")
-        .replace(/\bhoje\b/g, "")
-        .replace(/\bno\b/g, " ")
-        .replace(/\bna\b/g, " ")
-        .replace(/\bpro\b/g, " ")
-        .replace(/\bpra\b/g, " ")
-        .replace(/\d+(\.\d+)?/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      return titleCase(t);
-    }
-
-    function parseMonthYearFromText(cmd){
-      const t = normalizeText(cmd);
-      const yearMatch = t.match(/\b(20\d{2})\b/);
-      const year = yearMatch ? yearMatch[1] : String(new Date().getFullYear());
-
-      for(const [name, num] of Object.entries(MONTHS_PT)){
-        if(t.includes(name)) return { year, month:num };
-      }
-
-      const current = currentMonthKey();
-      return { year: current.slice(0,4), month: current.slice(5,7) };
-    }
-
-    function findCurrentMonthItemByName(all, name, monthKey){
-      const d = ensureMonthItems(all, monthKey || currentMonthKey());
-      const n = normalizeText(name);
-      return d.items.find(it => {
-        const itemName = normalizeText(it.desc);
-        return itemName.includes(n) || n.includes(itemName);
-      });
-    }
-
-    function ensureSpeech(){
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if(!SR){
-        setMicStatus("Sem suporte", "err");
-        dbg("SpeechRecognition não suportado neste navegador.");
-        return false;
-      }
-
-      recognition = new SR();
-      recognition.lang = "pt-BR";
-      recognition.interimResults = true;
-      recognition.continuous = false;
-
-      recognition.onstart = () => {
-        listening = true;
-        document.getElementById("bigMic").classList.add("listening");
-        document.getElementById("hintText").textContent = "Ouvindo... fale seu pedido normalmente.";
-        setMicStatus("Ouvindo...", "ok");
-      };
-
-      recognition.onresult = (event) => {
-        let finalText = "";
-        let partialText = "";
-        for(let i = event.resultIndex; i < event.results.length; i++){
-          const txt = event.results[i][0].transcript || "";
-          if(event.results[i].isFinal) finalText += txt + " ";
-          else partialText += txt + " ";
-        }
-        const merged = (finalText || partialText).trim();
-        if(merged) setTranscript(merged);
-      };
-
-      recognition.onerror = (event) => {
-        listening = false;
-        document.getElementById("bigMic").classList.remove("listening");
-        document.getElementById("hintText").textContent = "Erro ao ouvir. Tente novamente.";
-        setMicStatus("Erro", "err");
-        dbg("Erro SpeechRecognition: " + (event.error || "desconhecido"));
-      };
-
-      recognition.onend = async () => {
-        listening = false;
-        document.getElementById("bigMic").classList.remove("listening");
-        if(lastTranscript){
-          document.getElementById("hintText").textContent = "Texto capturado. Executando automaticamente...";
-          setMicStatus("Pronto", "ok");
-          if(autoExecuteAfterSpeech){
-            await executeVoiceCommand();
-          }
-        }else{
-          document.getElementById("hintText").textContent = "Nenhuma fala detectada. Tente novamente.";
-          setMicStatus("Parado", "");
-        }
-      };
-
-      return true;
-    }
-
-    function toggleRecording(){
-      if(!recognition && !ensureSpeech()) return;
-      try{
-        if(listening) recognition.stop();
-        else recognition.start();
-      }catch(e){
-        dbg("Falha ao iniciar/parar gravação: " + e.message);
-      }
-    }
-
-    function requestNotificationPermission(){
-      if(!("Notification" in window)){
-        setResult(`<span class="err">Seu navegador não suporta notificações.</span>`);
-        return;
-      }
-      Notification.requestPermission().then((perm)=>{
-        if(perm === "granted") setResult(`<span class="ok">Notificações ativadas com sucesso.</span>`);
-        else setResult(`<span class="warn">Notificações não foram permitidas.</span>`);
-      }).catch(()=>{
-        setResult(`<span class="err">Não foi possível ativar notificações.</span>`);
-      });
-    }
-
-    function openIndexByVoiceAction(action, extra = {}){
-      savePendingVoiceAction({ action, ...extra });
-      const params = new URLSearchParams();
-      params.set("voice_action", action);
-      if(extra.month) params.set("month", extra.month);
-      if(extra.year) params.set("year", extra.year);
-      location.href = "./index.html?" + params.toString();
-    }
-
-    function tryOpenScreenCommand(text){
-      const t = normalizeText(text);
-
-      if(t.includes("abrir ia") || t.includes("abre ia") || t.includes("abrir inteligência") || t.includes("abrir assistente")){
-        location.href = "./ia.html";
-        return { ok:true, html:`Abrindo a <b>IA</b>.` };
-      }
-      if(t.includes("voltar inicio") || t.includes("voltar início") || t.includes("abrir inicio") || t.includes("abrir tela principal") || t.includes("abrir home") || t.includes("ir para inicio") || t.includes("ir para início")){
-        openIndexByVoiceAction("open_home");
-        return { ok:true, html:`Voltando para a <b>tela principal</b>.` };
-      }
-      if(t.includes("abrir historico") || t.includes("abrir histórico") || t.includes("abre historico") || t.includes("abre histórico")){
-        openIndexByVoiceAction("open_history");
-        return { ok:true, html:`Abrindo <b>Histórico</b>.` };
-      }
-      if(t.includes("abrir simuladores") || t.includes("abrir simulador") || t.includes("abre simuladores") || t.includes("abre simulador")){
-        openIndexByVoiceAction("open_simulators");
-        return { ok:true, html:`Abrindo <b>Simuladores</b>.` };
-      }
-      if(t.includes("abrir categorias") || t.includes("abrir minhas categorias") || t.includes("abre categorias")){
-        openIndexByVoiceAction("open_categories");
-        return { ok:true, html:`Abrindo <b>Minhas Categorias</b>.` };
-      }
-      if(t.includes("abrir gastos fixos") || t.includes("abrir fixos") || t.includes("abre gastos fixos") || t.includes("abre fixos")){
-        openIndexByVoiceAction("open_fixed_expenses");
-        return { ok:true, html:`Abrindo <b>Gastos Fixos</b>.` };
-      }
-      if(t.includes("abrir investimentos fixos") || t.includes("abrir investimento fixo") || t.includes("abre investimentos fixos") || t.includes("abre investimento fixo")){
-        openIndexByVoiceAction("open_fixed_investments");
-        return { ok:true, html:`Abrindo <b>Investimentos Fixos</b>.` };
-      }
-      if(t.includes("abrir configuracoes") || t.includes("abrir configurações") || t.includes("abre configuracoes") || t.includes("abre configurações")){
-        openIndexByVoiceAction("open_config");
-        return { ok:true, html:`Abrindo <b>Configurações</b>.` };
-      }
-      if(t.includes("abrir pdf") || t.includes("abrir imprimir pdf") || t.includes("abre pdf") || t.includes("imprimir em pdf")){
-        openIndexByVoiceAction("open_pdf");
-        return { ok:true, html:`Abrindo <b>Imprimir em PDF</b>.` };
-      }
-
-      return null;
-    }
-
-    function tryLocalRule(cmd, all){
-      const openCmd = tryOpenScreenCommand(cmd);
-      if(openCmd) return openCmd;
-
-      const t = normalizeText(cmd);
-
-      if(t.includes("mostrar resumo do mes") || t.includes("resumo do mes") || t.includes("resumo do mês")){
-        return { ok:true, html: monthSummaryHtml(all, currentMonthKey()) };
-      }
-
-      if(t.includes("resumo do ano")){
-        const yearMatch = t.match(/\b(20\d{2})\b/);
-        const year = yearMatch ? yearMatch[1] : String(new Date().getFullYear());
-        openIndexByVoiceAction("generate_year_summary_pdf", { year });
-        return { ok:true, html:`Gerando <b>Resumo do ano ${escapeHtml(year)}</b> no index.` };
-      }
-
-      if(t.includes("pdf do mes") || t.includes("pdf do mês") || t.includes("gera pdf") || t.includes("gerar pdf") || t.includes("imprimir pdf do mes") || t.includes("imprimir pdf do mês")){
-        const parsed = parseMonthYearFromText(t);
-        const monthKey = `${parsed.year}-${parsed.month}`;
-        openIndexByVoiceAction("generate_month_pdf", { month: monthKey, year: parsed.year });
-        return { ok:true, html:`Gerando <b>PDF do mês ${escapeHtml(monthKey)}</b> no index.` };
-      }
-
-      if(t.includes("abrir notificacoes") || t.includes("ativar notificacoes") || t.includes("ativar notificações") || t === "notificacoes" || t === "notificações"){
-        requestNotificationPermission();
-        return { ok:true, html:`Abrindo permissão de <b>notificações</b>.` };
-      }
-
-      if(t.includes("anotar guardado") || t.includes("guardar ") || t.includes("guardei ") || t.includes("quero guardar ") || t.includes("quero juntar ")){
-        const valor = extractAmount(t);
-        let desc = cleanDesc(t);
-        if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor do guardado." };
-        if(!desc) desc = "Guardado";
-        const d = ensureMonthItems(all, currentMonthKey());
-        d.saved.unshift({ value:valor, desc, date:todayISO(), source:"manual" });
-        saveState(all);
-        return { ok:true, html:`Valor guardado anotado:<br>• Valor: <b>${money(valor)}</b><br>• Descrição: <b>${escapeHtml(desc)}</b>` };
-      }
-
-      if(t.includes("mudar tema") || t.includes("trocar tema") || t.includes("mudar cor") || t.includes("trocar cor") || t.includes("mude tema") || t.includes("mude o tema")){
-        let changed = [];
-
-        const presetMap = {
-          roxo:"purple", purple:"purple",
-          verde:"green", green:"green",
-          azul:"default",
-          padrao:"default", padrão:"default", normal:"default",
-          laranja:"sunset", "por do sol":"sunset", sunset:"sunset",
-          minimal:"mono", mono:"mono"
-        };
-
-        for(const [name, preset] of Object.entries(presetMap)){
-          if(t.includes(name)){
-            localStorage.setItem(THEME_KEYS.preset, preset);
-            changed.push(`Tema alterado para <b>${escapeHtml(preset)}</b>`);
-            break;
-          }
-        }
-
-        for(const [name, hex] of Object.entries(COLOR_MAP)){
-          if(t.includes(name)){
-            localStorage.setItem(THEME_KEYS.accent, hex);
-            changed.push(`Cor principal alterada para <b>${escapeHtml(name)}</b>`);
-            break;
-          }
-        }
-
-        if(!changed.length) return { ok:false, html:"Não entendi qual cor/tema você quer usar." };
-        applyThemeToPage();
-        return { ok:true, html:changed.join("<br>") };
-      }
-
-      if((t.includes("marcar") || t.includes("marca ")) && t.includes("como pago") && !t.includes("desmarcar") && !t.includes("tirar")){
-        let nome = t.replace("marcar","").replace("marca","").replace("como pago","").trim();
-        const target = findCurrentMonthItemByName(all, nome, currentMonthKey());
-        if(!target) return { ok:false, html:`Não encontrei item parecido com "<b>${escapeHtml(nome)}</b>".` };
-        target.paid = true;
-        const d = ensureMonthItems(all, currentMonthKey());
-        if(target.isInvestFixo && target.invId){
-          d.investStatus[target.invId] = true;
-          const exists = d.saved.some(s => s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey());
-          if(!exists){
-            d.saved.unshift({
-              value:Number(target.amount || 0),
-              desc:`Automático: ${target.desc}`,
-              date:todayISO(),
-              source:"investFixo",
-              invId:target.invId,
-              month:currentMonthKey()
-            });
-          }
-        }
-        saveState(all);
-        return { ok:true, html:`Item <b>${escapeHtml(target.desc)}</b> marcado como <b>Pago</b>.` };
-      }
-
-      if((t.includes("desmarcar") && t.includes("pago")) || t.includes("tirar") && t.includes("do pago") || t.includes("voltar pendente")){
-        let nome = t
-          .replace("desmarcar","")
-          .replace("como pago","")
-          .replace("tirar","")
-          .replace("do pago","")
-          .replace("voltar pendente","")
-          .replace("pago","")
-          .trim();
-
-        const target = findCurrentMonthItemByName(all, nome, currentMonthKey());
-        if(!target) return { ok:false, html:`Não encontrei item parecido com "<b>${escapeHtml(nome)}</b>".` };
-        target.paid = false;
-        const d = ensureMonthItems(all, currentMonthKey());
-        if(target.isInvestFixo && target.invId){
-          d.investStatus[target.invId] = false;
-          d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===target.invId && s.month===currentMonthKey()));
-        }
-        saveState(all);
-        return { ok:true, html:`Item <b>${escapeHtml(target.desc)}</b> voltou para <b>Pendente</b>.` };
-      }
-
-      if(t.startsWith("gastei ") || t.startsWith("paguei ") || t.includes("anota que paguei")){
-        const valor = extractAmount(t);
-        if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor gasto." };
-        let desc = cleanDesc(t);
-        if(!desc) desc = "Gasto";
-        const categoria = parseCategory(t, all.categorias);
-        const d = ensureMonthItems(all, currentMonthKey());
-        d.items.push({
-          id:uid(),
-          desc,
-          amount:valor,
-          category:categoria,
-          isFixo:false,
-          isInvestFixo:false,
-          paid:true
-        });
-        saveState(all);
-        return { ok:true, html:`Gasto anotado:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(valor)}</b><br>• Categoria: <b>${escapeHtml(categoria)}</b><br>• Status: <b>Pago</b>` };
-      }
-
-      if(t.includes("adicionar gasto") || t.includes("anotar gasto") || t.startsWith("gasto ")){
-        if(t.includes("gasto fixo")) return null;
-        const valor = extractAmount(t);
-        const categoria = parseCategory(t, all.categorias);
-        const desc = cleanDesc(t);
-        if(!desc) return { ok:false, html:"Não entendi a descrição do gasto." };
-        if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor do gasto." };
-        const d = ensureMonthItems(all, currentMonthKey());
-        d.items.push({
-          id:uid(),
-          desc,
-          amount:valor,
-          category:categoria,
-          isFixo:false,
-          isInvestFixo:false,
-          paid:false
-        });
-        saveState(all);
-        return { ok:true, html:`Gasto adicionado:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(valor)}</b><br>• Categoria: <b>${escapeHtml(categoria)}</b>` };
-      }
-
-      if(t.includes("gasto fixo") || (t.includes("fixo") && extractAmount(t) && !t.includes("investimento"))){
-        const valor = extractAmount(t);
-        const categoria = parseCategory(t, all.categorias);
-        const dueDay = extractDueDay(t);
-        const desc = cleanDesc(t);
-        if(!desc) return { ok:false, html:"Não entendi a descrição do gasto fixo." };
-        if(!valor || valor <= 0) return { ok:false, html:"Não entendi o valor do gasto fixo." };
-
-        all.fixos.push({
-          id:uid(),
-          desc,
-          amount:valor,
-          category:categoria,
-          diaPagar:dueDay || 0,
-          isFixo:true
-        });
-        saveState(all);
-        return { ok:true, html:`Gasto fixo adicionado:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(valor)}</b><br>• Categoria: <b>${escapeHtml(categoria)}</b><br>• Vence: <b>${dueDay ? ("dia " + dueDay) : "sem prazo"}</b>` };
-      }
-
-      if(t.includes("investimento fixo")){
-        const nums = extractAllNumbers(t);
-        const goalAmount = nums[0] || 0;
-        const months = extractMonths(t) || nums[1] || 0;
-        const dueDay = extractDueDay(t);
-        const name = cleanDesc(t);
-        if(!name) return { ok:false, html:"Não entendi o nome do investimento fixo." };
-        if(!goalAmount || goalAmount <= 0) return { ok:false, html:"Não entendi a meta final." };
-        if(!months || months <= 0) return { ok:false, html:"Não entendi o prazo em meses." };
-        const mensal = Math.round((goalAmount / months) * 100) / 100;
-        const id = uid();
-        all.investFixos.push({
-          id,
-          nome:name,
-          metaFinal:goalAmount,
-          prazoMeses:months,
-          mensal,
-          diaPagar:dueDay || 0
-        });
-        const d = ensureMonthItems(all, currentMonthKey());
-        d.investStatus[id] = false;
-        saveState(all);
-        return { ok:true, html:`Investimento fixo adicionado:<br>• <b>${escapeHtml(name)}</b><br>• Meta final: <b>${money(goalAmount)}</b><br>• Prazo: <b>${months} meses</b><br>• Mensal: <b>${money(mensal)}</b>` };
-      }
-
-      if(t.includes("adicionar categoria") || t.includes("criar categoria")){
-        let nome = t.replace("adicionar categoria","").replace("criar categoria","").trim();
-        if(!nome) return { ok:false, html:"Não entendi o nome da categoria." };
-        nome = titleCase(nome);
-        if(all.categorias.some(c => normalizeText(c) === normalizeText(nome))){
-          return { ok:false, html:`A categoria "${escapeHtml(nome)}" já existe.` };
-        }
-        all.categorias.push(nome);
-        saveState(all);
-        return { ok:true, html:`Categoria <b>${escapeHtml(nome)}</b> adicionada com sucesso.` };
-      }
-
-      if(t.includes("remover gasto fixo") || t.includes("remove gasto fixo") || t.includes("apagar gasto fixo")){
-        const nome = cleanDesc(t);
-        const idx = all.fixos.findIndex(it => normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc)));
-        if(idx === -1) return { ok:false, html:`Não encontrei gasto fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
-        const removed = all.fixos[idx];
-        all.fixos.splice(idx,1);
-        Object.keys(all.state.meses || {}).forEach(m=>{
-          const d = all.state.meses[m];
-          if(d && Array.isArray(d.items)){
-            d.items = d.items.filter(it => !(it.isFixo && !it.isInvestFixo && (it.id === removed.id || normalizeText(it.desc) === normalizeText(removed.desc))));
-          }
-        });
-        saveState(all);
-        return { ok:true, html:`Gasto fixo <b>${escapeHtml(removed.desc)}</b> removido do sistema.` };
-      }
-
-      if(t.includes("remover investimento fixo") || t.includes("remove investimento fixo") || t.includes("apagar investimento fixo")){
-        const nome = cleanDesc(t);
-        const idx = all.investFixos.findIndex(it => normalizeText(it.nome).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.nome)));
-        if(idx === -1) return { ok:false, html:`Não encontrei investimento fixo parecido com "<b>${escapeHtml(nome)}</b>".` };
-        const removed = all.investFixos[idx];
-        all.investFixos.splice(idx,1);
-        Object.keys(all.state.meses || {}).forEach(m=>{
-          const d = all.state.meses[m];
-          if(d){
-            if(d.investStatus && removed.id) delete d.investStatus[removed.id];
-            if(Array.isArray(d.saved)) d.saved = d.saved.filter(s => !(s && s.source==="investFixo" && s.invId===removed.id));
-            if(Array.isArray(d.items)) d.items = d.items.filter(it => !(it.isInvestFixo && (it.invId === removed.id || it.id === removed.id)));
-          }
-        });
-        saveState(all);
-        return { ok:true, html:`Investimento fixo <b>${escapeHtml(removed.nome)}</b> removido do sistema.` };
-      }
-
-      if(t.includes("remover gasto") || t.includes("remove o gasto") || t.includes("remove gasto") || t.includes("apagar gasto")){
-        if(t.includes("gasto fixo")) return null;
-        const nome = cleanDesc(t);
-        const d = ensureMonthItems(all, currentMonthKey());
-        const idx = d.items.findIndex(it => !it.isFixo && (normalizeText(it.desc).includes(normalizeText(nome)) || normalizeText(nome).includes(normalizeText(it.desc))));
-        if(idx === -1) return { ok:false, html:`Não encontrei gasto parecido com "<b>${escapeHtml(nome)}</b>".` };
-        const removed = d.items[idx];
-        d.items.splice(idx,1);
-        saveState(all);
-        return { ok:true, html:`Gasto <b>${escapeHtml(removed.desc)}</b> removido do mês atual.` };
-      }
-
-      return null;
-    }
-
-    function buildVoiceAIPrompt(userText, all){
-      const month = currentMonthKey();
-      const d = ensureMonthItems(all, month);
-
-      const context = {
-        currentMonth: month,
-        categories: all.categorias,
-        fixedExpenses: all.fixos.map(f=>({
-          desc:f.desc, amount:Number(f.amount||0), category:f.category || "Outros", dueDay:Number(f.diaPagar||0)
-        })),
-        fixedInvestments: all.investFixos.map(inv=>({
-          name:inv.nome, goalAmount:Number(inv.metaFinal||0), months:Number(inv.prazoMeses||0), monthlyAmount:Number(inv.mensal||0), dueDay:Number(inv.diaPagar||0)
-        })),
-        currentMonthItems: d.items.map(it=>({
-          desc:it.desc, amount:Number(it.amount||0), category:it.category || "Outros",
-          paid:!!it.paid, isFixed:!!it.isFixo, isFixedInvestment:!!it.isInvestFixo, dueDay:Number(it.diaPagar||0)
-        }))
-      };
-
-      return `
-Você é um interpretador de intenção para um app de finanças pessoais.
-Converta o pedido do usuário em UM JSON executável.
-Responda SOMENTE JSON puro, sem markdown, sem explicação.
-
-Ações permitidas:
-- add_expense
-- add_fixed_expense
-- add_fixed_investment
-- mark_paid
-- mark_pending
-- remove_expense
-- remove_fixed_expense
-- remove_fixed_investment
-- add_saved
-- change_theme
-- generate_month_pdf
-- generate_year_summary_pdf
-- show_summary
-- request_notifications
-- open_screen
-- unknown
-
-Para open_screen, use:
-{"action":"open_screen","screen":"home|ia|history|simulators|categories|fixed_expenses|fixed_investments|settings|pdf"}
-
-Regras:
-1) Sempre devolva um único objeto JSON.
-2) Se faltar algo essencial, complete com o melhor palpite.
-3) Se não entender, use {"action":"unknown","raw":"...","reason":"..."}.
-4) generate_month_pdf usa month no formato YYYY-MM.
-5) generate_year_summary_pdf usa year no formato YYYY.
-6) mark_paid e mark_pending usam "target".
-7) remove_* usam "target".
-8) add_saved usa "amount" e "desc".
-9) add_fixed_investment usa:
-   {"action":"add_fixed_investment","name":"...","goalAmount":3000,"months":12,"dueDay":10}
-10) add_fixed_expense usa:
-   {"action":"add_fixed_expense","desc":"...","amount":99,"category":"Casa","dueDay":11}
-11) add_expense usa:
-   {"action":"add_expense","desc":"...","amount":50,"category":"Alimentação","paid":true}
-
-Contexto do app:
-${JSON.stringify(context, null, 2)}
-
-Pedido do usuário:
-${userText}
-      `.trim();
-    }
-
-    function extractJsonFromText(text){
-      const raw = String(text || "").trim();
-      try{
-        return JSON.parse(raw);
-      }catch(e){}
-
-      const match = raw.match(/\{[\s\S]*\}/);
-      if(match){
-        try{
-          return JSON.parse(match[0]);
-        }catch(e){}
-      }
-      throw new Error("A IA não retornou JSON válido.");
-    }
-
-    async function askAIToInterpret(userText, all){
-      const base = (window.API_BASE_URL || "").replace(/\/$/, "");
-      if(!base) throw new Error("API_BASE_URL não configurada.");
-
-      const prompt = buildVoiceAIPrompt(userText, all);
-
-      const resp = await fetch(base + "/api/chat", {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "x-app-key": window.APP_KEY || ""
-        },
-        body:JSON.stringify({ prompt }),
-        cache:"no-store",
-        mode:"cors"
-      });
-
-      if(!resp.ok){
-        const txt = await resp.text().catch(()=> "");
-        throw new Error(`Falha na IA (${resp.status}): ${txt || "sem detalhe"}`);
-      }
-
-      const data = await resp.json();
-      const aiText = data.response || data.text || data.message || "";
-      return extractJsonFromText(aiText);
-    }
-
-    async function executeParsedAction(parsed, all){
-      const action = String(parsed.action || "").trim();
-
-      if(action === "unknown" || !action){
-        return { ok:false, html:`A IA não conseguiu identificar a ação.<br><br>${escapeHtml(parsed.reason || "Sem motivo informado.")}` };
-      }
-
-      if(action === "open_screen"){
-        const screen = String(parsed.screen || "").toLowerCase();
-
-        if(screen === "ia"){
-          location.href = "./ia.html";
-          return { ok:true, html:`Abrindo a <b>IA</b>.` };
-        }
-        if(screen === "home"){
-          openIndexByVoiceAction("open_home");
-          return { ok:true, html:`Voltando para a <b>tela principal</b>.` };
-        }
-        if(screen === "history"){
-          openIndexByVoiceAction("open_history");
-          return { ok:true, html:`Abrindo <b>Histórico</b>.` };
-        }
-        if(screen === "simulators"){
-          openIndexByVoiceAction("open_simulators");
-          return { ok:true, html:`Abrindo <b>Simuladores</b>.` };
-        }
-        if(screen === "categories"){
-          openIndexByVoiceAction("open_categories");
-          return { ok:true, html:`Abrindo <b>Minhas Categorias</b>.` };
-        }
-        if(screen === "fixed_expenses"){
-          openIndexByVoiceAction("open_fixed_expenses");
-          return { ok:true, html:`Abrindo <b>Gastos Fixos</b>.` };
-        }
-        if(screen === "fixed_investments"){
-          openIndexByVoiceAction("open_fixed_investments");
-          return { ok:true, html:`Abrindo <b>Investimentos Fixos</b>.` };
-        }
-        if(screen === "settings"){
-          openIndexByVoiceAction("open_config");
-          return { ok:true, html:`Abrindo <b>Configurações</b>.` };
-        }
-        if(screen === "pdf"){
-          openIndexByVoiceAction("open_pdf");
-          return { ok:true, html:`Abrindo <b>Imprimir em PDF</b>.` };
-        }
-
-        return { ok:false, html:`Tela não suportada: <b>${escapeHtml(screen)}</b>` };
-      }
-
-      if(action === "show_summary"){
-        return { ok:true, html: monthSummaryHtml(all, currentMonthKey()) };
-      }
-
-      if(action === "request_notifications"){
-        requestNotificationPermission();
-        return { ok:true, html:`Abrindo permissão de <b>notificações</b>.` };
-      }
-
-      if(action === "add_saved"){
-        const d = ensureMonthItems(all, currentMonthKey());
-        const amount = Number(parsed.amount || 0);
-        const desc = titleCase(parsed.desc || "Guardado");
-        if(!amount || amount <= 0) return { ok:false, html:"Ação add_saved veio sem valor válido." };
-        d.saved.unshift({ value:amount, desc, date:todayISO(), source:"manual" });
-        saveState(all);
-        return { ok:true, html:`Valor guardado anotado:<br>• Valor: <b>${money(amount)}</b><br>• Descrição: <b>${escapeHtml(desc)}</b>` };
-      }
-
-      if(action === "add_expense"){
-        const d = ensureMonthItems(all, currentMonthKey());
-        const desc = titleCase(parsed.desc || "Gasto");
-        const amount = Number(parsed.amount || 0);
-        const category = parsed.category ? titleCase(parsed.category) : "Outros";
-        const paid = !!parsed.paid;
-        if(!amount || amount <= 0) return { ok:false, html:"Ação add_expense veio sem valor válido." };
-        d.items.push({
-          id:uid(),
-          desc,
-          amount,
-          category,
-          isFixo:false,
-          isInvestFixo:false,
-          paid
-        });
-        saveState(all);
-        return { ok:true, html:`Gasto adicionado pela IA:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(amount)}</b><br>• Categoria: <b>${escapeHtml(category)}</b><br>• Status: <b>${paid ? "Pago" : "Pendente"}</b>` };
-      }
-
-      if(action === "add_fixed_expense"){
-        const desc = titleCase(parsed.desc || "Fixo");
-        const amount = Number(parsed.amount || 0);
-        const category = parsed.category ? titleCase(parsed.category) : "Outros";
-        const dueDay = Number(parsed.dueDay || 0);
-        if(!amount || amount <= 0) return { ok:false, html:"Ação add_fixed_expense veio sem valor válido." };
-
-        all.fixos.push({
-          id:uid(),
-          desc,
-          amount,
-          category,
-          diaPagar:dueDay || 0,
-          isFixo:true
-        });
-        saveState(all);
-        return { ok:true, html:`Gasto fixo adicionado pela IA:<br>• <b>${escapeHtml(desc)}</b><br>• Valor: <b>${money(amount)}</b><br>• Categoria: <b>${escapeHtml(category)}</b><br>• Vence: <b>${dueDay ? ("dia " + dueDay) : "sem prazo"}</b>` };
-      }
-
-      if(action === "add_fixed_investment"){
-        const name = titleCase(parsed.name || parsed.desc || "Investimento");
-        const goalAmount = Number(parsed.goalAmount || parsed.metaFinal || 0);
-        const months = Number(parsed.months || parsed.prazoMeses || 0);
-        const dueDay = Number(parsed.dueDay || 0);
-        if(!goalAmount || goalAmount <= 0) return { ok:false, html:"Ação add_fixed_investment veio sem meta válida." };
-        if(!months || months <= 0) return { ok:false, html:"Ação add_fixed_investment veio sem prazo válido." };
-        const mensal = Math.round((goalAmount / months) * 100) / 100;
-        const id = uid();
-
-        all.investFixos.push({
-          id,
-          nome:name,
-          metaFinal:goalAmount,
-          prazoMeses:months,
-          mensal,
-          diaPagar:dueDay || 0
-        });
-
-        const dm = ensureMonthItems(all, currentMonthKey());
-        dm.investStatus[id] = false;
-        saveState(all);
-
-        return { ok:true, html:`Investimento fixo adicionado pela IA:<br>• <b>${escapeHtml(name)}</b><br>• Meta: <b>${money(goalAmount)}</b><br>• Prazo: <b>${months} meses</b><br>• Mensal: <b>${money(mensal)}</b>` };
-      }
-
-      if(action === "mark_paid"){
-        const target = parsed.target || parsed.desc || "";
-        const item = findCurrentMonthItemByName(all, target, currentMonthKey());
-        if(!item) return { ok:false, html:`Não encontrei item para marcar como pago: <b>${escapeHtml(target)}</b>` };
-        item.paid = true;
-
-        const dc = ensureMonthItems(all, currentMonthKey());
-        if(item.isInvestFixo && item.invId){
-          dc.investStatus[item.invId] = true;
-          const exists = dc.saved.some(s => s && s.source==="investFixo" && s.invId===item.invId && s.month===currentMonthKey());
-          if(!exists){
-            dc.saved.unshift({
-              value:Number(item.amount || 0),
-              desc:`Automático: ${item.desc}`,
-              date:todayISO(),
-              source:"investFixo",
-              invId:item.invId,
-              month:currentMonthKey()
-            });
-          }
-        }
-        saveState(all);
-        return { ok:true, html:`Item <b>${escapeHtml(item.desc)}</b> marcado como <b>Pago</b>.` };
-      }
-
-      if(action === "mark_pending"){
-        const target = parsed.target || parsed.desc || "";
-        const item = findCurrentMonthItemByName(all, target, currentMonthKey());
-        if(!item) return { ok:false, html:`Não encontrei item para voltar a pendente: <b>${escapeHtml(target)}</b>` };
-        item.paid = false;
-        const dc = ensureMonthItems(all, currentMonthKey());
-        if(item.isInvestFixo && item.invId){
-          dc.investStatus[item.invId] = false;
-          dc.saved = dc.saved.filter(s => !(s && s.source==="investFixo" && s.invId===item.invId && s.month===currentMonthKey()));
-        }
-        saveState(all);
-        return { ok:true, html:`Item <b>${escapeHtml(item.desc)}</b> voltou para <b>Pendente</b>.` };
-      }
-
-      if(action === "remove_expense"){
-        const target = parsed.target || parsed.desc || "";
-        const d = ensureMonthItems(all, currentMonthKey());
-        const idx = d.items.findIndex(it => !it.isFixo && (normalizeText(it.desc).includes(normalizeText(target)) || normalizeText(target).includes(normalizeText(it.desc))));
-        if(idx === -1) return { ok:false, html:`Não encontrei gasto para remover: <b>${escapeHtml(target)}</b>` };
-        const removed = d.items[idx];
-        d.items.splice(idx,1);
-        saveState(all);
-        return { ok:true, html:`Gasto <b>${escapeHtml(removed.desc)}</b> removido do mês atual.` };
-      }
-
-      if(action === "remove_fixed_expense"){
-        const target = parsed.target || parsed.desc || "";
-        const idx = all.fixos.findIndex(it => normalizeText(it.desc).includes(normalizeText(target)) || normalizeText(target).includes(normalizeText(it.desc)));
-        if(idx === -1) return { ok:false, html:`Não encontrei gasto fixo para remover: <b>${escapeHtml(target)}</b>` };
-        const removed = all.fixos[idx];
-        all.fixos.splice(idx,1);
-
-        Object.keys(all.state.meses || {}).forEach(m=>{
-          const dm = all.state.meses[m];
-          if(dm && Array.isArray(dm.items)){
-            dm.items = dm.items.filter(it => !(it.isFixo && !it.isInvestFixo && (it.id === removed.id || normalizeText(it.desc) === normalizeText(removed.desc))));
-          }
-        });
-
-        saveState(all);
-        return { ok:true, html:`Gasto fixo <b>${escapeHtml(removed.desc)}</b> removido do sistema.` };
-      }
-
-      if(action === "remove_fixed_investment"){
-        const target = parsed.target || parsed.name || parsed.desc || "";
-        const idx = all.investFixos.findIndex(it => normalizeText(it.nome).includes(normalizeText(target)) || normalizeText(target).includes(normalizeText(it.nome)));
-        if(idx === -1) return { ok:false, html:`Não encontrei investimento fixo para remover: <b>${escapeHtml(target)}</b>` };
-        const removed = all.investFixos[idx];
-        all.investFixos.splice(idx,1);
-
-        Object.keys(all.state.meses || {}).forEach(m=>{
-          const dm = all.state.meses[m];
-          if(dm){
-            if(dm.investStatus && removed.id) delete dm.investStatus[removed.id];
-            if(Array.isArray(dm.saved)) dm.saved = dm.saved.filter(s => !(s && s.source==="investFixo" && s.invId===removed.id));
-            if(Array.isArray(dm.items)) dm.items = dm.items.filter(it => !(it.isInvestFixo && (it.invId === removed.id || it.id === removed.id)));
-          }
-        });
-
-        saveState(all);
-        return { ok:true, html:`Investimento fixo <b>${escapeHtml(removed.nome)}</b> removido do sistema.` };
-      }
-
-      if(action === "change_theme"){
-        if(parsed.preset) localStorage.setItem(THEME_KEYS.preset, String(parsed.preset));
-        if(parsed.accent) localStorage.setItem(THEME_KEYS.accent, String(parsed.accent));
-        if(parsed.colorName && COLOR_MAP[normalizeText(parsed.colorName)]){
-          localStorage.setItem(THEME_KEYS.accent, COLOR_MAP[normalizeText(parsed.colorName)]);
-        }
-        applyThemeToPage();
-        return { ok:true, html:`Tema alterado pela IA com sucesso.` };
-      }
-
-      if(action === "generate_month_pdf"){
-        const monthKey = String(parsed.month || currentMonthKey());
-        openIndexByVoiceAction("generate_month_pdf", { month: monthKey, year: monthKey.slice(0,4) });
-        return { ok:true, html:`Gerando <b>PDF do mês ${escapeHtml(monthKey)}</b> no index.` };
-      }
-
-      if(action === "generate_year_summary_pdf"){
-        const year = String(parsed.year || new Date().getFullYear());
-        openIndexByVoiceAction("generate_year_summary_pdf", { year });
-        return { ok:true, html:`Gerando <b>Resumo do ano ${escapeHtml(year)}</b> no index.` };
-      }
-
-      return { ok:false, html:`Ação não suportada: <b>${escapeHtml(action)}</b>` };
-    }
-
-    async function executeVoiceCommand(){
-      if(!USER_ID){
-        setResult(`<span class="err">Faça login primeiro.</span>`);
-        return;
-      }
-
-      const cmd = lastTranscript.trim();
-      if(!cmd){
-        setResult(`<span class="warn">Nenhum comando para executar.</span>`);
-        return;
-      }
-
-      const all = loadState();
-
-      try{
-        setResult("Analisando comando...");
-
-        const local = tryLocalRule(cmd, all);
-        if(local){
-          if(local.ok){
-            setResult(`<span class="ok">Comando executado.</span><br><br>${local.html}`);
-            dbg("Local OK: " + cmd);
-          }else{
-            setResult(`<span class="warn">Não foi possível concluir.</span><br><br>${local.html}`);
-            dbg("Local falhou: " + cmd);
-          }
-          return;
-        }
-
-        setResult("Enviando para a IA interpretar...");
-        const parsed = await askAIToInterpret(cmd, all);
-        const execResult = await executeParsedAction(parsed, all);
-
-        if(execResult.ok){
-          setResult(`<span class="ok">Comando executado pela IA.</span><br><br>${execResult.html}`);
-          dbg("IA OK: " + JSON.stringify(parsed));
-        }else{
-          setResult(`<span class="warn">A IA respondeu, mas não consegui concluir.</span><br><br>${execResult.html}`);
-          dbg("IA falhou: " + JSON.stringify(parsed));
-        }
-      }catch(e){
-        setResult(
-          `<span class="err">Erro ao executar comando.</span><br><br>` +
-          `${escapeHtml(e.message || String(e))}<br><br>` +
-          `<span class="small">Se aparecer "Failed to fetch", normalmente é problema de URL da IA, CORS, domínio bloqueado ou endpoint fora do ar.</span>`
-        );
-        dbg("Erro comando: " + (e.message || e));
-      }
-    }
-
-    async function initFirebase(){
-      if(!window.firebase){
-        dbg("Firebase não carregou.");
-        return false;
-      }
-
-      try{
-        if(!firebase.apps || !firebase.apps.length){
-          firebase.initializeApp(FIREBASE_CONFIG);
-        }
-      }catch(e){}
-
-      auth = firebase.auth();
-
-      auth.onAuthStateChanged((u)=>{
-        USER = u || null;
-        if(!USER){
-          USER_ID = null;
-          location.replace("./login.html");
-          return;
-        }
-
-        USER_ID = USER.uid;
-
-        const savedTheme = localStorage.getItem("theme");
-        if(savedTheme === "light") document.body.classList.add("light");
-
-        applyThemeToPage();
-        dbg("Usuário autenticado: " + (USER.email || USER.uid));
-      });
-
-      return true;
-    }
-
-    document.addEventListener("DOMContentLoaded", async ()=>{
-      const ok = await initFirebase();
-      if(!ok) return;
-      ensureSpeech();
-      applyThemeToPage();
-    });
-  </script>
+    setVoiceStatus("Pronto", true);
+    setVoiceState("Pronto para ouvir", "Toque em “Ouvir comando” e fale naturalmente.");
+    loadAck();
+    renderLog();
+    startAckWatcher();
+    bindManualShortcuts();
+  });
+});
+</script>
 </body>
 </html>
