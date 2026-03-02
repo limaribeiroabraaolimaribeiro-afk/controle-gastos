@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Histórico • Controle de Gastos PRO</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#569cff">
+
+<style>
+:root{
+  --bg:#07101f;
+  --grad1: rgba(86,156,255,.22);
+  --grad2: rgba(57,217,138,.16);
+  --grad3: rgba(255,93,93,.12);
+
+  --panel: rgba(255,255,255,.06);
+  --panel2: rgba(255,255,255,.08);
+  --stroke: rgba(255,255,255,.10);
+  --text:#eaf0ff;
+  --muted: rgba(234,240,255,.72);
+
+  --accent:#569cff;
+  --good:#39d98a;
+  --warn:#ffd166;
+  --danger:#ff5d5d;
+
+  --shadow: 0 18px 60px rgba(0,0,0,.45);
+  --glass: blur(14px);
+  --radius: 22px;
+}
+.light{
+  --panel: rgba(0,0,0,.04);
+  --panel2: rgba(0,0,0,.06);
+  --stroke: rgba(0,0,0,.08);
+  --text:#0d1222;
+  --muted: rgba(13,18,34,.68);
+  --shadow: 0 18px 60px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-height:100vh;
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+  background:
+    radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
+    radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
+    radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
+    var(--bg);
+}
+.wrap{max-width:980px;margin:auto;padding:16px;padding-bottom:120px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+h1{margin:0;font-size:20px;letter-spacing:.2px}
+h2{margin:0;font-size:16px}
+h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:700}
+.small{font-size:12px;color:var(--muted)}
+.card{
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  padding:14px;
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--glass);
+}
+.row{display:flex;gap:10px;align-items:center}
+.row > *{flex:1}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.btn{
+  appearance:none;border:0;cursor:pointer;
+  background:rgba(255,255,255,.10);
+  color:var(--text);
+  padding:12px 12px;border-radius:14px;
+  border:1px solid var(--stroke);
+  font-weight:750;
+  box-shadow:0 10px 26px rgba(0,0,0,.18);
+  text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn.primary{
+  background:var(--accent);
+  border-color:color-mix(in srgb, var(--accent), transparent 55%);
+  color:#fff;
+}
+.btn.danger{
+  background:var(--danger);
+  border-color:color-mix(in srgb, var(--danger), transparent 55%);
+  color:#2b0707;
+}
+.btn.good{
+  background:var(--good);
+  border-color:color-mix(in srgb, var(--good), transparent 55%);
+  color:#062114;
+}
+.btn.icon{
+  width:42px;height:42px;padding:0;border-radius:14px
+}
+input,select{
+  width:100%;
+  padding:12px 12px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  outline:none;
+  background:rgba(0,0,0,.15);
+  color:var(--text);
+  font-size:14px;
+}
+.light input,.light select{background:rgba(255,255,255,.75)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+.badge{
+  display:inline-flex;gap:6px;align-items:center;
+  padding:4px 10px;border-radius:999px;
+  background:rgba(255,255,255,.10);
+  border:1px solid var(--stroke);
+  font-size:12px;color:var(--muted);
+}
+.badge.good{color:var(--good); border-color: rgba(57,217,138,.35); background: rgba(57,217,138,.10)}
+.badge.warn{color:var(--warn); border-color: rgba(255,209,102,.35); background: rgba(255,209,102,.10)}
+.badge.danger{color:var(--danger); border-color: rgba(255,93,93,.35); background: rgba(255,93,93,.10)}
+.note{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  padding:12px;border-radius:16px;
+}
+.hr{height:1px;background:var(--stroke);margin:12px 0}
+.listCol{display:grid;gap:10px}
+.backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.backBtn{font-weight:850}
+#loading{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px;text-align:center;
+}
+.empty{
+  padding:18px;border-radius:18px;border:1px dashed var(--stroke);
+  text-align:center;color:var(--muted)
+}
+.kpi{
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  border-radius:18px;
+  padding:12px;
+}
+.kpi .v{font-size:18px;font-weight:850;margin-top:6px}
+.successText{color:var(--good);font-weight:800}
+.warnText{color:var(--warn);font-weight:800}
+.dangerText{color:var(--danger);font-weight:900}
+.monthTitle{
+  font-weight:950;
+  text-transform:capitalize;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.monthRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.monthActions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex:0 0 auto;
+}
+.monthStats{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:8px;
+}
+#debugBox{
+  position:fixed; left:12px; right:12px; bottom:12px;
+  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
+  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
+}
+@media (max-width:720px){
+  .grid2,.grid4{grid-template-columns:1fr}
+  .topbar{align-items:flex-start;flex-direction:column}
+  .monthRow{flex-direction:column;align-items:flex-start}
+  .monthActions{width:100%;justify-content:space-between}
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="card" style="max-width:520px;width:100%">
+    <h2 style="font-weight:900;margin-bottom:6px">Carregando histórico…</h2>
+    <div class="small">Validando login e preparando seus meses salvos.</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="wrap">
+    <div class="backRow">
+      <a class="btn backBtn" href="./index.html">← Voltar</a>
+      <div style="font-weight:900">Histórico</div>
+    </div>
+
+    <div class="topbar">
+      <div>
+        <h1>Controle de Gastos PRO</h1>
+        <div class="small">Visualize, abra e remova meses salvos do seu histórico.</div>
+      </div>
+      <div class="row" style="flex:0 0 auto">
+        <button class="btn" onclick="toggleTheme()">🌙/☀️</button>
+      </div>
+    </div>
+
+    <div class="grid4">
+      <div class="kpi">
+        <div class="small">Meses salvos</div>
+        <div class="v" id="kpiQtdMeses">0</div>
+      </div>
+      <div class="kpi">
+        <div class="small">Gasto somado</div>
+        <div class="v" id="kpiGastoTotal">R$ 0,00</div>
+      </div>
+      <div class="kpi">
+        <div class="small">Guardado somado</div>
+        <div class="v" id="kpiGuardadoTotal">R$ 0,00</div>
+      </div>
+      <div class="kpi">
+        <div class="small">Último mês</div>
+        <div class="v" id="kpiUltimoMes">—</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="grid2">
+        <div>
+          <label>Buscar mês</label>
+          <input id="busca" placeholder="Ex: março 2026" oninput="renderHistory()">
+        </div>
+        <div>
+          <label>Ordenar</label>
+          <select id="sortMode" onchange="renderHistory()">
+            <option value="recent">Mais recente primeiro</option>
+            <option value="oldest">Mais antigo primeiro</option>
+            <option value="highest_spent">Maior gasto primeiro</option>
+            <option value="highest_saved">Maior guardado primeiro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="small">
+        Toque em <b>Abrir</b> para voltar para esse mês na tela principal.
+        Toque em <b>✕</b> para deletar o mês do histórico.
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>Seus meses salvos</h3>
+      <div id="historyList" class="listCol"></div>
+    </div>
+  </div>
+</div>
+
+<div id="debugBox"></div>
+
+<script>
+function dbg(msg){
+  const box = document.getElementById("debugBox");
+  box.style.display = "block";
+  box.textContent = String(msg);
+}
+window.addEventListener("error", (e)=>{
+  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+});
+window.addEventListener("unhandledrejection", (e)=>{
+  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+});
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="./config.js"></script>
+
+<script>
+const FIREBASE_CONFIG = {
+  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
+  authDomain:"controle-gastos-pro.firebaseapp.com",
+  projectId:"controle-gastos-pro"
+};
+
+const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
+
+const THEME_PRESETS = {
+  default: {
+    dark:  { bg:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
+    light: { bg:"#f4f6ff", g1:"rgba(86,156,255,.14)", g2:"rgba(57,217,138,.10)", g3:"rgba(255,93,93,.08)" }
+  },
+  purple: {
+    dark:  { bg:"#0d0a1f", g1:"rgba(170,110,255,.25)", g2:"rgba(86,156,255,.12)", g3:"rgba(57,217,138,.10)" },
+    light: { bg:"#fbf8ff", g1:"rgba(170,110,255,.16)", g2:"rgba(86,156,255,.10)", g3:"rgba(57,217,138,.08)" }
+  },
+  green: {
+    dark:  { bg:"#061a14", g1:"rgba(57,217,138,.28)", g2:"rgba(86,156,255,.10)", g3:"rgba(255,209,102,.10)" },
+    light: { bg:"#f7fffb", g1:"rgba(57,217,138,.16)", g2:"rgba(86,156,255,.08)", g3:"rgba(255,209,102,.10)" }
+  },
+  sunset: {
+    dark:  { bg:"#1a0b0b", g1:"rgba(255,93,93,.22)", g2:"rgba(255,209,102,.18)", g3:"rgba(86,156,255,.10)" },
+    light: { bg:"#fff7f2", g1:"rgba(255,93,93,.14)", g2:"rgba(255,209,102,.14)", g3:"rgba(86,156,255,.08)" }
+  },
+  mono: {
+    dark:  { bg:"#05070c", g1:"rgba(255,255,255,.10)", g2:"rgba(255,255,255,.06)", g3:"rgba(255,255,255,.04)" },
+    light: { bg:"#ffffff", g1:"rgba(0,0,0,.06)", g2:"rgba(0,0,0,.04)", g3:"rgba(0,0,0,.03)" }
+  }
+};
+
+let auth = null;
+let USER = null;
+let USER_ID = null;
+let state = { meses:{} };
+
+function money(n){
+  return Number(n || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+}
+function escapeHtml(s){
+  return String(s || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+function showLoading(){
+  document.getElementById("loading").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+}
+function showApp(){
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+
+function kMes(){ return "gastos_pro_state_" + USER_ID; }
+
+function isLightMode(){
+  return document.body.classList.contains("light");
+}
+function applyThemeSettings(){
+  const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
+  const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
+  const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
+  const mode = isLightMode() ? "light" : "dark";
+  const colors = p[mode] || p.dark;
+
+  document.documentElement.style.setProperty("--accent", accent);
+  document.documentElement.style.setProperty("--bg", colors.bg);
+  document.documentElement.style.setProperty("--grad1", colors.g1);
+  document.documentElement.style.setProperty("--grad2", colors.g2);
+  document.documentElement.style.setProperty("--grad3", colors.g3);
+
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", accent);
+}
+function toggleTheme(){
+  document.body.classList.toggle("light");
+  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+  applyThemeSettings();
+}
+
+function loadAll(){
+  try{
+    const raw = localStorage.getItem(kMes());
+    state = raw ? JSON.parse(raw) : { meses:{} };
+  }catch(e){
+    state = { meses:{} };
+  }
+  if(!state || typeof state !== "object") state = { meses:{} };
+  if(!state.meses || typeof state.meses !== "object") state.meses = {};
+}
+function saveAll(){
+  localStorage.setItem(kMes(), JSON.stringify(state));
+}
+function getDataMes(m){
+  const mm = m || new Date().toISOString().slice(0,7);
+  if(!state.meses[mm]) state.meses[mm] = { salary:0, meta:0, items:[], saved:[], hiddenFixos:[], investStatus:{} };
+  const d = state.meses[mm];
+  if(!Array.isArray(d.items)) d.items = [];
+  if(!Array.isArray(d.saved)) d.saved = [];
+  if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos = [];
+  if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
+  return d;
+}
+
+function formatMonthLabel(m){
+  const dt = new Date(m + "-01T00:00:00");
+  return dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+}
+function normalizeText(s){
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+function getMonthSummary(m){
+  const d = getDataMes(m);
+  const salary = Number(d.salary || 0);
+  const spent = (d.items || []).reduce((a,b)=>a + Number(b.amount || 0), 0);
+  const saved = (d.saved || []).reduce((a,b)=>a + Number(b.value || 0), 0);
+  const left = salary - spent;
+  return { salary, spent, saved, left };
+}
+function getSortedMonths(){
+  const busca = normalizeText(document.getElementById("busca").value || "");
+  const sortMode = document.getElementById("sortMode").value;
+  let months = Object.keys(state.meses || {});
+
+  if(busca){
+    months = months.filter(m=>{
+      const label = normalizeText(formatMonthLabel(m));
+      const raw = normalizeText(m);
+      return label.includes(busca) || raw.includes(busca);
+    });
+  }
+
+  months.sort((a,b)=>{
+    if(sortMode === "oldest") return a.localeCompare(b);
+    if(sortMode === "highest_spent"){
+      return getMonthSummary(b).spent - getMonthSummary(a).spent;
+    }
+    if(sortMode === "highest_saved"){
+      return getMonthSummary(b).saved - getMonthSummary(a).saved;
+    }
+    return b.localeCompare(a);
+  });
+
+  return months;
+}
+
+function updateKPIs(){
+  const months = Object.keys(state.meses || {}).sort().reverse();
+  const totalMeses = months.length;
+
+  let gastoTotal = 0;
+  let guardadoTotal = 0;
+  months.forEach(m=>{
+    const s = getMonthSummary(m);
+    gastoTotal += s.spent;
+    guardadoTotal += s.saved;
+  });
+
+  document.getElementById("kpiQtdMeses").textContent = String(totalMeses);
+  document.getElementById("kpiGastoTotal").textContent = money(gastoTotal);
+  document.getElementById("kpiGuardadoTotal").textContent = money(guardadoTotal);
+  document.getElementById("kpiUltimoMes").textContent = totalMeses ? formatMonthLabel(months[0]) : "—";
+}
+
+function openMonth(m){
+  localStorage.setItem("mes_aberto", m);
+  location.href = "./index.html";
+}
+function deleteMonth(m){
+  if(!state.meses || !state.meses[m]) return;
+
+  const label = formatMonthLabel(m);
+  const ok = confirm(`Deletar o mês de ${label} do histórico?`);
+  if(!ok) return;
+
+  delete state.meses[m];
+  saveAll();
+  renderHistory();
+}
+function renderHistory(){
+  const div = document.getElementById("historyList");
+  const months = getSortedMonths();
+
+  if(!months.length){
+    div.innerHTML = `<div class="empty">Nenhum mês salvo encontrado.</div>`;
+    updateKPIs();
+    return;
+  }
+
+  div.innerHTML = months.map(m=>{
+    const label = formatMonthLabel(m);
+    const d = getDataMes(m);
+    const { salary, spent, saved, left } = getMonthSummary(m);
+    const itens = (d.items || []).length;
+    const sobraClass = left > 0 ? "good" : (left === 0 ? "warn" : "danger");
+    const sobraTextClass = left > 0 ? "successText" : (left === 0 ? "warnText" : "dangerText");
+
+    return `
+      <div class="note">
+        <div class="monthRow">
+          <div style="min-width:0">
+            <div class="monthTitle">${escapeHtml(label)}</div>
+            <div class="small" style="margin-top:6px">${escapeHtml(m)} • ${itens} item(ns) no mês</div>
+          </div>
+
+          <div class="monthActions">
+            <span class="badge ${sobraClass}">Sobra ${money(left)}</span>
+            <button class="btn primary" onclick="openMonth('${m}')">Abrir</button>
+            <button class="btn icon danger" title="Deletar mês" onclick="deleteMonth('${m}')">✕</button>
+          </div>
+        </div>
+
+        <div class="monthStats">
+          <span class="badge">Salário ${money(salary)}</span>
+          <span class="badge">Gasto ${money(spent)}</span>
+          <span class="badge">Guardado ${money(saved)}</span>
+          <span class="badge ${sobraClass} ${sobraTextClass}">Resultado ${money(left)}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  updateKPIs();
+}
+
+function setupVoiceBridge(){
+  window.addEventListener("storage", (e)=>{
+    if(e.key === "voice_cmd") handleVoiceCommand(e.newValue || "");
+  });
+
+  const cached = localStorage.getItem("voice_cmd");
+  if(cached) handleVoiceCommand(cached);
+}
+function consumeVoiceCommand(){
+  localStorage.removeItem("voice_cmd");
+  localStorage.setItem("voice_last_page", "historico.html");
+}
+function handleVoiceCommand(raw){
+  const cmd = String(raw || "").trim().toLowerCase();
+  if(!cmd) return;
+
+  if(
+    cmd.includes("abrir histórico") ||
+    cmd.includes("abrir historico") ||
+    cmd.includes("ir para histórico") ||
+    cmd.includes("ir para historico")
+  ){
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(
+    cmd.includes("voltar") ||
+    cmd.includes("abrir início") ||
+    cmd.includes("abrir tela principal") ||
+    cmd.includes("abrir dashboard") ||
+    cmd.includes("ir para home")
+  ){
+    consumeVoiceCommand();
+    location.href = "./index.html";
+    return;
+  }
+
+  if(cmd.includes("tema claro")){
+    if(!document.body.classList.contains("light")) toggleTheme();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("tema escuro") || cmd.includes("tema normal")){
+    if(document.body.classList.contains("light")) toggleTheme();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("ordenar por gasto")){
+    document.getElementById("sortMode").value = "highest_spent";
+    renderHistory();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("ordenar por guardado")){
+    document.getElementById("sortMode").value = "highest_saved";
+    renderHistory();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("ordenar mais recente")){
+    document.getElementById("sortMode").value = "recent";
+    renderHistory();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.includes("ordenar mais antigo")){
+    document.getElementById("sortMode").value = "oldest";
+    renderHistory();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.startsWith("buscar mês ") || cmd.startsWith("buscar mes ")){
+    const text = cmd.replace("buscar mês ", "").replace("buscar mes ", "").trim();
+    document.getElementById("busca").value = text;
+    renderHistory();
+    consumeVoiceCommand();
+    return;
+  }
+
+  if(cmd.startsWith("abrir mês ") || cmd.startsWith("abrir mes ")){
+    const text = normalizeText(cmd.replace("abrir mês ", "").replace("abrir mes ", "").trim());
+    const months = Object.keys(state.meses || {}).sort().reverse();
+    const found = months.find(m=>{
+      const label = normalizeText(formatMonthLabel(m));
+      return label.includes(text) || normalizeText(m) === text || normalizeText(m).includes(text);
+    });
+    if(found){
+      consumeVoiceCommand();
+      openMonth(found);
+      return;
+    }
+  }
+}
+
+async function initFirebase(){
+  if(!window.firebase){
+    dbg("Firebase não carregou.");
+    return false;
+  }
+
+  try{
+    if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  }catch(e){}
+
+  auth = firebase.auth();
+  try{
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  }catch(e){}
+
+  auth.onAuthStateChanged((u)=>{
+    USER = u || null;
+
+    if(!USER){
+      USER_ID = null;
+      location.replace("./login.html");
+      return;
+    }
+
+    USER_ID = USER.uid;
+
+    const t = localStorage.getItem("theme");
+    if(t === "light") document.body.classList.add("light");
+    applyThemeSettings();
+
+    loadAll();
+    renderHistory();
+    setupVoiceBridge();
+
+    showApp();
+  });
+
+  return true;
+}
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  showLoading();
+  applyThemeSettings();
+  await initFirebase();
+});
+</script>
+</body>
+</html>
