@@ -14,7 +14,8 @@
 
   function safeParse(json, fallback) {
     try {
-      return JSON.parse(json);
+      const parsed = JSON.parse(json);
+      return parsed == null ? fallback : parsed;
     } catch (e) {
       return fallback;
     }
@@ -42,6 +43,7 @@
 
   function getCurrentUserId() {
     try {
+      if (window.App && window.App.USER_ID) return String(window.App.USER_ID);
       if (window.USER_ID) return String(window.USER_ID);
     } catch (e) {}
     return "guest";
@@ -102,7 +104,7 @@
       janeiro: "01",
       fevereiro: "02",
       marco: "03",
-      março: "03",
+      "março": "03",
       abril: "04",
       maio: "05",
       junho: "06",
@@ -137,12 +139,18 @@
   }
 
   function enqueueIfNeeded(raw) {
-    const queue = safeParse(localStorage.getItem(VOICE_QUEUE_KEY), []);
+    let queue = safeParse(localStorage.getItem(VOICE_QUEUE_KEY), []);
+
+    if (!Array.isArray(queue)) {
+      queue = [];
+    }
+
     queue.push({
       cmd: raw,
       page: pageName,
       time: nowISO()
     });
+
     localStorage.setItem(VOICE_QUEUE_KEY, JSON.stringify(queue.slice(-30)));
   }
 
@@ -251,6 +259,7 @@
       if (item.keys.some(k => cmd.includes(k))) {
         localStorage.setItem("theme_preset_v1", item.value);
         if (typeof window.applyThemeSettings === "function") window.applyThemeSettings();
+        if (window.App && typeof window.App.applyThemeSettings === "function") window.App.applyThemeSettings();
         return item.label;
       }
     }
@@ -278,6 +287,10 @@
     if (cmd.includes("abrir historico") || cmd.includes("abrir histórico")) {
       if (typeof window.openHistory === "function") {
         window.openHistory();
+        return "Abrindo histórico.";
+      }
+      if (typeof window.openHistoryPage === "function") {
+        window.openHistoryPage();
         return "Abrindo histórico.";
       }
     }
@@ -327,6 +340,10 @@
     if (cmd.includes("abrir ia")) {
       if (typeof window.openIa === "function") {
         window.openIa();
+        return "Abrindo IA.";
+      }
+      if (typeof window.openScreen === "function") {
+        window.openScreen("screen-ia");
         return "Abrindo IA.";
       }
     }
@@ -648,7 +665,36 @@
     }
 
     if (cmd.startsWith("parametro ") || cmd.startsWith("parâmetro ")) {
-      const value = parseMoney(cmd.replace("parametro ", "").replace("juros ", ""));
+      const value = parseMoney(cmd.replace("parametro ", "").replace("parâmetro ", ""));
+      if (setValue(["#investExtraValue"], value)) return "Parâmetro preenchido.";
+    }
+
+    if (cmd.includes("calcular investimento")) {
+      if (typeof window.simularInvestimento === "function") {
+        window.simularInvestimento();
+        return "Calculando investimento.";
+      }
+    }
+
+    if (cmd.includes("limpar investimento")) {
+      if (typeof window.clearInvestimento === "function") {
+        window.clearInvestimento();
+        return "Simulação de investimento limpa.";
+      }
+    }
+
+    if (cmd.startsWith("valor emprestimo ") || cmd.startsWith("valor empréstimo ")) {
+      const value = parseMoney(cmd.replace("valor emprestimo ", "").replace("valor empréstimo ", ""));
+      if (setValue(["#loanValor"], value)) return "Valor do empréstimo preenchido.";
+    }
+
+    if (cmd.startsWith("parcelas ")) {
+      const value = parseMoney(cmd.replace("parcelas ", ""));
+      if (setValue(["#loanParcelas"], value)) return "Parcelas preenchidas.";
+    }
+
+    if (cmd.startsWith("juros ")) {
+      const value = parseMoney(cmd.replace("juros ", ""));
       if (setValue(["#loanJuros"], value)) return "Juros preenchido.";
     }
 
