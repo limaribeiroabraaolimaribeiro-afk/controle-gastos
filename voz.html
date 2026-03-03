@@ -101,6 +101,46 @@
 .transcript .label{font-size:12px;color:var(--muted)}
 .transcript .text{margin-top:6px;font-weight:900;white-space:pre-wrap}
 .rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.voiceGroups{
+  margin-top:14px;
+  display:grid;
+  gap:12px;
+}
+.voiceGroup{
+  border:1px solid var(--stroke);
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  padding:12px;
+}
+.voiceGroup h3{
+  margin:0 0 8px;
+  font-size:14px;
+  color:var(--text);
+}
+.voiceExamples{
+  display:grid;
+  gap:8px;
+}
+.voiceEx{
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.04);
+  font-weight:850;
+}
+.voiceEx small{
+  display:block;
+  margin-top:4px;
+  font-weight:600;
+  color:var(--muted);
+}
+.tipBox{
+  margin-top:12px;
+  padding:12px;
+  border-radius:18px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.05);
+}
 @media (max-width:720px){
   .rowBtns .btn{flex:1}
 }
@@ -120,7 +160,7 @@
         <div class="voiceLogo">🎙️</div>
         <div class="voiceTitle">
           <div class="t">Voz • Abrir telas e executar ações</div>
-          <div class="s">Toque no microfone, fale um comando e o sistema executa.</div>
+          <div class="s">Toque no microfone, fale o comando e o sistema abre ou executa sozinho.</div>
         </div>
       </div>
       <div class="voiceStatusPill">
@@ -143,8 +183,73 @@
           <button class="btn danger" onclick="clearLast()">Limpar</button>
         </div>
 
-        <div class="small" style="margin-top:12px;color:var(--muted)">
-          Dica: fale direto, por exemplo: <b>abrir histórico</b>, <b>anote mercado 100 casa</b>, <b>imprimir resumo do ano</b>, <b>tema roxo</b>.
+        <div class="tipBox">
+          <div style="font-weight:900">Como falar certo</div>
+          <div class="small" style="margin-top:6px">
+            Fale sempre de forma direta, sem frases longas. Primeiro diga a ação, depois o conteúdo.
+            <br>Exemplo: <b>anote mercado 100 casa</b>
+            <br>Exemplo: <b>abrir histórico</b>
+          </div>
+        </div>
+
+        <div class="voiceGroups">
+          <div class="voiceGroup">
+            <h3>Grupo 1 — Abrir páginas</h3>
+            <div class="voiceExamples">
+              <div class="voiceEx">abrir histórico<small>Abre a tela do histórico</small></div>
+              <div class="voiceEx">abrir gastos fixos<small>Abre a tela de gastos fixos</small></div>
+              <div class="voiceEx">abrir investimentos fixos<small>Abre a tela de investimentos fixos</small></div>
+              <div class="voiceEx">abrir categorias<small>Abre a tela de categorias</small></div>
+              <div class="voiceEx">abrir simuladores<small>Abre a tela de simuladores</small></div>
+              <div class="voiceEx">abrir ia<small>Abre a IA na tela principal</small></div>
+              <div class="voiceEx">abrir menu<small>Abre o menu na tela principal</small></div>
+              <div class="voiceEx">abrir tela principal<small>Volta para a tela principal</small></div>
+            </div>
+          </div>
+
+          <div class="voiceGroup">
+            <h3>Grupo 2 — Comandos do index</h3>
+            <div class="voiceExamples">
+              <div class="voiceEx">anote mercado 100 casa<small>Anota um gasto normal: descrição + valor + categoria</small></div>
+              <div class="voiceEx">anote farmácia 60 saúde<small>Anota outro gasto normal</small></div>
+              <div class="voiceEx">anote como pago casa<small>Marca um item como pago</small></div>
+              <div class="voiceEx">anote como pendente casa<small>Marca um item como pendente</small></div>
+              <div class="voiceEx">anote guardado 300 de reserva<small>Adiciona valor ao guardado com descrição</small></div>
+              <div class="voiceEx">imprimir resumo do ano<small>Abre o PDF e gera o resumo anual</small></div>
+              <div class="voiceEx">imprimir pdf do mês<small>Abre o PDF e gera o relatório completo do mês</small></div>
+              <div class="voiceEx">tema roxo<small>Troca para o tema roxo</small></div>
+              <div class="voiceEx">tema verde<small>Troca para o tema verde</small></div>
+              <div class="voiceEx">tema minimal<small>Troca para o tema minimal</small></div>
+              <div class="voiceEx">tema padrão<small>Volta para o tema padrão</small></div>
+              <div class="voiceEx">tema pôr do sol<small>Troca para o tema pôr do sol</small></div>
+              <div class="voiceEx">abrir edição do painel<small>Abre a tela de edição do painel</small></div>
+            </div>
+          </div>
+
+          <div class="voiceGroup">
+            <h3>Grupo 3 — Comandos das páginas específicas</h3>
+            <div class="voiceExamples">
+              <div class="voiceEx">anote gastos fixos internet 99 casa<small>Vai para fixos.html e adiciona gasto fixo</small></div>
+              <div class="voiceEx">remover gasto fixo internet<small>Vai para fixos.html e remove o gasto fixo</small></div>
+              <div class="voiceEx">adicionar investimento fixo reserva 6000 12 10<small>Vai para investfixos.html e adiciona investimento fixo: nome + meta + meses + dia</small></div>
+              <div class="voiceEx">remover investimento fixo reserva<small>Vai para investfixos.html e remove investimento fixo</small></div>
+              <div class="voiceEx">adicionar categoria saúde<small>Vai para categorias.html e adiciona categoria</small></div>
+              <div class="voiceEx">remover categoria saúde<small>Vai para categorias.html e remove categoria</small></div>
+              <div class="voiceEx">buscar histórico mercado<small>Vai para historico.html e faz a busca</small></div>
+              <div class="voiceEx">abrir mês 2026-03<small>Vai para historico.html e abre o mês</small></div>
+              <div class="voiceEx">remover mês 2026-03<small>Vai para historico.html e remove o mês</small></div>
+              <div class="voiceEx">calcular investimento<small>Vai para simuladores.html e calcula investimento</small></div>
+              <div class="voiceEx">calcular empréstimo<small>Vai para simuladores.html e calcula empréstimo</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="small" style="margin-top:14px;color:var(--muted)">
+          Dica final: fale sempre nesse padrão:
+          <br><b>ação + conteúdo</b>
+          <br>Exemplo certo: <b>anote mercado 100 casa</b>
+          <br>Exemplo certo: <b>adicionar categoria saúde</b>
+          <br>Exemplo certo: <b>adicionar investimento fixo reserva 6000 12 10</b>
         </div>
       </div>
     </div>
@@ -200,7 +305,7 @@ function routeCommand(raw){
   const cmd = normalize(raw);
   if(!cmd) return false;
 
-  // ===== Grupo 1 — abrir páginas =====
+  // Grupo 1 — abrir páginas
   if(cmd.includes("abrir historico") || cmd.includes("abrir histórico")){
     saveVoiceCommand(raw);
     location.href = "./historico.html";
@@ -242,35 +347,38 @@ function routeCommand(raw){
     return true;
   }
 
-  // ===== Grupo 3 — comandos das páginas específicas (primeiro) =====
-  // anote gastos fixos ... -> fixos.html
-  if(cmd.includes("gastos fixos") && (cmd.startsWith("anote") || cmd.startsWith("anotar"))){
+  // Grupo 3 — páginas específicas
+  if(cmd.includes("gastos fixos") && (cmd.startsWith("anote") || cmd.startsWith("anotar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir"))){
     saveVoiceCommand(raw);
     location.href = "./fixos.html";
     return true;
   }
-  // adicionar investimento fixo ... -> investfixos.html
-  if(cmd.includes("investimento fixo") && (cmd.startsWith("adicionar") || cmd.startsWith("anote") || cmd.startsWith("anotar"))){
+
+  if(cmd.includes("investimento fixo") && (cmd.startsWith("adicionar") || cmd.startsWith("anote") || cmd.startsWith("anotar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir"))){
     saveVoiceCommand(raw);
     location.href = "./investfixos.html";
     return true;
   }
-  // adicionar/remover categoria -> categorias.html
+
   if(cmd.includes("categoria") && (cmd.startsWith("adicionar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir") || cmd.startsWith("anote") || cmd.startsWith("anotar"))){
     saveVoiceCommand(raw);
     location.href = "./categorias.html";
     return true;
   }
 
-  // ===== Grupo 2 — comandos do index (fallback principal) =====
-  // Tudo que for:
-  // - anote mercado 100 casa
-  // - anote como pago ...
-  // - anote como pendente ...
-  // - anote guardado ...
-  // - imprimir pdf/resumo
-  // - temas
-  // -> index.html executa
+  if(cmd.startsWith("buscar historico") || cmd.startsWith("buscar histórico") || cmd.startsWith("abrir mês") || cmd.startsWith("abrir mes") || cmd.startsWith("remover mês") || cmd.startsWith("remover mes")){
+    saveVoiceCommand(raw);
+    location.href = "./historico.html";
+    return true;
+  }
+
+  if(cmd.includes("calcular investimento") || cmd.includes("calcular emprestimo") || cmd.includes("calcular empréstimo") || cmd.includes("abrir investimento") || cmd.includes("abrir empréstimo") || cmd.includes("abrir emprestimo")){
+    saveVoiceCommand(raw);
+    location.href = "./simuladores.html";
+    return true;
+  }
+
+  // Grupo 2 — index
   const isIndexAction =
     cmd.startsWith("anote") || cmd.startsWith("anotar") ||
     cmd.includes("imprimir resumo do ano") ||
@@ -289,7 +397,6 @@ function routeCommand(raw){
   return false;
 }
 
-/* ====== Reconhecimento de voz (Web Speech API) ====== */
 let recognition = null;
 let listening = false;
 
@@ -334,10 +441,8 @@ function initRecognition(){
 
     setStatus("Pronto", true);
 
-    // executa roteamento
     const ok = routeCommand(raw);
     if(!ok){
-      // se não achou rota, manda mesmo assim pro index como fallback
       saveVoiceCommand(raw);
       location.href = "./index.html";
     }
@@ -350,7 +455,7 @@ function toggleListen(){
   if(!recognition) recognition = initRecognition();
 
   if(!recognition){
-    alert("Seu celular/navegador não suporta reconhecimento de voz (SpeechRecognition). Use Chrome ou ative permissões do microfone.");
+    alert("Seu celular ou navegador não suporta reconhecimento de voz. Use Chrome e permita o microfone.");
     return;
   }
 
@@ -383,13 +488,10 @@ function clearLast(){
   setStatus("Pronto", true);
 }
 
-/* ====== Inicial ====== */
 document.addEventListener("DOMContentLoaded", ()=>{
   setStatus("Pronto", true);
   const last = localStorage.getItem(VOICE_LAST_KEY);
   if(last) setLastText(last);
-
-  // força permissão: somente quando clicar no botão (regras do navegador)
   recognition = initRecognition();
 });
 </script>
