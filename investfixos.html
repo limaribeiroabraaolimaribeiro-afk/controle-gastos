@@ -7,153 +7,26 @@
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#569cff">
+<link rel="stylesheet" href="./ui.css">
 
 <style>
-:root{
-  --bg:#07101f;
-  --grad1: rgba(86,156,255,.22);
-  --grad2: rgba(57,217,138,.16);
-  --grad3: rgba(255,93,93,.12);
-
-  --panel: rgba(255,255,255,.06);
-  --panel2: rgba(255,255,255,.08);
-  --stroke: rgba(255,255,255,.10);
-  --text:#eaf0ff;
-  --muted: rgba(234,240,255,.72);
-
-  --accent:#569cff;
-  --good:#39d98a;
-  --warn:#ffd166;
-  --danger:#ff5d5d;
-
-  --shadow: 0 18px 60px rgba(0,0,0,.45);
-  --glass: blur(14px);
-  --radius: 22px;
-}
-.light{
-  --panel: rgba(0,0,0,.04);
-  --panel2: rgba(0,0,0,.06);
-  --stroke: rgba(0,0,0,.08);
-  --text:#0d1222;
-  --muted: rgba(13,18,34,.68);
-  --shadow: 0 18px 60px rgba(0,0,0,.12);
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-  min-height:100vh;
-  color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-  background:
-    radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
-    radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
-    radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
-    var(--bg);
-}
-.wrap{max-width:980px;margin:auto;padding:16px;padding-bottom:120px}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-h1{margin:0;font-size:20px;letter-spacing:.2px}
-h2{margin:0;font-size:16px}
-h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:700}
-.small{font-size:12px;color:var(--muted)}
-.card{
-  background: linear-gradient(180deg, var(--panel2), var(--panel));
-  border:1px solid var(--stroke);
-  border-radius:var(--radius);
-  padding:14px;
-  box-shadow:var(--shadow);
-  backdrop-filter:var(--glass);
-}
-.row{display:flex;gap:10px;align-items:center}
-.row > *{flex:1}
-.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.btn{
-  appearance:none;border:0;cursor:pointer;
-  background:rgba(255,255,255,.10);
-  color:var(--text);
-  padding:12px 12px;border-radius:14px;
-  border:1px solid var(--stroke);
-  font-weight:750;
-  box-shadow:0 10px 26px rgba(0,0,0,.18);
-  text-decoration:none;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-}
-.btn.primary{
-  background:var(--accent);
-  border-color:color-mix(in srgb, var(--accent), transparent 55%);
-  color:#fff;
-}
-.btn.danger{
-  background:var(--danger);
-  border-color:color-mix(in srgb, var(--danger), transparent 55%);
-  color:#2b0707;
-}
-.btn.good{
-  background:var(--good);
-  border-color:color-mix(in srgb, var(--good), transparent 55%);
-  color:#062114;
-}
-.btn.icon{
-  width:42px;height:42px;padding:0;border-radius:14px
-}
-input,select{
-  width:100%;
-  padding:12px 12px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  outline:none;
-  background:rgba(0,0,0,.15);
-  color:var(--text);
-  font-size:14px;
-}
-.light input,.light select{background:rgba(255,255,255,.75)}
-label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
-.badge{
-  display:inline-flex;gap:6px;align-items:center;
-  padding:4px 10px;border-radius:999px;
-  background:rgba(255,255,255,.10);
-  border:1px solid var(--stroke);
-  font-size:12px;color:var(--muted);
-}
-.badge.good{color:var(--good); border-color: rgba(57,217,138,.35); background: rgba(57,217,138,.10)}
-.badge.warn{color:var(--warn); border-color: rgba(255,209,102,.35); background: rgba(255,209,102,.10)}
-.note{
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--stroke);
-  padding:12px;border-radius:16px;
-}
-.hr{height:1px;background:var(--stroke);margin:12px 0}
-.listCol{display:grid;gap:10px}
-.backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.backBtn{font-weight:850}
-#loading{
-  display:flex;align-items:center;justify-content:center;
-  min-height:100vh;padding:24px;text-align:center;
-}
-.empty{
-  padding:18px;border-radius:18px;border:1px dashed var(--stroke);
-  text-align:center;color:var(--muted)
-}
-.kpiGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.kpi{
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--stroke);
-  border-radius:18px;
-  padding:12px;
-}
-.kpi .v{font-size:18px;font-weight:850;margin-top:6px}
-.successText{color: var(--good);font-weight:800}
-.warnText{color: var(--warn);font-weight:800}
-.dangerText{color: var(--danger);font-weight:900}
 #debugBox{
   position:fixed; left:12px; right:12px; bottom:12px;
   background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
   font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
-@media (max-width:720px){
-  .grid2,.grid3,.kpiGrid{grid-template-columns:1fr}
-  .topbar{align-items:flex-start;flex-direction:column}
+.invRow{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.invInfo{min-width:0}
+.invTitle{
+  font-weight:950;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.invMeta{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;
 }
 </style>
 </head>
@@ -176,82 +49,67 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
     <div class="topbar">
       <div>
         <h1>Controle de Gastos PRO</h1>
-        <div class="small">Cadastre metas fixas mensais com prazo e notificações.</div>
+        <div class="small">Cadastre metas fixas para juntar dinheiro todo mês. Elas aparecem automaticamente na tela principal.</div>
       </div>
       <div class="row" style="flex:0 0 auto">
         <button class="btn" onclick="toggleTheme()">🌙/☀️</button>
       </div>
     </div>
 
-    <div class="kpiGrid">
+    <div class="grid3">
       <div class="kpi">
-        <div class="small">Total cadastrados</div>
+        <div class="small">Total de investimentos</div>
         <div class="v" id="kpiQtd">0</div>
       </div>
       <div class="kpi">
-        <div class="small">Mensal total</div>
+        <div class="small">Aporte mensal somado</div>
         <div class="v" id="kpiMensal">R$ 0,00</div>
       </div>
       <div class="kpi">
-        <div class="small">Meta total</div>
+        <div class="small">Meta final somada</div>
         <div class="v" id="kpiMeta">R$ 0,00</div>
-      </div>
-      <div class="kpi">
-        <div class="small">Próximo vencimento</div>
-        <div class="v" id="kpiVence">—</div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <h3>Como funciona</h3>
-      <div class="small">
-        Você informa <b>Nome</b>, <b>Meta final</b>, <b>Prazo em meses</b> e <b>até que dia pagar</b>.
-        O sistema calcula o valor mensal automático e esse valor aparece na tela principal como <b>Juntar</b>.
-        Ao marcar <b>Pago</b> na tela principal, o valor entra automaticamente no <b>Guardado</b>.
       </div>
     </div>
 
     <div class="card" style="margin-top:12px">
       <h3>Adicionar investimento fixo</h3>
 
-      <label>Nome</label>
-      <input id="invNome" placeholder="Ex: Reserva de emergência">
-
-      <div class="grid2" style="margin-top:10px">
+      <div class="grid2">
         <div>
-          <label>Meta final (R$)</label>
-          <input id="invMetaFinal" type="number" inputmode="decimal" placeholder="Ex: 10000">
+          <label>Nome</label>
+          <input id="invNome" placeholder="Ex: Reserva de emergência">
         </div>
         <div>
-          <label>Prazo (meses)</label>
-          <input id="invPrazoMeses" type="number" inputmode="numeric" placeholder="Ex: 12" value="12">
+          <label>Meta final</label>
+          <input id="invMetaFinal" type="number" inputmode="decimal" placeholder="Ex: 6000">
         </div>
       </div>
 
       <div class="grid2" style="margin-top:10px">
         <div>
-          <label>Até que dia deve pagar</label>
-          <input id="invDiaPagar" type="number" min="1" max="31" inputmode="numeric" placeholder="Ex: 10" value="10">
+          <label>Prazo em meses</label>
+          <input id="invPrazoMeses" type="number" inputmode="numeric" placeholder="Ex: 12">
         </div>
-        <div class="note">
-          <div style="font-weight:900">Notificações</div>
-          <div class="small" style="margin-top:6px">
-            O sistema avisa quando faltar 3, 2, 1 dias e no dia do prazo, se as notificações estiverem permitidas.
-          </div>
+        <div>
+          <label>Dia para pagar</label>
+          <input id="invDiaPagar" type="number" inputmode="numeric" min="1" max="31" placeholder="Ex: 10">
         </div>
       </div>
 
       <div class="note" style="margin-top:10px">
-        <div style="font-weight:900">Mensal automático</div>
-        <div class="small" id="invResumo">Preencha Meta e Prazo para ver o valor por mês.</div>
+        <div style="font-weight:900">Comando de voz</div>
+        <div class="small" style="margin-top:6px">
+          Exemplos:
+          <br><b>adicionar investimento fixo reserva 6000 12 10</b>
+          <br><b>remover investimento fixo reserva</b>
+        </div>
       </div>
 
       <div class="hr"></div>
 
       <div class="row">
-        <button class="btn" onclick="requestNotificationPermission()">🔔 Ativar notificações</button>
         <button class="btn" onclick="clearForm()">Limpar</button>
-        <button class="btn primary" onclick="addInvestFixo()">Adicionar</button>
+        <button class="btn primary" onclick="addInvestFixo()">Adicionar investimento fixo</button>
       </div>
     </div>
 
@@ -259,14 +117,14 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="row" style="margin-bottom:10px">
         <div>
           <h3 style="margin:0">Lista de investimentos fixos</h3>
-          <div class="small">Remover aqui apaga do cadastro geral.</div>
+          <div class="small">Ao remover, ele deixa de aparecer nos meses seguintes.</div>
         </div>
-        <input id="busca" placeholder="Buscar investimento fixo…" oninput="renderInvestFixos()">
+        <input id="buscaInv" placeholder="Buscar investimento fixo…" oninput="renderInvestimentos()">
       </div>
 
       <div class="hr"></div>
 
-      <div id="listaInvestFixos" class="listCol"></div>
+      <div id="listaInvestimentos" class="listCol"></div>
     </div>
   </div>
 </div>
@@ -276,6 +134,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 <script>
 function dbg(msg){
   const box = document.getElementById("debugBox");
+  if(!box) return;
   box.style.display = "block";
   box.textContent = String(msg);
 }
@@ -290,274 +149,88 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="./config.js"></script>
+<script src="./app.js"></script>
 
 <script>
-const FIREBASE_CONFIG = {
-  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-  authDomain:"controle-gastos-pro.firebaseapp.com",
-  projectId:"controle-gastos-pro"
-};
+const VOICE_CMD_KEY = "voice_cmd";
 
-const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
-const NOTIF_KEYS = {
-  permAsked: "notif_perm_asked_v1",
-  sentPrefix: "notif_sent_v1"
-};
-
-const THEME_PRESETS = {
-  default: {
-    dark:  { bg:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
-    light: { bg:"#f4f6ff", g1:"rgba(86,156,255,.14)", g2:"rgba(57,217,138,.10)", g3:"rgba(255,93,93,.08)" }
-  },
-  purple: {
-    dark:  { bg:"#0d0a1f", g1:"rgba(170,110,255,.25)", g2:"rgba(86,156,255,.12)", g3:"rgba(57,217,138,.10)" },
-    light: { bg:"#fbf8ff", g1:"rgba(170,110,255,.16)", g2:"rgba(86,156,255,.10)", g3:"rgba(57,217,138,.08)" }
-  },
-  green: {
-    dark:  { bg:"#061a14", g1:"rgba(57,217,138,.28)", g2:"rgba(86,156,255,.10)", g3:"rgba(255,209,102,.10)" },
-    light: { bg:"#f7fffb", g1:"rgba(57,217,138,.16)", g2:"rgba(86,156,255,.08)", g3:"rgba(255,209,102,.10)" }
-  },
-  sunset: {
-    dark:  { bg:"#1a0b0b", g1:"rgba(255,93,93,.22)", g2:"rgba(255,209,102,.18)", g3:"rgba(86,156,255,.10)" },
-    light: { bg:"#fff7f2", g1:"rgba(255,93,93,.14)", g2:"rgba(255,209,102,.14)", g3:"rgba(86,156,255,.08)" }
-  },
-  mono: {
-    dark:  { bg:"#05070c", g1:"rgba(255,255,255,.10)", g2:"rgba(255,255,255,.06)", g3:"rgba(255,255,255,.04)" },
-    light: { bg:"#ffffff", g1:"rgba(0,0,0,.06)", g2:"rgba(0,0,0,.04)", g3:"rgba(0,0,0,.03)" }
-  }
-};
-
-let auth = null;
-let USER = null;
-let USER_ID = null;
-let investFixos = [];
-let state = { meses:{} };
-
-function money(n){
-  return Number(n || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+function normalize(text){
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
-function uid(){
-  return Math.random().toString(16).slice(2) + Date.now().toString(16);
-}
-function escapeHtml(s){
-  return String(s || "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-function todayISO(){
-  return new Date().toISOString().slice(0,10);
-}
-function showLoading(){
-  document.getElementById("loading").style.display = "flex";
-  document.getElementById("app").style.display = "none";
-}
-function showApp(){
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("app").style.display = "block";
+function parseMoney(text){
+  if (text == null) return 0;
+  const s = String(text)
+    .replace(/[^\d,.-]/g, "")
+    .replace(/\.(?=\d{3}\b)/g, "")
+    .replace(",", ".");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
 }
 
-function kMes(){ return "gastos_pro_state_" + USER_ID; }
-function kInv(){ return "inv_fixos_" + USER_ID; }
-function kNotifSent(invId, mes, tag){
-  return `${NOTIF_KEYS.sentPrefix}_${USER_ID || "guest"}_${invId}_${mes}_${tag}`;
-}
-
-function isLightMode(){
-  return document.body.classList.contains("light");
-}
-function applyThemeSettings(){
-  const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
-  const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
-  const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
-  const mode = isLightMode() ? "light" : "dark";
-  const colors = p[mode] || p.dark;
-
-  document.documentElement.style.setProperty("--accent", accent);
-  document.documentElement.style.setProperty("--bg", colors.bg);
-  document.documentElement.style.setProperty("--grad1", colors.g1);
-  document.documentElement.style.setProperty("--grad2", colors.g2);
-  document.documentElement.style.setProperty("--grad3", colors.g3);
-
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute("content", accent);
-}
 function toggleTheme(){
-  document.body.classList.toggle("light");
-  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
-  applyThemeSettings();
+  App.toggleTheme();
 }
 
-function loadAll(){
-  try{
-    const raw = localStorage.getItem(kMes());
-    state = raw ? JSON.parse(raw) : { meses:{} };
-  }catch(e){
-    state = { meses:{} };
-  }
-  if(!state || typeof state !== "object") state = { meses:{} };
-  if(!state.meses || typeof state.meses !== "object") state.meses = {};
-
-  try{
-    const raw = localStorage.getItem(kInv());
-    investFixos = raw ? JSON.parse(raw) : [];
-    if(!Array.isArray(investFixos)) investFixos = [];
-  }catch(e){
-    investFixos = [];
-  }
-}
-function saveAll(){
-  localStorage.setItem(kMes(), JSON.stringify(state));
-  localStorage.setItem(kInv(), JSON.stringify(investFixos));
-}
-
-function currentMonthKeyFromDate(baseDate = new Date()){
-  const y = baseDate.getFullYear();
-  const m = String(baseDate.getMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`;
-}
-function getDataMes(m){
-  const mm = m || currentMonthKeyFromDate();
-  if(!state.meses[mm]) state.meses[mm] = { salary:0, meta:0, items:[], saved:[], hiddenFixos:[], investStatus:{} };
-  const d = state.meses[mm];
-  if(!Array.isArray(d.items)) d.items = [];
-  if(!Array.isArray(d.saved)) d.saved = [];
-  if(!Array.isArray(d.hiddenFixos)) d.hiddenFixos = [];
-  if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
-  return d;
-}
-function calcMensalAuto(metaFinal, prazoMeses){
-  const meta = Number(metaFinal || 0);
-  const meses = Number(prazoMeses || 0);
-  if(!meta || meta <= 0) return 0;
-  if(!meses || meses <= 0) return 0;
-  return Math.round((meta / meses) * 100) / 100;
-}
 function clearForm(){
   document.getElementById("invNome").value = "";
   document.getElementById("invMetaFinal").value = "";
-  document.getElementById("invPrazoMeses").value = "12";
-  document.getElementById("invDiaPagar").value = "10";
-  updateInvResumo();
-  document.getElementById("invNome").focus();
-}
-function updateInvResumo(){
-  const nome = (document.getElementById("invNome").value || "").trim();
-  const metaFinal = Number(document.getElementById("invMetaFinal").value || 0);
-  const prazoMeses = Number(document.getElementById("invPrazoMeses").value || 0) || 12;
-  const diaPagar = Number(document.getElementById("invDiaPagar").value || 0);
-  const out = document.getElementById("invResumo");
-
-  if(!nome){
-    out.textContent = "Digite o Nome.";
-    return;
-  }
-  if(!metaFinal || metaFinal <= 0){
-    out.textContent = "Digite a Meta final (R$).";
-    return;
-  }
-  if(!prazoMeses || prazoMeses <= 0){
-    out.textContent = "Digite o Prazo (meses).";
-    return;
-  }
-
-  const mensal = calcMensalAuto(metaFinal, prazoMeses);
-  let txt = `Para juntar ${money(metaFinal)} em ${prazoMeses} meses, o valor mensal fica ${money(mensal)}.`;
-  if(diaPagar >= 1 && diaPagar <= 31){
-    txt += ` Prazo de pagamento: até o dia ${diaPagar} de cada mês.`;
-  }
-  out.textContent = txt;
-}
-
-function daysUntilDue(day, baseDate = new Date()){
-  const y = baseDate.getFullYear();
-  const m = baseDate.getMonth();
-  const maxDay = new Date(y, m + 1, 0).getDate();
-  const dueDay = Math.min(Math.max(Number(day || 1), 1), maxDay);
-
-  const today = new Date(y, m, baseDate.getDate());
-  const due = new Date(y, m, dueDay);
-
-  const diffMs = due.getTime() - today.getTime();
-  return Math.floor(diffMs / 86400000);
-}
-function nextDueLabel(){
-  if(!investFixos.length) return "—";
-
-  const now = new Date();
-  let best = null;
-
-  investFixos.forEach(inv=>{
-    const day = Number(inv.diaPagar || 0);
-    if(!day) return;
-
-    let diff = daysUntilDue(day, now);
-    let label = `Dia ${day}`;
-
-    if(diff < 0){
-      diff = 99;
-      label = `Próx. mês dia ${day}`;
-    }
-
-    if(!best || diff < best.diff){
-      best = { diff, label };
-    }
-  });
-
-  return best ? best.label : "—";
+  document.getElementById("invPrazoMeses").value = "";
+  document.getElementById("invDiaPagar").value = "";
 }
 
 function updateKPIs(){
-  const qtd = investFixos.length;
-  const mensal = investFixos.reduce((a,b)=>a + Number(b.mensal || 0), 0);
-  const meta = investFixos.reduce((a,b)=>a + Number(b.metaFinal || 0), 0);
+  const list = Array.isArray(App.investFixos) ? App.investFixos : [];
+  const qtd = list.length;
+  const mensal = list.reduce((a,b)=>a + Number(b.mensal || 0), 0);
+  const meta = list.reduce((a,b)=>a + Number(b.metaFinal || 0), 0);
 
   document.getElementById("kpiQtd").textContent = String(qtd);
-  document.getElementById("kpiMensal").textContent = money(mensal);
-  document.getElementById("kpiMeta").textContent = money(meta);
-  document.getElementById("kpiVence").textContent = nextDueLabel();
+  document.getElementById("kpiMensal").textContent = App.money(mensal);
+  document.getElementById("kpiMeta").textContent = App.money(meta);
 }
 
-function renderInvestFixos(){
-  const div = document.getElementById("listaInvestFixos");
-  const busca = (document.getElementById("busca").value || "").trim().toLowerCase();
+function renderInvestimentos(){
+  const div = document.getElementById("listaInvestimentos");
+  const list = Array.isArray(App.investFixos) ? [...App.investFixos] : [];
+  const busca = normalize(document.getElementById("buscaInv").value || "");
 
-  let lista = [...investFixos];
+  let filtered = list;
   if(busca){
-    lista = lista.filter(inv=>{
-      const nome = String(inv.nome || "").toLowerCase();
-      return nome.includes(busca);
+    filtered = filtered.filter(item => {
+      const text = normalize((item.nome || ""));
+      return text.includes(busca);
     });
   }
 
-  if(!lista.length){
-    div.innerHTML = `<div class="empty">${busca ? "Nenhum investimento fixo encontrado." : "Nenhum investimento fixo cadastrado ainda."}</div>`;
+  if(!filtered.length){
+    div.innerHTML = `<div class="empty">${busca ? "Nenhum investimento fixo encontrado." : "Nenhum investimento fixo cadastrado."}</div>`;
     updateKPIs();
     return;
   }
 
-  div.innerHTML = lista.map(inv=>{
-    const realIndex = investFixos.findIndex(x => String(x.id) === String(inv.id));
-    const meta = Number(inv.metaFinal || 0);
-    const meses = Number(inv.prazoMeses || 0);
-    const mensal = Number(inv.mensal || 0);
-    const diaPagar = Number(inv.diaPagar || 0);
+  div.innerHTML = filtered.map(item=>{
+    const realIndex = App.investFixos.findIndex(inv =>
+      String(inv.id || "") === String(item.id || "")
+    );
 
     return `
-      <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div style="min-width:0">
-          <div style="font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📌 ${escapeHtml(inv.nome)}</div>
-          <div class="small" style="margin-top:6px">
-            <span class="badge">Meta ${money(meta)}</span>
-            <span class="badge">${meses} meses</span>
-            <span class="badge warn">Dia ${diaPagar}</span>
+      <div class="note">
+        <div class="invRow">
+          <div class="invInfo">
+            <div class="invTitle">${App.escapeHtml(item.nome || "")}</div>
+            <div class="invMeta">
+              <span class="badge">Meta ${App.money(item.metaFinal || 0)}</span>
+              <span class="badge">Mensal ${App.money(item.mensal || 0)}</span>
+              <span class="badge">Prazo ${Number(item.prazoMeses || 0)} meses</span>
+              <span class="badge warn">Dia ${Number(item.diaPagar || 0) || "—"}</span>
+            </div>
           </div>
-          <div style="margin-top:8px;font-weight:900" class="successText">Mensal automático: ${money(mensal)}</div>
-          <div class="small" style="margin-top:6px">Na tela principal aparece como <b>Juntar</b> e pode ser marcado como <b>Pago</b>.</div>
+          <button class="btn icon danger" onclick="removeInvestFixo(${realIndex})" title="Remover investimento fixo">✕</button>
         </div>
-        <button class="btn icon danger" title="Remover do cadastro" onclick="removeInvestFixo(${realIndex})">✕</button>
       </div>
     `;
   }).join("");
@@ -566,275 +239,137 @@ function renderInvestFixos(){
 }
 
 function addInvestFixo(){
-  if(!USER_ID){ alert("Faça login primeiro."); return; }
-
   const nome = (document.getElementById("invNome").value || "").trim();
   const metaFinal = Number(document.getElementById("invMetaFinal").value || 0);
-  const prazoMeses = Number(document.getElementById("invPrazoMeses").value || 0) || 12;
+  const prazoMeses = Number(document.getElementById("invPrazoMeses").value || 0);
   const diaPagar = Number(document.getElementById("invDiaPagar").value || 0);
 
-  if(!nome) return alert("Digite o Nome.");
-  if(!metaFinal || metaFinal <= 0) return alert("Digite a Meta final (R$).");
-  if(!prazoMeses || prazoMeses <= 0) return alert("Digite o Prazo (meses).");
+  if(!nome) return alert("Digite o nome do investimento fixo.");
+  if(!metaFinal || metaFinal <= 0) return alert("Digite uma meta final válida.");
+  if(!prazoMeses || prazoMeses <= 0) return alert("Digite um prazo em meses válido.");
   if(!diaPagar || diaPagar < 1 || diaPagar > 31) return alert("Digite um dia válido entre 1 e 31.");
 
-  const mensal = calcMensalAuto(metaFinal, prazoMeses);
-  const id = uid();
-
-  investFixos.push({
-    id,
+  App.addInvestFixo({
     nome,
     metaFinal,
     prazoMeses,
-    mensal,
     diaPagar
   });
 
-  const mesAtual = currentMonthKeyFromDate();
-  const d = getDataMes(mesAtual);
-  d.investStatus[id] = false;
-
-  saveAll();
   clearForm();
-  renderInvestFixos();
-  checkDueNotifications();
+  renderInvestimentos();
 }
-function removeInvestFixo(idx){
-  if(idx < 0 || idx >= investFixos.length) return;
-  const inv = investFixos[idx];
-  const ok = confirm(`Remover "${inv.nome}" do cadastro geral de investimentos fixos?`);
+
+function removeInvestFixo(index){
+  if(index < 0 || index >= App.investFixos.length) return;
+  const item = App.investFixos[index];
+  const ok = confirm(`Remover o investimento fixo "${item.nome}"?`);
   if(!ok) return;
 
-  Object.keys(state.meses || {}).forEach(m=>{
-    const d = state.meses[m];
-    if(d && d.investStatus && inv && inv.id) delete d.investStatus[inv.id];
-    if(d && Array.isArray(d.saved) && inv && inv.id){
-      d.saved = d.saved.filter(s => !(s && s.source === "investFixo" && s.invId === inv.id));
-    }
-  });
-
-  investFixos.splice(idx, 1);
-  saveAll();
-  renderInvestFixos();
+  App.removeInvestFixo(index);
+  renderInvestimentos();
 }
 
-function showBrowserNotification(title, body){
-  if(!("Notification" in window)) return;
-  if(Notification.permission !== "granted") return;
-
-  try{
-    new Notification(title, {
-      body,
-      icon: "icons/icon-192.png",
-      badge: "icons/icon-192.png",
-      tag: "gastos-pro-prazo"
-    });
-  }catch(e){}
-}
-function requestNotificationPermission(){
-  if(!("Notification" in window)){
-    alert("Seu navegador não suporta notificações.");
-    return;
-  }
-
-  Notification.requestPermission().then((perm)=>{
-    if(perm === "granted"){
-      alert("Notificações ativadas com sucesso.");
-      localStorage.setItem(NOTIF_KEYS.permAsked, "1");
-      checkDueNotifications();
-    }else{
-      alert("Notificações não foram permitidas.");
-    }
-  }).catch(()=>{});
-}
-function checkDueNotifications(){
-  if(!USER_ID) return;
-  if(!("Notification" in window)) return;
-  if(Notification.permission !== "granted") return;
-
-  const now = new Date();
-  const mes = currentMonthKeyFromDate(now);
-  const d = getDataMes(mes);
-
-  investFixos.forEach(inv=>{
-    if(!inv || !inv.id) return;
-
-    const dueDay = Number(inv.diaPagar || 0);
-    if(!dueDay || dueDay < 1) return;
-
-    const paid = !!(d.investStatus && d.investStatus[inv.id]);
-    if(paid) return;
-
-    const diff = daysUntilDue(dueDay, now);
-    if(diff < 0 || diff > 3) return;
-
-    const tag = `faltam_${diff}_dias`;
-    const alreadySent = localStorage.getItem(kNotifSent(inv.id, mes, tag)) === "1";
-    if(alreadySent) return;
-
-    let body = "";
-    if(diff === 0){
-      body = `O prazo para pagar ${inv.nome} é hoje (dia ${dueDay}).`;
-    }else if(diff === 1){
-      body = `O prazo para pagar ${inv.nome} está chegando. Falta 1 dia (vence dia ${dueDay}).`;
-    }else{
-      body = `O prazo para pagar ${inv.nome} está chegando. Faltam ${diff} dias (vence dia ${dueDay}).`;
-    }
-
-    showBrowserNotification("Controle de Gastos PRO", body);
-    localStorage.setItem(kNotifSent(inv.id, mes, tag), "1");
-  });
-}
-function startDueNotificationWatcher(){
-  checkDueNotifications();
-  if(window.__dueNotifInterval) clearInterval(window.__dueNotifInterval);
-  window.__dueNotifInterval = setInterval(()=>{
-    checkDueNotifications();
-  }, 60 * 60 * 1000);
-}
-
-function setupVoiceBridge(){
-  window.addEventListener("storage", (e)=>{
-    if(e.key === "voice_cmd") handleVoiceCommand(e.newValue || "");
-  });
-
-  const cached = localStorage.getItem("voice_cmd");
-  if(cached) handleVoiceCommand(cached);
-}
-function consumeVoiceCommand(){
-  localStorage.removeItem("voice_cmd");
-  localStorage.setItem("voice_last_page", "investfixos.html");
-}
-function handleVoiceCommand(raw){
-  const cmd = String(raw || "").trim().toLowerCase();
-  if(!cmd) return;
-
-  if(
-    cmd.includes("abrir investimentos fixos") ||
-    cmd.includes("abrir investimento fixo") ||
-    cmd.includes("abrir investir fixo")
-  ){
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(
-    cmd.includes("voltar") ||
-    cmd.includes("abrir início") ||
-    cmd.includes("abrir tela principal") ||
-    cmd.includes("abrir dashboard") ||
-    cmd.includes("ir para home")
-  ){
-    consumeVoiceCommand();
-    location.href = "./index.html";
-    return;
-  }
-
-  if(cmd.includes("tema claro")){
-    if(!document.body.classList.contains("light")) toggleTheme();
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(cmd.includes("tema escuro") || cmd.includes("tema normal")){
-    if(document.body.classList.contains("light")) toggleTheme();
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(cmd.includes("ativar notificações")){
-    requestNotificationPermission();
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(cmd.includes("limpar formulário") || cmd.includes("limpar form")){
-    clearForm();
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(cmd.includes("adicionar investimento fixo") || cmd.includes("salvar investimento fixo")){
-    addInvestFixo();
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(cmd.startsWith("preencher investimento fixo ")){
-    const text = cmd.replace("preencher investimento fixo ","").trim();
-    const parts = text.split("|").map(s=>s.trim());
-
-    if(parts[0]) document.getElementById("invNome").value = parts[0];
-    if(parts[1]) document.getElementById("invMetaFinal").value = String(Number(parts[1]) || "");
-    if(parts[2]) document.getElementById("invPrazoMeses").value = String(Number(parts[2]) || "");
-    if(parts[3]) document.getElementById("invDiaPagar").value = String(Number(parts[3]) || "");
-
-    updateInvResumo();
-    consumeVoiceCommand();
-    return;
-  }
-}
-
-async function initFirebase(){
-  if(!window.firebase){
-    dbg("Firebase não carregou.");
-    return false;
-  }
-
-  try{
-    if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-  }catch(e){}
-
-  auth = firebase.auth();
-  try{
-    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-  }catch(e){}
-
-  auth.onAuthStateChanged((u)=>{
-    USER = u || null;
-
-    if(!USER){
-      USER_ID = null;
-      location.replace("./login.html");
-      return;
-    }
-
-    USER_ID = USER.uid;
-
-    const t = localStorage.getItem("theme");
-    if(t === "light") document.body.classList.add("light");
-    applyThemeSettings();
-
-    loadAll();
-
-    ["invNome","invMetaFinal","invPrazoMeses","invDiaPagar"].forEach(id=>{
-      const el = document.getElementById(id);
-      if(el && !el.dataset.bound){
-        el.addEventListener("input", updateInvResumo);
-        el.dataset.bound = "1";
-      }
-    });
-
-    if(("Notification" in window) && Notification.permission === "default" && localStorage.getItem(NOTIF_KEYS.permAsked) !== "1"){
-      localStorage.setItem(NOTIF_KEYS.permAsked, "1");
-      setTimeout(()=>{ requestNotificationPermission(); }, 1200);
-    }
-
-    updateInvResumo();
-    renderInvestFixos();
-    startDueNotificationWatcher();
-    setupVoiceBridge();
-
-    showApp();
-  });
-
+function removeInvestFixoByName(target){
+  const normTarget = normalize(target);
+  const idx = (App.investFixos || []).findIndex(inv => normalize(inv.nome || "").includes(normTarget));
+  if(idx < 0) return false;
+  App.removeInvestFixo(idx);
   return true;
 }
 
+function handleVoiceCommand(raw){
+  const cmd = normalize(raw);
+  if(!cmd) return false;
+
+  if(cmd.includes("tema roxo")){
+    localStorage.setItem(App.THEME_KEYS.preset, "purple");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema minimal") || cmd.includes("tema mono")){
+    localStorage.setItem(App.THEME_KEYS.preset, "mono");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema verde")){
+    localStorage.setItem(App.THEME_KEYS.preset, "green");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema padrao") || cmd.includes("tema padrão")){
+    localStorage.setItem(App.THEME_KEYS.preset, "default");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema por do sol") || cmd.includes("tema pôr do sol") || cmd.includes("tema sunset")){
+    localStorage.setItem(App.THEME_KEYS.preset, "sunset");
+    App.applyThemeSettings();
+    return true;
+  }
+
+  let m = cmd.match(/^adicionar\s+investimento\s+fixo\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+(\d+)\s+(\d+)$/i)
+       || cmd.match(/^anote\s+investimento\s+fixo\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+(\d+)\s+(\d+)$/i)
+       || cmd.match(/^anotar\s+investimento\s+fixo\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+(\d+)\s+(\d+)$/i);
+
+  if(m){
+    const nome = (m[1] || "").trim();
+    const metaFinal = parseMoney(m[2]);
+    const prazoMeses = Number(m[3] || 0);
+    const diaPagar = Number(m[4] || 0);
+
+    if(nome && metaFinal > 0 && prazoMeses > 0 && diaPagar >= 1 && diaPagar <= 31){
+      App.addInvestFixo({
+        nome,
+        metaFinal,
+        prazoMeses,
+        diaPagar
+      });
+      renderInvestimentos();
+      return true;
+    }
+  }
+
+  m = cmd.match(/^remover\s+investimento\s+fixo\s+(.+)$/i)
+    || cmd.match(/^apagar\s+investimento\s+fixo\s+(.+)$/i)
+    || cmd.match(/^excluir\s+investimento\s+fixo\s+(.+)$/i);
+
+  if(m){
+    const ok = removeInvestFixoByName((m[1] || "").trim());
+    if(ok){
+      renderInvestimentos();
+      return true;
+    }
+  }
+
+  if(cmd.includes("abrir tela principal") || cmd.includes("abrir inicio") || cmd.includes("abrir início") || cmd.includes("ir para home")){
+    location.href = "./index.html";
+    return true;
+  }
+
+  return false;
+}
+
+function bindVoiceStorageListener(){
+  window.addEventListener("storage", (e)=>{
+    if(e.key === VOICE_CMD_KEY && e.newValue){
+      const ok = handleVoiceCommand(e.newValue);
+      if(ok) localStorage.removeItem(VOICE_CMD_KEY);
+    }
+  });
+
+  const first = localStorage.getItem(VOICE_CMD_KEY);
+  if(first){
+    const ok = handleVoiceCommand(first);
+    if(ok) localStorage.removeItem(VOICE_CMD_KEY);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async ()=>{
-  showLoading();
-  applyThemeSettings();
-  await initFirebase();
+  await App.boot(()=>{
+    bindVoiceStorageListener();
+    renderInvestimentos();
+  });
 });
 </script>
 </body>
