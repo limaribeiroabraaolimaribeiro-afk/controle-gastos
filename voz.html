@@ -295,10 +295,17 @@ function setLastText(text){
   document.getElementById("lastText").textContent = text || "—";
 }
 
-function saveVoiceCommand(raw){
-  localStorage.setItem(VOICE_CMD_KEY, raw);
+function saveVoiceCommand(raw, persistCmd = true){
+  // sempre guarda o último comando pro botão "Repetir"
   localStorage.setItem(VOICE_LAST_KEY, raw);
   localStorage.setItem(VOICE_TS_KEY, String(Date.now()));
+
+  // só grava o comando para o index/páginas executarem quando precisar
+  if(persistCmd){
+    localStorage.setItem(VOICE_CMD_KEY, raw);
+  }else{
+    localStorage.removeItem(VOICE_CMD_KEY); // evita re-executar ao voltar pro index
+  }
 }
 
 function routeCommand(raw){
