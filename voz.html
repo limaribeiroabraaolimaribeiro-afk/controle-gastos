@@ -1,3 +1,4 @@
+<!-- voz.html -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -74,18 +75,20 @@
   padding:18px 0 8px;
 }
 .voiceOrb{
-  width:170px;height:170px;border-radius:50%;
+  width:190px;height:190px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   background:
     radial-gradient(120px 120px at 30% 20%, rgba(255,255,255,.22), transparent 60%),
     linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
   border:1px solid rgba(255,255,255,.18);
   box-shadow:0 20px 60px rgba(0,0,0,.30);
-  font-size:64px;
+  font-size:70px;
   transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  cursor:pointer;
+  user-select:none;
 }
 .voiceOrb.listening{
-  transform:scale(1.04);
+  transform:scale(1.05);
   box-shadow:0 24px 70px rgba(255,209,102,.20), 0 20px 60px rgba(0,0,0,.30);
   filter:saturate(1.08);
 }
@@ -100,12 +103,6 @@
   color:var(--muted);
   font-size:13px;
   margin-top:6px;
-}
-.voiceActions{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  margin-top:18px;
 }
 .voiceConsole{
   margin-top:16px;
@@ -123,53 +120,25 @@
     radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.08), transparent 60%),
     rgba(255,255,255,.60);
 }
-.voiceField{
-  margin-top:12px;
-}
+.voiceField{margin-top:12px}
 .voiceField:first-child{margin-top:0}
-.voiceField label{
-  display:block;
-  margin-bottom:6px;
+.voiceText{min-height:72px}
+.bigTapText{
+  text-align:center;
+  font-weight:900;
+  font-size:16px;
+  margin-top:18px;
 }
-.voiceText{
-  min-height:56px;
-}
-.voiceLog{
-  display:grid;
-  gap:10px;
-  margin-top:10px;
-  max-height:240px;
-  overflow:auto;
-}
-.voiceItem{
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.06);
-  border-radius:16px;
-  padding:10px 12px;
-}
-.voiceItem .top{
-  display:flex;justify-content:space-between;gap:10px;align-items:center;
-}
-.voiceItem .cmd{
-  font-weight:850;
+.smallHelp{
+  text-align:center;
+  color:var(--muted);
   margin-top:8px;
-  white-space:pre-wrap;
-  word-break:break-word;
+  font-size:13px;
 }
-.voiceExamples{
-  display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;
-}
-.voiceChip{
-  padding:8px 10px;border-radius:999px;
-  background:rgba(255,255,255,.08);
-  border:1px solid var(--stroke);
-  font-size:12px;color:var(--muted);
-  cursor:pointer;user-select:none;
-}
-.voiceChip:active{transform:translateY(1px)}
-@media (max-width:720px){
-  .voiceActions{grid-template-columns:1fr}
-  .voiceTop{align-items:flex-start;flex-direction:column}
+#debugBox{
+  position:fixed; left:12px; right:12px; bottom:12px;
+  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
+  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
 </style>
 </head>
@@ -195,63 +164,39 @@
           <div class="voiceLogo">🎙️</div>
           <div class="voiceTitle">
             <div class="t">Controle de Gastos PRO • Voz</div>
-            <div class="s">Fale um comando e o app executa na tela correta.</div>
+            <div class="s">Toque no microfone, fale e o sistema executa sozinho.</div>
           </div>
         </div>
 
         <div class="voiceStatusPill">
-          <span class="voiceStatusDot" id="voiceDot"></span>
-          <span id="voiceStatus">Aguardando…</span>
+          <span class="voiceStatusDot ok" id="voiceDot"></span>
+          <span id="voiceStatus">Pronto</span>
         </div>
       </div>
 
       <div class="voiceBody">
         <div class="voiceOrbWrap">
-          <div class="voiceOrb" id="voiceOrb">🎤</div>
+          <div class="voiceOrb" id="voiceOrb" onclick="toggleListen()">🎤</div>
         </div>
 
         <div class="voiceState" id="voiceState">Pronto para ouvir</div>
-        <div class="voiceHint" id="voiceHint">Toque em “Ouvir comando” e fale naturalmente.</div>
+        <div class="voiceHint" id="voiceHint">Toque no microfone e fale naturalmente.</div>
 
-        <div class="voiceActions">
-          <button class="btn warn" id="btnListen" onclick="startListening()">🎤 Ouvir comando</button>
-          <button class="btn" id="btnStop" onclick="stopListening()">⏹️ Parar</button>
-          <button class="btn primary" onclick="sendTypedCommand()">📤 Enviar texto</button>
-        </div>
+        <div class="bigTapText">Toque no microfone para gravar</div>
+        <div class="smallHelp">Quando o comando for enviado, o sistema mostra “Pronto”.</div>
 
         <div class="voiceConsole">
           <div class="voiceField">
             <label>Comando reconhecido</label>
-            <textarea id="recognizedText" class="voiceText" placeholder="O texto reconhecido aparece aqui…"></textarea>
+            <textarea id="recognizedText" class="voiceText" readonly placeholder="O texto reconhecido aparece aqui…"></textarea>
           </div>
 
           <div class="voiceField">
-            <label>Retorno do sistema</label>
+            <label>Resposta do sistema</label>
             <div class="note">
-              <div style="font-weight:850" id="ackTitle">Nenhum retorno ainda</div>
-              <div class="small" id="ackText" style="margin-top:6px">Depois de enviar um comando, o resultado aparece aqui.</div>
+              <div style="font-weight:900" id="ackTitle">Aguardando comando</div>
+              <div class="small" id="ackText" style="margin-top:6px">Fale um comando para executar automaticamente.</div>
             </div>
-          </div>
-
-          <div class="voiceField">
-            <label>Exemplos rápidos</label>
-            <div class="voiceExamples">
-              <div class="voiceChip" onclick="fillExample('abrir gastos fixos')">abrir gastos fixos</div>
-              <div class="voiceChip" onclick="fillExample('abrir investimentos fixos')">abrir investimentos fixos</div>
-              <div class="voiceChip" onclick="fillExample('abrir categorias')">abrir categorias</div>
-              <div class="voiceChip" onclick="fillExample('abrir histórico')">abrir histórico</div>
-              <div class="voiceChip" onclick="fillExample('abrir simuladores')">abrir simuladores</div>
-              <div class="voiceChip" onclick="fillExample('abrir ia')">abrir ia</div>
-              <div class="voiceChip" onclick="fillExample('abrir menu')">abrir menu</div>
-              <div class="voiceChip" onclick="fillExample('abrir adicionar gasto')">abrir adicionar gasto</div>
-              <div class="voiceChip" onclick="fillExample('tema roxo')">tema roxo</div>
-              <div class="voiceChip" onclick="fillExample('tema padrão')">tema padrão</div>
-            </div>
-          </div>
-
-          <div class="voiceField">
-            <label>Últimos comandos</label>
-            <div class="voiceLog" id="voiceLog"></div>
           </div>
         </div>
       </div>
@@ -260,21 +205,6 @@
 </div>
 
 <div id="debugBox"></div>
-
-<script>
-function dbg(msg){
-  const box = document.getElementById("debugBox");
-  if(!box) return;
-  box.style.display = "block";
-  box.textContent = String(msg);
-}
-window.addEventListener("error", (e)=>{
-  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
-});
-window.addEventListener("unhandledrejection", (e)=>{
-  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
-});
-</script>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -288,109 +218,64 @@ let ackWatcher = null;
 
 const VOICE_CMD_KEY = "voice_cmd";
 const VOICE_ACK_KEY = "voice_cmd_ack";
-const VOICE_QUEUE_KEY = "voice_queue";
+
+function dbg(msg){
+  const box = document.getElementById("debugBox");
+  box.style.display = "block";
+  box.textContent = String(msg);
+}
+window.addEventListener("error", (e)=>{
+  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+});
 
 function setVoiceStatus(text, ok){
-  const status = document.getElementById("voiceStatus");
-  const dot = document.getElementById("voiceDot");
-  if(status) status.textContent = text;
-  if(dot) dot.classList.toggle("ok", !!ok);
+  document.getElementById("voiceStatus").textContent = text;
+  document.getElementById("voiceDot").classList.toggle("ok", !!ok);
 }
 
 function setVoiceState(text, hint){
-  const state = document.getElementById("voiceState");
-  const hintEl = document.getElementById("voiceHint");
-  if(state) state.textContent = text;
-  if(hintEl) hintEl.textContent = hint || "";
+  document.getElementById("voiceState").textContent = text;
+  document.getElementById("voiceHint").textContent = hint || "";
 }
 
 function setListeningUI(on){
   isListening = !!on;
-  const orb = document.getElementById("voiceOrb");
-  const btnListen = document.getElementById("btnListen");
-  const btnStop = document.getElementById("btnStop");
-
-  if(orb) orb.classList.toggle("listening", on);
-  if(btnListen) btnListen.disabled = on;
-  if(btnStop) btnStop.disabled = !on;
+  document.getElementById("voiceOrb").classList.toggle("listening", on);
 
   if(on){
     setVoiceStatus("Ouvindo…", true);
-    setVoiceState("Escutando seu comando", "Fale agora. Quando terminar, o texto será enviado para o app.");
+    setVoiceState("Escutando seu comando", "Fale agora.");
   }else{
     setVoiceStatus("Pronto", true);
-    setVoiceState("Pronto para ouvir", "Toque em “Ouvir comando” e fale naturalmente.");
+    setVoiceState("Pronto para ouvir", "Toque no microfone e fale naturalmente.");
   }
 }
 
-function normalize(text){
-  return String(text || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
+function setAck(title, text, ok){
+  const t = document.getElementById("ackTitle");
+  const p = document.getElementById("ackText");
+  t.textContent = title;
+  t.className = ok ? "successText" : "warnText";
+  p.textContent = text;
 }
 
 function loadAck(){
   const raw = localStorage.getItem(VOICE_ACK_KEY);
   if(!raw){
-    document.getElementById("ackTitle").textContent = "Nenhum retorno ainda";
-    document.getElementById("ackText").textContent = "Depois de enviar um comando, o resultado aparece aqui.";
+    setAck("Aguardando comando", "Fale um comando para executar automaticamente.", false);
     return;
   }
 
   try{
     const data = JSON.parse(raw);
-    const ok = !!data.ok;
-    document.getElementById("ackTitle").textContent = ok ? "Comando processado" : "Comando não processado";
-    document.getElementById("ackTitle").className = ok ? "successText" : "warnText";
-    document.getElementById("ackText").textContent =
-      `${data.message || "Sem mensagem"}${data.page ? " • Tela: " + data.page : ""}${data.time ? " • " + new Date(data.time).toLocaleString("pt-BR") : ""}`;
+    if(data.ok){
+      setAck("Pronto", data.message || "Comando executado.", true);
+    }else{
+      setAck("Não executado", data.message || "O comando não foi executado.", false);
+    }
   }catch(e){
-    document.getElementById("ackTitle").textContent = "Retorno inválido";
-    document.getElementById("ackText").textContent = "Não foi possível ler o retorno do sistema.";
+    setAck("Retorno inválido", "Não foi possível ler a resposta do sistema.", false);
   }
-}
-
-function renderLog(){
-  const div = document.getElementById("voiceLog");
-  const raw = localStorage.getItem(VOICE_QUEUE_KEY);
-  const list = raw ? JSON.parse(raw) : [];
-
-  if(!Array.isArray(list) || !list.length){
-    div.innerHTML = `<div class="empty">Nenhum comando enviado ainda.</div>`;
-    return;
-  }
-
-  const ordered = [...list].reverse().slice(0, 12);
-
-  div.innerHTML = ordered.map(item=>{
-    const cmd = item && item.cmd ? item.cmd : "";
-    const page = item && item.page ? item.page : "—";
-    const time = item && item.time ? new Date(item.time).toLocaleString("pt-BR") : "—";
-    return `
-      <div class="voiceItem">
-        <div class="top">
-          <span class="badge">${page}</span>
-          <span class="small">${time}</span>
-        </div>
-        <div class="cmd">${escapeHtml(cmd)}</div>
-      </div>
-    `;
-  }).join("");
-}
-
-function escapeHtml(s){
-  return String(s || "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function fillExample(text){
-  document.getElementById("recognizedText").value = text;
 }
 
 function pushCommand(cmd){
@@ -402,20 +287,9 @@ function pushCommand(cmd){
   localStorage.setItem(VOICE_CMD_KEY, text);
 
   setVoiceStatus("Enviado", true);
-  setVoiceState("Comando enviado", "Se a tela correspondente estiver aberta, ela processa imediatamente. Se não estiver, abra a tela desejada ou use comandos de navegação como “abrir gastos fixos”.");
-  setTimeout(()=>{
-    loadAck();
-    renderLog();
-  }, 250);
-}
+  setVoiceState("Comando enviado", "Executando no app…");
 
-function sendTypedCommand(){
-  const text = (document.getElementById("recognizedText").value || "").trim();
-  if(!text){
-    alert("Digite ou dite um comando antes de enviar.");
-    return;
-  }
-  pushCommand(text);
+  setTimeout(()=>{ loadAck(); }, 500);
 }
 
 function createRecognition(){
@@ -455,13 +329,13 @@ function createRecognition(){
 
     if(event.error === "not-allowed" || event.error === "service-not-allowed"){
       setVoiceStatus("Permissão negada", false);
-      setVoiceState("Microfone bloqueado", "Permita o uso do microfone no navegador para usar o comando de voz.");
+      setVoiceState("Microfone bloqueado", "Permita o uso do microfone no navegador.");
       return;
     }
 
     if(event.error === "no-speech"){
-      setVoiceStatus("Sem fala detectada", false);
-      setVoiceState("Não ouvi nada", "Tente novamente e fale mais perto do microfone.");
+      setVoiceStatus("Sem fala", false);
+      setVoiceState("Não ouvi nada", "Toque de novo e fale mais perto do microfone.");
       return;
     }
 
@@ -506,35 +380,16 @@ function stopListening(){
   setListeningUI(false);
 }
 
-function startAckWatcher(){
-  if(ackWatcher) clearInterval(ackWatcher);
-  ackWatcher = setInterval(()=>{
-    loadAck();
-    renderLog();
-  }, 800);
-}
-
-function bindManualShortcuts(){
-  document.getElementById("recognizedText").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter" && !e.shiftKey){
-      e.preventDefault();
-      sendTypedCommand();
-    }
-  });
+function toggleListen(){
+  if(isListening) stopListening();
+  else startListening();
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
   await App.boot(()=>{
-    if(!App.isVoiceEnabled()){
-      alert("O sistema de voz está bloqueado. Ative na tela principal em Configurações.");
-    }
-
-    setVoiceStatus("Pronto", true);
-    setVoiceState("Pronto para ouvir", "Toque em “Ouvir comando” e fale naturalmente.");
     loadAck();
-    renderLog();
-    startAckWatcher();
-    bindManualShortcuts();
+    if(ackWatcher) clearInterval(ackWatcher);
+    ackWatcher = setInterval(loadAck, 700);
   });
 });
 </script>
