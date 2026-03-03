@@ -1,4 +1,3 @@
-<!-- voz.html -->
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -11,15 +10,14 @@
 <link rel="stylesheet" href="./ui.css">
 
 <style>
-.voiceWrap{
-  max-width:860px;
-  margin:auto;
-  padding:16px;
-  padding-bottom:120px;
+#debugBox{
+  position:fixed; left:12px; right:12px; bottom:12px;
+  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
+  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
-.voiceHero{
+.voiceCard{
+  border:1px solid var(--stroke);
   border-radius:26px;
-  border:1px solid color-mix(in srgb, var(--stroke), transparent 20%);
   background:
     radial-gradient(1200px 800px at 15% 0%, color-mix(in srgb, var(--accent), transparent 80%), transparent 60%),
     radial-gradient(900px 700px at 85% 10%, rgba(57,217,138,.10), transparent 62%),
@@ -30,29 +28,24 @@
 }
 .voiceTop{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:14px;border-bottom:1px solid var(--stroke);
+  padding:14px;
+  border-bottom:1px solid var(--stroke);
 }
-.voiceBrand{
-  display:flex;align-items:center;gap:12px;min-width:0;
-}
+.voiceBrand{display:flex;align-items:center;gap:10px;min-width:0}
 .voiceLogo{
-  width:52px;height:52px;border-radius:18px;
+  width:46px;height:46px;border-radius:18px;
   display:flex;align-items:center;justify-content:center;
-  background:
-    radial-gradient(60px 50px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
-    linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
+  background:radial-gradient(60px 50px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
+             linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 12%), color-mix(in srgb, var(--accent), #000 25%));
   border:1px solid rgba(255,255,255,.18);
   box-shadow:0 14px 38px rgba(0,0,0,.28);
-  font-size:24px;
+  font-weight:1000;color:#06162d;
 }
 .voiceTitle .t{
   font-weight:950;
-  letter-spacing:.2px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.voiceTitle .s{
-  font-size:12px;color:var(--muted);margin-top:2px;
-}
+.voiceTitle .s{font-size:12px;color:var(--muted);margin-top:2px}
 .voiceStatusPill{
   display:inline-flex;gap:8px;align-items:center;
   padding:8px 10px;border-radius:999px;
@@ -60,144 +53,98 @@
   border:1px solid var(--stroke);
   font-size:12px;color:var(--muted);
 }
-.voiceStatusDot{
+.voiceDot{
   width:10px;height:10px;border-radius:999px;
   background:var(--warn);
   box-shadow:0 0 0 4px rgba(255,209,102,.12);
 }
-.voiceStatusDot.ok{
+.voiceDot.ok{
   background:var(--good);
   box-shadow:0 0 0 4px rgba(57,217,138,.12);
 }
-.voiceBody{padding:16px}
-.voiceOrbWrap{
-  display:flex;justify-content:center;align-items:center;
-  padding:18px 0 8px;
-}
-.voiceOrb{
-  width:190px;height:190px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  background:
-    radial-gradient(120px 120px at 30% 20%, rgba(255,255,255,.22), transparent 60%),
-    linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
-  border:1px solid rgba(255,255,255,.18);
-  box-shadow:0 20px 60px rgba(0,0,0,.30);
-  font-size:70px;
-  transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
-  cursor:pointer;
-  user-select:none;
-}
-.voiceOrb.listening{
-  transform:scale(1.05);
-  box-shadow:0 24px 70px rgba(255,209,102,.20), 0 20px 60px rgba(0,0,0,.30);
-  filter:saturate(1.08);
-}
-.voiceState{
-  text-align:center;
-  font-weight:950;
-  font-size:18px;
-  margin-top:10px;
-}
-.voiceHint{
-  text-align:center;
-  color:var(--muted);
-  font-size:13px;
-  margin-top:6px;
-}
-.voiceConsole{
-  margin-top:16px;
-  border-radius:20px;
+.voiceBody{padding:14px}
+.bigMic{
+  width:100%;
+  border-radius:22px;
   border:1px solid var(--stroke);
-  background:
-    radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.10), transparent 55%),
-    radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.08), transparent 60%),
-    rgba(0,0,0,.12);
+  background:rgba(255,255,255,.06);
   padding:14px;
 }
-.light .voiceConsole{
-  background:
-    radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.10), transparent 55%),
-    radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.08), transparent 60%),
-    rgba(255,255,255,.60);
-}
-.voiceField{margin-top:12px}
-.voiceField:first-child{margin-top:0}
-.voiceText{min-height:72px}
-.bigTapText{
-  text-align:center;
-  font-weight:900;
+.micBtn{
+  width:100%;
+  border:0;
+  border-radius:22px;
+  padding:18px 16px;
+  font-weight:1000;
   font-size:16px;
-  margin-top:18px;
+  cursor:pointer;
+  background:
+    radial-gradient(140px 110px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+    linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
+  color:#1a1100;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
 }
-.smallHelp{
-  text-align:center;
-  color:var(--muted);
-  margin-top:8px;
-  font-size:13px;
+.micBtn.listening{
+  background:
+    radial-gradient(140px 110px at 30% 20%, rgba(255,255,255,.30), transparent 60%),
+    linear-gradient(135deg, rgba(57,217,138,.95), rgba(86,156,255,.45));
+  color:#04152c;
 }
-#debugBox{
-  position:fixed; left:12px; right:12px; bottom:12px;
-  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
-  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
+.transcript{
+  margin-top:12px;
+  border-radius:18px;
+  border:1px dashed var(--stroke);
+  padding:12px;
+  background:rgba(255,255,255,.04);
+  min-height:52px;
+}
+.transcript .label{font-size:12px;color:var(--muted)}
+.transcript .text{margin-top:6px;font-weight:900;white-space:pre-wrap}
+.rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+@media (max-width:720px){
+  .rowBtns .btn{flex:1}
 }
 </style>
 </head>
 <body>
 
-<div id="loading">
-  <div class="card" style="max-width:520px;width:100%">
-    <h2 style="font-weight:900;margin-bottom:6px">Carregando comando de voz…</h2>
-    <div class="small">Validando login e preparando o sistema.</div>
+<div class="wrap" style="max-width:980px">
+  <div class="backRow">
+    <a class="btn backBtn" href="./index.html">← Voltar</a>
+    <div style="font-weight:900">Comando de Voz</div>
   </div>
-</div>
 
-<div id="app" style="display:none">
-  <div class="voiceWrap">
-    <div class="backRow">
-      <a class="btn backBtn" href="./index.html">← Voltar</a>
-      <div style="font-weight:900">Comando de Voz</div>
-    </div>
-
-    <div class="voiceHero">
-      <div class="voiceTop">
-        <div class="voiceBrand">
-          <div class="voiceLogo">🎙️</div>
-          <div class="voiceTitle">
-            <div class="t">Controle de Gastos PRO • Voz</div>
-            <div class="s">Toque no microfone, fale e o sistema executa sozinho.</div>
-          </div>
-        </div>
-
-        <div class="voiceStatusPill">
-          <span class="voiceStatusDot ok" id="voiceDot"></span>
-          <span id="voiceStatus">Pronto</span>
+  <div class="voiceCard">
+    <div class="voiceTop">
+      <div class="voiceBrand">
+        <div class="voiceLogo">🎙️</div>
+        <div class="voiceTitle">
+          <div class="t">Voz • Abrir telas e executar ações</div>
+          <div class="s">Toque no microfone, fale um comando e o sistema executa.</div>
         </div>
       </div>
+      <div class="voiceStatusPill">
+        <span class="voiceDot" id="dot"></span>
+        <span id="status">Pronto</span>
+      </div>
+    </div>
 
-      <div class="voiceBody">
-        <div class="voiceOrbWrap">
-          <div class="voiceOrb" id="voiceOrb" onclick="toggleListen()">🎤</div>
+    <div class="voiceBody">
+      <div class="bigMic">
+        <button id="btnMic" class="micBtn" onclick="toggleListen()">🎙️ Gravar áudio</button>
+
+        <div class="transcript">
+          <div class="label">O que foi entendido:</div>
+          <div class="text" id="lastText">—</div>
         </div>
 
-        <div class="voiceState" id="voiceState">Pronto para ouvir</div>
-        <div class="voiceHint" id="voiceHint">Toque no microfone e fale naturalmente.</div>
+        <div class="rowBtns">
+          <button class="btn" onclick="replayLast()">Repetir último comando</button>
+          <button class="btn danger" onclick="clearLast()">Limpar</button>
+        </div>
 
-        <div class="bigTapText">Toque no microfone para gravar</div>
-        <div class="smallHelp">Quando o comando for enviado, o sistema mostra “Pronto”.</div>
-
-        <div class="voiceConsole">
-          <div class="voiceField">
-            <label>Comando reconhecido</label>
-            <textarea id="recognizedText" class="voiceText" readonly placeholder="O texto reconhecido aparece aqui…"></textarea>
-          </div>
-
-          <div class="voiceField">
-            <label>Resposta do sistema</label>
-            <div class="note">
-              <div style="font-weight:900" id="ackTitle">Aguardando comando</div>
-              <div class="small" id="ackText" style="margin-top:6px">Fale um comando para executar automaticamente.</div>
-            </div>
-          </div>
+        <div class="small" style="margin-top:12px;color:var(--muted)">
+          Dica: fale direto, por exemplo: <b>abrir histórico</b>, <b>anote mercado 100 casa</b>, <b>imprimir resumo do ano</b>, <b>tema roxo</b>.
         </div>
       </div>
     </div>
@@ -206,191 +153,244 @@
 
 <div id="debugBox"></div>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-<script src="./config.js"></script>
-<script src="./app.js"></script>
-
 <script>
-let recognition = null;
-let isListening = false;
-let ackWatcher = null;
-
-const VOICE_CMD_KEY = "voice_cmd";
-const VOICE_ACK_KEY = "voice_cmd_ack";
-
 function dbg(msg){
   const box = document.getElementById("debugBox");
+  if(!box) return;
   box.style.display = "block";
   box.textContent = String(msg);
 }
 window.addEventListener("error", (e)=>{
   dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
 });
+window.addEventListener("unhandledrejection", (e)=>{
+  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+});
+</script>
 
-function setVoiceStatus(text, ok){
-  document.getElementById("voiceStatus").textContent = text;
-  document.getElementById("voiceDot").classList.toggle("ok", !!ok);
+<script>
+const VOICE_CMD_KEY = "voice_cmd";
+const VOICE_LAST_KEY = "voice_last";
+const VOICE_TS_KEY   = "voice_ts";
+
+function normalize(text){
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
 
-function setVoiceState(text, hint){
-  document.getElementById("voiceState").textContent = text;
-  document.getElementById("voiceHint").textContent = hint || "";
+function setStatus(text, ok){
+  document.getElementById("status").textContent = text;
+  document.getElementById("dot").classList.toggle("ok", !!ok);
 }
 
-function setListeningUI(on){
-  isListening = !!on;
-  document.getElementById("voiceOrb").classList.toggle("listening", on);
+function setLastText(text){
+  document.getElementById("lastText").textContent = text || "—";
+}
 
-  if(on){
-    setVoiceStatus("Ouvindo…", true);
-    setVoiceState("Escutando seu comando", "Fale agora.");
-  }else{
-    setVoiceStatus("Pronto", true);
-    setVoiceState("Pronto para ouvir", "Toque no microfone e fale naturalmente.");
+function saveVoiceCommand(raw){
+  localStorage.setItem(VOICE_CMD_KEY, raw);
+  localStorage.setItem(VOICE_LAST_KEY, raw);
+  localStorage.setItem(VOICE_TS_KEY, String(Date.now()));
+}
+
+function routeCommand(raw){
+  const cmd = normalize(raw);
+  if(!cmd) return false;
+
+  // ===== Grupo 1 — abrir páginas =====
+  if(cmd.includes("abrir historico") || cmd.includes("abrir histórico")){
+    saveVoiceCommand(raw);
+    location.href = "./historico.html";
+    return true;
   }
-}
-
-function setAck(title, text, ok){
-  const t = document.getElementById("ackTitle");
-  const p = document.getElementById("ackText");
-  t.textContent = title;
-  t.className = ok ? "successText" : "warnText";
-  p.textContent = text;
-}
-
-function loadAck(){
-  const raw = localStorage.getItem(VOICE_ACK_KEY);
-  if(!raw){
-    setAck("Aguardando comando", "Fale um comando para executar automaticamente.", false);
-    return;
+  if(cmd.includes("abrir gastos fixos")){
+    saveVoiceCommand(raw);
+    location.href = "./fixos.html";
+    return true;
+  }
+  if(cmd.includes("abrir investimentos fixos") || cmd.includes("abrir investimento fixo")){
+    saveVoiceCommand(raw);
+    location.href = "./investfixos.html";
+    return true;
+  }
+  if(cmd.includes("abrir categorias")){
+    saveVoiceCommand(raw);
+    location.href = "./categorias.html";
+    return true;
+  }
+  if(cmd.includes("abrir simuladores") || cmd.includes("abrir simulador")){
+    saveVoiceCommand(raw);
+    location.href = "./simuladores.html";
+    return true;
+  }
+  if(cmd.includes("abrir ia")){
+    saveVoiceCommand(raw);
+    location.href = "./index.html#ia";
+    return true;
+  }
+  if(cmd.includes("abrir menu")){
+    saveVoiceCommand(raw);
+    location.href = "./index.html#menu";
+    return true;
+  }
+  if(cmd.includes("abrir tela principal") || cmd.includes("abrir inicio") || cmd.includes("abrir início") || cmd.includes("ir para home")){
+    saveVoiceCommand(raw);
+    location.href = "./index.html";
+    return true;
   }
 
-  try{
-    const data = JSON.parse(raw);
-    if(data.ok){
-      setAck("Pronto", data.message || "Comando executado.", true);
-    }else{
-      setAck("Não executado", data.message || "O comando não foi executado.", false);
-    }
-  }catch(e){
-    setAck("Retorno inválido", "Não foi possível ler a resposta do sistema.", false);
+  // ===== Grupo 3 — comandos das páginas específicas (primeiro) =====
+  // anote gastos fixos ... -> fixos.html
+  if(cmd.includes("gastos fixos") && (cmd.startsWith("anote") || cmd.startsWith("anotar"))){
+    saveVoiceCommand(raw);
+    location.href = "./fixos.html";
+    return true;
   }
+  // adicionar investimento fixo ... -> investfixos.html
+  if(cmd.includes("investimento fixo") && (cmd.startsWith("adicionar") || cmd.startsWith("anote") || cmd.startsWith("anotar"))){
+    saveVoiceCommand(raw);
+    location.href = "./investfixos.html";
+    return true;
+  }
+  // adicionar/remover categoria -> categorias.html
+  if(cmd.includes("categoria") && (cmd.startsWith("adicionar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir") || cmd.startsWith("anote") || cmd.startsWith("anotar"))){
+    saveVoiceCommand(raw);
+    location.href = "./categorias.html";
+    return true;
+  }
+
+  // ===== Grupo 2 — comandos do index (fallback principal) =====
+  // Tudo que for:
+  // - anote mercado 100 casa
+  // - anote como pago ...
+  // - anote como pendente ...
+  // - anote guardado ...
+  // - imprimir pdf/resumo
+  // - temas
+  // -> index.html executa
+  const isIndexAction =
+    cmd.startsWith("anote") || cmd.startsWith("anotar") ||
+    cmd.includes("imprimir resumo do ano") ||
+    cmd.includes("imprimir pdf do mes") || cmd.includes("imprimir pdf do mês") ||
+    cmd.includes("tema roxo") || cmd.includes("tema verde") || cmd.includes("tema minimal") ||
+    cmd.includes("tema padrao") || cmd.includes("tema padrão") ||
+    cmd.includes("tema por do sol") || cmd.includes("tema pôr do sol") ||
+    cmd.includes("abrir edicao do painel") || cmd.includes("abrir edição do painel") || cmd.includes("editar painel");
+
+  if(isIndexAction){
+    saveVoiceCommand(raw);
+    location.href = "./index.html";
+    return true;
+  }
+
+  return false;
 }
 
-function pushCommand(cmd){
-  const text = String(cmd || "").trim();
-  if(!text) return;
+/* ====== Reconhecimento de voz (Web Speech API) ====== */
+let recognition = null;
+let listening = false;
 
-  document.getElementById("recognizedText").value = text;
-  localStorage.removeItem(VOICE_ACK_KEY);
-  localStorage.setItem(VOICE_CMD_KEY, text);
-
-  setVoiceStatus("Enviado", true);
-  setVoiceState("Comando enviado", "Executando no app…");
-
-  setTimeout(()=>{ loadAck(); }, 500);
-}
-
-function createRecognition(){
+function initRecognition(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR) return null;
 
-  const rec = new SR();
-  rec.lang = "pt-BR";
-  rec.interimResults = true;
-  rec.continuous = false;
-  rec.maxAlternatives = 1;
+  const r = new SR();
+  r.lang = "pt-BR";
+  r.interimResults = false;
+  r.maxAlternatives = 1;
+  r.continuous = false;
 
-  rec.onstart = ()=>{
-    setListeningUI(true);
+  r.onstart = ()=>{
+    listening = true;
+    document.getElementById("btnMic").classList.add("listening");
+    document.getElementById("btnMic").textContent = "🟢 Ouvindo… toque para parar";
+    setStatus("Ouvindo…", true);
   };
 
-  rec.onresult = (event)=>{
-    let finalText = "";
-    let interimText = "";
-
-    for(let i = event.resultIndex; i < event.results.length; i++){
-      const transcript = event.results[i][0].transcript || "";
-      if(event.results[i].isFinal) finalText += transcript;
-      else interimText += transcript;
-    }
-
-    const combined = (finalText || interimText || "").trim();
-    document.getElementById("recognizedText").value = combined;
-
-    if(finalText.trim()){
-      pushCommand(finalText.trim());
-    }
+  r.onend = ()=>{
+    listening = false;
+    document.getElementById("btnMic").classList.remove("listening");
+    document.getElementById("btnMic").textContent = "🎙️ Gravar áudio";
+    setStatus("Pronto", true);
   };
 
-  rec.onerror = (event)=>{
-    setListeningUI(false);
+  r.onerror = (e)=>{
+    setStatus("Erro no microfone", false);
+    dbg("SpeechRecognition error: " + (e && e.error ? e.error : "desconhecido"));
+  };
 
-    if(event.error === "not-allowed" || event.error === "service-not-allowed"){
-      setVoiceStatus("Permissão negada", false);
-      setVoiceState("Microfone bloqueado", "Permita o uso do microfone no navegador.");
+  r.onresult = (e)=>{
+    const text = e.results && e.results[0] && e.results[0][0] ? e.results[0][0].transcript : "";
+    const raw = String(text || "").trim();
+    setLastText(raw || "—");
+
+    if(!raw){
+      setStatus("Não entendi. Tente de novo.", false);
       return;
     }
 
-    if(event.error === "no-speech"){
-      setVoiceStatus("Sem fala", false);
-      setVoiceState("Não ouvi nada", "Toque de novo e fale mais perto do microfone.");
-      return;
+    setStatus("Pronto", true);
+
+    // executa roteamento
+    const ok = routeCommand(raw);
+    if(!ok){
+      // se não achou rota, manda mesmo assim pro index como fallback
+      saveVoiceCommand(raw);
+      location.href = "./index.html";
     }
-
-    setVoiceStatus("Erro", false);
-    setVoiceState("Falha ao ouvir", "Erro de voz: " + event.error);
   };
 
-  rec.onend = ()=>{
-    setListeningUI(false);
-  };
-
-  return rec;
+  return r;
 }
 
-function startListening(){
-  if(!App.isVoiceEnabled()){
-    alert("O sistema de voz está bloqueado. Ative na tela principal em Configurações.");
-    return;
-  }
+function toggleListen(){
+  if(!recognition) recognition = initRecognition();
 
   if(!recognition){
-    recognition = createRecognition();
-  }
-
-  if(!recognition){
-    alert("Seu navegador não suporta reconhecimento de voz.");
+    alert("Seu celular/navegador não suporta reconhecimento de voz (SpeechRecognition). Use Chrome ou ative permissões do microfone.");
     return;
   }
 
   try{
+    if(listening){
+      recognition.stop();
+      return;
+    }
     recognition.start();
-  }catch(e){
-    setVoiceStatus("Erro", false);
-    setVoiceState("Não foi possível iniciar", "Feche e tente novamente.");
+  }catch(err){
+    dbg("Falha ao iniciar reconhecimento: " + (err && err.message ? err.message : String(err)));
   }
 }
 
-function stopListening(){
-  if(recognition){
-    try{ recognition.stop(); }catch(e){}
+function replayLast(){
+  const last = localStorage.getItem(VOICE_LAST_KEY);
+  if(!last) return alert("Nenhum comando anterior para repetir.");
+  setLastText(last);
+  setStatus("Executando…", true);
+  const ok = routeCommand(last);
+  if(!ok){
+    saveVoiceCommand(last);
+    location.href = "./index.html";
   }
-  setListeningUI(false);
 }
 
-function toggleListen(){
-  if(isListening) stopListening();
-  else startListening();
+function clearLast(){
+  localStorage.removeItem(VOICE_LAST_KEY);
+  setLastText("—");
+  setStatus("Pronto", true);
 }
 
-document.addEventListener("DOMContentLoaded", async ()=>{
-  await App.boot(()=>{
-    loadAck();
-    if(ackWatcher) clearInterval(ackWatcher);
-    ackWatcher = setInterval(loadAck, 700);
-  });
+/* ====== Inicial ====== */
+document.addEventListener("DOMContentLoaded", ()=>{
+  setStatus("Pronto", true);
+  const last = localStorage.getItem(VOICE_LAST_KEY);
+  if(last) setLastText(last);
+
+  // força permissão: somente quando clicar no botão (regras do navegador)
+  recognition = initRecognition();
 });
 </script>
 </body>
