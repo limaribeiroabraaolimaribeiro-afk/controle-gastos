@@ -3,495 +3,508 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>IA PRO</title>
+<title>IA PRO • Controle de Gastos PRO</title>
 
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#569cff">
+<link rel="stylesheet" href="./ui.css">
 
 <script>
-  // ✅ fallback (se config.js não carregar)
-  window.API_BASE_URL = window.API_BASE_URL || "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
-  window.APP_KEY = window.APP_KEY || "GastosPro@2026!";
+window.API_BASE_URL = "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
+window.APP_KEY = "GastosPro@2026!";
 </script>
 
-<!-- ✅ IMPORTANTE: agora ia.html também lê seu config.js -->
-<!-- (se config.js definir API_BASE_URL / APP_KEY, ele sobrescreve o fallback acima) -->
-<script src="./config.js"></script>
-
 <style>
-:root{
-  --bg:#07101f;
-  --grad1: rgba(86,156,255,.22);
-  --grad2: rgba(57,217,138,.16);
-  --grad3: rgba(255,93,93,.12);
-
-  --panel: rgba(255,255,255,.06);
-  --panel2: rgba(255,255,255,.08);
-  --stroke: rgba(255,255,255,.10);
-  --text:#eaf0ff;
-  --muted: rgba(234,240,255,.72);
-  --accent:#569cff;
-
-  --good:#39d98a;
-  --warn:#ffd166;
-  --shadow: 0 18px 60px rgba(0,0,0,.45);
-  --glass: blur(14px);
+html,body{min-height:100%}
+#debugBox{
+  position:fixed; left:12px; right:12px; bottom:12px;
+  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
+  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
-.light{
-  --bg:#f4f6ff;
-  --grad1: rgba(86,156,255,.20);
-  --grad2: rgba(57,217,138,.14);
-  --grad3: rgba(255,93,93,.10);
-
-  --panel: rgba(0,0,0,.04);
-  --panel2: rgba(0,0,0,.06);
-  --stroke: rgba(0,0,0,.08);
-  --text:#0d1222;
-  --muted: rgba(13,18,34,.68);
-  --shadow: 0 18px 60px rgba(0,0,0,.12);
+.iaWrap{
+  max-width:1100px;
+  margin:auto;
+  padding:16px;
+  padding-bottom:110px;
 }
-
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
+.iaShell{
+  border-radius:26px;
+  border:1px solid color-mix(in srgb, var(--stroke), transparent 20%);
   background:
-    radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
-    radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
-    radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
-    var(--bg);
-  color:var(--text);
-  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+    radial-gradient(1200px 800px at 15% 0%, color-mix(in srgb, var(--accent), transparent 80%), transparent 60%),
+    radial-gradient(900px 700px at 85% 10%, rgba(57,217,138,.10), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--glass);
+  overflow:hidden;
 }
-
-.btn{
-  appearance:none;border:0;cursor:pointer;
-  background: rgba(255,255,255,.10);
-  color:var(--text);
-  padding:12px 12px;border-radius:14px;
-  border:1px solid var(--stroke);
-  font-weight:750;
+.iaTop{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px;
+  border-bottom:1px solid var(--stroke);
 }
-.btn.primary{
-  background: var(--accent);
-  border-color: color-mix(in srgb, var(--accent), transparent 55%);
-  color:#fff;
+.iaBrand{
+  display:flex;align-items:center;gap:12px;min-width:0;
 }
-.btn.icon{
-  width:46px;height:46px;border-radius:16px;
+.iaLogo{
+  width:48px;height:48px;border-radius:18px;
   display:flex;align-items:center;justify-content:center;
-  padding:0;
-}
-.btn:active{transform:translateY(1px)}
-
-.shell{
-  height: 100vh;
-  display:flex;
-  flex-direction:column;
-  padding: 14px;
-  gap: 12px;
-}
-
-.top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding: 12px;
-  border-radius: 22px;
-  border: 1px solid var(--stroke);
-  background: linear-gradient(180deg, var(--panel2), var(--panel));
-  box-shadow: var(--shadow);
-  backdrop-filter: var(--glass);
-}
-
-.title{
-  display:flex;align-items:center;gap:10px;min-width:0;
-}
-.logo{
-  width:44px;height:44px;border-radius:16px;
-  display:flex;align-items:center;justify-content:center;
-  background: radial-gradient(60px 50px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
-              linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 12%), color-mix(in srgb, var(--accent), #000 25%));
+  background:
+    radial-gradient(60px 50px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
+    linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 12%), color-mix(in srgb, var(--accent), #000 25%));
   border:1px solid rgba(255,255,255,.18);
-  box-shadow: 0 14px 38px rgba(0,0,0,.28);
-  font-weight:1000;
-  color:#06162d;
+  box-shadow:0 14px 38px rgba(0,0,0,.28);
+  font-weight:1000;color:#06162d;font-size:15px;
 }
-.light .logo{color:#06162d}
-.titleText{min-width:0}
-.titleText .h{
+.iaTitle .t{
   font-weight:950;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.titleText .s{
+.iaTitle .s{
   font-size:12px;color:var(--muted);margin-top:2px;
 }
-
-.statusPill{
+.iaStatusPill{
   display:inline-flex;gap:8px;align-items:center;
   padding:8px 10px;border-radius:999px;
-  background: rgba(255,255,255,.10);
+  background:rgba(255,255,255,.10);
   border:1px solid var(--stroke);
   font-size:12px;color:var(--muted);
 }
-.dot{
+.iaStatusDot{
   width:10px;height:10px;border-radius:999px;
-  background: var(--warn);
-  box-shadow: 0 0 0 4px rgba(255,209,102,.12);
+  background:var(--warn);
+  box-shadow:0 0 0 4px rgba(255,209,102,.12);
 }
-.dot.ok{
-  background: var(--good);
-  box-shadow: 0 0 0 4px rgba(57,217,138,.12);
+.iaStatusDot.ok{
+  background:var(--good);
+  box-shadow:0 0 0 4px rgba(57,217,138,.12);
 }
-
-/* ✅ Chat ocupa quase toda a tela */
-.chat{
-  flex: 1;
-  min-height: 0;
-  border-radius: 24px;
+.iaBody{padding:14px}
+.iaChat{
+  height:min(68vh, 620px);
+  min-height:360px;
+  overflow:auto;
+  border-radius:20px;
   border:1px solid var(--stroke);
   background:
     radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.12), transparent 55%),
     radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.10), transparent 60%),
     rgba(0,0,0,.14);
-  box-shadow: var(--shadow);
-  backdrop-filter: var(--glass);
-  overflow:auto;
-  padding: 16px;
+  padding:14px;
 }
-.light .chat{
+.light .iaChat{
   background:
     radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.10), transparent 55%),
     radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.08), transparent 60%),
     rgba(255,255,255,.65);
 }
-
-.row{display:flex;margin:10px 0}
-.row.me{justify-content:flex-end}
-.row.bot{justify-content:flex-start}
-
-.bubble{
-  max-width: 88%;
-  padding: 12px 12px;
-  border-radius: 18px;
+.msgRow{display:flex;margin:10px 0}
+.msgRow.me{justify-content:flex-end}
+.msgRow.bot{justify-content:flex-start}
+.msg{
+  max-width:88%;
+  padding:12px 12px;
+  border-radius:18px;
   border:1px solid var(--stroke);
-  line-height:1.35;
+  line-height:1.4;
+  font-size:14px;
   white-space:pre-wrap;
 }
-.bubble.me{
+.msg.me{
   background:
     radial-gradient(120px 90px at 20% 10%, rgba(255,255,255,.22), transparent 60%),
     color-mix(in srgb, var(--accent), transparent 78%);
 }
-.bubble.bot{
-  background: rgba(255,255,255,.08);
+.msg.bot{
+  background:rgba(255,255,255,.08);
 }
-
-.quick{
-  display:flex;gap:8px;flex-wrap:wrap;
-  padding: 0 2px;
-}
-.chip{
-  padding:10px 12px;
-  border-radius:999px;
-  background: rgba(255,255,255,.08);
-  border:1px solid var(--stroke);
-  font-size:12px;
-  color: var(--muted);
-  cursor:pointer;
-  user-select:none;
-}
-.chip:active{transform:translateY(1px)}
-
-/* ✅ Composer estilo chat moderno */
-.composer{
+.iaComposer{
+  margin-top:12px;
   display:flex;
   gap:10px;
   align-items:flex-end;
-  padding: 12px;
-  border-radius: 22px;
-  border: 1px solid var(--stroke);
-  background: linear-gradient(180deg, var(--panel2), var(--panel));
-  box-shadow: var(--shadow);
-  backdrop-filter: var(--glass);
 }
-.inputWrap{
+.iaInputWrap{
   flex:1;
-  border-radius: 18px;
+  border-radius:18px;
   border:1px solid var(--stroke);
-  background: rgba(255,255,255,.06);
-  padding: 10px 12px;
+  background:rgba(255,255,255,.06);
+  padding:10px;
 }
-.inputWrap:focus-within{
-  border-color: color-mix(in srgb, var(--accent), transparent 30%);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent), transparent 85%);
+.iaInputWrap:focus-within{
+  border-color:color-mix(in srgb, var(--accent), transparent 30%);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--accent), transparent 85%);
 }
-textarea{
+.iaInput{
   width:100%;
-  min-height:44px;
-  max-height:140px;
+  min-height:48px;
+  max-height:180px;
   resize:none;
-  border:0;outline:none;
-  background:transparent;
-  color:var(--text);
-  font-size:14px;
+  border:0;outline:none;background:transparent;color:var(--text);
+  font-size:14px;padding:0;
 }
-.light textarea{color:var(--text)}
-.small{font-size:12px;color:var(--muted);margin-top:8px}
+.iaQuick{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;
+}
+.iaChip{
+  padding:8px 10px;border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--stroke);
+  font-size:12px;color:var(--muted);
+  cursor:pointer;user-select:none;
+}
+.iaChip:active{transform:translateY(1px)}
+.contextBox{
+  margin-top:12px;
+  border-radius:18px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.05);
+  padding:12px;
+}
+@media (max-width:720px){
+  .iaTop{align-items:flex-start;flex-direction:column}
+}
 </style>
 </head>
-
 <body>
 
-<div class="shell">
-  <div class="top">
-    <div class="title">
-      <div class="logo">IA</div>
-      <div class="titleText">
-        <div class="h">IA PRO • Consultor Financeiro</div>
-        <div class="s" id="iaHint">Conectando…</div>
-      </div>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:10px">
-      <div class="statusPill">
-        <span class="dot" id="dot"></span>
-        <span id="status">Aguardando…</span>
-      </div>
-      <!-- ✅ botão X de voltar -->
-      <button class="btn icon" onclick="goBack()" title="Voltar">✕</button>
-    </div>
-  </div>
-
-  <div class="chat" id="chat"></div>
-
-  <div class="quick">
-    <div class="chip" onclick="quick('Me faça um resumo do mês e diga onde dá pra economizar.')">Resumo do mês</div>
-    <div class="chip" onclick="quick('Qual foi a categoria que mais gastei e como reduzir?')">Onde reduzir</div>
-    <div class="chip" onclick="quick('Me sugira um plano para guardar dinheiro todo mês.')">Plano de guardar</div>
-    <div class="chip" onclick="quick('Analise se meu mês está saudável e me dê 3 ações práticas.')">Saúde financeira</div>
-  </div>
-
-  <div class="composer">
-    <div class="inputWrap">
-      <textarea id="prompt" placeholder="Digite sua pergunta… (Shift+Enter quebra linha)"></textarea>
-      <div class="small">Use seus gastos do mês para recomendações práticas (sem promessas).</div>
-    </div>
-    <button class="btn primary" onclick="send()">Enviar</button>
+<div id="loading">
+  <div class="card" style="max-width:520px;width:100%">
+    <h2 style="font-weight:900;margin-bottom:6px">Carregando IA…</h2>
+    <div class="small">Validando login e preparando a conversa.</div>
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<div id="app" style="display:none">
+  <div class="iaWrap">
+    <div class="backRow">
+      <a class="btn backBtn" href="./index.html">← Voltar</a>
+      <div style="font-weight:900">IA PRO</div>
+    </div>
+
+    <div class="iaShell">
+      <div class="iaTop">
+        <div class="iaBrand">
+          <div class="iaLogo">IA</div>
+          <div class="iaTitle">
+            <div class="t">IA PRO • Consultor Financeiro</div>
+            <div class="s" id="iaHint">Carregando contexto financeiro…</div>
+          </div>
+        </div>
+
+        <div class="iaStatusPill">
+          <span class="iaStatusDot" id="iaDot"></span>
+          <span id="iaStatus">Aguardando…</span>
+        </div>
+      </div>
+
+      <div class="iaBody">
+        <div class="iaChat" id="iaChat"></div>
+
+        <div class="iaQuick">
+          <div class="iaChip" onclick="iaQuick('Me faça um resumo do mês e diga onde dá para economizar.')">Resumo do mês</div>
+          <div class="iaChip" onclick="iaQuick('Qual foi a categoria que mais gastei e como reduzir?')">Onde reduzir</div>
+          <div class="iaChip" onclick="iaQuick('Monte um plano para guardar dinheiro todo mês.')">Plano de guardar</div>
+          <div class="iaChip" onclick="iaQuick('Analise se meu mês está saudável e me dê 3 ações práticas.')">Saúde financeira</div>
+          <div class="iaChip" onclick="iaQuick('Me sugira um investimento compatível com a minha sobra atual.')">Sugestão de investimento</div>
+        </div>
+
+        <div class="contextBox">
+          <div style="font-weight:900">Contexto usado pela IA</div>
+          <div class="small" id="contextPreview" style="margin-top:6px">Carregando…</div>
+        </div>
+
+        <div class="iaComposer">
+          <div class="iaInputWrap">
+            <textarea id="iaPrompt" class="iaInput" placeholder="Digite sua pergunta…"></textarea>
+            <div class="small" style="margin-top:8px">Pergunte sobre metas, corte de gastos, equilíbrio do mês e ideias para guardar mais.</div>
+          </div>
+          <button class="btn primary" style="flex:0 0 auto" onclick="iaSend()">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="debugBox"></div>
 
 <script>
-/* ✅ Garante que, se config.js existir, ele manda */
-window.API_BASE_URL = (window.API_BASE_URL || "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev").replace(/\/$/,"");
-window.APP_KEY = window.APP_KEY || "GastosPro@2026!";
-
-/* ✅ mesmo Firebase do app */
-const FIREBASE_CONFIG = {
-  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-  authDomain:"controle-gastos-pro.firebaseapp.com",
-  projectId:"controle-gastos-pro"
-};
-
-let auth=null;
-let USER=null;
-let USER_ID=null;
-
-let state={ meses:{} };
-let mesAtual=new Date().toISOString().slice(0,7);
-
-/* ===== helpers ===== */
-function money(n){ return Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}); }
-function setStatus(text, ok){
-  document.getElementById("status").textContent=text;
-  document.getElementById("dot").classList.toggle("ok", !!ok);
+function dbg(msg){
+  const box = document.getElementById("debugBox");
+  if(!box) return;
+  box.style.display = "block";
+  box.textContent = String(msg);
 }
-function add(role, text){
-  const box=document.getElementById("chat");
-  const row=document.createElement("div");
-  row.className="row "+(role==="me"?"me":"bot");
-  const b=document.createElement("div");
-  b.className="bubble "+(role==="me"?"me":"bot");
-  b.textContent=text;
-  row.appendChild(b);
+window.addEventListener("error", (e)=>{
+  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+});
+window.addEventListener("unhandledrejection", (e)=>{
+  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+});
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+<script src="./voice-bridge.js"></script>
+
+<script>
+const VOICE_CMD_KEY = "voice_cmd";
+let mesAtual = new Date().toISOString().slice(0,7);
+
+function normalize(text){
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function iaSetStatus(text, ok){
+  document.getElementById("iaStatus").textContent = text;
+  document.getElementById("iaDot").classList.toggle("ok", !!ok);
+}
+
+function iaAdd(role, text){
+  const box = document.getElementById("iaChat");
+  const row = document.createElement("div");
+  row.className = "msgRow " + (role === "me" ? "me" : "bot");
+
+  const bubble = document.createElement("div");
+  bubble.className = "msg " + (role === "me" ? "me" : "bot");
+  bubble.textContent = text;
+
+  row.appendChild(bubble);
   box.appendChild(row);
-  box.scrollTop=box.scrollHeight;
-}
-function quick(text){
-  const p=document.getElementById("prompt");
-  p.value=text;
-  p.focus();
+  box.scrollTop = box.scrollHeight;
 }
 
-/* ✅ volta pro index */
-function goBack(){
-  location.href = "./index.html";
+function iaQuick(text){
+  document.getElementById("iaPrompt").value = text;
+  document.getElementById("iaPrompt").focus();
 }
 
-/* ===== storage ===== */
-function kMes(){ return "gastos_pro_state_" + USER_ID; }
-function loadAll(){
-  try{
-    const raw = localStorage.getItem(kMes());
-    state = raw ? (JSON.parse(raw)||{meses:{}}) : {meses:{}};
-  }catch(e){
-    state={meses:{}};
-  }
+function getMesAtualAberto(){
+  const opened = localStorage.getItem("mes_aberto");
+  if(opened) mesAtual = opened;
+  return mesAtual;
 }
-function ensureMonthInvestStatus(d){
-  if(!d.investStatus || typeof d.investStatus!=="object") d.investStatus = {};
-  return d.investStatus;
-}
-function ensureSavedArray(d){
-  if(!Array.isArray(d.saved)) d.saved=[];
-  return d.saved;
-}
-function getDataMes(m){
-  const mm=m||mesAtual;
-  if(!state.meses[mm]) state.meses[mm]={salary:0,meta:0,items:[],saved:[],hiddenFixos:[],investStatus:{}};
-  const d=state.meses[mm];
-  if(!Array.isArray(d.items)) d.items=[];
-  ensureSavedArray(d);
-  ensureMonthInvestStatus(d);
-  return d;
-}
-function buildIaContext(){
-  const d=getDataMes(mesAtual);
-  const spent=(d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-  const saved=(d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
-  const salary=Number(d.salary||0);
-  const left=salary-spent;
 
-  const topCats={};
-  (d.items||[]).forEach(it=>{
-    const c=it.category||"Outros";
-    topCats[c]=(topCats[c]||0)+Number(it.amount||0);
+function buildIaContextObject(){
+  const mes = getMesAtualAberto();
+  const d = App.getDataMes(mes);
+
+  const salary = Number(d.salary || 0);
+  const spent = (d.items || []).reduce((a,b)=>a + Number(b.amount || 0), 0);
+  const saved = (d.saved || []).reduce((a,b)=>a + Number(b.value || 0), 0);
+  const left = salary - spent;
+
+  const byCat = {};
+  (d.items || []).forEach(it=>{
+    const cat = it.category || "Outros";
+    byCat[cat] = (byCat[cat] || 0) + Number(it.amount || 0);
   });
-  const catsSorted=Object.entries(topCats).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  const topCats = Object.entries(byCat)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,5)
+    .map(([cat,val])=>({ cat, val }));
+
+  const pendentes = (d.items || []).filter(it => !it.paid).slice(0,10).map(it=>({
+    desc: it.desc || "",
+    amount: Number(it.amount || 0),
+    category: it.category || "Outros"
+  }));
+
+  return {
+    mes,
+    salary,
+    spent,
+    saved,
+    left,
+    topCats,
+    pendentes,
+    totalItems: (d.items || []).length
+  };
+}
+
+function buildIaContextText(){
+  const c = buildIaContextObject();
 
   return [
-    `Mês: ${mesAtual}`,
-    `Salário: ${salary}`,
-    `Gasto total: ${spent}`,
-    `Sobra: ${left}`,
-    `Guardado no mês: ${saved}`,
-    `Top categorias: ${catsSorted.map(([c,v])=>`${c}=${v}`).join(", ")}`
+    `Mês aberto: ${c.mes}`,
+    `Salário: ${c.salary}`,
+    `Gasto total: ${c.spent}`,
+    `Guardado: ${c.saved}`,
+    `Sobra: ${c.left}`,
+    `Quantidade de lançamentos: ${c.totalItems}`,
+    `Top categorias: ${c.topCats.map(x => `${x.cat}=${x.val}`).join(", ") || "sem dados"}`,
+    `Pendentes: ${c.pendentes.map(x => `${x.desc}=${x.amount}`).join(", ") || "nenhum"}`
   ].join("\n");
 }
 
-/* ===== IA call (corrigido e blindado) ===== */
-async function callIA(prompt){
-  const base = (window.API_BASE_URL || "").replace(/\/$/,"");
-  const url = base + "/api/chat";
+function renderContextPreview(){
+  const c = buildIaContextObject();
+  document.getElementById("contextPreview").innerHTML = `
+    Mês: <b>${App.escapeHtml(c.mes)}</b>
+    <br>Salário: <b>${App.money(c.salary)}</b>
+    <br>Gastos: <b>${App.money(c.spent)}</b>
+    <br>Guardado: <b>${App.money(c.saved)}</b>
+    <br>Sobra: <b>${App.money(c.left)}</b>
+    <br>Top categorias: <b>${c.topCats.length ? c.topCats.map(x => `${App.escapeHtml(x.cat)} (${App.money(x.val)})`).join(", ") : "sem dados"}</b>
+  `;
+  document.getElementById("iaHint").textContent = `Usando dados do mês ${c.mes}`;
+}
 
-  let resp;
-  try{
-    resp = await fetch(url,{
-      method:"POST",
-      mode:"cors",
-      cache:"no-store",
-      headers:{
-        "Content-Type":"application/json",
-        "x-app-key": window.APP_KEY
-      },
-      body: JSON.stringify({ prompt })
-    });
-  }catch(e){
-    // ✅ Isso é o seu "Failed to fetch": preflight/CORS/Network
-    throw new Error("Falha de rede/CORS (OPTIONS). Seu Worker precisa responder OPTIONS e liberar Content-Type e x-app-key.");
-  }
+async function callIA(prompt) {
+  const base = (window.API_BASE_URL || "").replace(/\/$/, "");
+  const resp = await fetch(base + "/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-app-key": window.APP_KEY
+    },
+    body: JSON.stringify({ prompt }),
+    cache: "no-store"
+  });
 
-  const text = await resp.text();
-  let data = {};
-  try{ data = JSON.parse(text); }catch(e){}
-
+  const data = await resp.json().catch(()=>({}));
   if(!resp.ok){
-    throw new Error(`HTTP ${resp.status}: ${data?.error || text || "Erro sem detalhe"}`);
+    throw new Error(data?.error || ("Erro HTTP " + resp.status));
   }
 
-  return data.response || "Sem resposta";
+  return data.response || "Sem resposta.";
 }
 
-/* ✅ Health check agora testa /api/chat com ping (não depende de GET /) */
-async function health(){
-  const base=(window.API_BASE_URL||"").replace(/\/$/,"");
-  document.getElementById("iaHint").textContent = "Conectando em: " + base;
-
+async function iaHealth(){
   try{
-    await callIA("ping");
-    setStatus("Online ✅", true);
+    const base = (window.API_BASE_URL || "").replace(/\/$/, "");
+    const r = await fetch(base + "/", {
+      cache: "no-store",
+      headers: { "x-app-key": window.APP_KEY }
+    });
+    await r.json().catch(()=>({}));
+    iaSetStatus("Online ✅", true);
   }catch(e){
-    setStatus("Offline", false);
+    iaSetStatus("Offline", false);
   }
 }
 
-async function send(){
-  const input=document.getElementById("prompt");
-  const q=(input.value||"").trim();
+async function iaSend(){
+  const input = document.getElementById("iaPrompt");
+  const q = (input.value || "").trim();
   if(!q) return;
-  input.value="";
-  add("me", q);
-  setStatus("Consultando…", false);
+
+  input.value = "";
+  iaAdd("me", q);
+  iaSetStatus("Consultando…", false);
 
   try{
-    const ctx=buildIaContext();
-    const prompt =
-`Você é a IA PRO, consultor financeiro simples.
-Responda em PT-BR, direto e prático.
-Use os dados do mês para sugerir ações e investimentos coerentes, sem prometer ganhos.
-Se faltar dado, peça o mínimo necessário.
-Formate respostas com bullets quando fizer sentido.
+    const prompt = `Você é a IA PRO, consultor financeiro simples e prático.
+Responda sempre em PT-BR.
+Use os dados do usuário para dar orientações diretas, claras e úteis.
+Não invente valores nem dados.
+Não prometa lucro.
+Se o mês estiver apertado, diga isso com clareza.
+Quando possível, dê passos numerados curtos.
 
 DADOS DO USUÁRIO:
-${ctx}
+${buildIaContextText()}
 
 PERGUNTA:
 ${q}`;
-    const ans=await callIA(prompt);
-    add("bot", ans);
-    setStatus("Online ✅", true);
+
+    const ans = await callIA(prompt);
+    iaAdd("bot", ans);
+    iaSetStatus("Online ✅", true);
   }catch(e){
-    add("bot","Erro ao conectar na IA: " + (e.message||e));
-    setStatus("Offline", false);
+    iaAdd("bot", "Erro ao conectar na IA: " + (e.message || e));
+    iaSetStatus("Offline", false);
   }
 }
 
-/* Enter envia (Shift+Enter quebra linha) */
-document.getElementById("prompt").addEventListener("keydown",(e)=>{
-  if(e.key==="Enter" && !e.shiftKey){
-    e.preventDefault();
-    send();
+function handleVoiceCommand(raw){
+  const cmd = normalize(raw);
+  if(!cmd) return false;
+
+  if(cmd.includes("tema roxo")){
+    localStorage.setItem(App.THEME_KEYS.preset, "purple");
+    App.applyThemeSettings();
+    return true;
   }
-});
+  if(cmd.includes("tema minimal") || cmd.includes("tema mono")){
+    localStorage.setItem(App.THEME_KEYS.preset, "mono");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema verde")){
+    localStorage.setItem(App.THEME_KEYS.preset, "green");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema padrao") || cmd.includes("tema padrão")){
+    localStorage.setItem(App.THEME_KEYS.preset, "default");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema por do sol") || cmd.includes("tema pôr do sol") || cmd.includes("tema sunset")){
+    localStorage.setItem(App.THEME_KEYS.preset, "sunset");
+    App.applyThemeSettings();
+    return true;
+  }
 
-/* ===== init ===== */
-(async ()=>{
-  const t = localStorage.getItem("theme");
-  if(t==="light") document.body.classList.add("light");
+  if(cmd.includes("abrir tela principal") || cmd.includes("abrir inicio") || cmd.includes("abrir início") || cmd.includes("ir para home")){
+    location.href = "./index.html";
+    return true;
+  }
 
-  try{ firebase.initializeApp(FIREBASE_CONFIG); }catch(e){}
-  auth=firebase.auth();
-  auth.onAuthStateChanged((u)=>{
-    USER=u||null;
-    if(!USER){
-      location.replace("./login.html");
-      return;
+  let m = cmd.match(/^pergunta\s+(.+)$/i);
+  if(m){
+    document.getElementById("iaPrompt").value = m[1] || "";
+    return true;
+  }
+
+  if(cmd.includes("enviar ia") || cmd.includes("perguntar ia") || cmd.includes("consultar ia")){
+    iaSend();
+    return true;
+  }
+
+  return false;
+}
+
+function bindVoiceStorageListener(){
+  window.addEventListener("storage", (e)=>{
+    if(e.key === VOICE_CMD_KEY && e.newValue){
+      const ok = handleVoiceCommand(e.newValue);
+      if(ok) localStorage.removeItem(VOICE_CMD_KEY);
     }
-    USER_ID=USER.uid;
-    loadAll();
-
-    if(!document.getElementById("chat").dataset.inited){
-      add("bot","Oi! Eu sou a IA PRO. Me pergunte sobre seus gastos, salário e como investir melhor. 🙂");
-      add("bot","Dica: peça um resumo do mês, onde cortar gastos e um plano de guardar dinheiro.");
-      document.getElementById("chat").dataset.inited="1";
-    }
-
-    health();
   });
-})();
+
+  const first = localStorage.getItem(VOICE_CMD_KEY);
+  if(first){
+    const ok = handleVoiceCommand(first);
+    if(ok) localStorage.removeItem(VOICE_CMD_KEY);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  await App.boot(()=>{
+    bindVoiceStorageListener();
+    renderContextPreview();
+    iaHealth();
+
+    iaAdd("bot", "Estou pronta. Posso analisar seu mês, sugerir cortes de gastos, avaliar sua sobra e ajudar a montar metas.");
+
+    const input = document.getElementById("iaPrompt");
+    input.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        iaSend();
+      }
+    });
+  });
+});
 </script>
 </body>
 </html>
