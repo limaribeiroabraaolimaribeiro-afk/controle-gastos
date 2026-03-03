@@ -3,32 +3,160 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>Gastos Fixos • Controle de Gastos PRO</title>
+<title>Controle de Gastos PRO</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#569cff">
 <link rel="stylesheet" href="./ui.css">
 
+<script>
+window.API_BASE_URL = "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
+window.APP_KEY = "GastosPro@2026!";
+</script>
+
 <style>
+.screen{display:none}
+.screen.active{display:block}
+
+.pill{
+  display:flex;gap:10px;align-items:center;justify-content:center;
+  padding:10px 12px;border-radius:18px;
+  border:1px solid var(--stroke);
+  min-width:92px;font-weight:850;
+}
+.pill.menuBtn{
+  background:rgba(255,255,255,.14);
+  border-color:rgba(255,255,255,.20);
+  box-shadow:0 12px 30px rgba(0,0,0,.22);
+}
+.pill.themeBtn{
+  background:rgba(255,255,255,.10);
+  border-color:rgba(255,255,255,.18);
+}
+.pill .icon{opacity:.95}
+
+.list{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 10px;
+}
+.list tr{background:rgba(255,255,255,.06)}
+.list td{padding:12px;vertical-align:top}
+.list tr td:first-child{border-top-left-radius:16px;border-bottom-left-radius:16px}
+.list tr td:last-child{border-top-right-radius:16px;border-bottom-right-radius:16px}
+
+.fabWrap{
+  position:fixed; right:18px; bottom:18px;
+  display:flex; flex-direction:column; gap:10px; z-index:999;
+}
+.fab{
+  width:58px;height:58px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  cursor:pointer; user-select:none;
+}
+.fab.add{
+  background:radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+             linear-gradient(135deg, rgba(57,217,138,.98), rgba(57,217,138,.55));
+  color:#062114; font-size:30px; font-weight:900;
+}
+.fab.ai{
+  background:radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+             linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 15%), color-mix(in srgb, var(--accent), #000 20%));
+  color:#04152c; font-weight:1000; letter-spacing:.8px;
+  font-size:12px; line-height:1.05; text-align:center;
+}
+.fab.ai span{display:block;font-weight:950;font-size:13px}
+.fab.ai em{font-style:normal;font-weight:900;font-size:11px;opacity:.9}
+.fab.voice{
+  background:radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
+             linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
+  color:#1a1100;font-weight:1000;font-size:20px;
+}
+.fab.voice.hidden{display:none}
+
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:2000;
+}
+.modal{
+  width:min(520px, 100%);
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border:1px solid var(--stroke);
+  border-radius:22px;
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--glass);
+  overflow:hidden;
+}
+.modalHeader{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px;
+  border-bottom:1px solid var(--stroke);
+}
+.modalHeader .title{display:flex;gap:10px;align-items:center;font-weight:900}
+.modalBody{padding:14px}
+.modalFooter{
+  padding:14px;border-top:1px solid var(--stroke);
+  display:flex;gap:10px;justify-content:flex-end;
+}
+.closeX{
+  width:42px;height:42px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  cursor:pointer;font-weight:900;
+}
+
+.layoutItem{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 12px;border-radius:16px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+}
+.layoutLeft{display:flex;align-items:center;gap:10px;min-width:0}
+.layoutTitle{font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.layoutActions{display:flex;gap:8px;flex:0 0 auto}
+.chk{width:18px;height:18px;accent-color:var(--accent)}
+.handle{
+  width:34px;height:34px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.06);
+  font-weight:900;
+}
+
+.pdfPreview{
+  border:1px dashed var(--stroke);
+  border-radius:18px;
+  padding:12px;
+  background:rgba(255,255,255,.04);
+}
+
+.statLine{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 12px;border-radius:14px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.05);
+  margin-top:8px;
+}
+.savedRow{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+
 #debugBox{
   position:fixed; left:12px; right:12px; bottom:12px;
   background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
   font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
-.fixoRow{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-}
-.fixoInfo{
-  min-width:0;
-}
-.fixoTitle{
-  font-weight:950;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.fixoMeta{
-  display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;
+
+@media (max-width:720px){
+  .fabWrap{right:14px;bottom:14px}
 }
 </style>
 </head>
@@ -36,102 +164,354 @@
 
 <div id="loading">
   <div class="card" style="max-width:520px;width:100%">
-    <h2 style="font-weight:900;margin-bottom:6px">Carregando gastos fixos…</h2>
+    <h2 style="font-weight:900;margin-bottom:6px">Carregando…</h2>
     <div class="small">Validando login e preparando seus dados.</div>
+    <div class="hr"></div>
+    <div class="small">Se demorar, verifique sua internet.</div>
   </div>
 </div>
 
 <div id="app" style="display:none">
   <div class="wrap">
-    <div class="backRow">
-      <a class="btn backBtn" href="./index.html">← Voltar</a>
-      <div style="font-weight:900">Gastos Fixos</div>
-    </div>
 
     <div class="topbar">
       <div>
         <h1>Controle de Gastos PRO</h1>
-        <div class="small">Cadastre e remova seus gastos fixos. Eles aparecem automaticamente na tela principal.</div>
+        <div class="small" id="subHeader">Tela principal com resumo do mês, gráficos, lista e atalhos do app.</div>
       </div>
       <div class="row" style="flex:0 0 auto">
-        <button class="btn" onclick="toggleTheme()">🌙/☀️</button>
+        <button class="pill menuBtn" onclick="openMenu()" title="Menu">
+          <span class="icon">☰</span> Menu
+        </button>
+        <button class="pill themeBtn" onclick="toggleTheme()" title="Tema">
+          <span class="icon">🌙/☀️</span>
+        </button>
       </div>
     </div>
 
-    <div class="grid3">
-      <div class="kpi">
-        <div class="small">Total de fixos</div>
-        <div class="v" id="kpiQtd">0</div>
-      </div>
-      <div class="kpi">
-        <div class="small">Somado por mês</div>
-        <div class="v" id="kpiTotal">R$ 0,00</div>
-      </div>
-      <div class="kpi">
-        <div class="small">Maior gasto fixo</div>
-        <div class="v" id="kpiMaior">R$ 0,00</div>
-      </div>
-    </div>
+    <div class="screen active" id="screen-home">
+      <div id="homeContainer">
 
-    <div class="card" style="margin-top:12px">
-      <h3>Adicionar gasto fixo</h3>
+        <div data-home="resumo">
+          <div class="card">
+            <h2 style="font-weight:900;margin-bottom:10px">Resumo do mês</h2>
 
-      <div class="grid2">
-        <div>
-          <label>Descrição</label>
-          <input id="descFixo" placeholder="Ex: Internet">
-        </div>
-        <div>
-          <label>Valor</label>
-          <input id="valorFixo" type="number" inputmode="decimal" placeholder="Ex: 99.90">
-        </div>
-      </div>
+            <div class="grid2">
+              <div>
+                <label>Mês</label>
+                <select id="monthSelect"></select>
+              </div>
+              <div>
+                <label>Salário</label>
+                <input id="salary" type="number" placeholder="Ex: 4000">
+              </div>
+              <div>
+                <label>Meta</label>
+                <input id="meta" type="number" placeholder="Ex: 500">
+              </div>
+              <div>
+                <label>Guardado</label>
+                <input id="savedValue" type="number" placeholder="Ex: 300">
+              </div>
+            </div>
 
-      <div class="grid2" style="margin-top:10px">
-        <div>
-          <label>Categoria</label>
-          <select id="categoriaFixo"></select>
-        </div>
-        <div class="note">
-          <div style="font-weight:900">Comando de voz</div>
-          <div class="small" style="margin-top:6px">
-            Exemplos:
-            <br><b>anote gastos fixos internet 99 casa</b>
-            <br><b>remover gasto fixo internet</b>
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label>Descrição do guardado</label>
+                <input id="savedDesc" placeholder="Ex: Reserva, CDB, Tesouro">
+              </div>
+              <div style="display:flex;align-items:flex-end">
+                <button class="btn primary" style="width:100%" onclick="addSaved()">Adicionar ao guardado</button>
+              </div>
+            </div>
+
+            <div id="savedList" style="margin-top:12px"></div>
+
+            <div class="row" style="margin-top:14px">
+              <button class="btn primary" onclick="saveSettings()" style="flex:1">Salvar</button>
+              <button class="btn" onclick="openHistoryPage()" style="flex:1">📅 Histórico</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="hr"></div>
-
-      <div class="row">
-        <button class="btn" onclick="clearForm()">Limpar</button>
-        <button class="btn primary" onclick="addFixo()">Adicionar gasto fixo</button>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <div class="row" style="margin-bottom:10px">
-        <div>
-          <h3 style="margin:0">Lista de gastos fixos</h3>
-          <div class="small">Ao remover, ele deixa de aparecer nos meses seguintes.</div>
+        <div data-home="kpis" style="margin-top:12px">
+          <div class="grid2">
+            <div class="kpi">
+              <div class="small">Salário</div>
+              <div class="v" id="kpiSalary">R$ 0,00</div>
+            </div>
+            <div class="kpi">
+              <div class="small">Gasto</div>
+              <div class="v" id="kpiSpent">R$ 0,00</div>
+            </div>
+            <div class="kpi">
+              <div class="small">Sobra</div>
+              <div class="v" id="kpiLeft">R$ 0,00</div>
+            </div>
+            <div class="kpi">
+              <div class="small">Guardado</div>
+              <div class="v" id="kpiSaved">R$ 0,00</div>
+            </div>
+          </div>
         </div>
-        <input id="buscaFixo" placeholder="Buscar gasto fixo…" oninput="renderFixos()">
+
+        <div data-home="chartCat" style="margin-top:12px">
+          <div class="card">
+            <h3>Gastos por categoria</h3>
+            <canvas id="chart" style="width:100%;height:220px"></canvas>
+          </div>
+        </div>
+
+        <div data-home="chartEvo" style="margin-top:12px">
+          <div class="card">
+            <h3>Evolução</h3>
+            <canvas id="chartEvolucao" style="width:100%;height:220px"></canvas>
+          </div>
+        </div>
+
+        <div data-home="lista" style="margin-top:12px">
+          <div class="card">
+            <h3>Lista do mês</h3>
+            <div class="small" style="margin-bottom:10px">
+              Você pode marcar itens como <b>Pendente</b> ou <b>Pago</b>. Os investimentos fixos entram como <b>Juntar</b> com o dia escolhido.
+            </div>
+            <table class="list" id="list"></table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="screen" id="screen-menu">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="goHome()">← Voltar</button>
+        <div style="font-weight:900">Menu</div>
+      </div>
+
+      <div class="grid1">
+        <button class="btn" id="menuVoiceBtn" onclick="openVoicePage()">🎙️ Comando de voz</button>
+        <button class="btn" onclick="openIAPage()">🤖 IA PRO</button>
+        <button class="btn" onclick="openScreen('screen-config')">⚙️ Configurações</button>
+        <button class="btn" onclick="openSimuladoresPage()">🧠 Simuladores</button>
+        <button class="btn" onclick="openCategoriasPage()">📂 Minhas Categorias</button>
+        <button class="btn" onclick="openFixosPage()">📌 Gastos Fixos</button>
+        <button class="btn" onclick="openInvestFixosPage()">📈 Investimentos Fixos</button>
       </div>
 
       <div class="hr"></div>
 
-      <div id="listaFixos" class="listCol"></div>
+      <div class="card">
+        <h3>Conta</h3>
+        <div class="row">
+          <div>
+            <div style="font-weight:900" id="userName">—</div>
+            <div class="small" id="userEmail">—</div>
+          </div>
+          <button class="btn" onclick="logout()">Sair</button>
+        </div>
+      </div>
     </div>
+
+    <div class="screen" id="screen-config">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+        <div style="font-weight:900">Configurações</div>
+      </div>
+
+      <div class="grid1">
+        <button class="btn" onclick="openScreen('screen-themes')">🎨 Temas</button>
+        <button class="btn" onclick="openHomeEditor()">🧩 Edição do painel</button>
+        <button class="btn" onclick="openPdfScreen()">🖨️ Imprimir em PDF</button>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>Histórico</h3>
+        <div class="small">Acesse seu histórico completo de meses.</div>
+        <div class="hr"></div>
+        <button class="btn primary" onclick="openHistoryPage()">📅 Abrir histórico</button>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>Preferências</h3>
+
+        <div class="note" style="margin-bottom:10px">
+          <div style="font-weight:950">🎙️ Sistema de voz</div>
+          <div class="small" style="margin-top:6px">
+            Quando <b>bloqueado</b>, o botão de voz some da tela principal.
+            Quando <b>ativado</b>, aparece o botão 🎙️ e você pode abrir a tela de comando de voz.
+          </div>
+          <div class="hr"></div>
+          <div class="row">
+            <div>
+              <div class="small">Status</div>
+              <div style="font-weight:950" id="voiceEnableStatus">—</div>
+            </div>
+            <button class="btn" id="btnToggleVoiceEnabled" onclick="toggleVoiceEnabled()">—</button>
+          </div>
+        </div>
+
+        <button class="btn" onclick="toggleTheme()">🌙/☀️ Alternar tema</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-pdf">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
+        <div style="font-weight:900">Imprimir em PDF</div>
+      </div>
+
+      <div class="card">
+        <h3>Relatórios em PDF</h3>
+        <div class="small">
+          Você pode gerar:
+          <br>• <b>Resumo do ano inteiro</b> (gráficos + categoria que mais gastou + tabela anual)
+          <br>• <b>Relatório completo do mês</b> (ano + anotações do mês escolhido)
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="grid2">
+          <div>
+            <label>Ano</label>
+            <select id="pdfYear"></select>
+          </div>
+          <div>
+            <label>Mês para relatório</label>
+            <select id="pdfMonth"></select>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="pdfPreview small">
+          <b>Resumo do ano</b><br>
+          • Gráfico “Categorias do ano”<br>
+          • Gráfico “Evolução mensal”<br>
+          • Categoria que mais gastou no ano<br>
+          • Tabela por mês com salário, gasto, guardado e sobra
+          <br><br>
+          <b>Relatório completo do mês</b><br>
+          • Traz o resumo do ano + anotações do mês selecionado
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <button class="btn" onclick="gerarPDFResumoAno()">📘 Resumo do ano</button>
+          <button class="btn primary" onclick="gerarPDFCompletoMes()">📄 PDF do mês</button>
+        </div>
+
+        <div class="small" id="pdfStatus" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-home-editor">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
+        <div style="font-weight:900">Edição do painel</div>
+      </div>
+
+      <div class="card">
+        <h3>Organize sua tela principal</h3>
+        <div class="small">Marque o que aparece e use as setas para mudar a ordem.</div>
+        <div class="hr"></div>
+        <div id="layoutList"></div>
+        <div class="hr"></div>
+        <div class="row">
+          <button class="btn" onclick="resetHomeLayout()">↩️ Padrão</button>
+          <button class="btn primary" onclick="applyHomeLayoutFromEditor()">Salvar e aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-themes">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
+        <div style="font-weight:900">Temas</div>
+      </div>
+
+      <div class="card">
+        <h3>Cor do app</h3>
+        <div class="small">Escolha um estilo visual para a tela principal.</div>
+
+        <div class="hr"></div>
+
+        <label>Preset</label>
+        <select id="themePreset" onchange="saveThemePreset()">
+          <option value="default">Padrão</option>
+          <option value="purple">Roxo</option>
+          <option value="green">Verde</option>
+          <option value="sunset">Pôr do sol</option>
+          <option value="mono">Minimal</option>
+        </select>
+
+        <div class="hr"></div>
+
+        <h3>Cor dos botões</h3>
+        <div class="grid2" style="margin-top:10px">
+          <div>
+            <label>Escolher cor</label>
+            <input id="accentPicker" type="color" value="#569cff" onchange="saveAccentColor()">
+          </div>
+          <div class="note">
+            <div style="font-weight:900">Prévia</div>
+            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn primary mini" type="button">Primário</button>
+              <button class="btn mini" type="button">Normal</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <button class="btn" onclick="resetThemes()">↩️ Voltar ao padrão</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="fabWrap">
+    <div class="fab ai" onclick="openIAPage()" title="IA PRO">
+      <span>IA</span><em>PRO</em>
+    </div>
+    <div class="fab voice hidden" id="fabVoice" onclick="openVoicePage()" title="Comando de voz">🎙️</div>
+    <div class="fab add" onclick="openAddExpense()" title="Adicionar gasto">+</div>
   </div>
 </div>
 
 <div id="debugBox"></div>
 
+<div class="overlay" id="overlay-addExpense">
+  <div class="modal">
+    <div class="modalHeader">
+      <div class="title">➕ Adicionar gasto</div>
+      <div class="closeX" onclick="closeModal('overlay-addExpense')">✕</div>
+    </div>
+    <div class="modalBody">
+      <label>Descrição</label>
+      <input id="mDesc" placeholder="Ex: Mercado">
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Valor</label>
+          <input id="mValor" type="number" placeholder="Ex: 120.50">
+        </div>
+        <div>
+          <label>Categoria</label>
+          <select id="mCategoria"></select>
+        </div>
+      </div>
+      <div class="small" style="margin-top:10px">Dica: a categoria pode ser sugerida automaticamente pela descrição.</div>
+    </div>
+    <div class="modalFooter">
+      <button class="btn" onclick="closeModal('overlay-addExpense')">Cancelar</button>
+      <button class="btn good" onclick="confirmAddExpense()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 function dbg(msg){
   const box = document.getElementById("debugBox");
-  if(!box) return;
   box.style.display = "block";
   box.textContent = String(msg);
 }
@@ -143,13 +523,55 @@ window.addEventListener("unhandledrejection", (e)=>{
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
 <script src="./config.js"></script>
 <script src="./app.js"></script>
+<script src="./voice-bridge.js"></script>
 
 <script>
+let grafico = null;
+let graficoEvolucao = null;
+let mesAtual = new Date().toISOString().slice(0,7);
+let __voiceStorageBound = false;
+
 const VOICE_CMD_KEY = "voice_cmd";
+
+const HOME_SECTIONS = [
+  { id:"resumo", title:"Resumo do mês" },
+  { id:"kpis", title:"Cards (Salário/Gasto/Sobra/Guardado)" },
+  { id:"chartCat", title:"Gráfico por categoria" },
+  { id:"chartEvo", title:"Gráfico evolução" },
+  { id:"lista", title:"Lista do mês" }
+];
+
+function openModal(id){ const o=document.getElementById(id); if(o) o.style.display="flex"; }
+function closeModal(id){ const o=document.getElementById(id); if(o) o.style.display="none"; }
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const el = document.getElementById(id);
+  if(el) el.classList.add("active");
+}
+function openScreen(id){ showScreen(id); }
+function goHome(){ showScreen("screen-home"); applyHomeLayoutToDOM(); }
+function openMenu(){ showScreen("screen-menu"); }
+
+function openVoicePage(){ location.href = "./voz.html"; }
+function openFixosPage(){ location.href = "./fixos.html"; }
+function openInvestFixosPage(){ location.href = "./investfixos.html"; }
+function openCategoriasPage(){ location.href = "./categorias.html"; }
+function openHistoryPage(){ location.href = "./historico.html"; }
+function openSimuladoresPage(){ location.href = "./simuladores.html"; }
+function openIAPage(){ location.href = "./ia.html"; }
+
+function toggleTheme(){ App.toggleTheme(); drawAllCharts(); }
+function logout(){ App.logout(); }
 
 function normalize(text){
   return String(text || "")
@@ -172,202 +594,924 @@ function parseMoney(text){
   return Number.isFinite(n) ? n : 0;
 }
 
-function toggleTheme(){
-  App.toggleTheme();
-}
+function buildMonthSelect(){
+  const sel = document.getElementById("monthSelect");
+  const monthsSet = new Set(Object.keys(App.state.meses||{}));
+  const now = new Date();
 
-function buildCategorias(){
-  const sel = document.getElementById("categoriaFixo");
-  if(!sel) return;
-  const categorias = Array.isArray(App.categorias) && App.categorias.length
-    ? App.categorias
-    : ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
-
-  sel.innerHTML = categorias.map(c =>
-    `<option value="${App.escapeHtml(c)}">${App.escapeHtml(c)}</option>`
-  ).join("");
-}
-
-function clearForm(){
-  document.getElementById("descFixo").value = "";
-  document.getElementById("valorFixo").value = "";
-  document.getElementById("categoriaFixo").value = "Outros";
-}
-
-function updateKPIs(){
-  const fixos = Array.isArray(App.fixos) ? App.fixos : [];
-  const qtd = fixos.length;
-  const total = fixos.reduce((a,b)=>a + Number(b.amount || 0), 0);
-  const maior = fixos.reduce((a,b)=>Math.max(a, Number(b.amount || 0)), 0);
-
-  document.getElementById("kpiQtd").textContent = String(qtd);
-  document.getElementById("kpiTotal").textContent = App.money(total);
-  document.getElementById("kpiMaior").textContent = App.money(maior);
-}
-
-function renderFixos(){
-  const div = document.getElementById("listaFixos");
-  const fixos = Array.isArray(App.fixos) ? [...App.fixos] : [];
-  const busca = normalize(document.getElementById("buscaFixo").value || "");
-
-  let lista = fixos;
-  if(busca){
-    lista = lista.filter(f => {
-      const text = normalize((f.desc || "") + " " + (f.category || ""));
-      return text.includes(busca);
-    });
+  for(let i=0;i<=120;i++){
+    const dt = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    monthsSet.add(dt.toISOString().slice(0,7));
+  }
+  for(let i=1;i<=120;i++){
+    const dt = new Date(now.getFullYear(), now.getMonth()+i, 1);
+    monthsSet.add(dt.toISOString().slice(0,7));
   }
 
-  if(!lista.length){
-    div.innerHTML = `<div class="empty">${busca ? "Nenhum gasto fixo encontrado." : "Nenhum gasto fixo cadastrado."}</div>`;
-    updateKPIs();
+  const months = Array.from(monthsSet).sort().reverse();
+  sel.innerHTML = months.map(m=>{
+    const [y,mo]=m.split("-");
+    const dt = new Date(Number(y), Number(mo)-1, 1);
+    const label = dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+    return `<option value="${m}">${label}</option>`;
+  }).join("");
+
+  const opened = localStorage.getItem("mes_aberto");
+  if(opened) mesAtual = opened;
+  if(!months.includes(mesAtual)) mesAtual = new Date().toISOString().slice(0,7);
+
+  sel.value = mesAtual;
+  sel.onchange = ()=>{ mesAtual = sel.value; render(); };
+}
+
+function buildCategoriasSelects(){
+  const opts = App.categorias.map(c=>`<option value="${App.escapeHtml(c)}">${App.escapeHtml(c)}</option>`).join("");
+  const mCategoria = document.getElementById("mCategoria");
+  if(mCategoria) mCategoria.innerHTML = opts;
+}
+
+function renderSaved(){
+  const d = App.getDataMes(mesAtual);
+  const div = document.getElementById("savedList");
+  App.ensureSavedArray(d);
+
+  if(!d.saved.length){
+    div.innerHTML = "";
     return;
   }
 
-  div.innerHTML = lista.map(item=>{
-    const realIndex = App.fixos.findIndex(f =>
-      String(f.desc||"") === String(item.desc||"") &&
-      Number(f.amount||0) === Number(item.amount||0) &&
-      String(f.category||"") === String(item.category||"")
-    );
+  div.innerHTML = d.saved.map((s,idx)=>`
+    <div class="statLine savedRow">
+      <div>
+        <div style="font-weight:950">🏦 ${App.money(s.value)}</div>
+        <div class="small">
+          Data: ${App.escapeHtml(s.date || "")}
+          ${s.desc ? (" • " + App.escapeHtml(s.desc)) : ""}
+          ${s.source==="investFixo" ? ` • <span class="badge">Auto</span>` : ``}
+        </div>
+      </div>
+      <button class="btn icon mini" onclick="removeSaved(${idx})">✕</button>
+    </div>
+  `).join("");
+}
+
+function renderKPIs(){
+  const d = App.getDataMes(mesAtual);
+  const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+  const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
+  const salary = Number(d.salary||0);
+  const left = salary - spent;
+
+  document.getElementById("kpiSalary").textContent = App.money(salary);
+  document.getElementById("kpiSpent").textContent  = App.money(spent);
+  document.getElementById("kpiLeft").textContent   = App.money(left);
+  document.getElementById("kpiSaved").textContent  = App.money(saved);
+
+  document.getElementById("salary").value = salary ? salary : "";
+  document.getElementById("meta").value = d.meta ? d.meta : "";
+}
+
+function renderList(){
+  const d = App.getDataMes(mesAtual);
+  const table = document.getElementById("list");
+
+  if(!d.items.length){
+    table.innerHTML = `<tr><td class="small">Nenhum gasto neste mês. Toque em “+” para adicionar.</td></tr>`;
+    return;
+  }
+
+  table.innerHTML = d.items.map((i,idx)=>{
+    const paid = !!i.paid;
+    const statusBadge = paid ? `<span class="badge good">Pago</span>` : `<span class="badge warn">Pendente</span>`;
+    const fixBadge = i.isInvestFixo ? `<span class="badge">Juntar</span>` : (i.isFixo ? `<span class="badge">Fixo</span>` : ``);
+    const dueBadge = (i.isInvestFixo && i.diaPagar) ? `<span class="badge warn">Vence dia ${App.escapeHtml(i.diaPagar)}</span>` : ``;
+    const btnPaidClass = paid ? "good" : "warn";
+    const btnPaidText = paid ? "✅ Pago" : "⏳ Pendente";
 
     return `
-      <div class="note">
-        <div class="fixoRow">
-          <div class="fixoInfo">
-            <div class="fixoTitle">${App.escapeHtml(item.desc || "")}</div>
-            <div class="fixoMeta">
-              <span class="badge">${App.escapeHtml(item.category || "Outros")}</span>
-              <span class="badge">${App.money(item.amount || 0)}</span>
-              <span class="badge">Mensal</span>
-            </div>
+      <tr>
+        <td>
+          <div style="font-weight:900">
+            ${App.escapeHtml(i.desc||"")}
+            ${fixBadge}
+            ${dueBadge}
+            <span class="badge">${App.escapeHtml(i.category||"Outros")}</span>
+            ${statusBadge}
           </div>
-          <button class="btn icon danger" onclick="removeFixo(${realIndex})" title="Remover gasto fixo">✕</button>
+          <div class="small">${App.money(i.amount||0)}</div>
+          <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn ${btnPaidClass} mini" onclick="togglePaid(${idx})">${btnPaidText}</button>
+          </div>
+        </td>
+        <td style="width:64px;text-align:right">
+          <button class="btn icon mini" onclick="delItemSmart(${idx})">✕</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function drawChart(items){
+  const mapa = {};
+  items.forEach(i=>{
+    const cat = i.category || "Outros";
+    mapa[cat] = (mapa[cat]||0) + Number(i.amount||0);
+  });
+
+  const labels = Object.keys(mapa);
+  const valores = Object.values(mapa);
+
+  if(grafico) grafico.destroy();
+  grafico = new Chart(document.getElementById("chart"), {
+    type:"doughnut",
+    data:{ labels, datasets:[{ data: valores }] },
+    options:{
+      plugins:{
+        legend:{ labels:{ color:getComputedStyle(document.body).getPropertyValue("--text") } }
+      }
+    }
+  });
+}
+
+function drawEvolucao(){
+  const meses = Object.keys(App.state.meses||{}).sort();
+  if(!meses.length) return;
+
+  const valores = meses.map(m=>{
+    const d = App.getDataMes(m);
+    return (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+  });
+
+  if(graficoEvolucao) graficoEvolucao.destroy();
+  graficoEvolucao = new Chart(document.getElementById("chartEvolucao"), {
+    type:"line",
+    data:{ labels: meses, datasets:[{ data: valores }] },
+    options:{ plugins:{ legend:{ display:false }}}
+  });
+}
+
+function drawAllCharts(){
+  const d = App.getDataMes(mesAtual);
+  drawChart(d.items||[]);
+  drawEvolucao();
+}
+
+function saveSettings(){
+  const d = App.getDataMes(mesAtual);
+  d.salary = Number(document.getElementById("salary").value||0);
+  d.meta = Number(document.getElementById("meta").value||0);
+  App.saveAll();
+  if(typeof App.syncSalvarMes === "function"){
+    App.syncSalvarMes(mesAtual, d.salary, d.meta);
+  }
+  render();
+}
+
+function addSaved(){
+  const v = Number(document.getElementById("savedValue").value);
+  const desc = (document.getElementById("savedDesc").value||"").trim();
+  if(!v || v<=0) return alert("Digite um valor para adicionar ao guardado.");
+
+  const d = App.getDataMes(mesAtual);
+  App.ensureSavedArray(d);
+  d.saved.unshift({ value:v, desc, date:App.todayISO(), source:"manual" });
+
+  document.getElementById("savedValue").value = "";
+  document.getElementById("savedDesc").value = "";
+  App.saveAll();
+  renderSaved();
+  renderKPIs();
+}
+
+function removeSaved(idx){
+  const d = App.getDataMes(mesAtual);
+  App.ensureSavedArray(d);
+  if(idx<0 || idx>=d.saved.length) return;
+  d.saved.splice(idx,1);
+  App.saveAll();
+  renderSaved();
+  renderKPIs();
+}
+
+function openAddExpense(){
+  document.getElementById("mDesc").value = "";
+  document.getElementById("mValor").value = "";
+  document.getElementById("mCategoria").value = "Outros";
+  openModal("overlay-addExpense");
+}
+
+function confirmAddExpense(){
+  const desc = (document.getElementById("mDesc").value||"").trim();
+  const amount = Number(document.getElementById("mValor").value||0);
+  let cat = document.getElementById("mCategoria").value || "Outros";
+
+  if(!desc) return alert("Preencha a descrição.");
+  if(!amount || amount<=0) return alert("Preencha o valor.");
+
+  const sug = App.detectarCategoria(desc);
+  if(cat==="Outros" && sug!=="Outros") cat = sug;
+
+  addExpenseDirect(desc, amount, cat);
+  closeModal("overlay-addExpense");
+  render();
+}
+
+function addExpenseDirect(desc, amount, category){
+  const d = App.getDataMes(mesAtual);
+  const cat = App.categorias.includes(category) ? category : (category || App.detectarCategoria(desc));
+  d.items.push(App.ensureItemDefaults({ desc, amount, category:cat, isFixo:false, isInvestFixo:false }));
+  App.saveAll();
+  if(typeof App.syncAddGasto === "function"){
+    App.syncAddGasto(mesAtual, desc, amount, cat);
+  }
+}
+
+function markItemByName(target, shouldBePaid){
+  const d = App.getDataMes(mesAtual);
+  const normTarget = normalize(target);
+  const idx = (d.items || []).findIndex(it => normalize(it.desc || "").includes(normTarget));
+  if(idx < 0) return false;
+
+  const it = d.items[idx];
+  it.paid = !!shouldBePaid;
+
+  if(it.isInvestFixo && it.invId){
+    App.ensureMonthInvestStatus(d);
+    d.investStatus[it.invId] = !!it.paid;
+
+    if(it.paid){
+      App.addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount || 0), `Automático: ${it.desc}`);
+    }else{
+      App.removeAutoSavedForInv(d, it.invId, mesAtual);
+    }
+  }
+
+  App.saveAll();
+  return true;
+}
+
+function togglePaid(idx){
+  const d = App.getDataMes(mesAtual);
+  const it = d.items[idx];
+  if(!it) return;
+
+  it.paid = !it.paid;
+
+  if(it.isInvestFixo && it.invId){
+    App.ensureMonthInvestStatus(d);
+    d.investStatus[it.invId] = !!it.paid;
+
+    if(it.paid){
+      App.addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
+    }else{
+      App.removeAutoSavedForInv(d, it.invId, mesAtual);
+    }
+  }
+
+  App.saveAll();
+  renderSaved();
+  renderList();
+  renderKPIs();
+}
+
+function delItemMonthOnly(idx){
+  const d = App.getDataMes(mesAtual);
+  const it = d.items[idx];
+  if(!it) return;
+
+  d.items.splice(idx,1);
+  App.saveAll();
+
+  if(!it.isFixo && typeof App.syncDelGasto === "function"){
+    App.syncDelGasto(mesAtual, it.desc, it.amount);
+  }
+}
+
+function delItemSmart(idx){
+  const d = App.getDataMes(mesAtual);
+  const it = d.items[idx];
+  if(!it) return;
+
+  if(it.isFixo && typeof App.hideFixoOnlyThisMonth === "function"){
+    App.hideFixoOnlyThisMonth(mesAtual, it);
+    render();
+    return;
+  }
+
+  delItemMonthOnly(idx);
+  render();
+}
+
+function renderVoiceUI(){
+  const fab = document.getElementById("fabVoice");
+  const menuBtn = document.getElementById("menuVoiceBtn");
+  const status = document.getElementById("voiceEnableStatus");
+  const toggleBtn = document.getElementById("btnToggleVoiceEnabled");
+  const enabled = App.isVoiceEnabled();
+
+  fab.classList.toggle("hidden", !enabled);
+  menuBtn.style.display = enabled ? "" : "none";
+  status.textContent = enabled ? "Ativado" : "Bloqueado";
+  toggleBtn.textContent = enabled ? "Bloquear" : "Ativar";
+  toggleBtn.className = "btn " + (enabled ? "danger" : "good");
+}
+function toggleVoiceEnabled(){
+  App.toggleVoiceEnabled();
+  renderVoiceUI();
+}
+
+function kHomeLayout(){ return `home_layout_${App.USER_ID || "guest"}`; }
+function defaultHomeLayout(){ return HOME_SECTIONS.map(s=>({ id:s.id, show:true })); }
+function loadHomeLayout(){
+  try{
+    const raw = localStorage.getItem(kHomeLayout());
+    if(!raw) return defaultHomeLayout();
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed)) return defaultHomeLayout();
+
+    const ids = new Set(parsed.map(x=>x && x.id).filter(Boolean));
+    const fixed = parsed.filter(x=>x && typeof x.id==="string").map(x=>({ id:x.id, show:x.show!==false }));
+    HOME_SECTIONS.forEach(s=>{ if(!ids.has(s.id)) fixed.push({ id:s.id, show:true }); });
+    return fixed.filter(x=>HOME_SECTIONS.some(s=>s.id===x.id));
+  }catch(e){
+    return defaultHomeLayout();
+  }
+}
+function saveHomeLayout(layout){ localStorage.setItem(kHomeLayout(), JSON.stringify(layout)); }
+function applyHomeLayoutToDOM(){
+  const container = document.getElementById("homeContainer");
+  const layout = loadHomeLayout();
+  const map = {};
+  container.querySelectorAll("[data-home]").forEach(el=>{ map[el.getAttribute("data-home")] = el; });
+
+  layout.forEach(item=>{
+    const el = map[item.id];
+    if(!el) return;
+    container.appendChild(el);
+    el.style.display = item.show ? "" : "none";
+  });
+}
+function openHomeEditor(){
+  renderHomeEditorUI();
+  openScreen("screen-home-editor");
+}
+function renderHomeEditorUI(){
+  const div = document.getElementById("layoutList");
+  const layout = loadHomeLayout();
+  const titleById = Object.fromEntries(HOME_SECTIONS.map(s=>[s.id,s.title]));
+
+  div.innerHTML = layout.map((it,idx)=>{
+    const t = titleById[it.id] || it.id;
+    const checked = it.show ? "checked" : "";
+    const upDisabled = idx===0 ? "disabled" : "";
+    const downDisabled = idx===layout.length-1 ? "disabled" : "";
+    return `
+      <div class="layoutItem">
+        <div class="layoutLeft">
+          <div class="handle">≡</div>
+          <input class="chk" type="checkbox" ${checked} onchange="toggleHomeSectionShow(${idx}, this.checked)">
+          <div class="layoutTitle">${App.escapeHtml(t)}</div>
+        </div>
+        <div class="layoutActions">
+          <button class="btn icon mini" ${upDisabled} onclick="moveHomeSection(${idx}, -1)">↑</button>
+          <button class="btn icon mini" ${downDisabled} onclick="moveHomeSection(${idx}, 1)">↓</button>
         </div>
       </div>
     `;
   }).join("");
-
-  updateKPIs();
+}
+function moveHomeSection(index, dir){
+  const layout = loadHomeLayout();
+  const newIndex = index + dir;
+  if(newIndex < 0 || newIndex >= layout.length) return;
+  const tmp = layout[index];
+  layout[index] = layout[newIndex];
+  layout[newIndex] = tmp;
+  saveHomeLayout(layout);
+  renderHomeEditorUI();
+}
+function toggleHomeSectionShow(index, show){
+  const layout = loadHomeLayout();
+  if(!layout[index]) return;
+  layout[index].show = !!show;
+  saveHomeLayout(layout);
+}
+function resetHomeLayout(){
+  saveHomeLayout(defaultHomeLayout());
+  renderHomeEditorUI();
+}
+function applyHomeLayoutFromEditor(){
+  applyHomeLayoutToDOM();
+  goHome();
 }
 
-function addFixo(){
-  const desc = (document.getElementById("descFixo").value || "").trim();
-  const amount = Number(document.getElementById("valorFixo").value || 0);
-  const category = document.getElementById("categoriaFixo").value || "Outros";
+function saveThemePreset(){
+  App.setThemePreset(document.getElementById("themePreset").value);
+  drawAllCharts();
+}
+function saveAccentColor(){
+  App.setAccentColor(document.getElementById("accentPicker").value);
+}
+function resetThemes(){
+  App.resetThemes();
+  syncThemeUI();
+  drawAllCharts();
+}
+function syncThemeUI(){
+  const preset = localStorage.getItem(App.THEME_KEYS.preset) || "default";
+  const accent = localStorage.getItem(App.THEME_KEYS.accent) || "#569cff";
+  document.getElementById("themePreset").value = preset;
+  document.getElementById("accentPicker").value = accent;
+}
 
-  if(!desc) return alert("Digite a descrição do gasto fixo.");
-  if(!amount || amount <= 0) return alert("Digite um valor válido.");
+function buildPdfSelectors(){
+  const yearSel = document.getElementById("pdfYear");
+  const monthSel = document.getElementById("pdfMonth");
 
-  App.addFixo({
-    desc,
-    amount,
-    category
+  const months = Object.keys(App.state.meses||{}).sort();
+  const years = new Set(months.map(m=>m.slice(0,4)));
+  years.add(String(new Date().getFullYear()));
+  const yearsArr = Array.from(years).sort().reverse();
+
+  yearSel.innerHTML = yearsArr.map(y=>`<option value="${y}">${y}</option>`).join("");
+  yearSel.value = mesAtual.slice(0,4);
+
+  const monthsSorted = Object.keys(App.state.meses||{}).sort().reverse();
+  if(!monthsSorted.includes(mesAtual)) monthsSorted.unshift(mesAtual);
+  monthSel.innerHTML = monthsSorted.map(m=>{
+    const dt = new Date(m+"-01T00:00:00");
+    const label = dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+    return `<option value="${m}">${App.escapeHtml(label)}</option>`;
+  }).join("");
+  monthSel.value = mesAtual;
+}
+function openPdfScreen(){
+  buildPdfSelectors();
+  openScreen("screen-pdf");
+}
+
+function aggregateYear(year){
+  const months = Object.keys(App.state.meses||{}).filter(m=>m.startsWith(String(year)+"-")).sort();
+  const byCat = {};
+  const byMonth = [];
+
+  months.forEach(m=>{
+    const d = App.getDataMes(m);
+    const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+    const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
+    const salary = Number(d.salary||0);
+    byMonth.push({ m, salary, spent, saved });
+    (d.items||[]).forEach(it=>{
+      const c = it.category||"Outros";
+      byCat[c] = (byCat[c]||0) + Number(it.amount||0);
+    });
   });
 
-  clearForm();
-  renderFixos();
+  const catsSorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const topCat = catsSorted[0] ? { cat:catsSorted[0][0], value:catsSorted[0][1] } : { cat:"—", value:0 };
+  return { months, byCat, byMonth, topCat };
 }
 
-function removeFixo(index){
-  if(index < 0 || index >= App.fixos.length) return;
-  const item = App.fixos[index];
-  const ok = confirm(`Remover o gasto fixo "${item.desc}"?`);
-  if(!ok) return;
+async function renderPdfAndSave(wrap, filename){
+  const canvas = await html2canvas(wrap, { scale:2, backgroundColor:"#ffffff" });
+  const imgData = canvas.toDataURL("image/png");
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p","mm","a4");
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const imgW = pageW;
+  const imgH = (canvas.height * imgW) / canvas.width;
 
-  App.removeFixo(index);
-  renderFixos();
+  let y = 0;
+  let remaining = imgH;
+
+  pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+  remaining -= pageH;
+
+  while(remaining > 0){
+    pdf.addPage();
+    y = -(imgH - remaining);
+    pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
+    remaining -= pageH;
+  }
+
+  pdf.save(filename);
 }
 
-function removeFixoByName(target){
-  const normTarget = normalize(target);
-  const idx = (App.fixos || []).findIndex(f => normalize(f.desc || "").includes(normTarget));
-  if(idx < 0) return false;
-  App.removeFixo(idx);
-  return true;
+async function gerarPDFResumoAno(){
+  const status = document.getElementById("pdfStatus");
+  try{
+    status.textContent = "Gerando resumo do ano…";
+    const year = document.getElementById("pdfYear").value;
+    const agg = aggregateYear(year);
+
+    const wrap = document.createElement("div");
+    wrap.style.position = "fixed";
+    wrap.style.left = "-9999px";
+    wrap.style.top = "0";
+    wrap.style.width = "900px";
+    wrap.style.padding = "16px";
+    wrap.style.background = "#ffffff";
+    wrap.style.color = "#111";
+    wrap.style.fontFamily = "system-ui, sans-serif";
+    wrap.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
+        <div>
+          <div style="font-size:22px;font-weight:900">Resumo do Ano • Controle de Gastos PRO</div>
+          <div style="font-size:13px;color:#444">Ano: <b>${App.escapeHtml(year)}</b> • Gerado em: ${App.escapeHtml(App.todayISO())}</div>
+          <div style="font-size:13px;color:#444">Usuário: <b>${App.escapeHtml(App.USER?.displayName||"Usuário")}</b></div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:#444">
+          <div>Mais gastou no ano:</div>
+          <div style="font-size:14px;font-weight:900">${App.escapeHtml(agg.topCat.cat)} • ${App.money(agg.topCat.value)}</div>
+        </div>
+      </div>
+      <hr style="border:none;height:1px;background:#ddd;margin:14px 0">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Gráfico • Categorias do ano</div>
+          <canvas id="pdfChartCats" width="400" height="280"></canvas>
+        </div>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Gráfico • Evolução mensal</div>
+          <canvas id="pdfChartEvo" width="400" height="280"></canvas>
+        </div>
+      </div>
+      <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
+        <div style="font-weight:900;margin-bottom:8px">Tabela do ano</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr>
+              <th style="text-align:left;border-bottom:1px solid #ddd;padding:8px">Mês</th>
+              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Salário</th>
+              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Gastos</th>
+              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Guardado</th>
+              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Sobra</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${agg.byMonth.map(x=>{
+              const sobra = Number(x.salary||0) - Number(x.spent||0);
+              const dt = new Date(x.m+"-01T00:00:00");
+              const label = dt.toLocaleDateString("pt-BR",{month:"short",year:"numeric"});
+              return `
+                <tr>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-transform:capitalize">${App.escapeHtml(label)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${App.money(x.salary)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${App.money(x.spent)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${App.money(x.saved)}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${App.money(sobra)}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+    document.body.appendChild(wrap);
+
+    const catChart = new Chart(wrap.querySelector("#pdfChartCats"), {
+      type:"doughnut",
+      data:{ labels:Object.keys(agg.byCat), datasets:[{ data:Object.values(agg.byCat) }] },
+      options:{ plugins:{ legend:{ position:"bottom" }}}
+    });
+
+    const evoChart = new Chart(wrap.querySelector("#pdfChartEvo"), {
+      type:"line",
+      data:{
+        labels: agg.byMonth.map(x=>new Date(x.m+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"short"})),
+        datasets:[{ data: agg.byMonth.map(x=>Number(x.spent||0)) }]
+      },
+      options:{ plugins:{ legend:{ display:false }}}
+    });
+
+    await new Promise(r=>setTimeout(r, 250));
+    await renderPdfAndSave(wrap, `resumo_ano_${year}.pdf`);
+    catChart.destroy();
+    evoChart.destroy();
+    wrap.remove();
+    status.textContent = "Resumo do ano gerado ✅";
+  }catch(e){
+    status.textContent = "Erro ao gerar PDF: " + (e.message||e);
+  }
 }
 
-function handleVoiceCommand(raw){
+async function gerarPDFCompletoMes(){
+  const status = document.getElementById("pdfStatus");
+  try{
+    status.textContent = "Gerando PDF do mês…";
+    const year = document.getElementById("pdfYear").value;
+    const monthKey = document.getElementById("pdfMonth").value;
+    const agg = aggregateYear(year);
+    const notesData = App.getDataMes(monthKey);
+
+    const wrap = document.createElement("div");
+    wrap.style.position = "fixed";
+    wrap.style.left = "-9999px";
+    wrap.style.top = "0";
+    wrap.style.width = "900px";
+    wrap.style.padding = "16px";
+    wrap.style.background = "#ffffff";
+    wrap.style.color = "#111";
+    wrap.style.fontFamily = "system-ui, sans-serif";
+    wrap.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
+        <div>
+          <div style="font-size:22px;font-weight:900">Relatório do Mês • Controle de Gastos PRO</div>
+          <div style="font-size:13px;color:#444">Ano: <b>${App.escapeHtml(year)}</b> • Mês: <b>${App.escapeHtml(monthKey)}</b> • Gerado em: ${App.escapeHtml(App.todayISO())}</div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:#444">
+          <div>Mais gastou no ano:</div>
+          <div style="font-size:14px;font-weight:900">${App.escapeHtml(agg.topCat.cat)} • ${App.money(agg.topCat.value)}</div>
+        </div>
+      </div>
+      <hr style="border:none;height:1px;background:#ddd;margin:14px 0">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Categorias do ano</div>
+          <canvas id="pdfChartCats" width="400" height="280"></canvas>
+        </div>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-weight:900;margin-bottom:8px">Evolução mensal</div>
+          <canvas id="pdfChartEvo" width="400" height="280"></canvas>
+        </div>
+      </div>
+      <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
+        <div style="font-weight:900;margin-bottom:8px">Anotações do mês</div>
+        <div style="font-size:12px;color:#444;margin-bottom:8px">
+          Salário: <b>${App.money(notesData.salary || 0)}</b> • Guardado: <b>${App.money((notesData.saved||[]).reduce((a,b)=>a+Number(b.value||0),0))}</b>
+        </div>
+        ${
+          notesData.items.length
+          ? notesData.items.map(it=>`
+            <div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed #eee">
+              <div>
+                <div style="font-weight:800">${App.escapeHtml(it.desc||"")}</div>
+                <div style="font-size:12px;color:#444">${App.escapeHtml(it.category||"Outros")} • ${it.paid ? "Pago" : "Pendente"}</div>
+              </div>
+              <div style="font-weight:900">${App.money(it.amount||0)}</div>
+            </div>
+          `).join("")
+          : `<div style="font-size:12px;color:#444">Nenhuma anotação neste mês.</div>`
+        }
+      </div>
+    `;
+    document.body.appendChild(wrap);
+
+    const catChart = new Chart(wrap.querySelector("#pdfChartCats"), {
+      type:"doughnut",
+      data:{ labels:Object.keys(agg.byCat), datasets:[{ data:Object.values(agg.byCat) }] },
+      options:{ plugins:{ legend:{ position:"bottom" }}}
+    });
+
+    const evoChart = new Chart(wrap.querySelector("#pdfChartEvo"), {
+      type:"line",
+      data:{
+        labels: agg.byMonth.map(x=>new Date(x.m+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"short"})),
+        datasets:[{ data: agg.byMonth.map(x=>Number(x.spent||0)) }]
+      },
+      options:{ plugins:{ legend:{ display:false }}}
+    });
+
+    await new Promise(r=>setTimeout(r, 250));
+    await renderPdfAndSave(wrap, `pdf_mes_${monthKey}.pdf`);
+    catChart.destroy();
+    evoChart.destroy();
+    wrap.remove();
+    status.textContent = "PDF do mês gerado ✅";
+  }catch(e){
+    status.textContent = "Erro ao gerar PDF: " + (e.message||e);
+  }
+}
+
+/* ===== Voz: ações do index ===== */
+function handleVoiceCommandOnIndex(raw){
   const cmd = normalize(raw);
   if(!cmd) return false;
+
+  if(cmd.includes("abrir menu")){
+    openMenu();
+    return true;
+  }
+  if(cmd.includes("abrir ia")){
+    openIAPage();
+    return true;
+  }
+  if(cmd.includes("abrir edicao do painel") || cmd.includes("abrir edição do painel") || cmd.includes("editar painel")){
+    openHomeEditor();
+    return true;
+  }
+
+  if(cmd.includes("imprimir resumo do ano")){
+    openPdfScreen();
+    setTimeout(()=>gerarPDFResumoAno(), 250);
+    return true;
+  }
+  if(cmd.includes("imprimir pdf do mes") || cmd.includes("imprimir pdf do mês")){
+    openPdfScreen();
+    setTimeout(()=>gerarPDFCompletoMes(), 250);
+    return true;
+  }
 
   if(cmd.includes("tema roxo")){
     localStorage.setItem(App.THEME_KEYS.preset, "purple");
     App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
     return true;
   }
   if(cmd.includes("tema minimal") || cmd.includes("tema mono")){
     localStorage.setItem(App.THEME_KEYS.preset, "mono");
     App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
     return true;
   }
   if(cmd.includes("tema verde")){
     localStorage.setItem(App.THEME_KEYS.preset, "green");
     App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
     return true;
   }
   if(cmd.includes("tema padrao") || cmd.includes("tema padrão")){
     localStorage.setItem(App.THEME_KEYS.preset, "default");
     App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
     return true;
   }
   if(cmd.includes("tema por do sol") || cmd.includes("tema pôr do sol") || cmd.includes("tema sunset")){
     localStorage.setItem(App.THEME_KEYS.preset, "sunset");
     App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
     return true;
   }
 
-  let m = cmd.match(/^anote\s+gastos?\s+fixos?\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i)
-       || cmd.match(/^anotar\s+gastos?\s+fixos?\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i);
+  let m = cmd.match(/^anote\s+como\s+pago\s+(.+)$/i) || cmd.match(/^anotar\s+como\s+pago\s+(.+)$/i);
   if(m){
-    App.addFixo({
-      desc: (m[1] || "").trim(),
-      amount: parseMoney(m[2]),
-      category: capitalize(m[3])
-    });
-    renderFixos();
-    return true;
+    if(markItemByName(m[1], true)){
+      render();
+      return true;
+    }
+    return false;
   }
 
-  m = cmd.match(/^remover\s+gasto\s+fixo\s+(.+)$/i)
-    || cmd.match(/^apagar\s+gasto\s+fixo\s+(.+)$/i)
-    || cmd.match(/^excluir\s+gasto\s+fixo\s+(.+)$/i);
+  m = cmd.match(/^anote\s+como\s+pendente\s+(.+)$/i) || cmd.match(/^anotar\s+como\s+pendente\s+(.+)$/i);
   if(m){
-    const ok = removeFixoByName((m[1] || "").trim());
-    if(ok){
-      renderFixos();
+    if(markItemByName(m[1], false)){
+      render();
+      return true;
+    }
+    return false;
+  }
+
+  m = cmd.match(/^anote\s+guardado\s+(\d+(?:[.,]\d+)?)\s+de\s+(.+)$/i) || cmd.match(/^anotar\s+guardado\s+(\d+(?:[.,]\d+)?)\s+de\s+(.+)$/i);
+  if(m){
+    const value = parseMoney(m[1]);
+    const desc = (m[2]||"").trim();
+    if(value>0){
+      const d = App.getDataMes(mesAtual);
+      App.ensureSavedArray(d);
+      d.saved.unshift({ value:Number(value), desc, date:App.todayISO(), source:"manual" });
+      App.saveAll();
+      render();
       return true;
     }
   }
 
-  if(cmd.includes("abrir tela principal") || cmd.includes("abrir inicio") || cmd.includes("abrir início") || cmd.includes("ir para home")){
-    location.href = "./index.html";
-    return true;
+  m = cmd.match(/^anote\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i) || cmd.match(/^anotar\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i);
+  if(m && !cmd.includes("gastos fixos")){
+    const desc = (m[1]||"").trim();
+    const amount = parseMoney(m[2]);
+    const category = capitalize(m[3]);
+    if(desc && amount>0){
+      addExpenseDirect(desc, amount, category);
+      render();
+      return true;
+    }
   }
 
   return false;
 }
 
 function bindVoiceStorageListener(){
+  if(__voiceStorageBound) return;
+  __voiceStorageBound = true;
+
   window.addEventListener("storage", (e)=>{
     if(e.key === VOICE_CMD_KEY && e.newValue){
-      const ok = handleVoiceCommand(e.newValue);
+      const ok = handleVoiceCommandOnIndex(e.newValue);
       if(ok) localStorage.removeItem(VOICE_CMD_KEY);
     }
   });
 
   const first = localStorage.getItem(VOICE_CMD_KEY);
   if(first){
-    const ok = handleVoiceCommand(first);
+    const ok = handleVoiceCommandOnIndex(first);
     if(ok) localStorage.removeItem(VOICE_CMD_KEY);
   }
 }
 
+function applyHashRoute(){
+  const hash = (location.hash || "").toLowerCase();
+  if(hash === "#menu"){
+    openMenu();
+  }else if(hash === "#ia"){
+    openIAPage();
+  }
+}
+
+async function render(){
+  buildMonthSelect();
+  buildCategoriasSelects();
+
+  const d = App.getDataMes(mesAtual);
+  App.ensureMonthInvestStatus(d);
+
+  d.items.forEach(it=>{
+    if(it && it.isInvestFixo && it.invId){
+      if(typeof d.investStatus[it.invId] !== "boolean") d.investStatus[it.invId] = false;
+      it.paid = !!d.investStatus[it.invId];
+      if(it.paid){
+        App.addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
+      }else{
+        App.removeAutoSavedForInv(d, it.invId, mesAtual);
+      }
+    }
+  });
+
+  App.saveAll();
+  applyHomeLayoutToDOM();
+  renderKPIs();
+  renderSaved();
+  renderList();
+  drawAllCharts();
+  buildPdfSelectors();
+
+  if(typeof App.fetchMes === "function"){
+    const data = await App.fetchMes(mesAtual);
+    if(Array.isArray(data) && data.length){
+      const first = data[0] || {};
+      if(first.salary != null) d.salary = Number(first.salary || d.salary || 0);
+      if(first.meta != null) d.meta = Number(first.meta || d.meta || 0);
+
+      const apiItems = data.filter(x=>x && x.desc).map(x=>App.ensureItemDefaults({
+        desc:x.desc,
+        amount:Number(x.amount||0),
+        category:(x.category && App.categorias.includes(x.category)) ? x.category : (x.category || App.detectarCategoria(x.desc)),
+        isFixo:false,
+        isInvestFixo:false
+      }));
+
+      const hidden = new Set((d.hiddenFixos||[]).map(String));
+      const merged = [];
+      const seen = new Set();
+      const fresh = App.getDataMes(mesAtual);
+
+      for(const it of (fresh.items||[]).filter(x=>x.isFixo)){
+        const fk = App.fixKey(it.desc,it.amount,it.category);
+        if(hidden.has(fk)) continue;
+        const k = fk + "|fix";
+        if(!seen.has(k)){ merged.push(it); seen.add(k); }
+      }
+
+      for(const it of (d.items||[]).filter(x=>!x.isFixo)){
+        const k = App.fixKey(it.desc,it.amount,it.category) + "|loc";
+        if(!seen.has(k)){ merged.push(it); seen.add(k); }
+      }
+
+      for(const it of apiItems){
+        const k = App.fixKey(it.desc,it.amount,it.category) + "|api";
+        if(!seen.has(k)){ merged.push(it); seen.add(k); }
+      }
+
+      d.items = merged.map(App.ensureItemDefaults);
+      App.saveAll();
+
+      renderKPIs();
+      renderSaved();
+      renderList();
+      drawAllCharts();
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async ()=>{
-  await App.boot(()=>{
-    buildCategorias();
+  await App.boot((user)=>{
+    document.getElementById("userName").textContent = user.displayName || "Usuário";
+    document.getElementById("userEmail").textContent = user.email || "";
+    syncThemeUI();
+    renderVoiceUI();
+    renderHomeEditorUI();
     bindVoiceStorageListener();
-    renderFixos();
+    render();
+    if(typeof App.startDueNotificationWatcher === "function"){
+      App.startDueNotificationWatcher();
+    }
+    goHome();
+    applyHashRoute();
   });
 });
 </script>
