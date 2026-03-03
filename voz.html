@@ -150,7 +150,7 @@
 
 <div class="wrap" style="max-width:980px">
   <div class="backRow">
-    <a class="btn backBtn" href="./index.html">← Voltar</a>
+    <a class="btn backBtn" href="./index.html" onclick="onExitVoice(event)">← Voltar</a>
     <div style="font-weight:900">Comando de Voz</div>
   </div>
 
@@ -274,7 +274,7 @@ window.addEventListener("unhandledrejection", (e)=>{
 </script>
 
 <script>
-const VOICE_CMD_KEY = "voice_cmd";
+const VOICE_CMD_KEY  = "voice_cmd";
 const VOICE_LAST_KEY = "voice_last";
 const VOICE_TS_KEY   = "voice_ts";
 
@@ -295,16 +295,29 @@ function setLastText(text){
   document.getElementById("lastText").textContent = text || "—";
 }
 
+function clearVoiceCmd(){
+  // limpa o comando "executável" para não reabrir coisas ao voltar
+  localStorage.removeItem(VOICE_CMD_KEY);
+  // também remove timestamp do comando executável (opcional, mas ajuda)
+  localStorage.removeItem(VOICE_TS_KEY);
+}
+
+function onExitVoice(ev){
+  // quando clicar em voltar/sair do voz.html, limpa o comando executável
+  try{ clearVoiceCmd(); }catch(_){}
+  // segue a navegação normal do link
+}
+
 function saveVoiceCommand(raw, persistCmd = true){
   // sempre guarda o último comando pro botão "Repetir"
   localStorage.setItem(VOICE_LAST_KEY, raw);
-  localStorage.setItem(VOICE_TS_KEY, String(Date.now()));
 
   // só grava o comando para o index/páginas executarem quando precisar
   if(persistCmd){
     localStorage.setItem(VOICE_CMD_KEY, raw);
+    localStorage.setItem(VOICE_TS_KEY, String(Date.now()));
   }else{
-    localStorage.removeItem(VOICE_CMD_KEY); // evita re-executar ao voltar pro index
+    clearVoiceCmd();
   }
 }
 
@@ -312,80 +325,80 @@ function routeCommand(raw){
   const cmd = normalize(raw);
   if(!cmd) return false;
 
-  // Grupo 1 — abrir páginas
+  // Grupo 1 — abrir páginas (NÃO grava voice_cmd, só voice_last)
   if(cmd.includes("abrir historico") || cmd.includes("abrir histórico")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, false);
     location.href = "./historico.html";
     return true;
   }
   if(cmd.includes("abrir gastos fixos")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, false);
     location.href = "./fixos.html";
     return true;
   }
   if(cmd.includes("abrir investimentos fixos") || cmd.includes("abrir investimento fixo")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, false);
     location.href = "./investfixos.html";
     return true;
   }
   if(cmd.includes("abrir categorias")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, false);
     location.href = "./categorias.html";
     return true;
   }
   if(cmd.includes("abrir simuladores") || cmd.includes("abrir simulador")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, false);
     location.href = "./simuladores.html";
     return true;
   }
   if(cmd.includes("abrir ia")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, false);
     location.href = "./index.html#ia";
     return true;
   }
   if(cmd.includes("abrir menu")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, false);
     location.href = "./index.html#menu";
     return true;
   }
   if(cmd.includes("abrir tela principal") || cmd.includes("abrir inicio") || cmd.includes("abrir início") || cmd.includes("ir para home")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, false);
     location.href = "./index.html";
     return true;
   }
 
-  // Grupo 3 — páginas específicas
+  // Grupo 3 — páginas específicas (precisa mandar o comando para a página executar)
   if(cmd.includes("gastos fixos") && (cmd.startsWith("anote") || cmd.startsWith("anotar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir"))){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, true);
     location.href = "./fixos.html";
     return true;
   }
 
   if(cmd.includes("investimento fixo") && (cmd.startsWith("adicionar") || cmd.startsWith("anote") || cmd.startsWith("anotar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir"))){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, true);
     location.href = "./investfixos.html";
     return true;
   }
 
   if(cmd.includes("categoria") && (cmd.startsWith("adicionar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir") || cmd.startsWith("anote") || cmd.startsWith("anotar"))){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, true);
     location.href = "./categorias.html";
     return true;
   }
 
   if(cmd.startsWith("buscar historico") || cmd.startsWith("buscar histórico") || cmd.startsWith("abrir mês") || cmd.startsWith("abrir mes") || cmd.startsWith("remover mês") || cmd.startsWith("remover mes")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, true);
     location.href = "./historico.html";
     return true;
   }
 
   if(cmd.includes("calcular investimento") || cmd.includes("calcular emprestimo") || cmd.includes("calcular empréstimo") || cmd.includes("abrir investimento") || cmd.includes("abrir empréstimo") || cmd.includes("abrir emprestimo")){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, true);
     location.href = "./simuladores.html";
     return true;
   }
 
-  // Grupo 2 — index
+  // Grupo 2 — index (precisa mandar o comando para o index executar)
   const isIndexAction =
     cmd.startsWith("anote") || cmd.startsWith("anotar") ||
     cmd.includes("imprimir resumo do ano") ||
@@ -396,7 +409,7 @@ function routeCommand(raw){
     cmd.includes("abrir edicao do painel") || cmd.includes("abrir edição do painel") || cmd.includes("editar painel");
 
   if(isIndexAction){
-    saveVoiceCommand(raw);
+    saveVoiceCommand(raw, true);
     location.href = "./index.html";
     return true;
   }
@@ -450,7 +463,8 @@ function initRecognition(){
 
     const ok = routeCommand(raw);
     if(!ok){
-      saveVoiceCommand(raw);
+      // comando não reconhecido: manda pro index executar/decidir
+      saveVoiceCommand(raw, true);
       location.href = "./index.html";
     }
   };
@@ -484,16 +498,25 @@ function replayLast(){
   setStatus("Executando…", true);
   const ok = routeCommand(last);
   if(!ok){
-    saveVoiceCommand(last);
+    saveVoiceCommand(last, true);
     location.href = "./index.html";
   }
 }
 
 function clearLast(){
   localStorage.removeItem(VOICE_LAST_KEY);
+  clearVoiceCmd();
   setLastText("—");
   setStatus("Pronto", true);
 }
+
+// limpa automaticamente quando sair da tela (voltar do celular, trocar de página, etc.)
+window.addEventListener("pagehide", ()=>{
+  try{ clearVoiceCmd(); }catch(_){}
+});
+window.addEventListener("beforeunload", ()=>{
+  try{ clearVoiceCmd(); }catch(_){}
+});
 
 document.addEventListener("DOMContentLoaded", ()=>{
   setStatus("Pronto", true);
