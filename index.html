@@ -8,7 +8,6 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#569cff">
 
-<!-- ✅ NOVA IA (Cloudflare Workers AI) -->
 <script>
   window.API_BASE_URL = "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
   window.APP_KEY = "GastosPro@2026!";
@@ -290,7 +289,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   background: rgba(255,255,255,.04);
 }
 
-/* IA */
 .iaWrap{
   max-width:1100px;
   margin:auto;
@@ -431,6 +429,26 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   user-select:none;
 }
 .iaChip:active{transform:translateY(1px)}
+
+.voiceToast{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 92px;
+  z-index: 1200;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.72);
+  color:#fff;
+  font-size:13px;
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow: 0 10px 24px rgba(0,0,0,.26);
+  display:none;
+  max-width: min(92vw, 560px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 </style>
 </head>
 
@@ -449,7 +467,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
   <div class="wrap">
 
-    <!-- TOP BAR -->
     <div class="topbar">
       <div>
         <h1>Controle de Gastos PRO</h1>
@@ -465,7 +482,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: HOME -->
     <div class="screen active" id="screen-home">
       <div id="homeContainer">
 
@@ -565,7 +581,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: MENU -->
     <div class="screen" id="screen-menu">
       <div class="backRow">
         <button class="btn backBtn" onclick="goHome()">← Voltar</button>
@@ -573,7 +588,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
 
       <div class="grid1">
-        <button class="btn" id="menuVoiceBtn" onclick="openVoicePage()">🎙️ Comando de voz</button>
         <button class="btn" onclick="openScreen('screen-config')">⚙️ Configurações</button>
         <button class="btn" onclick="openScreen('screen-simulators')">🧠 Simuladores</button>
         <button class="btn" onclick="openScreen('screen-categories')">📂 Minhas Categorias</button>
@@ -595,7 +609,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: CONFIG -->
     <div class="screen" id="screen-config">
       <div class="backRow">
         <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
@@ -622,7 +635,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           <div style="font-weight:950">🎙️ Sistema de voz</div>
           <div class="small" style="margin-top:6px">
             Quando <b>bloqueado</b>, o botão de voz some da tela principal.
-            Quando <b>ativado</b>, aparece o botão 🎙️ e você pode abrir a tela de comando de voz.
+            Quando <b>ativado</b>, aparece o botão 🎙️ flutuante.
           </div>
           <div class="hr"></div>
           <div class="row">
@@ -638,7 +651,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: PDF -->
     <div class="screen" id="screen-pdf">
       <div class="backRow">
         <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
@@ -650,6 +662,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <div class="small">
           Você pode gerar:
           <br>• <b>Resumo do ano inteiro</b> (gráficos + mais gastou + tabela anual)
+          <br>• <b>Relatório do mês</b> (resumo do mês atual)
           <br>• <b>Relatório completo</b> (ano + investimentos + anotações do mês escolhido)
         </div>
 
@@ -674,15 +687,22 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           • Gráfico “Evolução mensal (gasto)”<br>
           • “Mais gastou no ano” (categoria e valor)<br>
           • Tabela (Salário/Gastos/Guardado/Sobra por mês)<br><br>
+          <b>Relatório do mês</b><br>
+          • Salário, gastos, guardado e sobra<br>
+          • Gráfico do mês<br>
+          • Lista do mês com status<br><br>
           <b>Relatório completo</b><br>
-          • Tudo do resumo + Investimentos fixos cadastrados<br>
-          • Anotações do mês escolhido (itens e status) + salário/guardado do mês
+          • Tudo do resumo + investimentos fixos + anotações do mês escolhido
         </div>
 
         <div class="hr"></div>
 
-        <div class="row">
+        <div class="grid2">
           <button class="btn" onclick="gerarPDFResumoAno()">📘 Resumo do ano</button>
+          <button class="btn" onclick="gerarPDFMes()">🗓️ PDF do mês</button>
+        </div>
+
+        <div class="row" style="margin-top:10px">
           <button class="btn primary" onclick="gerarPDFCompleto()">📄 Completo (ano + mês)</button>
         </div>
 
@@ -690,7 +710,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: HOME EDITOR -->
     <div class="screen" id="screen-home-editor">
       <div class="backRow">
         <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
@@ -700,7 +719,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="card">
         <h3>Organize sua tela principal</h3>
         <div class="small">
-          Marque o que aparece e use as setas para mudar a ordem (pra cima/baixo).
+          Marque o que aparece e use as setas para mudar a ordem.
         </div>
 
         <div class="hr"></div>
@@ -716,7 +735,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: THEMES -->
     <div class="screen" id="screen-themes">
       <div class="backRow">
         <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
@@ -724,8 +742,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
 
       <div class="card">
-        <h3>Cor do app (painel/fundo)</h3>
-        <div class="small">Escolha um estilo de fundo. Isso muda o painel principal (no escuro e no claro).</div>
+        <h3>Cor do app</h3>
+        <div class="small">Escolha um estilo de fundo. Isso muda o painel principal no escuro e no claro.</div>
 
         <div class="hr"></div>
 
@@ -735,7 +753,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           <option value="purple">Roxo</option>
           <option value="green">Verde</option>
           <option value="sunset">Pôr do sol</option>
-          <option value="mono">Minimal</option>
+          <option value="mono">Minimal / Preto</option>
         </select>
 
         <div class="hr"></div>
@@ -763,7 +781,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: CATEGORIES -->
     <div class="screen" id="screen-categories">
       <div class="backRow">
         <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
@@ -783,7 +800,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: FIXOS -->
     <div class="screen" id="screen-fixos">
       <div class="backRow">
         <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
@@ -807,13 +823,12 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <button class="btn primary" style="margin-top:10px" onclick="addFixo()">Adicionar</button>
 
         <div class="hr"></div>
-        <div class="small">⚠️ O X aqui remove do sistema. Na lista do mês (Home), o X remove só daquele mês.</div>
+        <div class="small">⚠️ O X aqui remove do sistema. Na lista do mês, o X remove só daquele mês.</div>
         <div class="hr"></div>
         <div id="listaFixos" class="small"></div>
       </div>
     </div>
 
-    <!-- SCREEN: INVEST FIXOS -->
     <div class="screen" id="screen-investfixos">
       <div class="backRow">
         <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
@@ -824,8 +839,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
         <h3>Como funciona</h3>
         <div class="small">
           Você informa <b>Nome</b>, <b>Meta final (R$)</b> e <b>Prazo (meses)</b>.
-          O app calcula automaticamente o <b>valor mensal</b> (meta ÷ meses).
-          Esse valor aparece em <b>todos os meses</b> como “Juntar” na tela principal.
+          O app calcula automaticamente o <b>valor mensal</b>.
+          Esse valor aparece em <b>todos os meses</b> como “Juntar”.
           ✅ Começa como <b>Pendente</b>
           ✅ Ao marcar <b>Pago</b>, entra automaticamente no <b>Guardado</b>.
         </div>
@@ -834,7 +849,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="card" style="margin-top:12px">
         <h3>Adicionar investimento fixo</h3>
 
-        <label>Nome (ex.: Reserva, Carro, Casa)</label>
+        <label>Nome</label>
         <input id="invNome" placeholder="Ex: Reserva">
 
         <div class="grid2" style="margin-top:10px">
@@ -860,7 +875,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: SIMULATORS -->
     <div class="screen" id="screen-simulators">
       <div class="backRow">
         <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
@@ -951,7 +965,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- SCREEN: HISTORY -->
     <div class="screen" id="screen-history">
       <div class="backRow">
         <button class="btn backBtn" onclick="goBackFromHistory()">← Voltar</button>
@@ -966,7 +979,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- LOGIN -->
     <div class="screen" id="screen-login">
       <div class="card" style="max-width:520px;margin:auto">
         <h2 style="font-weight:950;margin-bottom:6px">Entrar</h2>
@@ -977,9 +989,8 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-  </div><!-- /wrap -->
+  </div>
 
-  <!-- IA -->
   <div class="screen" id="screen-ia">
     <div class="iaWrap">
       <div class="backRow">
@@ -1015,7 +1026,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
           <div class="iaComposer">
             <div class="iaInputWrap">
               <textarea id="iaPrompt" class="iaInput" placeholder="Digite sua pergunta… (Shift+Enter quebra linha)"></textarea>
-              <div class="small" style="margin-top:8px">Dica: pergunte por metas, corte de gastos e sugestões de investimento (sem promessas).</div>
+              <div class="small" style="margin-top:8px">Dica: pergunte por metas, corte de gastos e sugestões de investimento.</div>
             </div>
             <button class="btn primary" style="flex:0 0 auto" onclick="iaSend()">Enviar</button>
           </div>
@@ -1025,7 +1036,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
     </div>
   </div>
 
-  <!-- FABs -->
   <div class="fabWrap">
     <div class="fab ai" onclick="openIa()" title="IA PRO">
       <span>IA</span><em>PRO</em>
@@ -1036,11 +1046,11 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
     <div class="fab add" onclick="openAddExpense()" title="Adicionar gasto">+</div>
   </div>
 
-</div><!-- /app -->
+</div>
 
+<div id="voiceToast" class="voiceToast"></div>
 <div id="debugBox"></div>
 
-<!-- MODALS -->
 <div class="overlay" id="overlay-addExpense">
   <div class="modal">
     <div class="modalHeader">
@@ -1074,6 +1084,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 <script>
 function dbg(msg){
   const box = document.getElementById("debugBox");
+  if(!box) return;
   box.style.display = "block";
   box.textContent = String(msg);
 }
@@ -1095,9 +1106,6 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="./config.js"></script>
 
 <script>
-/* =========================
-   CONFIG
-========================= */
 const FIREBASE_CONFIG = {
   apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
   authDomain:"controle-gastos-pro.firebaseapp.com",
@@ -1141,7 +1149,25 @@ let lastNonIAScreen = "screen-home";
 /* =========================
    VOZ
 ========================= */
-const VOICE_KEYS = { enabled: "voice_enabled_v1" };
+const VOICE_KEYS = {
+  enabled: "voice_enabled_v1",
+  bridgeSeen: "voice_bridge_seen_v1"
+};
+
+const VOICE_COMMAND_KEYS = [
+  "voice_command_v1",
+  "voice_command",
+  "voz_comando",
+  "voz_command",
+  "gastos_voice_command",
+  "gastos_voice_command_v1",
+  "voice_bridge_command",
+  "voice_bridge_payload"
+];
+
+let voiceBridgeStarted = false;
+let voiceLastProcessedRaw = "";
+
 function kVoiceEnabled(){ return `${VOICE_KEYS.enabled}_${USER_ID || "guest"}`; }
 function isVoiceEnabled(){
   const v = localStorage.getItem(kVoiceEnabled());
@@ -1153,14 +1179,12 @@ function setVoiceEnabled(on){
 }
 function applyVoiceVisibility(){
   const fab = document.getElementById("fabVoice");
-  const menuBtn = document.getElementById("menuVoiceBtn");
   const status = document.getElementById("voiceEnableStatus");
   const toggleBtn = document.getElementById("btnToggleVoiceEnabled");
 
   const enabled = isVoiceEnabled();
 
   if(fab) fab.classList.toggle("hidden", !enabled);
-  if(menuBtn) menuBtn.style.display = enabled ? "" : "none";
 
   if(status) status.textContent = enabled ? "Ativado" : "Bloqueado";
   if(toggleBtn){
@@ -1179,6 +1203,267 @@ function openVoicePage(){
     return;
   }
   location.href = "./voz.html";
+}
+function showVoiceToast(text){
+  const el = document.getElementById("voiceToast");
+  if(!el) return;
+  el.textContent = text;
+  el.style.display = "block";
+  clearTimeout(showVoiceToast._t);
+  showVoiceToast._t = setTimeout(()=>{ el.style.display = "none"; }, 2600);
+}
+function normalizeText(s){
+  return String(s||"")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g," ");
+}
+function parseMoneyFromText(txt){
+  const m = String(txt||"").replace(/\s+/g," ").match(/(\d+[.,]?\d*)/);
+  if(!m) return 0;
+  return Number(String(m[1]).replace(",", ".")) || 0;
+}
+function parseCategoryFromText(txt){
+  const t = normalizeText(txt);
+  const found = categorias.find(c => t.includes(normalizeText(c)));
+  return found || detectarCategoria(txt);
+}
+function findBestItemIndexByTerm(term){
+  const d = getDataMes(mesAtual);
+  const t = normalizeText(term);
+  if(!t) return -1;
+  let bestIndex = -1;
+  let bestScore = -1;
+  (d.items||[]).forEach((it, idx)=>{
+    const pool = normalizeText(`${it.desc} ${it.category}`);
+    let score = 0;
+    t.split(" ").forEach(word=>{
+      if(word && pool.includes(word)) score += 1;
+    });
+    if(score > bestScore){
+      bestScore = score;
+      bestIndex = idx;
+    }
+  });
+  return bestScore > 0 ? bestIndex : -1;
+}
+function setItemPaidBySearch(term, paid){
+  const idx = findBestItemIndexByTerm(term);
+  if(idx < 0) return false;
+  const d = getDataMes(mesAtual);
+  const it = d.items[idx];
+  if(!it) return false;
+  if(!!it.paid === !!paid) return true;
+  togglePaid(idx);
+  return true;
+}
+function deleteItemBySearch(term){
+  const idx = findBestItemIndexByTerm(term);
+  if(idx < 0) return false;
+  delItemSmart(idx);
+  return true;
+}
+function setThemeByVoice(name){
+  const t = normalizeText(name);
+  let preset = "default";
+  if(t.includes("roxo")) preset = "purple";
+  else if(t.includes("verde")) preset = "green";
+  else if(t.includes("por do sol") || t.includes("pordo sol") || t.includes("sunset")) preset = "sunset";
+  else if(t.includes("preto") || t.includes("minimal") || t.includes("mono")) preset = "mono";
+  else if(t.includes("padrao") || t.includes("normal")) preset = "default";
+
+  localStorage.setItem(THEME_KEYS.preset, preset);
+  applyThemeSettings();
+  const sel = document.getElementById("themePreset");
+  if(sel) sel.value = preset;
+  return preset;
+}
+function processVoiceAddCommand(raw){
+  let txt = normalizeText(raw);
+
+  txt = txt
+    .replace(/^anote\s+/,"")
+    .replace(/^anotar\s+/,"")
+    .replace(/^adicionar\s+/,"")
+    .replace(/^adicione\s+/,"")
+    .trim();
+
+  if(txt.startsWith("guardado ")){
+    const value = parseMoneyFromText(txt);
+    let desc = txt.replace(/^guardado\s+/,"").replace(/^\d+[.,]?\d*\s*(de)?\s*/,"").trim();
+    if(!value || value<=0) return false;
+    const d = getDataMes(mesAtual);
+    ensureSavedArray(d);
+    d.saved.unshift({ value, desc, date:todayISO(), source:"manual" });
+    saveAll();
+    renderSaved();
+    renderKPIs();
+    return true;
+  }
+
+  const value = parseMoneyFromText(txt);
+  if(!value || value<=0) return false;
+
+  const parts = txt.split(" ");
+  let lastCat = parseCategoryFromText(parts[parts.length-1] || "");
+  let desc = txt;
+
+  if(lastCat && normalizeText(desc).endsWith(normalizeText(lastCat))){
+    const re = new RegExp(`${normalizeText(lastCat).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
+    desc = normalizeText(desc).replace(re,"").trim();
+  }
+
+  desc = desc.replace(/\d+[.,]?\d*/,"").trim();
+  if(!desc) desc = "Gasto";
+
+  const category = lastCat || detectarCategoria(desc);
+  const d = getDataMes(mesAtual);
+  d.items.push(ensureItemDefaults({ desc: titleCase(desc), amount: value, category, isFixo:false, isInvestFixo:false }));
+  saveAll();
+
+  fetch(API+"/addGasto",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc: titleCase(desc), amount: value, category })
+  }).catch(()=>{});
+
+  render();
+  return true;
+}
+function processVoiceCommand(commandText){
+  if(!USER_ID) return false;
+  const raw = String(commandText||"").trim();
+  if(!raw) return false;
+
+  const txt = normalizeText(raw);
+
+  if(txt.includes("abrir historico")){ openHistory(); showVoiceToast("Histórico aberto"); return true; }
+  if(txt.includes("abrir gastos fixos")){ openScreen("screen-fixos"); showVoiceToast("Gastos fixos abertos"); return true; }
+  if(txt.includes("abrir investimentos fixos")){ openScreen("screen-investfixos"); showVoiceToast("Investimentos fixos abertos"); return true; }
+  if(txt.includes("abrir categorias")){ openScreen("screen-categories"); showVoiceToast("Categorias abertas"); return true; }
+  if(txt.includes("abrir simuladores")){ openScreen("screen-simulators"); showVoiceToast("Simuladores abertos"); return true; }
+  if(txt.includes("abrir ia")){ openIa(); return true; }
+  if(txt.includes("abrir menu")){ openMenu(); showVoiceToast("Menu aberto"); return true; }
+  if(txt.includes("abrir tela principal") || txt.includes("abrir inicio") || txt.includes("abrir home")){ goHome(); showVoiceToast("Tela principal aberta"); return true; }
+
+  if(txt.startsWith("tema ") || txt.includes("tema roxo") || txt.includes("tema verde") || txt.includes("tema preto") || txt.includes("tema padrao") || txt.includes("tema por do sol")){
+    const p = setThemeByVoice(txt);
+    const map = { purple:"Roxo", green:"Verde", mono:"Preto", default:"Padrão", sunset:"Pôr do sol" };
+    showVoiceToast("Tema aplicado: " + (map[p] || p));
+    return true;
+  }
+
+  if(txt.includes("imprimir resumo do ano")){
+    buildPdfSelectors();
+    openPdfScreen();
+    setTimeout(()=>gerarPDFResumoAno(), 150);
+    showVoiceToast("Gerando resumo do ano");
+    return true;
+  }
+  if(txt.includes("imprimir pdf do mes") || txt.includes("imprimir pdf mes") || txt.includes("imprimir mes")){
+    buildPdfSelectors();
+    openPdfScreen();
+    setTimeout(()=>gerarPDFMes(), 150);
+    showVoiceToast("Gerando PDF do mês");
+    return true;
+  }
+  if(txt.includes("imprimir pdf completo") || txt.includes("imprimir relatorio completo")){
+    buildPdfSelectors();
+    openPdfScreen();
+    setTimeout(()=>gerarPDFCompleto(), 150);
+    showVoiceToast("Gerando PDF completo");
+    return true;
+  }
+
+  if(txt.startsWith("anote ") || txt.startsWith("anotar ") || txt.startsWith("adicionar ")){
+    const ok = processVoiceAddCommand(raw);
+    showVoiceToast(ok ? "Anotado" : "Não entendi o comando de anotar");
+    return ok;
+  }
+
+  if(txt.startsWith("pago ") || txt.startsWith("como pago ") || txt.startsWith("marcar pago ") || txt.startsWith("marque pago ")){
+    const term = raw.replace(/^(pago|como pago|marcar pago|marque pago)\s+/i,"");
+    const ok = setItemPaidBySearch(term, true);
+    showVoiceToast(ok ? "Marcado como pago" : "Não achei esse item");
+    if(ok) render();
+    return ok;
+  }
+
+  if(txt.startsWith("pendente ") || txt.startsWith("como pendente ") || txt.startsWith("marcar pendente ") || txt.startsWith("marque pendente ")){
+    const term = raw.replace(/^(pendente|como pendente|marcar pendente|marque pendente)\s+/i,"");
+    const ok = setItemPaidBySearch(term, false);
+    showVoiceToast(ok ? "Marcado como pendente" : "Não achei esse item");
+    if(ok) render();
+    return ok;
+  }
+
+  if(txt.startsWith("exclua ") || txt.startsWith("excluir ") || txt.startsWith("apague ") || txt.startsWith("remover ")){
+    const term = raw.replace(/^(exclua|excluir|apague|remover)\s+/i,"");
+    const ok = deleteItemBySearch(term);
+    showVoiceToast(ok ? "Item removido" : "Não achei esse item");
+    if(ok) render();
+    return ok;
+  }
+
+  return false;
+}
+function parseVoicePayload(raw){
+  if(raw == null) return "";
+  if(typeof raw !== "string") return String(raw);
+
+  let txt = raw.trim();
+  if(!txt) return "";
+
+  try{
+    const j = JSON.parse(txt);
+    if(j && typeof j === "object"){
+      return j.command || j.comando || j.text || j.transcript || j.payload || "";
+    }
+  }catch(e){}
+
+  return txt;
+}
+function consumeVoiceCommandFromKey(key){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw || raw === voiceLastProcessedRaw) return false;
+
+    const payload = parseVoicePayload(raw);
+    if(!payload) return false;
+
+    const ok = processVoiceCommand(payload);
+    if(ok){
+      voiceLastProcessedRaw = raw;
+      localStorage.setItem(VOICE_KEYS.bridgeSeen, String(Date.now()));
+      try{
+        localStorage.removeItem(key);
+      }catch(e){}
+      return true;
+    }
+    return false;
+  }catch(e){
+    return false;
+  }
+}
+function startVoiceBridge(){
+  if(voiceBridgeStarted) return;
+  voiceBridgeStarted = true;
+
+  const tick = ()=>{
+    if(USER_ID){
+      for(const key of VOICE_COMMAND_KEYS){
+        if(consumeVoiceCommandFromKey(key)) break;
+      }
+    }
+  };
+
+  setInterval(tick, 700);
+  window.addEventListener("storage", (e)=>{
+    if(!e || !e.key) return;
+    if(VOICE_COMMAND_KEYS.includes(e.key)) consumeVoiceCommandFromKey(e.key);
+  });
 }
 
 /* =========================
@@ -1358,6 +1643,13 @@ function applyHomeLayoutFromEditor(){ applyHomeLayoutToDOM(); goHome(); }
 const money = (n)=> Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 function uid(){ return Math.random().toString(16).slice(2) + Date.now().toString(16); }
 function todayISO(){ return new Date().toISOString().slice(0,10); }
+function titleCase(s){
+  return String(s||"")
+    .split(" ")
+    .filter(Boolean)
+    .map(x => x.charAt(0).toUpperCase() + x.slice(1))
+    .join(" ");
+}
 
 function showLoading(){ document.getElementById("app").style.display="none"; document.getElementById("loading").style.display="flex"; }
 function showApp(){ document.getElementById("loading").style.display="none"; document.getElementById("app").style.display="block"; }
@@ -1678,7 +1970,7 @@ function updateInvResumo(){
   if(!metaFinal || metaFinal<=0){ out.textContent="Digite a Meta final (R$)."; return; }
   if(!prazoMeses || prazoMeses<=0){ out.textContent="Digite o Prazo (meses)."; return; }
   const mensal = calcMensalAuto(metaFinal, prazoMeses);
-  out.textContent = `Para juntar ${money(metaFinal)} em ${prazoMeses} meses, o valor mensal fica: ${money(mensal)} (meta ÷ meses).`;
+  out.textContent = `Para juntar ${money(metaFinal)} em ${prazoMeses} meses, o valor mensal fica: ${money(mensal)}.`;
 }
 function renderInvestFixos(){
   const div = document.getElementById("listaInvestFixos");
@@ -2024,7 +2316,9 @@ function drawChart(items){
   const valores= Object.values(mapa);
 
   if(grafico) grafico.destroy();
-  grafico=new Chart(document.getElementById("chart"),{
+  const canvas = document.getElementById("chart");
+  if(!canvas) return;
+  grafico=new Chart(canvas,{
     type:"doughnut",
     data:{ labels, datasets:[{ data: valores }] },
     options:{ plugins:{ legend:{ labels:{ color: getComputedStyle(document.body).getPropertyValue("--text") } } } }
@@ -2032,13 +2326,15 @@ function drawChart(items){
 }
 function drawEvolucao(){
   const meses = Object.keys(state.meses||{}).sort().reverse();
+  const canvas = document.getElementById("chartEvolucao");
+  if(!canvas) return;
   if(!meses.length) return;
   const valores = meses.map(m=>{
     const d = getDataMes(m);
     return (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
   });
   if(graficoEvolucao) graficoEvolucao.destroy();
-  graficoEvolucao=new Chart(document.getElementById("chartEvolucao"),{
+  graficoEvolucao=new Chart(canvas,{
     type:"line",
     data:{ labels: meses, datasets:[{ data: valores }] },
     options:{ plugins:{ legend:{ display:false } } }
@@ -2091,13 +2387,19 @@ function renderKPIs(){
   const salary = Number(d.salary||0);
   const left = salary - spent;
 
-  document.getElementById("kpiSalary").textContent = money(salary);
-  document.getElementById("kpiSpent").textContent  = money(spent);
-  document.getElementById("kpiLeft").textContent   = money(left);
-  document.getElementById("kpiSaved").textContent  = money(saved);
+  const s1 = document.getElementById("kpiSalary");
+  const s2 = document.getElementById("kpiSpent");
+  const s3 = document.getElementById("kpiLeft");
+  const s4 = document.getElementById("kpiSaved");
+  if(s1) s1.textContent = money(salary);
+  if(s2) s2.textContent = money(spent);
+  if(s3) s3.textContent = money(left);
+  if(s4) s4.textContent = money(saved);
 
-  document.getElementById("salary").value = salary ? salary : "";
-  document.getElementById("meta").value = d.meta ? d.meta : "";
+  const salaryEl = document.getElementById("salary");
+  const metaEl = document.getElementById("meta");
+  if(salaryEl) salaryEl.value = salary ? salary : "";
+  if(metaEl) metaEl.value = d.meta ? d.meta : "";
 }
 
 function render(){
@@ -2329,6 +2631,7 @@ function getIaBase(){
 }
 function iaAdd(role, text){
   const box = document.getElementById("iaChat");
+  if(!box) return;
   const row = document.createElement("div");
   row.className = "msgRow " + (role==="me" ? "me" : "bot");
   const bubble = document.createElement("div");
@@ -2374,12 +2677,13 @@ function buildIaContext(){
 }
 function iaQuick(text){
   const input = document.getElementById("iaPrompt");
+  if(!input) return;
   input.value = text;
   input.focus();
 }
 async function iaSend(){
   const input = document.getElementById("iaPrompt");
-  const q = (input.value||"").trim();
+  const q = (input?.value||"").trim();
   if(!q) return;
 
   input.value="";
@@ -2467,9 +2771,8 @@ async function renderPdfAndSave(wrap, filename){
 async function gerarPDFResumoAno(){
   const status = document.getElementById("pdfStatus");
   try{
-    status.textContent = "Gerando resumo do ano…";
+    if(status) status.textContent = "Gerando resumo do ano…";
     const year = document.getElementById("pdfYear").value;
-
     const agg = aggregateYear(year);
 
     const wrap = document.createElement("div");
@@ -2568,21 +2871,143 @@ async function gerarPDFResumoAno(){
     });
 
     await new Promise(r=>setTimeout(r, 250));
-
     await renderPdfAndSave(wrap, `resumo_ano_${year}.pdf`);
 
     catChart.destroy(); evoChart.destroy();
     wrap.remove();
 
-    status.textContent = "Resumo do ano gerado ✅";
+    if(status) status.textContent = "Resumo do ano gerado ✅";
   }catch(e){
-    status.textContent = "Erro ao gerar resumo do ano: " + (e.message||e);
+    if(status) status.textContent = "Erro ao gerar resumo do ano: " + (e.message||e);
+  }
+}
+async function gerarPDFMes(){
+  const status = document.getElementById("pdfStatus");
+  try{
+    if(status) status.textContent = "Gerando PDF do mês…";
+
+    const d = getDataMes(mesAtual);
+    const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+    const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
+    const left = Number(d.salary||0) - spent;
+    const dtMes = new Date(mesAtual+"-01T00:00:00");
+    const mesLabel = dtMes.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+
+    const byCat = {};
+    (d.items||[]).forEach(it=>{
+      const c = it.category||"Outros";
+      byCat[c] = (byCat[c]||0) + Number(it.amount||0);
+    });
+    const topCat = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0] || ["—",0];
+
+    const wrap = document.createElement("div");
+    wrap.style.position = "fixed";
+    wrap.style.left = "-9999px";
+    wrap.style.top = "0";
+    wrap.style.width = "900px";
+    wrap.style.padding = "16px";
+    wrap.style.background = "#ffffff";
+    wrap.style.color = "#111";
+    wrap.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+    wrap.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
+        <div>
+          <div style="font-size:22px;font-weight:900">Relatório do Mês • Controle de Gastos PRO</div>
+          <div style="font-size:13px;color:#444">Mês: <b style="text-transform:capitalize">${escapeHtml(mesLabel)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
+          <div style="font-size:13px;color:#444">Usuário: <b>${escapeHtml(USER?.displayName||"Usuário")}</b></div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:#444">
+          <div>Mais gastou no mês:</div>
+          <div style="font-size:14px;font-weight:900">${escapeHtml(topCat[0])} • ${money(topCat[1])}</div>
+        </div>
+      </div>
+
+      <hr style="border:none;height:1px;background:#ddd;margin:14px 0"/>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-size:12px;color:#666">Salário</div>
+          <div style="font-size:18px;font-weight:900">${money(d.salary||0)}</div>
+        </div>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-size:12px;color:#666">Gastos</div>
+          <div style="font-size:18px;font-weight:900">${money(spent)}</div>
+        </div>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-size:12px;color:#666">Guardado</div>
+          <div style="font-size:18px;font-weight:900">${money(saved)}</div>
+        </div>
+        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
+          <div style="font-size:12px;color:#666">Sobra</div>
+          <div style="font-size:18px;font-weight:900">${money(left)}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
+        <div style="font-weight:900;margin-bottom:8px">Gráfico do mês</div>
+        <canvas id="pdfChartMes" width="820" height="300"></canvas>
+      </div>
+
+      <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
+        <div style="font-weight:900;margin-bottom:8px">Anotações do mês</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr>
+              <th style="text-align:left;border-bottom:1px solid #ddd;padding:8px">Descrição</th>
+              <th style="text-align:left;border-bottom:1px solid #ddd;padding:8px">Categoria</th>
+              <th style="text-align:left;border-bottom:1px solid #ddd;padding:8px">Status</th>
+              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${
+              (d.items||[]).length
+              ? (d.items||[]).map(it=>`
+                <tr>
+                  <td style="padding:7px;border-bottom:1px solid #eee">${escapeHtml(it.desc||"")}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee">${escapeHtml(it.category||"Outros")}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee">${it.paid ? "Pago" : "Pendente"}${it.isInvestFixo ? " • Juntar" : (it.isFixo ? " • Fixo" : "")}</td>
+                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${money(it.amount||0)}</td>
+                </tr>
+              `).join("")
+              : `<tr><td colspan="4" style="padding:10px;color:#666">Nenhum item neste mês.</td></tr>`
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:14px;font-size:11px;color:#666">
+        Observação: Este relatório é um resumo do seu controle. Não é recomendação financeira.
+      </div>
+    `;
+    document.body.appendChild(wrap);
+
+    const chart = new Chart(wrap.querySelector("#pdfChartMes"), {
+      type:"bar",
+      data:{
+        labels: Object.keys(byCat),
+        datasets:[{ data: Object.values(byCat) }]
+      },
+      options:{
+        plugins:{ legend:{ display:false } },
+        scales:{ y:{ beginAtZero:true } }
+      }
+    });
+
+    await new Promise(r=>setTimeout(r, 250));
+    await renderPdfAndSave(wrap, `relatorio_mes_${mesAtual}.pdf`);
+
+    chart.destroy();
+    wrap.remove();
+    if(status) status.textContent = "PDF do mês gerado ✅";
+  }catch(e){
+    if(status) status.textContent = "Erro ao gerar PDF do mês: " + (e.message||e);
   }
 }
 async function gerarPDFCompleto(){
   const status = document.getElementById("pdfStatus");
   try{
-    status.textContent = "Gerando relatório completo…";
+    if(status) status.textContent = "Gerando relatório completo…";
     const year = document.getElementById("pdfYear").value;
     const monthNotes = document.getElementById("pdfMonth").value;
 
@@ -2727,9 +3152,9 @@ async function gerarPDFCompleto(){
     catChart.destroy(); evoChart.destroy();
     wrap.remove();
 
-    status.textContent = "Relatório completo gerado ✅";
+    if(status) status.textContent = "Relatório completo gerado ✅";
   }catch(e){
-    status.textContent = "Erro ao gerar relatório completo: " + (e.message||e);
+    if(status) status.textContent = "Erro ao gerar relatório completo: " + (e.message||e);
   }
 }
 
@@ -2737,7 +3162,7 @@ async function gerarPDFCompleto(){
    AUTH
 ========================= */
 async function initFirebase(){
-  if(!window.firebase){ dbg("Firebase não carregou (sem internet ou bloqueio)."); return false; }
+  if(!window.firebase){ dbg("Firebase não carregou."); return false; }
 
   try{ if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); }catch(e){}
   auth = firebase.auth();
@@ -2807,6 +3232,8 @@ async function initFirebase(){
     showApp();
     goHome();
     render();
+    iaHealth();
+    startVoiceBridge();
   });
 
   return true;
@@ -2847,11 +3274,10 @@ function escapeHtml(s){
 document.addEventListener("DOMContentLoaded", async ()=>{
   applyThemeSettings();
   showLoading();
+  renderHomeEditorUI();
   const ok = await initFirebase();
   if(!ok) return;
-
   applyThemeSettings();
-  renderHomeEditorUI();
 });
 </script>
 </body>
