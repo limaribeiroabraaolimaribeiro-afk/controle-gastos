@@ -10,8 +10,8 @@
 <link rel="stylesheet" href="./ui.css">
 
 <script>
-  window.API_BASE_URL = "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
-  window.APP_KEY = "GastosPro@2026!";
+window.API_BASE_URL = "https://gastospro-ai.limaribeiroabraoolimaribeiro.workers.dev";
+window.APP_KEY = "GastosPro@2026!";
 </script>
 
 <style>
@@ -683,6 +683,7 @@ window.addEventListener("unhandledrejection", (e)=>{
 let grafico = null;
 let graficoEvolucao = null;
 let mesAtual = new Date().toISOString().slice(0,7);
+let __voiceStorageBound = false;
 
 const HOME_SECTIONS = [
   { id:"resumo", title:"Resumo do mês" },
@@ -713,6 +714,27 @@ function openSimuladoresPage(){ location.href = "./simuladores.html"; }
 
 function toggleTheme(){ App.toggleTheme(); drawAllCharts(); }
 function logout(){ App.logout(); }
+
+function normalize(text){
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+function capitalize(text){
+  const t = String(text || "").trim();
+  return t ? (t.charAt(0).toUpperCase() + t.slice(1)) : "Outros";
+}
+function parseMoney(text){
+  if (text == null) return 0;
+  const s = String(text)
+    .replace(/[^\d,.-]/g, "")
+    .replace(/\.(?=\d{3}\b)/g, "")
+    .replace(",", ".");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
 
 function buildMonthSelect(){
   const sel = document.getElementById("monthSelect");
@@ -932,6 +954,45 @@ function confirmAddExpense(){
 
   closeModal("overlay-addExpense");
   render();
+}
+
+function addExpenseDirect(desc, amount, category){
+  const d = App.getDataMes(mesAtual);
+  const cat = App.categorias.includes(category) ? category : (category || App.detectarCategoria(desc));
+  d.items.push(App.ensureItemDefaults({ desc, amount, category:cat, isFixo:false, isInvestFixo:false }));
+  App.saveAll();
+  App.syncAddGasto(mesAtual, desc, amount, cat);
+}
+
+function addSavedDirect(value, desc){
+  const d = App.getDataMes(mesAtual);
+  App.ensureSavedArray(d);
+  d.saved.unshift({ value:Number(value||0), desc:desc||"", date:App.todayISO(), source:"manual" });
+  App.saveAll();
+}
+
+function markItemByName(target, shouldBePaid){
+  const d = App.getDataMes(mesAtual);
+  const normTarget = normalize(target);
+  const idx = (d.items || []).findIndex(it => normalize(it.desc || "").includes(normTarget));
+  if(idx < 0) return false;
+
+  const it = d.items[idx];
+  it.paid = !!shouldBePaid;
+
+  if(it.isInvestFixo && it.invId){
+    App.ensureMonthInvestStatus(d);
+    d.investStatus[it.invId] = !!it.paid;
+
+    if(it.paid){
+      App.addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount || 0), `Automático: ${it.desc}`);
+    }else{
+      App.removeAutoSavedForInv(d, it.invId, mesAtual);
+    }
+  }
+
+  App.saveAll();
+  return true;
 }
 
 function togglePaid(idx){
@@ -1468,6 +1529,124 @@ ${q}`;
   }
 }
 
+function handleVoiceDirectCommands(raw){
+  const cmd = normalize(raw);
+  if(!cmd) return false;
+
+  if(cmd.includes("abrir menu")){
+    openMenu();
+    return true;
+  }
+  if(cmd.includes("abrir ia")){
+    openScreen("screen-ia");
+    return true;
+  }
+  if(cmd.includes("abrir configuracoes") || cmd.includes("abrir configurações")){
+    openScreen("screen-config");
+    return true;
+  }
+  if(cmd.includes("abrir temas")){
+    openScreen("screen-themes");
+    return true;
+  }
+  if(cmd.includes("abrir pdf") || cmd.includes("imprimir resumo do ano") || cmd.includes("imprimir pdf do mes") || cmd.includes("imprimir pdf do mês")){
+    openPdfScreen();
+    if(cmd.includes("imprimir resumo do ano")) setTimeout(()=>gerarPDFResumoAno(), 250);
+    if(cmd.includes("imprimir pdf do mes") || cmd.includes("imprimir pdf do mês")) setTimeout(()=>gerarPDFCompleto(), 250);
+    return true;
+  }
+
+  const paid = cmd.match(/^anote\s+como\s+pago\s+(.+)$/i) || cmd.match(/^anotar\s+como\s+pago\s+(.+)$/i);
+  if(paid){
+    if(markItemByName(paid[1], true)){
+      render();
+      return true;
+    }
+  }
+
+  const pending = cmd.match(/^anote\s+como\s+pendente\s+(.+)$/i) || cmd.match(/^anotar\s+como\s+pendente\s+(.+)$/i);
+  if(pending){
+    if(markItemByName(pending[1], false)){
+      render();
+      return true;
+    }
+  }
+
+  const saved = cmd.match(/^anote\s+guardado\s+(\d+(?:[.,]\d+)?)\s+de\s+(.+)$/i) || cmd.match(/^anotar\s+guardado\s+(\d+(?:[.,]\d+)?)\s+de\s+(.+)$/i);
+  if(saved){
+    addSavedDirect(parseMoney(saved[1]), saved[2].trim());
+    render();
+    return true;
+  }
+
+  const fixo = cmd.match(/^anote\s+gastos?\s+fixos?\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i) || cmd.match(/^anotar\s+gastos?\s+fixos?\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i);
+  if(fixo){
+    App.addFixo({
+      desc: fixo[1].trim(),
+      amount: parseMoney(fixo[2]),
+      category: capitalize(fixo[3])
+    });
+    render();
+    return true;
+  }
+
+  const gasto = cmd.match(/^anote\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i) || cmd.match(/^anotar\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i);
+  if(gasto && !cmd.includes("gastos fixos")){
+    addExpenseDirect(gasto[1].trim(), parseMoney(gasto[2]), capitalize(gasto[3]));
+    render();
+    return true;
+  }
+
+  if(cmd.includes("tema roxo")){
+    localStorage.setItem(App.THEME_KEYS.preset, "purple");
+    App.applyThemeSettings();
+    drawAllCharts();
+    return true;
+  }
+  if(cmd.includes("tema minimal") || cmd.includes("tema mono")){
+    localStorage.setItem(App.THEME_KEYS.preset, "mono");
+    App.applyThemeSettings();
+    drawAllCharts();
+    return true;
+  }
+  if(cmd.includes("tema verde")){
+    localStorage.setItem(App.THEME_KEYS.preset, "green");
+    App.applyThemeSettings();
+    drawAllCharts();
+    return true;
+  }
+  if(cmd.includes("tema padrão") || cmd.includes("tema padrao")){
+    localStorage.setItem(App.THEME_KEYS.preset, "default");
+    App.applyThemeSettings();
+    drawAllCharts();
+    return true;
+  }
+  if(cmd.includes("tema por do sol") || cmd.includes("tema pôr do sol") || cmd.includes("tema sunset")){
+    localStorage.setItem(App.THEME_KEYS.preset, "sunset");
+    App.applyThemeSettings();
+    drawAllCharts();
+    return true;
+  }
+
+  return false;
+}
+
+function bindVoiceStorageListener(){
+  if(__voiceStorageBound) return;
+  __voiceStorageBound = true;
+
+  window.addEventListener("storage", (e)=>{
+    if(e.key === "voice_cmd" && e.newValue){
+      handleVoiceDirectCommands(e.newValue);
+    }
+  });
+
+  const first = localStorage.getItem("voice_cmd");
+  if(first){
+    handleVoiceDirectCommands(first);
+  }
+}
+
 async function render(){
   buildMonthSelect();
   buildCategoriasSelects();
@@ -1559,6 +1738,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     renderVoiceUI();
     renderHomeEditorUI();
     initBindings();
+    bindVoiceStorageListener();
     iaHealth();
     render();
     App.startDueNotificationWatcher();
