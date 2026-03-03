@@ -193,7 +193,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .fab.ai span{display:block;font-weight:950;font-size:13px}
 .fab.ai em{font-style:normal;font-weight:900;font-size:11px;opacity:.9}
 
-/* ✅ FAB VOZ (só aparece quando ativado nas Config) */
 .fab.voice{
   background:
     radial-gradient(90px 70px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
@@ -202,7 +201,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   font-weight:1000;
   font-size:20px;
 }
-.fab.voice.hidden{ display:none; }
+.fab.voice.hidden{display:none}
 
 .overlay{
   position:fixed;inset:0;
@@ -265,7 +264,6 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
 
-/* ✅ Editor do painel (Config > Edição) */
 .layoutItem{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:10px 12px;border-radius:16px;
@@ -292,10 +290,13 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   background: rgba(255,255,255,.04);
 }
 
-/* =========================
-   ✅ IA FULLSCREEN (designer único)
-========================= */
-.iaWrap{ max-width:1100px; margin:auto; padding:16px; padding-bottom:120px; }
+/* IA */
+.iaWrap{
+  max-width:1100px;
+  margin:auto;
+  padding:16px;
+  padding-bottom:120px;
+}
 .iaShell{
   border-radius: 26px;
   border: 1px solid color-mix(in srgb, var(--stroke), transparent 20%);
@@ -312,7 +313,9 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   padding:14px 14px;
   border-bottom:1px solid var(--stroke);
 }
-.iaBrand{ display:flex;align-items:center;gap:10px;min-width:0; }
+.iaBrand{
+  display:flex;align-items:center;gap:10px;min-width:0;
+}
 .iaLogo{
   width:44px;height:44px;border-radius:16px;
   display:flex;align-items:center;justify-content:center;
@@ -326,19 +329,34 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .light .iaLogo{ color:#06162d; }
 .iaTitle{ min-width:0; }
 .iaTitle .t{
-  font-weight:950; letter-spacing:.2px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  font-weight:950;
+  letter-spacing:.2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
-.iaTitle .s{ font-size:12px; color:var(--muted); margin-top:2px; }
+.iaTitle .s{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
 .iaStatusPill{
   display:inline-flex;gap:8px;align-items:center;
   padding:8px 10px;border-radius:999px;
   background: rgba(255,255,255,.10);
   border:1px solid var(--stroke);
-  font-size:12px; color:var(--muted);
+  font-size:12px;
+  color:var(--muted);
 }
-.iaStatusDot{ width:10px;height:10px;border-radius:999px; background: var(--warn); box-shadow: 0 0 0 4px rgba(255,209,102,.12); }
-.iaStatusDot.ok{ background: var(--good); box-shadow: 0 0 0 4px rgba(57,217,138,.12); }
+.iaStatusDot{
+  width:10px;height:10px;border-radius:999px;
+  background: var(--warn);
+  box-shadow: 0 0 0 4px rgba(255,209,102,.12);
+}
+.iaStatusDot.ok{
+  background: var(--good);
+  box-shadow: 0 0 0 4px rgba(57,217,138,.12);
+}
 .iaBody{ padding:14px; }
 .iaChat{
   height: min(64vh, 540px);
@@ -555,7 +573,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
 
       <div class="grid1">
-        <button class="btn" id="menuVoiceBtn" onclick="openVoiceScreen()">🎙️ Comando de voz</button>
+        <button class="btn" id="menuVoiceBtn" onclick="openVoicePage()">🎙️ Comando de voz</button>
         <button class="btn" onclick="openScreen('screen-config')">⚙️ Configurações</button>
         <button class="btn" onclick="openScreen('screen-simulators')">🧠 Simuladores</button>
         <button class="btn" onclick="openScreen('screen-categories')">📂 Minhas Categorias</button>
@@ -600,12 +618,11 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="card" style="margin-top:12px">
         <h3>Preferências</h3>
 
-        <!-- ✅ NOVO: bloquear/ativar sistema de voz -->
         <div class="note" style="margin-bottom:10px">
           <div style="font-weight:950">🎙️ Sistema de voz</div>
           <div class="small" style="margin-top:6px">
             Quando <b>bloqueado</b>, o botão de voz some da tela principal.
-            Quando <b>ativado</b>, aparece o botão 🎙️ e você pode gravar um comando (tipo WhatsApp).
+            Quando <b>ativado</b>, aparece o botão 🎙️ e você pode abrir a tela de comando de voz.
           </div>
           <div class="hr"></div>
           <div class="row">
@@ -621,41 +638,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- ✅ SCREEN: VOZ (tela única de áudio) -->
-    <div class="screen" id="screen-voice">
-      <div class="backRow">
-        <button class="btn backBtn" onclick="goBackFromVoice()">← Voltar</button>
-        <div style="font-weight:900">Comando de voz</div>
-      </div>
-
-      <div class="card">
-        <h3>Como falar</h3>
-        <div class="small">
-          Fale assim:
-          <br>• <b>anote mercado 120</b>
-          <br>• <b>anote uber 25 transporte</b>
-          <br>• <b>anote aluguel 950 casa</b>
-          <br><br>
-          ✅ O app vai responder apenas: <b>Anotado</b> e salvar como <b>Pendente</b> no mês atual.
-        </div>
-
-        <div class="hr"></div>
-
-        <label>Último comando reconhecido</label>
-        <textarea id="voiceTranscript" rows="3" placeholder="Aqui aparece o que foi entendido..." readonly></textarea>
-
-        <div class="hr"></div>
-
-        <div class="row">
-          <button class="btn primary" id="btnVoiceStart" onclick="startVoiceCommand()">🎙️ Enviar comando de voz</button>
-          <button class="btn" onclick="goHome()">🏠 Ir para Home</button>
-        </div>
-
-        <div class="small" id="voiceCmdStatus" style="margin-top:10px">Status: pronto</div>
-      </div>
-    </div>
-
-    <!-- ✅ SCREEN: PDF -->
+    <!-- SCREEN: PDF -->
     <div class="screen" id="screen-pdf">
       <div class="backRow">
         <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
@@ -707,7 +690,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       </div>
     </div>
 
-    <!-- ✅ SCREEN: HOME EDITOR -->
+    <!-- SCREEN: HOME EDITOR -->
     <div class="screen" id="screen-home-editor">
       <div class="backRow">
         <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
@@ -996,7 +979,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 
   </div><!-- /wrap -->
 
-  <!-- ✅ SCREEN: IA FULLSCREEN (mantida no index, não removi nada) -->
+  <!-- IA -->
   <div class="screen" id="screen-ia">
     <div class="iaWrap">
       <div class="backRow">
@@ -1048,8 +1031,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <span>IA</span><em>PRO</em>
     </div>
 
-    <!-- ✅ VOZ (só aparece quando ativado em Config) -->
-    <div class="fab voice hidden" id="fabVoice" onclick="openVoiceScreen()" title="Comando de voz">🎙️</div>
+    <div class="fab voice hidden" id="fabVoice" onclick="openVoicePage()" title="Comando de voz">🎙️</div>
 
     <div class="fab add" onclick="openAddExpense()" title="Adicionar gasto">+</div>
   </div>
@@ -1155,14 +1137,12 @@ let grafico = null;
 let graficoEvolucao = null;
 let lastNonHistoryScreen = "screen-home";
 let lastNonIAScreen = "screen-home";
-let lastNonVoiceScreen = "screen-home";
 
 /* =========================
-   ✅ VOZ (ativar/bloquear)
+   VOZ
 ========================= */
 const VOICE_KEYS = { enabled: "voice_enabled_v1" };
 function kVoiceEnabled(){ return `${VOICE_KEYS.enabled}_${USER_ID || "guest"}`; }
-/* padrão: BLOQUEADO (0) */
 function isVoiceEnabled(){
   const v = localStorage.getItem(kVoiceEnabled());
   return v === "1";
@@ -1191,6 +1171,14 @@ function applyVoiceVisibility(){
 function toggleVoiceEnabled(){
   const enabled = isVoiceEnabled();
   setVoiceEnabled(!enabled);
+}
+function openVoicePage(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  if(!isVoiceEnabled()){
+    alert("O sistema de voz está bloqueado. Ative em Configurações.");
+    return;
+  }
+  location.href = "./voz.html";
 }
 
 /* =========================
@@ -1223,7 +1211,6 @@ const THEME_PRESETS = {
 function isLightMode(){
   return document.body.classList.contains("light");
 }
-
 function applyThemeSettings(){
   const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
   const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
@@ -1247,7 +1234,6 @@ function applyThemeSettings(){
   const meta = document.querySelector('meta[name="theme-color"]');
   if(meta) meta.setAttribute("content", accent);
 }
-
 function saveThemePreset(){
   const sel = document.getElementById("themePreset");
   const preset = sel ? sel.value : "default";
@@ -1381,9 +1367,8 @@ function showScreen(id){
   if(el) el.classList.add("active");
 }
 function openScreen(id){
-  if(id !== "screen-history" && id !== "screen-ia" && id !== "screen-voice") lastNonHistoryScreen = id;
+  if(id !== "screen-history" && id !== "screen-ia") lastNonHistoryScreen = id;
   if(id !== "screen-ia") lastNonIAScreen = id;
-  if(id !== "screen-voice") lastNonVoiceScreen = id;
   showScreen(id);
 }
 function goHome(){ openScreen("screen-home"); applyHomeLayoutToDOM(); }
@@ -1391,7 +1376,6 @@ function openMenu(){ openScreen("screen-menu"); }
 function openHistory(){ buildHistoryUI(); showScreen("screen-history"); }
 function goBackFromHistory(){ showScreen(lastNonHistoryScreen || "screen-home"); }
 
-/* ✅ alterna tema e reaplica preset claro/escuro */
 function toggleTheme(){
   document.body.classList.toggle("light");
   localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
@@ -1401,28 +1385,12 @@ function toggleTheme(){
 function openModal(id){ const o=document.getElementById(id); if(o) o.style.display="flex"; }
 function closeModal(id){ const o=document.getElementById(id); if(o) o.style.display="none"; }
 
-/* ✅ IA: abre arquivo separado ia.html */
 function openIa(){
   const current = document.querySelector(".screen.active")?.id || "screen-home";
   sessionStorage.setItem("return_screen", current);
   location.href = "./ia.html";
 }
 function goBackFromIA(){ showScreen(lastNonIAScreen || "screen-home"); }
-
-/* ✅ VOZ: tela única */
-function openVoiceScreen(){
-  if(!USER_ID){ alert("Faça login primeiro"); return; }
-  if(!isVoiceEnabled()){
-    alert("O sistema de voz está bloqueado. Ative em Configurações.");
-    return;
-  }
-  const t = document.getElementById("voiceTranscript");
-  const s = document.getElementById("voiceCmdStatus");
-  if(t) t.value = "";
-  if(s) s.textContent = "Status: pronto";
-  openScreen("screen-voice");
-}
-function goBackFromVoice(){ showScreen(lastNonVoiceScreen || "screen-home"); }
 
 /* =========================
    STORAGE KEYS
@@ -1474,13 +1442,10 @@ function detectarCategoria(desc){
   return "Outros";
 }
 
-/* Invest fixo */
 function ensureMonthInvestStatus(d){
   if(!d.investStatus || typeof d.investStatus!=="object") d.investStatus = {};
   return d.investStatus;
 }
-
-/* Guardado auto do investimento fixo */
 function ensureSavedArray(d){
   if(!Array.isArray(d.saved)) d.saved = [];
   return d.saved;
@@ -1564,121 +1529,6 @@ function getDataMes(m){
 }
 
 /* =========================
-   ✅ VOZ: comando tipo WhatsApp (aperte, fale, executa)
-========================= */
-function parseExpenseFromSpeech(text){
-  let t = (text||"").toLowerCase().trim();
-
-  // opcional: remover "anote"
-  if(t.startsWith("anote")) t = t.replace(/^anote\s*/, "").trim();
-  t = t.replace(/^anotar\s*/, "").trim();
-
-  // pega último número como valor
-  const matches = t.match(/(\d+[.,]?\d*)/g);
-  if(!matches || !matches.length) return null;
-
-  const last = matches[matches.length - 1].replace(",", ".");
-  const amount = Number(last);
-  if(!amount || amount <= 0) return null;
-
-  t = t.replace(matches[matches.length - 1], "").trim();
-
-  // categoria opcional no final
-  let category = "Outros";
-  if(Array.isArray(categorias) && categorias.length){
-    const parts = t.split(" ").filter(Boolean);
-    const lastWord = parts[parts.length-1] || "";
-    const found = categorias.find(c => c.toLowerCase() === lastWord.toLowerCase());
-    if(found){
-      category = found;
-      parts.pop();
-      t = parts.join(" ").trim();
-    }else{
-      category = detectarCategoria(t);
-    }
-  }else{
-    category = detectarCategoria(t);
-  }
-
-  const desc = t || "Gasto";
-  return { desc, amount, category };
-}
-
-let voiceCmdRec = null;
-function startVoiceCommand(){
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const status = document.getElementById("voiceCmdStatus");
-  const btn = document.getElementById("btnVoiceStart");
-
-  if(!SpeechRecognition){
-    alert("Reconhecimento de voz não suportado. Use Chrome no Android.");
-    return;
-  }
-  if(!USER_ID){
-    alert("Faça login primeiro.");
-    return;
-  }
-
-  if(btn) btn.disabled = true;
-  if(status) status.textContent = "Status: ouvindo…";
-
-  if(!voiceCmdRec){
-    voiceCmdRec = new SpeechRecognition();
-    voiceCmdRec.lang = "pt-BR";
-    voiceCmdRec.interimResults = false;
-    voiceCmdRec.maxAlternatives = 1;
-    try{ voiceCmdRec.continuous = false; }catch(e){}
-
-    voiceCmdRec.onresult = (event) => {
-      const text = (event.results?.[0]?.[0]?.transcript || "").trim();
-      const t = document.getElementById("voiceTranscript");
-      if(t) t.value = text || "";
-
-      const parsed = parseExpenseFromSpeech(text);
-      if(!parsed){
-        if(status) status.textContent = "Status: não entendi. Fale: “anote mercado 120”.";
-        if(btn) btn.disabled = false;
-        return;
-      }
-
-      // adiciona como PENDENTE (paid=false)
-      const { desc, amount, category } = parsed;
-      const d = getDataMes(mesAtual);
-      d.items.push(ensureItemDefaults({ desc, amount, category, isFixo:false, isInvestFixo:false, paid:false }));
-      saveAll();
-
-      fetch(API+"/addGasto",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc, amount, category })
-      }).catch(()=>{});
-
-      render();
-
-      // ✅ só responde "Anotado"
-      if(status) status.textContent = "Anotado ✅";
-      if(btn) btn.disabled = false;
-    };
-
-    voiceCmdRec.onerror = (e) => {
-      if(status) status.textContent = "Status: erro no microfone (" + (e.error||"") + ").";
-      if(btn) btn.disabled = false;
-    };
-
-    voiceCmdRec.onend = () => {
-      if(btn) btn.disabled = false;
-      // se ainda estava "ouvindo", volta pro pronto
-      if(status && status.textContent.includes("ouvindo")) status.textContent = "Status: pronto";
-    };
-  }
-
-  try{ voiceCmdRec.start(); }catch(e){
-    if(status) status.textContent = "Status: não foi possível iniciar.";
-    if(btn) btn.disabled = false;
-  }
-}
-
-/* =========================
    UI BUILDERS
 ========================= */
 function buildMonthSelect(){
@@ -1710,7 +1560,6 @@ function buildMonthSelect(){
   sel.onchange = ()=>{ mesAtual = sel.value; render(); };
 }
 
-/* ✅ PDF selectors */
 function buildPdfSelectors(){
   const yearSel = document.getElementById("pdfYear");
   const monthSel = document.getElementById("pdfMonth");
@@ -1855,7 +1704,7 @@ function renderInvestFixos(){
 }
 
 /* =========================
-   HISTÓRICO (com X)
+   HISTÓRICO
 ========================= */
 function deleteMonth(m){
   if(!USER_ID) return;
@@ -2450,7 +2299,7 @@ function simularEmprestimo(){
 }
 
 /* =========================
-   IA (Cloudflare Workers AI)
+   IA
 ========================= */
 async function callIA(prompt) {
   const base = (window.API_BASE_URL || "").replace(/\/$/, "");
@@ -2468,7 +2317,6 @@ async function callIA(prompt) {
   if (!resp.ok) throw new Error(data?.error || ("Erro HTTP " + resp.status));
   return data.response || "Sem resposta";
 }
-
 function iaSetStatus(text, ok){
   const s = document.getElementById("iaStatus");
   const dot = document.getElementById("iaDot");
@@ -2563,7 +2411,7 @@ ${q}`;
 }
 
 /* =========================
-   PDF (mantido como estava)
+   PDF
 ========================= */
 function monthsOfYear(year){
   const y = String(year);
@@ -2589,7 +2437,6 @@ function aggregateYear(year){
   const topCat = catsSorted[0] ? { cat: catsSorted[0][0], value: catsSorted[0][1] } : { cat:"—", value:0 };
   return { months, byCat, byMonth, topCat };
 }
-
 async function renderPdfAndSave(wrap, filename){
   const canvas = await html2canvas(wrap, { scale: 2, backgroundColor:"#ffffff" });
   const imgData = canvas.toDataURL("image/png");
@@ -2617,9 +2464,7 @@ async function renderPdfAndSave(wrap, filename){
 
   pdf.save(filename);
 }
-
-/* ✅ suas funções de PDF resumido/complete seguem (iguais) */
-async function gerarPDFResumoAno(){ /* ...mantido igual ao seu... */ 
+async function gerarPDFResumoAno(){
   const status = document.getElementById("pdfStatus");
   try{
     status.textContent = "Gerando resumo do ano…";
@@ -2734,8 +2579,7 @@ async function gerarPDFResumoAno(){ /* ...mantido igual ao seu... */
     status.textContent = "Erro ao gerar resumo do ano: " + (e.message||e);
   }
 }
-
-async function gerarPDFCompleto(){ /* ...mantido igual ao seu... */
+async function gerarPDFCompleto(){
   const status = document.getElementById("pdfStatus");
   try{
     status.textContent = "Gerando relatório completo…";
@@ -2914,7 +2758,6 @@ async function initFirebase(){
 
     loadAll();
 
-    // ✅ aplica UI da voz (padrão bloqueado se ainda não existir chave)
     if(localStorage.getItem(kVoiceEnabled()) == null) localStorage.setItem(kVoiceEnabled(), "0");
     applyVoiceVisibility();
 
