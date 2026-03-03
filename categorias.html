@@ -7,144 +7,26 @@
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#569cff">
+<link rel="stylesheet" href="./ui.css">
 
 <style>
-:root{
-  --bg:#07101f;
-  --grad1: rgba(86,156,255,.22);
-  --grad2: rgba(57,217,138,.16);
-  --grad3: rgba(255,93,93,.12);
-
-  --panel: rgba(255,255,255,.06);
-  --panel2: rgba(255,255,255,.08);
-  --stroke: rgba(255,255,255,.10);
-  --text:#eaf0ff;
-  --muted: rgba(234,240,255,.72);
-
-  --accent:#569cff;
-  --good:#39d98a;
-  --warn:#ffd166;
-  --danger:#ff5d5d;
-
-  --shadow: 0 18px 60px rgba(0,0,0,.45);
-  --glass: blur(14px);
-  --radius: 22px;
-}
-.light{
-  --panel: rgba(0,0,0,.04);
-  --panel2: rgba(0,0,0,.06);
-  --stroke: rgba(0,0,0,.08);
-  --text:#0d1222;
-  --muted: rgba(13,18,34,.68);
-  --shadow: 0 18px 60px rgba(0,0,0,.12);
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-  min-height:100vh;
-  color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-  background:
-    radial-gradient(1000px 700px at 20% 10%, var(--grad1), transparent 55%),
-    radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
-    radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
-    var(--bg);
-}
-.wrap{max-width:980px;margin:auto;padding:16px;padding-bottom:120px}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-h1{margin:0;font-size:20px;letter-spacing:.2px}
-h2{margin:0;font-size:16px}
-h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:700}
-.small{font-size:12px;color:var(--muted)}
-.card{
-  background: linear-gradient(180deg, var(--panel2), var(--panel));
-  border:1px solid var(--stroke);
-  border-radius:var(--radius);
-  padding:14px;
-  box-shadow:var(--shadow);
-  backdrop-filter:var(--glass);
-}
-.row{display:flex;gap:10px;align-items:center}
-.row > *{flex:1}
-.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.btn{
-  appearance:none;border:0;cursor:pointer;
-  background:rgba(255,255,255,.10);
-  color:var(--text);
-  padding:12px 12px;border-radius:14px;
-  border:1px solid var(--stroke);
-  font-weight:750;
-  box-shadow:0 10px 26px rgba(0,0,0,.18);
-  text-decoration:none;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-}
-.btn.primary{
-  background:var(--accent);
-  border-color:color-mix(in srgb, var(--accent), transparent 55%);
-  color:#fff;
-}
-.btn.danger{
-  background:var(--danger);
-  border-color:color-mix(in srgb, var(--danger), transparent 55%);
-  color:#2b0707;
-}
-.btn.icon{
-  width:42px;height:42px;padding:0;border-radius:14px
-}
-input{
-  width:100%;
-  padding:12px 12px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  outline:none;
-  background:rgba(0,0,0,.15);
-  color:var(--text);
-  font-size:14px;
-}
-.light input{background:rgba(255,255,255,.75)}
-label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
-.badge{
-  display:inline-flex;gap:6px;align-items:center;
-  padding:4px 10px;border-radius:999px;
-  background:rgba(255,255,255,.10);
-  border:1px solid var(--stroke);
-  font-size:12px;color:var(--muted);
-}
-.note{
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--stroke);
-  padding:12px;border-radius:16px;
-}
-.hr{height:1px;background:var(--stroke);margin:12px 0}
-.listCol{display:grid;gap:10px}
-.backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.backBtn{font-weight:850}
-#loading{
-  display:flex;align-items:center;justify-content:center;
-  min-height:100vh;padding:24px;text-align:center;
-}
-.empty{
-  padding:18px;border-radius:18px;border:1px dashed var(--stroke);
-  text-align:center;color:var(--muted)
-}
-.kpiGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.kpi{
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--stroke);
-  border-radius:18px;
-  padding:12px;
-}
-.kpi .v{font-size:18px;font-weight:850;margin-top:6px}
-.lockText{opacity:.85}
 #debugBox{
   position:fixed; left:12px; right:12px; bottom:12px;
   background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
   font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
-@media (max-width:720px){
-  .grid2,.grid3,.kpiGrid{grid-template-columns:1fr}
-  .topbar{align-items:flex-start;flex-direction:column}
+.catRow{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.catInfo{min-width:0}
+.catTitle{
+  font-weight:950;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.catMeta{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;
 }
 </style>
 </head>
@@ -161,49 +43,57 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   <div class="wrap">
     <div class="backRow">
       <a class="btn backBtn" href="./index.html">← Voltar</a>
-      <div style="font-weight:900">Minhas Categorias</div>
+      <div style="font-weight:900">Categorias</div>
     </div>
 
     <div class="topbar">
       <div>
         <h1>Controle de Gastos PRO</h1>
-        <div class="small">Gerencie as categorias usadas nos gastos do app.</div>
+        <div class="small">Adicione ou remova categorias para usar no seu app.</div>
       </div>
       <div class="row" style="flex:0 0 auto">
         <button class="btn" onclick="toggleTheme()">🌙/☀️</button>
       </div>
     </div>
 
-    <div class="kpiGrid">
+    <div class="grid3">
       <div class="kpi">
         <div class="small">Total de categorias</div>
         <div class="v" id="kpiQtd">0</div>
       </div>
       <div class="kpi">
-        <div class="small">Personalizadas</div>
-        <div class="v" id="kpiCustom">0</div>
+        <div class="small">Categoria protegida</div>
+        <div class="v" id="kpiProtegida">Investimentos</div>
       </div>
       <div class="kpi">
-        <div class="small">Protegidas</div>
-        <div class="v" id="kpiLock">1</div>
+        <div class="small">Busca</div>
+        <div class="v" id="kpiBusca">Livre</div>
       </div>
     </div>
 
     <div class="card" style="margin-top:12px">
       <h3>Adicionar categoria</h3>
 
-      <label>Nome da categoria</label>
-      <input id="novaCategoria" placeholder="Ex: Saúde">
+      <div class="grid2">
+        <div>
+          <label>Nome da categoria</label>
+          <input id="novaCategoria" placeholder="Ex: Saúde">
+        </div>
+        <div class="note">
+          <div style="font-weight:900">Comando de voz</div>
+          <div class="small" style="margin-top:6px">
+            Exemplos:
+            <br><b>adicionar categoria saúde</b>
+            <br><b>remover categoria saúde</b>
+          </div>
+        </div>
+      </div>
 
       <div class="hr"></div>
 
       <div class="row">
-        <button class="btn primary" onclick="addCategoria()">Adicionar</button>
         <button class="btn" onclick="clearForm()">Limpar</button>
-      </div>
-
-      <div class="small" style="margin-top:10px">
-        A categoria <b>Investimentos</b> é protegida e não pode ser removida.
+        <button class="btn primary" onclick="addCategoria()">Adicionar categoria</button>
       </div>
     </div>
 
@@ -211,9 +101,9 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
       <div class="row" style="margin-bottom:10px">
         <div>
           <h3 style="margin:0">Lista de categorias</h3>
-          <div class="small">Ao remover uma categoria, gastos dessa categoria vão para <b>Outros</b>.</div>
+          <div class="small">A categoria <b>Investimentos</b> é protegida e não pode ser removida.</div>
         </div>
-        <input id="busca" placeholder="Buscar categoria…" oninput="renderCategorias()">
+        <input id="buscaCategoria" placeholder="Buscar categoria…" oninput="renderCategorias()">
       </div>
 
       <div class="hr"></div>
@@ -228,6 +118,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 <script>
 function dbg(msg){
   const box = document.getElementById("debugBox");
+  if(!box) return;
   box.style.display = "block";
   box.textContent = String(msg);
 }
@@ -242,181 +133,72 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="./config.js"></script>
+<script src="./app.js"></script>
 
 <script>
-const FIREBASE_CONFIG = {
-  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-  authDomain:"controle-gastos-pro.firebaseapp.com",
-  projectId:"controle-gastos-pro"
-};
+const VOICE_CMD_KEY = "voice_cmd";
 
-const DEFAULT_CATEGORIAS = ["Casa","Alimentação","Transporte","Lazer","Pets","Investimentos","Outros"];
-const THEME_KEYS = { preset: "theme_preset_v1", accent: "theme_accent_v1" };
-
-const THEME_PRESETS = {
-  default: {
-    dark:  { bg:"#07101f", g1:"rgba(86,156,255,.22)", g2:"rgba(57,217,138,.16)", g3:"rgba(255,93,93,.12)" },
-    light: { bg:"#f4f6ff", g1:"rgba(86,156,255,.14)", g2:"rgba(57,217,138,.10)", g3:"rgba(255,93,93,.08)" }
-  },
-  purple: {
-    dark:  { bg:"#0d0a1f", g1:"rgba(170,110,255,.25)", g2:"rgba(86,156,255,.12)", g3:"rgba(57,217,138,.10)" },
-    light: { bg:"#fbf8ff", g1:"rgba(170,110,255,.16)", g2:"rgba(86,156,255,.10)", g3:"rgba(57,217,138,.08)" }
-  },
-  green: {
-    dark:  { bg:"#061a14", g1:"rgba(57,217,138,.28)", g2:"rgba(86,156,255,.10)", g3:"rgba(255,209,102,.10)" },
-    light: { bg:"#f7fffb", g1:"rgba(57,217,138,.16)", g2:"rgba(86,156,255,.08)", g3:"rgba(255,209,102,.10)" }
-  },
-  sunset: {
-    dark:  { bg:"#1a0b0b", g1:"rgba(255,93,93,.22)", g2:"rgba(255,209,102,.18)", g3:"rgba(86,156,255,.10)" },
-    light: { bg:"#fff7f2", g1:"rgba(255,93,93,.14)", g2:"rgba(255,209,102,.14)", g3:"rgba(86,156,255,.08)" }
-  },
-  mono: {
-    dark:  { bg:"#05070c", g1:"rgba(255,255,255,.10)", g2:"rgba(255,255,255,.06)", g3:"rgba(255,255,255,.04)" },
-    light: { bg:"#ffffff", g1:"rgba(0,0,0,.06)", g2:"rgba(0,0,0,.04)", g3:"rgba(0,0,0,.03)" }
-  }
-};
-
-let auth = null;
-let USER = null;
-let USER_ID = null;
-
-let categorias = [...DEFAULT_CATEGORIAS];
-let fixos = [];
-let state = { meses:{} };
-
-function money(n){
-  return Number(n || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+function normalize(text){
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
-function escapeHtml(s){
-  return String(s || "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-function showLoading(){
-  document.getElementById("loading").style.display = "flex";
-  document.getElementById("app").style.display = "none";
-}
-function showApp(){
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("app").style.display = "block";
+function capitalize(text){
+  const t = String(text || "").trim();
+  return t ? (t.charAt(0).toUpperCase() + t.slice(1)) : "";
 }
 
-function kMes(){ return "gastos_pro_state_" + USER_ID; }
-function kCat(){ return "categorias_" + USER_ID; }
-function kFix(){ return "fixos_" + USER_ID; }
-
-function isLightMode(){
-  return document.body.classList.contains("light");
-}
-function applyThemeSettings(){
-  const preset = localStorage.getItem(THEME_KEYS.preset) || "default";
-  const accent = localStorage.getItem(THEME_KEYS.accent) || "#569cff";
-  const p = THEME_PRESETS[preset] || THEME_PRESETS.default;
-  const mode = isLightMode() ? "light" : "dark";
-  const colors = p[mode] || p.dark;
-
-  document.documentElement.style.setProperty("--accent", accent);
-  document.documentElement.style.setProperty("--bg", colors.bg);
-  document.documentElement.style.setProperty("--grad1", colors.g1);
-  document.documentElement.style.setProperty("--grad2", colors.g2);
-  document.documentElement.style.setProperty("--grad3", colors.g3);
-
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute("content", accent);
-}
 function toggleTheme(){
-  document.body.classList.toggle("light");
-  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
-  applyThemeSettings();
-}
-
-function loadAll(){
-  try{
-    const raw = localStorage.getItem(kMes());
-    state = raw ? JSON.parse(raw) : { meses:{} };
-  }catch(e){
-    state = { meses:{} };
-  }
-  if(!state || typeof state !== "object") state = { meses:{} };
-  if(!state.meses || typeof state.meses !== "object") state.meses = {};
-
-  try{
-    const raw = localStorage.getItem(kCat());
-    categorias = raw ? JSON.parse(raw) : [...DEFAULT_CATEGORIAS];
-    if(!Array.isArray(categorias) || !categorias.length) categorias = [...DEFAULT_CATEGORIAS];
-    if(!categorias.some(c=>String(c).toLowerCase()==="investimentos")) categorias.splice(categorias.length-1,0,"Investimentos");
-  }catch(e){
-    categorias = [...DEFAULT_CATEGORIAS];
-  }
-
-  try{
-    const raw = localStorage.getItem(kFix());
-    fixos = raw ? JSON.parse(raw) : [];
-    if(!Array.isArray(fixos)) fixos = [];
-  }catch(e){
-    fixos = [];
-  }
-}
-function saveAll(){
-  localStorage.setItem(kMes(), JSON.stringify(state));
-  localStorage.setItem(kCat(), JSON.stringify(categorias));
-  localStorage.setItem(kFix(), JSON.stringify(fixos));
+  App.toggleTheme();
 }
 
 function clearForm(){
   document.getElementById("novaCategoria").value = "";
-  document.getElementById("novaCategoria").focus();
 }
 
 function updateKPIs(){
-  const qtd = categorias.length;
-  const custom = categorias.filter(c=>!DEFAULT_CATEGORIAS.includes(c)).length;
-  const locked = categorias.filter(c=>String(c).toLowerCase()==="investimentos").length;
-
-  document.getElementById("kpiQtd").textContent = String(qtd);
-  document.getElementById("kpiCustom").textContent = String(custom);
-  document.getElementById("kpiLock").textContent = String(locked);
+  const list = Array.isArray(App.categorias) ? App.categorias : [];
+  document.getElementById("kpiQtd").textContent = String(list.length);
+  document.getElementById("kpiBusca").textContent = (document.getElementById("buscaCategoria").value || "").trim() ? "Ativa" : "Livre";
 }
 
 function renderCategorias(){
   const div = document.getElementById("listaCategorias");
-  const busca = (document.getElementById("busca").value || "").trim().toLowerCase();
+  const list = Array.isArray(App.categorias) ? [...App.categorias] : [];
+  const busca = normalize(document.getElementById("buscaCategoria").value || "");
 
-  let lista = [...categorias];
+  let filtered = list;
   if(busca){
-    lista = lista.filter(c => String(c).toLowerCase().includes(busca));
+    filtered = filtered.filter(cat => normalize(cat).includes(busca));
   }
 
-  if(!lista.length){
+  if(!filtered.length){
     div.innerHTML = `<div class="empty">${busca ? "Nenhuma categoria encontrada." : "Nenhuma categoria cadastrada."}</div>`;
     updateKPIs();
     return;
   }
 
-  div.innerHTML = lista.map(cat=>{
-    const realIndex = categorias.findIndex(x => String(x) === String(cat));
-    const lower = String(cat).toLowerCase();
-    const isLocked = lower === "investimentos";
-    const isDefault = DEFAULT_CATEGORIAS.includes(cat);
+  div.innerHTML = filtered.map(cat=>{
+    const realIndex = App.categorias.findIndex(c => String(c) === String(cat));
+    const protegida = normalize(cat) === "investimentos";
 
     return `
-      <div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div style="min-width:0">
-          <div style="font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(cat)}</div>
-          <div class="small" style="margin-top:6px">
-            ${isDefault ? `<span class="badge">Padrão</span>` : `<span class="badge">Personalizada</span>`}
-            ${isLocked ? `<span class="badge lockText">Protegida</span>` : ``}
+      <div class="note">
+        <div class="catRow">
+          <div class="catInfo">
+            <div class="catTitle">${App.escapeHtml(cat)}</div>
+            <div class="catMeta">
+              ${protegida ? `<span class="badge warn">Protegida</span>` : `<span class="badge">Personalizada</span>`}
+            </div>
           </div>
+          <button
+            class="btn icon ${protegida ? '' : 'danger'}"
+            onclick="removeCategoria(${realIndex})"
+            title="${protegida ? 'Categoria protegida' : 'Remover categoria'}"
+            ${protegida ? 'disabled' : ''}>✕</button>
         </div>
-        <button
-          class="btn icon ${isLocked ? "" : "danger"}"
-          ${isLocked ? "disabled" : ""}
-          title="${isLocked ? "Investimentos não pode ser removida" : "Remover categoria"}"
-          onclick="removeCategoria(${realIndex})"
-        >✕</button>
       </div>
     `;
   }).join("");
@@ -425,174 +207,132 @@ function renderCategorias(){
 }
 
 function addCategoria(){
-  if(!USER_ID){ alert("Faça login primeiro."); return; }
-
-  const input = document.getElementById("novaCategoria");
-  const nome = (input.value || "").trim();
-
+  const nome = (document.getElementById("novaCategoria").value || "").trim();
   if(!nome) return alert("Digite o nome da categoria.");
 
-  if(categorias.some(c => String(c).toLowerCase() === nome.toLowerCase())){
-    return alert("Essa categoria já existe.");
+  const result = App.addCategoria(capitalize(nome));
+  if(!result.ok){
+    alert(result.error || "Não foi possível adicionar a categoria.");
+    return;
   }
 
-  categorias.push(nome);
-  saveAll();
   clearForm();
   renderCategorias();
 }
 
-function removeCategoria(idx){
-  if(!USER_ID){ alert("Faça login primeiro."); return; }
-  if(idx < 0 || idx >= categorias.length) return;
+function removeCategoria(index){
+  if(index < 0 || index >= App.categorias.length) return;
+  const nome = App.categorias[index];
+  const protegida = normalize(nome) === "investimentos";
+  if(protegida) return alert("A categoria Investimentos não pode ser removida.");
 
-  const cat = categorias[idx];
-  const lower = String(cat).toLowerCase();
-  if(lower === "investimentos"){
-    alert("A categoria Investimentos não pode ser removida.");
+  const ok = confirm(`Remover a categoria "${nome}"?`);
+  if(!ok) return;
+
+  const result = App.removeCategoria(index);
+  if(!result.ok){
+    alert(result.error || "Não foi possível remover a categoria.");
     return;
   }
 
-  const ok = confirm(`Remover a categoria "${cat}"? Gastos dessa categoria vão para "Outros".`);
-  if(!ok) return;
-
-  categorias.splice(idx, 1);
-
-  fixos = fixos.map(f=>{
-    if(String(f.category || "") === cat) return { ...f, category:"Outros" };
-    return f;
-  });
-
-  Object.keys(state.meses || {}).forEach(m=>{
-    const d = state.meses[m];
-    if(!d) return;
-
-    if(Array.isArray(d.items)){
-      d.items = d.items.map(it=>{
-        if(String(it.category || "") === cat) return { ...it, category:"Outros" };
-        return it;
-      });
-    }
-  });
-
-  saveAll();
   renderCategorias();
 }
 
-function setupVoiceBridge(){
-  window.addEventListener("storage", (e)=>{
-    if(e.key === "voice_cmd") handleVoiceCommand(e.newValue || "");
-  });
+function removeCategoriaByName(target){
+  const normTarget = normalize(target);
+  const idx = (App.categorias || []).findIndex(cat => normalize(cat).includes(normTarget));
+  if(idx < 0) return false;
 
-  const cached = localStorage.getItem("voice_cmd");
-  if(cached) handleVoiceCommand(cached);
+  const nome = App.categorias[idx];
+  if(normalize(nome) === "investimentos") return false;
+
+  const result = App.removeCategoria(idx);
+  return !!result.ok;
 }
-function consumeVoiceCommand(){
-  localStorage.removeItem("voice_cmd");
-  localStorage.setItem("voice_last_page", "categorias.html");
-}
+
 function handleVoiceCommand(raw){
-  const cmd = String(raw || "").trim().toLowerCase();
-  if(!cmd) return;
+  const cmd = normalize(raw);
+  if(!cmd) return false;
 
-  if(
-    cmd.includes("abrir categorias") ||
-    cmd.includes("abrir minhas categorias") ||
-    cmd.includes("ir para categorias")
-  ){
-    consumeVoiceCommand();
-    return;
+  if(cmd.includes("tema roxo")){
+    localStorage.setItem(App.THEME_KEYS.preset, "purple");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema minimal") || cmd.includes("tema mono")){
+    localStorage.setItem(App.THEME_KEYS.preset, "mono");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema verde")){
+    localStorage.setItem(App.THEME_KEYS.preset, "green");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema padrao") || cmd.includes("tema padrão")){
+    localStorage.setItem(App.THEME_KEYS.preset, "default");
+    App.applyThemeSettings();
+    return true;
+  }
+  if(cmd.includes("tema por do sol") || cmd.includes("tema pôr do sol") || cmd.includes("tema sunset")){
+    localStorage.setItem(App.THEME_KEYS.preset, "sunset");
+    App.applyThemeSettings();
+    return true;
   }
 
-  if(
-    cmd.includes("voltar") ||
-    cmd.includes("abrir início") ||
-    cmd.includes("abrir tela principal") ||
-    cmd.includes("abrir dashboard") ||
-    cmd.includes("ir para home")
-  ){
-    consumeVoiceCommand();
+  let m = cmd.match(/^adicionar\s+categoria\s+(.+)$/i)
+       || cmd.match(/^anote\s+categoria\s+(.+)$/i)
+       || cmd.match(/^anotar\s+categoria\s+(.+)$/i);
+  if(m){
+    const nome = capitalize((m[1] || "").trim());
+    if(nome){
+      const result = App.addCategoria(nome);
+      if(result.ok){
+        renderCategorias();
+        return true;
+      }
+    }
+  }
+
+  m = cmd.match(/^remover\s+categoria\s+(.+)$/i)
+    || cmd.match(/^apagar\s+categoria\s+(.+)$/i)
+    || cmd.match(/^excluir\s+categoria\s+(.+)$/i);
+  if(m){
+    const ok = removeCategoriaByName((m[1] || "").trim());
+    if(ok){
+      renderCategorias();
+      return true;
+    }
+  }
+
+  if(cmd.includes("abrir tela principal") || cmd.includes("abrir inicio") || cmd.includes("abrir início") || cmd.includes("ir para home")){
     location.href = "./index.html";
-    return;
+    return true;
   }
 
-  if(cmd.includes("tema claro")){
-    if(!document.body.classList.contains("light")) toggleTheme();
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(cmd.includes("tema escuro") || cmd.includes("tema normal")){
-    if(document.body.classList.contains("light")) toggleTheme();
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(cmd.includes("limpar formulário") || cmd.includes("limpar form")){
-    clearForm();
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(cmd.includes("adicionar categoria") || cmd.includes("salvar categoria")){
-    addCategoria();
-    consumeVoiceCommand();
-    return;
-  }
-
-  if(cmd.startsWith("preencher categoria ")){
-    const text = cmd.replace("preencher categoria ","").trim();
-    if(text) document.getElementById("novaCategoria").value = text;
-    consumeVoiceCommand();
-    return;
-  }
+  return false;
 }
 
-async function initFirebase(){
-  if(!window.firebase){
-    dbg("Firebase não carregou.");
-    return false;
-  }
-
-  try{
-    if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-  }catch(e){}
-
-  auth = firebase.auth();
-  try{
-    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-  }catch(e){}
-
-  auth.onAuthStateChanged((u)=>{
-    USER = u || null;
-
-    if(!USER){
-      USER_ID = null;
-      location.replace("./login.html");
-      return;
+function bindVoiceStorageListener(){
+  window.addEventListener("storage", (e)=>{
+    if(e.key === VOICE_CMD_KEY && e.newValue){
+      const ok = handleVoiceCommand(e.newValue);
+      if(ok) localStorage.removeItem(VOICE_CMD_KEY);
     }
-
-    USER_ID = USER.uid;
-
-    const t = localStorage.getItem("theme");
-    if(t === "light") document.body.classList.add("light");
-    applyThemeSettings();
-
-    loadAll();
-    renderCategorias();
-    clearForm();
-    setupVoiceBridge();
-
-    showApp();
   });
 
-  return true;
+  const first = localStorage.getItem(VOICE_CMD_KEY);
+  if(first){
+    const ok = handleVoiceCommand(first);
+    if(ok) localStorage.removeItem(VOICE_CMD_KEY);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
-  showLoading();
-  applyThemeSettings();
-  await initFirebase();
+  await App.boot(()=>{
+    bindVoiceStorageListener();
+    renderCategorias();
+  });
 });
 </script>
 </body>
