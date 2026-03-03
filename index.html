@@ -15,6 +15,9 @@ window.APP_KEY = "GastosPro@2026!";
 </script>
 
 <style>
+.screen{display:none}
+.screen.active{display:block}
+
 .pill{
   display:flex;gap:10px;align-items:center;justify-content:center;
   padding:10px 12px;border-radius:18px;
@@ -31,9 +34,6 @@ window.APP_KEY = "GastosPro@2026!";
   border-color:rgba(255,255,255,.18);
 }
 .pill .icon{opacity:.95}
-
-.screen{display:none}
-.screen.active{display:block}
 
 .list{
   width:100%;
@@ -253,6 +253,11 @@ window.APP_KEY = "GastosPro@2026!";
 
 @media (max-width:720px){
   .fabWrap{right:14px;bottom:14px}
+}
+#debugBox{
+  position:fixed; left:12px; right:12px; bottom:12px;
+  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
+  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
 }
 </style>
 </head>
@@ -685,6 +690,8 @@ let graficoEvolucao = null;
 let mesAtual = new Date().toISOString().slice(0,7);
 let __voiceStorageBound = false;
 
+const VOICE_CMD_KEY = "voice_cmd";
+
 const HOME_SECTIONS = [
   { id:"resumo", title:"Resumo do mês" },
   { id:"kpis", title:"Cards (Salário/Gasto/Sobra/Guardado)" },
@@ -947,11 +954,7 @@ function confirmAddExpense(){
   const sug = App.detectarCategoria(desc);
   if(cat==="Outros" && sug!=="Outros") cat = sug;
 
-  const d = App.getDataMes(mesAtual);
-  d.items.push(App.ensureItemDefaults({ desc, amount, category:cat, isFixo:false, isInvestFixo:false }));
-  App.saveAll();
-  App.syncAddGasto(mesAtual, desc, amount, cat);
-
+  addExpenseDirect(desc, amount, cat);
   closeModal("overlay-addExpense");
   render();
 }
@@ -962,13 +965,6 @@ function addExpenseDirect(desc, amount, category){
   d.items.push(App.ensureItemDefaults({ desc, amount, category:cat, isFixo:false, isInvestFixo:false }));
   App.saveAll();
   App.syncAddGasto(mesAtual, desc, amount, cat);
-}
-
-function addSavedDirect(value, desc){
-  const d = App.getDataMes(mesAtual);
-  App.ensureSavedArray(d);
-  d.saved.unshift({ value:Number(value||0), desc:desc||"", date:App.todayISO(), source:"manual" });
-  App.saveAll();
 }
 
 function markItemByName(target, shouldBePaid){
@@ -1096,7 +1092,10 @@ function applyHomeLayoutToDOM(){
     el.style.display = item.show ? "" : "none";
   });
 }
-function openHomeEditor(){ renderHomeEditorUI(); openScreen("screen-home-editor"); }
+function openHomeEditor(){
+  renderHomeEditorUI();
+  openScreen("screen-home-editor");
+}
 function renderHomeEditorUI(){
   const div = document.getElementById("layoutList");
   const layout = loadHomeLayout();
@@ -1192,263 +1191,195 @@ function openPdfScreen(){
   openScreen("screen-pdf");
 }
 
-function aggregateYear(year){
-  const months = Object.keys(App.state.meses||{}).filter(m=>m.startsWith(String(year)+"-")).sort();
-  const byCat = {};
-  const byMonth = [];
+/* ======= VOZ: INDEX EXECUTA (anotar, pagar/pendente, pdf, temas, menu, IA, edição) ======= */
+function handleVoiceCommandOnIndex(raw){
+  const cmd = normalize(raw);
+  if(!cmd) return false;
 
-  months.forEach(m=>{
-    const d = App.getDataMes(m);
-    const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-    const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
-    const salary = Number(d.salary||0);
-    byMonth.push({ m, salary, spent, saved });
-    (d.items||[]).forEach(it=>{
-      const c = it.category||"Outros";
-      byCat[c] = (byCat[c]||0) + Number(it.amount||0);
-    });
-  });
-
-  const catsSorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-  const topCat = catsSorted[0] ? { cat:catsSorted[0][0], value:catsSorted[0][1] } : { cat:"—", value:0 };
-  return { months, byCat, byMonth, topCat };
-}
-
-async function renderPdfAndSave(wrap, filename){
-  const canvas = await html2canvas(wrap, { scale:2, backgroundColor:"#ffffff" });
-  const imgData = canvas.toDataURL("image/png");
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p","mm","a4");
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  const imgW = pageW;
-  const imgH = (canvas.height * imgW) / canvas.width;
-
-  let y = 0;
-  let remaining = imgH;
-
-  pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
-  remaining -= pageH;
-
-  while(remaining > 0){
-    pdf.addPage();
-    y = -(imgH - remaining);
-    pdf.addImage(imgData, "PNG", 0, y, imgW, imgH);
-    remaining -= pageH;
+  // Abrir menu / IA / edição do painel
+  if(cmd.includes("abrir menu")){
+    openMenu();
+    return true;
+  }
+  if(cmd.includes("abrir ia")){
+    openScreen("screen-ia");
+    return true;
+  }
+  if(cmd.includes("abrir edicao do painel") || cmd.includes("abrir edição do painel") || cmd.includes("editar painel") || cmd.includes("edicao do painel") || cmd.includes("edição do painel")){
+    openHomeEditor();
+    return true;
   }
 
-  pdf.save(filename);
+  // PDF
+  if(cmd.includes("imprimir resumo do ano")){
+    openPdfScreen();
+    setTimeout(()=>{ if(typeof gerarPDFResumoAno==="function") gerarPDFResumoAno(); }, 250);
+    return true;
+  }
+  if(cmd.includes("imprimir pdf do mes") || cmd.includes("imprimir pdf do mês")){
+    openPdfScreen();
+    setTimeout(()=>{ if(typeof gerarPDFCompleto==="function") gerarPDFCompleto(); }, 250);
+    return true;
+  }
+
+  // Temas (preset)
+  if(cmd.includes("tema roxo")){
+    localStorage.setItem(App.THEME_KEYS.preset, "purple");
+    App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
+    return true;
+  }
+  if(cmd.includes("tema minimal") || cmd.includes("tema mono")){
+    localStorage.setItem(App.THEME_KEYS.preset, "mono");
+    App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
+    return true;
+  }
+  if(cmd.includes("tema verde")){
+    localStorage.setItem(App.THEME_KEYS.preset, "green");
+    App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
+    return true;
+  }
+  if(cmd.includes("tema padrao") || cmd.includes("tema padrão")){
+    localStorage.setItem(App.THEME_KEYS.preset, "default");
+    App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
+    return true;
+  }
+  if(cmd.includes("tema por do sol") || cmd.includes("tema pôr do sol") || cmd.includes("tema sunset")){
+    localStorage.setItem(App.THEME_KEYS.preset, "sunset");
+    App.applyThemeSettings();
+    syncThemeUI();
+    drawAllCharts();
+    return true;
+  }
+
+  // Marcar pago/pendente
+  let m = cmd.match(/^anote\s+como\s+pago\s+(.+)$/i) || cmd.match(/^anotar\s+como\s+pago\s+(.+)$/i);
+  if(m){
+    if(markItemByName(m[1], true)){
+      render();
+      return true;
+    }
+    return false;
+  }
+  m = cmd.match(/^anote\s+como\s+pendente\s+(.+)$/i) || cmd.match(/^anotar\s+como\s+pendente\s+(.+)$/i);
+  if(m){
+    if(markItemByName(m[1], false)){
+      render();
+      return true;
+    }
+    return false;
+  }
+
+  // Guardado
+  m = cmd.match(/^anote\s+guardado\s+(\d+(?:[.,]\d+)?)\s+de\s+(.+)$/i) || cmd.match(/^anotar\s+guardado\s+(\d+(?:[.,]\d+)?)\s+de\s+(.+)$/i);
+  if(m){
+    const value = parseMoney(m[1]);
+    const desc = (m[2]||"").trim();
+    if(value>0){
+      const d = App.getDataMes(mesAtual);
+      App.ensureSavedArray(d);
+      d.saved.unshift({ value:Number(value), desc, date:App.todayISO(), source:"manual" });
+      App.saveAll();
+      render();
+      return true;
+    }
+  }
+
+  // Anotar gasto normal: "anote mercado 100 casa"
+  m = cmd.match(/^anote\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i) || cmd.match(/^anotar\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i);
+  if(m && !cmd.includes("gastos fixos")){
+    const desc = (m[1]||"").trim();
+    const amount = parseMoney(m[2]);
+    const category = capitalize(m[3]);
+    if(desc && amount>0){
+      addExpenseDirect(desc, amount, category);
+      render();
+      return true;
+    }
+  }
+
+  // Abrir telas externas (index só redireciona, execução é da página)
+  if(cmd.includes("abrir historico") || cmd.includes("abrir histórico")){
+    localStorage.setItem(VOICE_CMD_KEY, raw);
+    location.href = "./historico.html";
+    return true;
+  }
+  if(cmd.includes("abrir gastos fixos")){
+    localStorage.setItem(VOICE_CMD_KEY, raw);
+    location.href = "./fixos.html";
+    return true;
+  }
+  if(cmd.includes("abrir investimentos fixos") || cmd.includes("abrir investimento fixo")){
+    localStorage.setItem(VOICE_CMD_KEY, raw);
+    location.href = "./investfixos.html";
+    return true;
+  }
+  if(cmd.includes("abrir categorias")){
+    localStorage.setItem(VOICE_CMD_KEY, raw);
+    location.href = "./categorias.html";
+    return true;
+  }
+  if(cmd.includes("abrir simuladores") || cmd.includes("abrir simulador")){
+    localStorage.setItem(VOICE_CMD_KEY, raw);
+    location.href = "./simuladores.html";
+    return true;
+  }
+
+  return false;
 }
 
+function bindVoiceStorageListener(){
+  if(__voiceStorageBound) return;
+  __voiceStorageBound = true;
+
+  window.addEventListener("storage", (e)=>{
+    if(e.key === VOICE_CMD_KEY && e.newValue){
+      const ok = handleVoiceCommandOnIndex(e.newValue);
+      if(ok) localStorage.removeItem(VOICE_CMD_KEY);
+    }
+  });
+
+  const first = localStorage.getItem(VOICE_CMD_KEY);
+  if(first){
+    const ok = handleVoiceCommandOnIndex(first);
+    if(ok) localStorage.removeItem(VOICE_CMD_KEY);
+  }
+}
+
+/* ======= PDF (chama as funções existentes no app.js, se você já tem) ======= */
 async function gerarPDFResumoAno(){
+  if(typeof App.gerarPDFResumoAno === "function") return App.gerarPDFResumoAno();
   const status = document.getElementById("pdfStatus");
-  try{
-    status.textContent = "Gerando resumo do ano…";
-    const year = document.getElementById("pdfYear").value;
-    const agg = aggregateYear(year);
-
-    const wrap = document.createElement("div");
-    wrap.style.position = "fixed";
-    wrap.style.left = "-9999px";
-    wrap.style.top = "0";
-    wrap.style.width = "900px";
-    wrap.style.padding = "16px";
-    wrap.style.background = "#ffffff";
-    wrap.style.color = "#111";
-    wrap.style.fontFamily = "system-ui, sans-serif";
-    wrap.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
-        <div>
-          <div style="font-size:22px;font-weight:900">Resumo do Ano • Controle de Gastos PRO</div>
-          <div style="font-size:13px;color:#444">Ano: <b>${App.escapeHtml(year)}</b> • Gerado em: ${App.escapeHtml(App.todayISO())}</div>
-          <div style="font-size:13px;color:#444">Usuário: <b>${App.escapeHtml(App.USER?.displayName||"Usuário")}</b></div>
-        </div>
-        <div style="text-align:right;font-size:12px;color:#444">
-          <div>Mais gastou no ano:</div>
-          <div style="font-size:14px;font-weight:900">${App.escapeHtml(agg.topCat.cat)} • ${App.money(agg.topCat.value)}</div>
-        </div>
-      </div>
-      <hr style="border:none;height:1px;background:#ddd;margin:14px 0">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Gráfico • Categorias do ano</div>
-          <canvas id="pdfChartCats" width="400" height="280"></canvas>
-        </div>
-        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Gráfico • Evolução mensal</div>
-          <canvas id="pdfChartEvo" width="400" height="280"></canvas>
-        </div>
-      </div>
-      <div style="margin-top:14px;border:1px solid #ddd;border-radius:12px;padding:12px">
-        <div style="font-weight:900;margin-bottom:8px">Tabela do ano</div>
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
-          <thead>
-            <tr>
-              <th style="text-align:left;border-bottom:1px solid #ddd;padding:8px">Mês</th>
-              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Salário</th>
-              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Gastos</th>
-              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Guardado</th>
-              <th style="text-align:right;border-bottom:1px solid #ddd;padding:8px">Sobra</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${agg.byMonth.map(x=>{
-              const sobra = Number(x.salary||0) - Number(x.spent||0);
-              const dt = new Date(x.m+"-01T00:00:00");
-              const label = dt.toLocaleDateString("pt-BR",{month:"short",year:"numeric"});
-              return `
-                <tr>
-                  <td style="padding:7px;border-bottom:1px solid #eee;text-transform:capitalize">${App.escapeHtml(label)}</td>
-                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${App.money(x.salary)}</td>
-                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${App.money(x.spent)}</td>
-                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${App.money(x.saved)}</td>
-                  <td style="padding:7px;border-bottom:1px solid #eee;text-align:right">${App.money(sobra)}</td>
-                </tr>
-              `;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>
-    `;
-    document.body.appendChild(wrap);
-
-    const catChart = new Chart(wrap.querySelector("#pdfChartCats"), {
-      type:"doughnut",
-      data:{ labels:Object.keys(agg.byCat), datasets:[{ data:Object.values(agg.byCat) }] },
-      options:{ plugins:{ legend:{ position:"bottom" }}}
-    });
-
-    const evoChart = new Chart(wrap.querySelector("#pdfChartEvo"), {
-      type:"line",
-      data:{
-        labels: agg.byMonth.map(x=>new Date(x.m+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"short"})),
-        datasets:[{ data: agg.byMonth.map(x=>Number(x.spent||0)) }]
-      },
-      options:{ plugins:{ legend:{ display:false }}}
-    });
-
-    await new Promise(r=>setTimeout(r, 250));
-    await renderPdfAndSave(wrap, `resumo_ano_${year}.pdf`);
-    catChart.destroy();
-    evoChart.destroy();
-    wrap.remove();
-    status.textContent = "Resumo do ano gerado ✅";
-  }catch(e){
-    status.textContent = "Erro ao gerar PDF: " + (e.message||e);
-  }
+  status.textContent = "Seu app.js ainda não expôs gerarPDFResumoAno().";
 }
-
 async function gerarPDFCompleto(){
+  if(typeof App.gerarPDFCompleto === "function") return App.gerarPDFCompleto();
   const status = document.getElementById("pdfStatus");
-  try{
-    status.textContent = "Gerando relatório completo…";
-    const year = document.getElementById("pdfYear").value;
-    const monthNotes = document.getElementById("pdfMonth").value;
-    const agg = aggregateYear(year);
-    const notesData = App.getDataMes(monthNotes);
-
-    const wrap = document.createElement("div");
-    wrap.style.position = "fixed";
-    wrap.style.left = "-9999px";
-    wrap.style.top = "0";
-    wrap.style.width = "900px";
-    wrap.style.padding = "16px";
-    wrap.style.background = "#ffffff";
-    wrap.style.color = "#111";
-    wrap.style.fontFamily = "system-ui, sans-serif";
-    wrap.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
-        <div>
-          <div style="font-size:22px;font-weight:900">Relatório Completo • Controle de Gastos PRO</div>
-          <div style="font-size:13px;color:#444">Ano: <b>${App.escapeHtml(year)}</b> • Gerado em: ${App.escapeHtml(App.todayISO())}</div>
-        </div>
-        <div style="text-align:right;font-size:12px;color:#444">
-          <div>Mais gastou no ano:</div>
-          <div style="font-size:14px;font-weight:900">${App.escapeHtml(agg.topCat.cat)} • ${App.money(agg.topCat.value)}</div>
-        </div>
-      </div>
-      <hr style="border:none;height:1px;background:#ddd;margin:14px 0">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Categorias do ano</div>
-          <canvas id="pdfChartCats" width="400" height="280"></canvas>
-        </div>
-        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Evolução mensal</div>
-          <canvas id="pdfChartEvo" width="400" height="280"></canvas>
-        </div>
-      </div>
-      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Investimentos fixos cadastrados</div>
-          ${
-            App.investFixos.length
-            ? App.investFixos.map(inv=>`
-              <div style="padding:6px 0;border-bottom:1px dashed #eee">
-                <div style="font-weight:800">${App.escapeHtml(inv.nome)}</div>
-                <div style="font-size:12px;color:#444">Meta: ${App.money(inv.metaFinal)} • Prazo: ${inv.prazoMeses} meses • Mensal: <b>${App.money(inv.mensal)}</b> • Dia: <b>${inv.diaPagar || "—"}</b></div>
-              </div>
-            `).join("")
-            : `<div style="font-size:12px;color:#444">Nenhum investimento fixo cadastrado.</div>`
-          }
-        </div>
-        <div style="border:1px solid #ddd;border-radius:12px;padding:12px">
-          <div style="font-weight:900;margin-bottom:8px">Anotações do mês (${App.escapeHtml(monthNotes)})</div>
-          ${
-            notesData.items.length
-            ? notesData.items.slice(0,28).map(it=>`
-              <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee">
-                <div>
-                  <div style="font-weight:800">${App.escapeHtml(it.desc||"")}</div>
-                  <div style="font-size:12px;color:#444">${App.escapeHtml(it.category||"Outros")} • ${it.paid ? "Pago" : "Pendente"}</div>
-                </div>
-                <div style="font-weight:900">${App.money(it.amount||0)}</div>
-              </div>
-            `).join("")
-            : `<div style="font-size:12px;color:#444">Nenhuma anotação neste mês.</div>`
-          }
-        </div>
-      </div>
-    `;
-    document.body.appendChild(wrap);
-
-    const catChart = new Chart(wrap.querySelector("#pdfChartCats"), {
-      type:"doughnut",
-      data:{ labels:Object.keys(agg.byCat), datasets:[{ data:Object.values(agg.byCat) }] },
-      options:{ plugins:{ legend:{ position:"bottom" }}}
-    });
-
-    const evoChart = new Chart(wrap.querySelector("#pdfChartEvo"), {
-      type:"line",
-      data:{
-        labels: agg.byMonth.map(x=>new Date(x.m+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"short"})),
-        datasets:[{ data: agg.byMonth.map(x=>Number(x.spent||0)) }]
-      },
-      options:{ plugins:{ legend:{ display:false }}}
-    });
-
-    await new Promise(r=>setTimeout(r, 250));
-    await renderPdfAndSave(wrap, `relatorio_completo_${year}_${monthNotes}.pdf`);
-    catChart.destroy();
-    evoChart.destroy();
-    wrap.remove();
-    status.textContent = "Relatório completo gerado ✅";
-  }catch(e){
-    status.textContent = "Erro ao gerar PDF: " + (e.message||e);
-  }
+  status.textContent = "Seu app.js ainda não expôs gerarPDFCompleto().";
 }
 
-async function callIA(prompt) {
-  const base = (window.API_BASE_URL || "").replace(/\/$/, "");
-  const resp = await fetch(base + "/api/chat", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json", "x-app-key":window.APP_KEY },
-    body:JSON.stringify({ prompt }),
-    cache:"no-store"
-  });
-  const data = await resp.json().catch(()=>({}));
-  if(!resp.ok) throw new Error(data?.error || ("Erro HTTP " + resp.status));
-  return data.response || "Sem resposta";
+/* ======= IA (opcional: se já existir no app.js) ======= */
+async function iaSend(){
+  if(typeof App.iaSend === "function") return App.iaSend(mesAtual);
+  // fallback simples: não quebra a tela
+  const input = document.getElementById("iaPrompt");
+  const q = (input.value||"").trim();
+  if(!q) return;
+  input.value = "";
+  iaAdd("me", q);
+  iaSetStatus("Offline", false);
+  iaAdd("bot", "Sua IA está no app.js. Se quiser, eu ligo aqui também.");
+}
+function iaQuick(text){
+  document.getElementById("iaPrompt").value = text;
+  document.getElementById("iaPrompt").focus();
 }
 function iaSetStatus(text, ok){
   document.getElementById("iaStatus").textContent = text;
@@ -1464,187 +1395,6 @@ function iaAdd(role, text){
   row.appendChild(bubble);
   box.appendChild(row);
   box.scrollTop = box.scrollHeight;
-}
-function iaQuick(text){
-  document.getElementById("iaPrompt").value = text;
-  document.getElementById("iaPrompt").focus();
-}
-async function iaHealth(){
-  try{
-    const base = (window.API_BASE_URL || "").replace(/\/$/, "");
-    const r = await fetch(base + "/", { cache:"no-store", headers:{ "x-app-key":window.APP_KEY }});
-    await r.json().catch(()=>({}));
-    iaSetStatus("Online ✅", true);
-  }catch(e){
-    iaSetStatus("Offline", false);
-  }
-}
-function buildIaContext(){
-  const d = App.getDataMes(mesAtual);
-  const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
-  const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
-  const salary = Number(d.salary||0);
-  const left = salary - spent;
-  const topCats = {};
-  (d.items||[]).forEach(it=>{
-    const c = it.category||"Outros";
-    topCats[c] = (topCats[c]||0) + Number(it.amount||0);
-  });
-  const catsSorted = Object.entries(topCats).sort((a,b)=>b[1]-a[1]).slice(0,5);
-
-  return [
-    `Mês: ${mesAtual}`,
-    `Salário: ${salary}`,
-    `Gasto total: ${spent}`,
-    `Sobra: ${left}`,
-    `Guardado no mês: ${saved}`,
-    `Top categorias: ${catsSorted.map(([c,v])=>`${c}=${v}`).join(", ")}`
-  ].join("\n");
-}
-async function iaSend(){
-  const input = document.getElementById("iaPrompt");
-  const q = (input.value||"").trim();
-  if(!q) return;
-
-  input.value = "";
-  iaAdd("me", q);
-  iaSetStatus("Consultando…", false);
-
-  try{
-    const prompt = `Você é a IA PRO, consultor financeiro simples.
-Responda em PT-BR, direto e prático.
-Use os dados do mês para sugerir ações coerentes, sem prometer ganhos.
-
-DADOS DO USUÁRIO:
-${buildIaContext()}
-
-PERGUNTA:
-${q}`;
-    const ans = await callIA(prompt);
-    iaAdd("bot", ans);
-    iaSetStatus("Online ✅", true);
-  }catch(e){
-    iaAdd("bot", "Erro ao conectar na IA: " + (e.message||e));
-    iaSetStatus("Offline", false);
-  }
-}
-
-function handleVoiceDirectCommands(raw){
-  const cmd = normalize(raw);
-  if(!cmd) return false;
-
-  if(cmd.includes("abrir menu")){
-    openMenu();
-    return true;
-  }
-  if(cmd.includes("abrir ia")){
-    openScreen("screen-ia");
-    return true;
-  }
-  if(cmd.includes("abrir configuracoes") || cmd.includes("abrir configurações")){
-    openScreen("screen-config");
-    return true;
-  }
-  if(cmd.includes("abrir temas")){
-    openScreen("screen-themes");
-    return true;
-  }
-  if(cmd.includes("abrir pdf") || cmd.includes("imprimir resumo do ano") || cmd.includes("imprimir pdf do mes") || cmd.includes("imprimir pdf do mês")){
-    openPdfScreen();
-    if(cmd.includes("imprimir resumo do ano")) setTimeout(()=>gerarPDFResumoAno(), 250);
-    if(cmd.includes("imprimir pdf do mes") || cmd.includes("imprimir pdf do mês")) setTimeout(()=>gerarPDFCompleto(), 250);
-    return true;
-  }
-
-  const paid = cmd.match(/^anote\s+como\s+pago\s+(.+)$/i) || cmd.match(/^anotar\s+como\s+pago\s+(.+)$/i);
-  if(paid){
-    if(markItemByName(paid[1], true)){
-      render();
-      return true;
-    }
-  }
-
-  const pending = cmd.match(/^anote\s+como\s+pendente\s+(.+)$/i) || cmd.match(/^anotar\s+como\s+pendente\s+(.+)$/i);
-  if(pending){
-    if(markItemByName(pending[1], false)){
-      render();
-      return true;
-    }
-  }
-
-  const saved = cmd.match(/^anote\s+guardado\s+(\d+(?:[.,]\d+)?)\s+de\s+(.+)$/i) || cmd.match(/^anotar\s+guardado\s+(\d+(?:[.,]\d+)?)\s+de\s+(.+)$/i);
-  if(saved){
-    addSavedDirect(parseMoney(saved[1]), saved[2].trim());
-    render();
-    return true;
-  }
-
-  const fixo = cmd.match(/^anote\s+gastos?\s+fixos?\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i) || cmd.match(/^anotar\s+gastos?\s+fixos?\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i);
-  if(fixo){
-    App.addFixo({
-      desc: fixo[1].trim(),
-      amount: parseMoney(fixo[2]),
-      category: capitalize(fixo[3])
-    });
-    render();
-    return true;
-  }
-
-  const gasto = cmd.match(/^anote\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i) || cmd.match(/^anotar\s+(.+?)\s+(\d+(?:[.,]\d+)?)\s+([a-zà-úç]+)$/i);
-  if(gasto && !cmd.includes("gastos fixos")){
-    addExpenseDirect(gasto[1].trim(), parseMoney(gasto[2]), capitalize(gasto[3]));
-    render();
-    return true;
-  }
-
-  if(cmd.includes("tema roxo")){
-    localStorage.setItem(App.THEME_KEYS.preset, "purple");
-    App.applyThemeSettings();
-    drawAllCharts();
-    return true;
-  }
-  if(cmd.includes("tema minimal") || cmd.includes("tema mono")){
-    localStorage.setItem(App.THEME_KEYS.preset, "mono");
-    App.applyThemeSettings();
-    drawAllCharts();
-    return true;
-  }
-  if(cmd.includes("tema verde")){
-    localStorage.setItem(App.THEME_KEYS.preset, "green");
-    App.applyThemeSettings();
-    drawAllCharts();
-    return true;
-  }
-  if(cmd.includes("tema padrão") || cmd.includes("tema padrao")){
-    localStorage.setItem(App.THEME_KEYS.preset, "default");
-    App.applyThemeSettings();
-    drawAllCharts();
-    return true;
-  }
-  if(cmd.includes("tema por do sol") || cmd.includes("tema pôr do sol") || cmd.includes("tema sunset")){
-    localStorage.setItem(App.THEME_KEYS.preset, "sunset");
-    App.applyThemeSettings();
-    drawAllCharts();
-    return true;
-  }
-
-  return false;
-}
-
-function bindVoiceStorageListener(){
-  if(__voiceStorageBound) return;
-  __voiceStorageBound = true;
-
-  window.addEventListener("storage", (e)=>{
-    if(e.key === "voice_cmd" && e.newValue){
-      handleVoiceDirectCommands(e.newValue);
-    }
-  });
-
-  const first = localStorage.getItem("voice_cmd");
-  if(first){
-    handleVoiceDirectCommands(first);
-  }
 }
 
 async function render(){
@@ -1673,61 +1423,6 @@ async function render(){
   renderList();
   drawAllCharts();
   buildPdfSelectors();
-
-  const data = await App.fetchMes(mesAtual);
-  if(Array.isArray(data) && data.length){
-    const first = data[0] || {};
-    if(first.salary != null) d.salary = Number(first.salary || d.salary || 0);
-    if(first.meta != null) d.meta = Number(first.meta || d.meta || 0);
-
-    const apiItems = data.filter(x=>x && x.desc).map(x=>App.ensureItemDefaults({
-      desc:x.desc,
-      amount:Number(x.amount||0),
-      category:(x.category && App.categorias.includes(x.category)) ? x.category : (x.category || App.detectarCategoria(x.desc)),
-      isFixo:false,
-      isInvestFixo:false
-    }));
-
-    const hidden = new Set((d.hiddenFixos||[]).map(String));
-    const merged = [];
-    const seen = new Set();
-    const fresh = App.getDataMes(mesAtual);
-
-    for(const it of (fresh.items||[]).filter(x=>x.isFixo)){
-      const fk = App.fixKey(it.desc,it.amount,it.category);
-      if(hidden.has(fk)) continue;
-      const k = fk + "|fix";
-      if(!seen.has(k)){ merged.push(it); seen.add(k); }
-    }
-
-    for(const it of (d.items||[]).filter(x=>!x.isFixo)){
-      const k = App.fixKey(it.desc,it.amount,it.category) + "|loc";
-      if(!seen.has(k)){ merged.push(it); seen.add(k); }
-    }
-
-    for(const it of apiItems){
-      const k = App.fixKey(it.desc,it.amount,it.category) + "|api";
-      if(!seen.has(k)){ merged.push(it); seen.add(k); }
-    }
-
-    d.items = merged.map(App.ensureItemDefaults);
-    App.saveAll();
-
-    renderKPIs();
-    renderSaved();
-    renderList();
-    drawAllCharts();
-  }
-}
-
-function initBindings(){
-  const iaInput = document.getElementById("iaPrompt");
-  iaInput.addEventListener("keydown",(e)=>{
-    if(e.key==="Enter" && !e.shiftKey){
-      e.preventDefault();
-      iaSend();
-    }
-  });
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
@@ -1737,9 +1432,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     syncThemeUI();
     renderVoiceUI();
     renderHomeEditorUI();
-    initBindings();
     bindVoiceStorageListener();
-    iaHealth();
     render();
     App.startDueNotificationWatcher();
     goHome();
