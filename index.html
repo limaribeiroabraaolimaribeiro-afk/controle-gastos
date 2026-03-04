@@ -3283,13 +3283,11 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 </script>
 
   <script>
-
 /* =========================
 VOICE BRIDGE (voz.html → index.html)
 NÃO ALTERA O APP
 APENAS ESCUTA COMANDOS
 ========================= */
-
 (function(){
 
 const VOICE_KEY = "gastos_voice_command";
@@ -3299,325 +3297,316 @@ function readVoiceCommand(){
     const cmd = localStorage.getItem(VOICE_KEY);
     if(!cmd) return;
     localStorage.removeItem(VOICE_KEY);
-    executeVoice(String(cmd || "").toLowerCase().trim());
+    executeVoice(String(cmd || ""));
   }catch(e){}
 }
-
 setInterval(readVoiceCommand, 700);
 
 /* =========================
-HELPERS
+HELPERS (robustos)
 ========================= */
-
-function normalizeText(s){
-  return String(s || "")
+function norm(s){
+  return String(s||"")
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, " ")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g," ")
     .trim();
 }
 
-function getFirstNumber(text){
-  const m = String(text || "").match(/(\d+(?:[.,]\d+)?)/);
-  if(!m) return 0;
-  return Number(String(m[1]).replace(",", "."));
+function safeCall(name, args=[]){
+  try{
+    const fn = window[name];
+    if(typeof fn === "function") return fn.apply(null, args);
+  }catch(e){}
+  return null;
 }
 
-function removeFirstNumber(text){
-  return String(text || "").replace(/(\d+(?:[.,]\d+)?)/, " ").replace(/\s+/g, " ").trim();
+function clickByText(txt){
+  const n = norm(txt);
+  const els = Array.from(document.querySelectorAll("button,a,[role='button']"));
+  for(const el of els){
+    const t = norm(el.textContent || "");
+    if(t === n || t.includes(n)){
+      el.click();
+      return true;
+    }
+  }
+  return false;
+}
+
+function parseNumberFlexible(text){
+  const t = String(text||"");
+
+  // "12 mil" => 12000
+  let m = t.match(/(\d+(?:[.,]\d+)?)\s*mil\b/i);
+  if(m){
+    const base = Number(String(m[1]).replace(/\./g,"").replace(",", "."));
+    if(!isNaN(base)) return Math.round(base * 1000);
+  }
+
+  // 12.000 / 12 000 / 12000 / 12,5
+  m = t.match(/(\d{1,3}(?:[.\s]\d{3})+|\d+(?:[.,]\d+)?)/);
+  if(!m) return 0;
+
+  let num = String(m[1]).replace(/\s/g,"");
+  if(num.includes(".") && num.includes(",")){
+    num = num.replace(/\./g,"").replace(",", ".");
+  }else{
+    if(/^\d{1,3}(\.\d{3})+$/.test(num)) num = num.replace(/\./g,"");
+    else num = num.replace(",", ".");
+  }
+
+  const v = Number(num);
+  return isNaN(v) ? 0 : v;
+}
+
+function removeFirstNumberFlexible(text){
+  let s = String(text||"");
+  if(/(\d+(?:[.,]\d+)?)\s*mil\b/i.test(s)){
+    return s.replace(/(\d+(?:[.,]\d+)?)\s*mil\b/i," ").replace(/\s+/g," ").trim();
+  }
+  return s.replace(/(\d{1,3}(?:[.\s]\d{3})+|\d+(?:[.,]\d+)?)/," ").replace(/\s+/g," ").trim();
 }
 
 function findCategoryInCommand(text){
-  const txt = normalizeText(text);
-  const sorted = [...categorias].sort((a,b)=>b.length-a.length);
-  for(const c of sorted){
-    if(txt.includes(normalizeText(c))) return c;
-  }
+  try{
+    const txt = norm(text);
+    const sorted = [...categorias].sort((a,b)=>b.length-a.length);
+    for(const c of sorted){
+      if(txt.includes(norm(c))) return c;
+    }
+  }catch(e){}
   return null;
 }
 
 function removeCategoryFromText(text, category){
-  if(!category) return String(text || "").trim();
-  const reg = new RegExp(normalizeText(category).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-  return normalizeText(text).replace(reg, " ").replace(/\s+/g, " ").trim();
+  if(!category) return norm(text);
+  const reg = new RegExp(norm(category).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+  return norm(text).replace(reg," ").replace(/\s+/g," ").trim();
 }
 
 function renderEverything(){
-  saveAll();
-  renderCategorias();
-  renderFixos();
-  renderInvestFixos();
-  renderSaved();
-  render();
+  try{ saveAll(); }catch(e){}
+  try{ renderCategorias(); }catch(e){}
+  try{ renderFixos(); }catch(e){}
+  try{ renderInvestFixos(); }catch(e){}
+  try{ renderSaved(); }catch(e){}
+  try{ render(); }catch(e){}
+  try{ renderKPIs(); }catch(e){}
 }
 
 /* =========================
 COMANDOS
 ========================= */
-
-function executeVoice(cmd){
+function executeVoice(cmdRaw){
+  const cmd = norm(cmdRaw);
   if(!cmd) return;
 
-/* -------------------------
-ABRIR TELAS
-------------------------- */
+  /* -------- ABRIR TELAS (com fallback) -------- */
+  if(cmd.includes("abrir historico")){
+    if(safeCall("openHistory")) return;
+    try{ if(typeof openScreen==="function") return openScreen("screen-history"); }catch(e){}
+    if(clickByText("historico")) return;
+    return;
+  }
 
-  if(cmd.includes("abrir historico")) return openHistory();
-  if(cmd.includes("abrir menu")) return openMenu();
-  if(cmd.includes("abrir tela principal")) return goHome();
-  if(cmd.includes("abrir categorias")) return openScreen("screen-categories");
-  if(cmd.includes("abrir gastos fixos")) return openScreen("screen-fixos");
-  if(cmd.includes("abrir investimentos fixos")) return openScreen("screen-investfixos");
-  if(cmd.includes("abrir simuladores")) return openScreen("screen-simulators");
-  if(cmd.includes("abrir configuracoes")) return openScreen("screen-config");
-  if(cmd.includes("abrir ia")) return openIa();
+  if(cmd.includes("abrir configuracoes") || cmd.includes("abrir configuracao")){
+    try{ if(typeof openScreen==="function") return openScreen("screen-config"); }catch(e){}
+    if(clickByText("configuracoes") || clickByText("configuracao")) return;
+    return;
+  }
 
-/* -------------------------
-TEMAS
-------------------------- */
+  if(cmd.includes("abrir menu")){
+    if(safeCall("openMenu")) return;
+    clickByText("menu");
+    return;
+  }
+
+  if(cmd.includes("abrir tela principal")){
+    if(safeCall("goHome")) return;
+    location.href="./index.html";
+    return;
+  }
+
+  if(cmd.includes("abrir categorias")){
+    try{ if(typeof openScreen==="function") return openScreen("screen-categories"); }catch(e){}
+    clickByText("categorias");
+    return;
+  }
+
+  if(cmd.includes("abrir gastos fixos")){
+    try{ if(typeof openScreen==="function") return openScreen("screen-fixos"); }catch(e){}
+    clickByText("gastos fixos");
+    return;
+  }
+
+  if(cmd.includes("abrir investimentos fixos")){
+    try{ if(typeof openScreen==="function") return openScreen("screen-investfixos"); }catch(e){}
+    clickByText("investimentos fixos");
+    return;
+  }
+
+  if(cmd.includes("abrir simuladores")){
+    try{ if(typeof openScreen==="function") return openScreen("screen-simulators"); }catch(e){}
+    clickByText("simuladores");
+    return;
+  }
+
+  if(cmd.includes("abrir ia")){
+    if(safeCall("openIa")) return;
+    clickByText("ia");
+    return;
+  }
+
+  /* -------- TEMAS (agora pega acento/variações) -------- */
+  if(cmd.includes("tema padrao") || cmd === "tema padrao" || cmd === "padrao"){
+    localStorage.setItem("theme_preset_v1","default");
+    try{ applyThemeSettings(); }catch(e){}
+    return;
+  }
+
+  if(cmd.includes("tema por do sol") || cmd.includes("tema por-do-sol")){
+    localStorage.setItem("theme_preset_v1","sunset");
+    try{ applyThemeSettings(); }catch(e){}
+    return;
+  }
 
   if(cmd.includes("tema roxo")){
     localStorage.setItem("theme_preset_v1","purple");
-    applyThemeSettings();
+    try{ applyThemeSettings(); }catch(e){}
     return;
   }
 
   if(cmd.includes("tema verde")){
     localStorage.setItem("theme_preset_v1","green");
-    applyThemeSettings();
+    try{ applyThemeSettings(); }catch(e){}
     return;
   }
 
   if(cmd.includes("tema minimal")){
     localStorage.setItem("theme_preset_v1","mono");
-    applyThemeSettings();
+    try{ applyThemeSettings(); }catch(e){}
     return;
   }
 
-  if(cmd.includes("tema por do sol") || cmd.includes("tema por-do-sol") || cmd.includes("tema por do sol")){
-    localStorage.setItem("theme_preset_v1","sunset");
-    applyThemeSettings();
-    return;
-  }
-
-  if(cmd.includes("tema padrao")){
-    localStorage.setItem("theme_preset_v1","default");
-    applyThemeSettings();
-    return;
-  }
-
-/* -------------------------
-PDF
-------------------------- */
-
+  /* -------- PDF (fallback) -------- */
   if(cmd.includes("imprimir resumo do ano")){
-    gerarPDFResumoAno();
+    if(safeCall("gerarPDFResumoAno")) return;
+    clickByText("resumo do ano");
     return;
   }
 
-  if(cmd.includes("imprimir pdf do mes")){
-    gerarPDFCompleto();
+  if(cmd.includes("imprimir pdf do mes") || cmd.includes("imprimir pdf mes")){
+    if(safeCall("gerarPDFCompleto")) return;
+    if(safeCall("gerarPDFMes")) return;
+    clickByText("imprimir pdf");
     return;
   }
 
-/* -------------------------
-GUARDADO
-Ex:
-guardado 300
-guardado 300 reserva
-guardado 300 de reserva
-guardado 300 para reserva
-------------------------- */
+  /* -------- PENDENTE (antes do anote genérico) -------- */
+  if(cmd.startsWith("anote ") && cmd.includes(" pendente")){
+    const descBusca = norm(cmd.replace(/^anote\s+/,"").replace(/\bpendente\b/," ").trim());
+    if(!descBusca) return;
 
+    const d = getDataMes(mesAtual);
+    let achou = false;
+
+    (d.items||[]).forEach(it=>{
+      const di = norm(it.desc||"");
+      if(di.includes(descBusca) || descBusca.includes(di)){
+        it.paid = false;
+        it.status = "pendente";
+        achou = true;
+      }
+    });
+
+    if(achou) renderEverything();
+    return;
+  }
+
+  /* -------- FIXO (valor grande e descrição qualquer) -------- */
+  if(cmd.startsWith("anote ") && cmd.includes(" fixo")){
+    const base = norm(cmd.replace(/^anote\s+/,"").replace(/\bfixo\b/," ").trim());
+    const valor = parseNumberFlexible(base);
+    if(!valor || valor<=0) return;
+
+    let desc = removeFirstNumberFlexible(base);
+    desc = norm(desc);
+    if(!desc) desc="Gasto fixo";
+
+    const categoria = (typeof detectarCategoria==="function" ? (detectarCategoria(desc)||"Outros") : "Outros");
+
+    try{
+      fixos.push({ desc, amount: valor, category: categoria, isFixo:true });
+      renderEverything();
+    }catch(e){}
+    return;
+  }
+
+  /* -------- EM X MESES (corrige 12000 vs 1200) -------- */
+  if(cmd.startsWith("anote ") && cmd.includes(" em ") && cmd.includes(" mes")){
+    const txt = norm(cmd.replace(/^anote\s+/,"").trim());
+    const mm = txt.match(/\bem\s+(\d+)\s+mes/);
+    const meses = mm ? Number(mm[1]) : 0;
+    const total = parseNumberFlexible(txt);
+
+    if(!meses || meses<=0 || !total || total<=0) return;
+
+    let nome = txt
+      .replace(/(\d+(?:[.,]\d+)?\s*mil\b)/i," ")
+      .replace(/(\d{1,3}(?:[.\s]\d{3})+|\d+(?:[.,]\d+)?)/," ")
+      .replace(/\bem\s+\d+\s+mes(?:es)?\b/i," ")
+      .replace(/\s+/g," ")
+      .trim();
+
+    if(!nome) nome="Investimento";
+
+    const id = (typeof uid==="function" ? uid() : String(Date.now()));
+    const mensal = (typeof calcMensalAuto==="function") ? calcMensalAuto(total, meses) : Math.round((total/meses)*100)/100;
+
+    try{
+      investFixos.push({ id, nome, metaFinal: total, prazoMeses: meses, mensal });
+      const d = getDataMes(mesAtual);
+      if(!d.investStatus || typeof d.investStatus!=="object") d.investStatus = {};
+      d.investStatus[id] = false;
+      renderEverything();
+    }catch(e){}
+    return;
+  }
+
+  /* -------- ANOTE GENÉRICO -------- */
+  if(cmd.startsWith("anote")){
+    const texto = norm(cmd.replace(/^anote\b/,"").trim());
+    const valor = parseNumberFlexible(texto);
+    if(!valor || valor<=0) return;
+
+    let categoria = findCategoryInCommand(texto);
+    if(!categoria) categoria = (typeof detectarCategoria==="function" ? (detectarCategoria(texto)||"Outros") : "Outros");
+
+    let desc = removeFirstNumberFlexible(texto);
+    desc = removeCategoryFromText(desc, categoria).trim();
+    if(!desc) desc = "anotação voz";
+
+    const d = getDataMes(mesAtual);
+    d.items.push({ desc, amount: valor, category: categoria, isFixo:false, isInvestFixo:false, paid:false });
+    renderEverything();
+    return;
+  }
+
+  /* -------- GUARDADO -------- */
   if(cmd.startsWith("guardado")){
-    const valor = getFirstNumber(cmd);
-    if(!valor || valor <= 0) return;
+    const valor = parseNumberFlexible(cmd);
+    if(!valor || valor<=0) return;
 
-    let desc = removeFirstNumber(cmd.replace(/^guardado\b/i, "").trim());
-    desc = desc.replace(/^(de|da|do|para|pra)\s+/i, "").trim();
+    let desc = removeFirstNumberFlexible(cmd.replace(/^guardado\b/,"").trim());
+    desc = norm(desc).replace(/^(de|da|do|para|pra)\s+/,"").trim();
 
     const d = getDataMes(mesAtual);
     if(!Array.isArray(d.saved)) d.saved = [];
-
-    d.saved.unshift({
-      value: valor,
-      desc: desc || "",
-      date: new Date().toISOString().slice(0,10),
-      source: "manual"
-    });
-
+    d.saved.unshift({ value: valor, desc: desc||"", date: new Date().toISOString().slice(0,10), source:"manual" });
     renderEverything();
     return;
   }
-
-/* -------------------------
-ANOTE + DESC + PAGO
-Ex: anote casa pago
-------------------------- */
-
-  if(cmd.startsWith("anote ") && cmd.endsWith(" pago")){
-    const descBusca = normalizeText(
-      cmd.replace(/^anote\s+/i, "").replace(/\spago$/i, "").trim()
-    );
-    if(!descBusca) return;
-
-    const d = getDataMes(mesAtual);
-    let achou = false;
-
-    (d.items || []).forEach(it=>{
-      const descItem = normalizeText(it.desc || "");
-      if(descItem.includes(descBusca)){
-        it.paid = true;
-
-        if(it.isInvestFixo && it.invId){
-          if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
-          d.investStatus[it.invId] = true;
-          addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
-        }
-
-        achou = true;
-      }
-    });
-
-    if(achou) renderEverything();
-    return;
-  }
-
-/* -------------------------
-ANOTE + DESC + PENDENTE
-Ex: anote casa pendente
-------------------------- */
-
-  if(cmd.startsWith("anote ") && cmd.endsWith(" pendente")){
-    const descBusca = normalizeText(
-      cmd.replace(/^anote\s+/i, "").replace(/\spendente$/i, "").trim()
-    );
-    if(!descBusca) return;
-
-    const d = getDataMes(mesAtual);
-    let achou = false;
-
-    (d.items || []).forEach(it=>{
-      const descItem = normalizeText(it.desc || "");
-      if(descItem.includes(descBusca)){
-        it.paid = false;
-
-        if(it.isInvestFixo && it.invId){
-          if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
-          d.investStatus[it.invId] = false;
-          removeAutoSavedForInv(d, it.invId, mesAtual);
-        }
-
-        achou = true;
-      }
-    });
-
-    if(achou) renderEverything();
-    return;
-  }
-
-/* -------------------------
-ANOTE + DESC + VALOR + FIXO
-Ex: anote aluguel 114 fixo
-------------------------- */
-
-  if(cmd.startsWith("anote ") && cmd.endsWith(" fixo")){
-    const base = cmd.replace(/^anote\s+/i, "").replace(/\sfixo$/i, "").trim();
-    const valor = getFirstNumber(base);
-    if(!valor || valor <= 0) return;
-
-    let desc = removeFirstNumber(base).trim();
-    if(!desc) desc = "Gasto fixo";
-
-    const categoria = detectarCategoria(desc) || "Outros";
-
-    fixos.push({
-      desc,
-      amount: valor,
-      category: categoria,
-      isFixo: true
-    });
-
-    renderEverything();
-    return;
-  }
-
-/* -------------------------
-ANOTE + DESC + VALOR + EM + TOTAL MESES
-Interpretação:
-cria investimento fixo
-Ex: anote viagem 12000 em 24 meses
-------------------------- */
-
-  if(cmd.startsWith("anote ") && /\bem\s+\d+\s+mes/.test(cmd)){
-    const txt = cmd.replace(/^anote\s+/i, "").trim();
-
-    const mesesMatch = txt.match(/\bem\s+(\d+)\s+mes(?:es)?\b/i);
-    const prazoMeses = mesesMatch ? Number(mesesMatch[1]) : 0;
-    const valor = getFirstNumber(txt);
-
-    if(!valor || valor <= 0 || !prazoMeses || prazoMeses <= 0) return;
-
-    let nome = txt
-      .replace(/(\d+(?:[.,]\d+)?)/, " ")
-      .replace(/\bem\s+\d+\s+mes(?:es)?\b/i, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    if(!nome) nome = "Investimento";
-
-    const id = uid();
-    const mensal = calcMensalAuto(valor, prazoMeses);
-
-    investFixos.push({
-      id,
-      nome,
-      metaFinal: valor,
-      prazoMeses,
-      mensal
-    });
-
-    const d = getDataMes(mesAtual);
-    if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
-    d.investStatus[id] = false;
-
-    renderEverything();
-    return;
-  }
-
-/* -------------------------
-ANOTE + DESC + VALOR + CATEGORIA
-Ex: anote mercado 120 alimentacao
-------------------------- */
-
-  if(cmd.startsWith("anote")){
-    let texto = cmd.replace(/^anote\b/i, "").trim();
-    const valor = getFirstNumber(texto);
-    if(!valor || valor <= 0) return;
-
-    let categoria = findCategoryInCommand(texto);
-    if(!categoria) categoria = detectarCategoria(texto) || "Outros";
-
-    let desc = removeFirstNumber(texto);
-    desc = removeCategoryFromText(desc, categoria);
-    desc = desc.trim();
-
-    const d = getDataMes(mesAtual);
-
-    d.items.push({
-      desc: desc || "anotação voz",
-      amount: valor,
-      category: categoria,
-      isFixo: false,
-      isInvestFixo: false,
-      paid: false
-    });
-
-    renderEverything();
-    return;
-  }
-
 }
 
 })();
