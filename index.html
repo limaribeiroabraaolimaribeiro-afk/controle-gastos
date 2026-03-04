@@ -3286,7 +3286,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 /* =========================
 VOICE BRIDGE (voz.html → index.html)
-NÃO ALTERA NADA DO APP
+NÃO ALTERA O APP
 APENAS ESCUTA COMANDOS
 ========================= */
 
@@ -3299,130 +3299,324 @@ function readVoiceCommand(){
     const cmd = localStorage.getItem(VOICE_KEY);
     if(!cmd) return;
     localStorage.removeItem(VOICE_KEY);
-    executeVoice(cmd.toLowerCase());
+    executeVoice(String(cmd || "").toLowerCase().trim());
   }catch(e){}
 }
 
 setInterval(readVoiceCommand, 700);
 
+/* =========================
+HELPERS
+========================= */
+
+function normalizeText(s){
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getFirstNumber(text){
+  const m = String(text || "").match(/(\d+(?:[.,]\d+)?)/);
+  if(!m) return 0;
+  return Number(String(m[1]).replace(",", "."));
+}
+
+function removeFirstNumber(text){
+  return String(text || "").replace(/(\d+(?:[.,]\d+)?)/, " ").replace(/\s+/g, " ").trim();
+}
+
+function findCategoryInCommand(text){
+  const txt = normalizeText(text);
+  const sorted = [...categorias].sort((a,b)=>b.length-a.length);
+  for(const c of sorted){
+    if(txt.includes(normalizeText(c))) return c;
+  }
+  return null;
+}
+
+function removeCategoryFromText(text, category){
+  if(!category) return String(text || "").trim();
+  const reg = new RegExp(normalizeText(category).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+  return normalizeText(text).replace(reg, " ").replace(/\s+/g, " ").trim();
+}
+
+function renderEverything(){
+  saveAll();
+  renderCategorias();
+  renderFixos();
+  renderInvestFixos();
+  renderSaved();
+  render();
+}
 
 /* =========================
-EXECUTOR DE COMANDOS
+COMANDOS
 ========================= */
 
 function executeVoice(cmd){
+  if(!cmd) return;
 
-/* ABRIR TELAS */
+/* -------------------------
+ABRIR TELAS
+------------------------- */
 
-if(cmd.includes("abrir histórico")) openHistory();
-if(cmd.includes("abrir menu")) openMenu();
-if(cmd.includes("abrir tela principal")) goHome();
-if(cmd.includes("abrir categorias")) openScreen("screen-categories");
-if(cmd.includes("abrir gastos fixos")) openScreen("screen-fixos");
-if(cmd.includes("abrir investimentos fixos")) openScreen("screen-investfixos");
-if(cmd.includes("abrir simuladores")) openScreen("screen-simulators");
-if(cmd.includes("abrir configurações")) openScreen("screen-config");
-if(cmd.includes("abrir ia")) openIa();
+  if(cmd.includes("abrir historico")) return openHistory();
+  if(cmd.includes("abrir menu")) return openMenu();
+  if(cmd.includes("abrir tela principal")) return goHome();
+  if(cmd.includes("abrir categorias")) return openScreen("screen-categories");
+  if(cmd.includes("abrir gastos fixos")) return openScreen("screen-fixos");
+  if(cmd.includes("abrir investimentos fixos")) return openScreen("screen-investfixos");
+  if(cmd.includes("abrir simuladores")) return openScreen("screen-simulators");
+  if(cmd.includes("abrir configuracoes")) return openScreen("screen-config");
+  if(cmd.includes("abrir ia")) return openIa();
 
+/* -------------------------
+TEMAS
+------------------------- */
 
-/* TEMAS */
+  if(cmd.includes("tema roxo")){
+    localStorage.setItem("theme_preset_v1","purple");
+    applyThemeSettings();
+    return;
+  }
 
-if(cmd.includes("tema roxo")){
-localStorage.setItem("theme_preset_v1","purple");
-applyThemeSettings();
-}
+  if(cmd.includes("tema verde")){
+    localStorage.setItem("theme_preset_v1","green");
+    applyThemeSettings();
+    return;
+  }
 
-if(cmd.includes("tema verde")){
-localStorage.setItem("theme_preset_v1","green");
-applyThemeSettings();
-}
+  if(cmd.includes("tema minimal")){
+    localStorage.setItem("theme_preset_v1","mono");
+    applyThemeSettings();
+    return;
+  }
 
-if(cmd.includes("tema minimal")){
-localStorage.setItem("theme_preset_v1","mono");
-applyThemeSettings();
-}
+  if(cmd.includes("tema por do sol") || cmd.includes("tema por-do-sol") || cmd.includes("tema por do sol")){
+    localStorage.setItem("theme_preset_v1","sunset");
+    applyThemeSettings();
+    return;
+  }
 
-if(cmd.includes("tema pôr do sol") || cmd.includes("tema por do sol")){
-localStorage.setItem("theme_preset_v1","sunset");
-applyThemeSettings();
-}
+  if(cmd.includes("tema padrao")){
+    localStorage.setItem("theme_preset_v1","default");
+    applyThemeSettings();
+    return;
+  }
 
-if(cmd.includes("tema padrão") || cmd.includes("tema padrao")){
-localStorage.setItem("theme_preset_v1","default");
-applyThemeSettings();
-}
+/* -------------------------
+PDF
+------------------------- */
 
+  if(cmd.includes("imprimir resumo do ano")){
+    gerarPDFResumoAno();
+    return;
+  }
 
-/* PDF */
+  if(cmd.includes("imprimir pdf do mes")){
+    gerarPDFCompleto();
+    return;
+  }
 
-if(cmd.includes("imprimir resumo do ano")){
-gerarPDFResumoAno();
-}
+/* -------------------------
+GUARDADO
+Ex:
+guardado 300
+guardado 300 reserva
+guardado 300 de reserva
+guardado 300 para reserva
+------------------------- */
 
-if(cmd.includes("imprimir pdf do mês") || cmd.includes("imprimir pdf do mes")){
-gerarPDFCompleto();
-}
+  if(cmd.startsWith("guardado")){
+    const valor = getFirstNumber(cmd);
+    if(!valor || valor <= 0) return;
 
+    let desc = removeFirstNumber(cmd.replace(/^guardado\b/i, "").trim());
+    desc = desc.replace(/^(de|da|do|para|pra)\s+/i, "").trim();
 
-/* ANOTAÇÕES */
+    const d = getDataMes(mesAtual);
+    if(!Array.isArray(d.saved)) d.saved = [];
 
-if(cmd.startsWith("anote")){
+    d.saved.unshift({
+      value: valor,
+      desc: desc || "",
+      date: new Date().toISOString().slice(0,10),
+      source: "manual"
+    });
 
-let texto = cmd.replace("anote","").trim();
+    renderEverything();
+    return;
+  }
 
-let partes = texto.split(" ");
+/* -------------------------
+ANOTE + DESC + PAGO
+Ex: anote casa pago
+------------------------- */
 
-let valor = parseFloat(partes.find(p=>!isNaN(p)));
+  if(cmd.startsWith("anote ") && cmd.endsWith(" pago")){
+    const descBusca = normalizeText(
+      cmd.replace(/^anote\s+/i, "").replace(/\spago$/i, "").trim()
+    );
+    if(!descBusca) return;
 
-if(!valor) return;
+    const d = getDataMes(mesAtual);
+    let achou = false;
 
-let categoria = categorias.find(c=>texto.includes(c.toLowerCase()));
+    (d.items || []).forEach(it=>{
+      const descItem = normalizeText(it.desc || "");
+      if(descItem.includes(descBusca)){
+        it.paid = true;
 
-if(!categoria) categoria="Outros";
+        if(it.isInvestFixo && it.invId){
+          if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
+          d.investStatus[it.invId] = true;
+          addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
+        }
 
-let desc = texto.replace(valor,"").replace(categoria.toLowerCase(),"").trim();
+        achou = true;
+      }
+    });
 
-const d = getDataMes(mesAtual);
+    if(achou) renderEverything();
+    return;
+  }
 
-d.items.push({
-desc: desc || "anotação voz",
-amount: valor,
-category: categoria,
-isFixo:false,
-isInvestFixo:false,
-paid:false
-});
+/* -------------------------
+ANOTE + DESC + PENDENTE
+Ex: anote casa pendente
+------------------------- */
 
-saveAll();
-render();
+  if(cmd.startsWith("anote ") && cmd.endsWith(" pendente")){
+    const descBusca = normalizeText(
+      cmd.replace(/^anote\s+/i, "").replace(/\spendente$/i, "").trim()
+    );
+    if(!descBusca) return;
 
-}
+    const d = getDataMes(mesAtual);
+    let achou = false;
 
+    (d.items || []).forEach(it=>{
+      const descItem = normalizeText(it.desc || "");
+      if(descItem.includes(descBusca)){
+        it.paid = false;
 
-/* GUARDADO */
+        if(it.isInvestFixo && it.invId){
+          if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
+          d.investStatus[it.invId] = false;
+          removeAutoSavedForInv(d, it.invId, mesAtual);
+        }
 
-if(cmd.includes("guardado")){
+        achou = true;
+      }
+    });
 
-let partes = cmd.split(" ");
+    if(achou) renderEverything();
+    return;
+  }
 
-let valor = parseFloat(partes.find(p=>!isNaN(p)));
+/* -------------------------
+ANOTE + DESC + VALOR + FIXO
+Ex: anote aluguel 114 fixo
+------------------------- */
 
-if(!valor) return;
+  if(cmd.startsWith("anote ") && cmd.endsWith(" fixo")){
+    const base = cmd.replace(/^anote\s+/i, "").replace(/\sfixo$/i, "").trim();
+    const valor = getFirstNumber(base);
+    if(!valor || valor <= 0) return;
 
-const d = getDataMes(mesAtual);
+    let desc = removeFirstNumber(base).trim();
+    if(!desc) desc = "Gasto fixo";
 
-d.saved.unshift({
-value: valor,
-desc:"voz",
-date: new Date().toISOString().slice(0,10),
-source:"manual"
-});
+    const categoria = detectarCategoria(desc) || "Outros";
 
-saveAll();
-renderSaved();
-renderKPIs();
+    fixos.push({
+      desc,
+      amount: valor,
+      category: categoria,
+      isFixo: true
+    });
 
-}
+    renderEverything();
+    return;
+  }
+
+/* -------------------------
+ANOTE + DESC + VALOR + EM + TOTAL MESES
+Interpretação:
+cria investimento fixo
+Ex: anote viagem 12000 em 24 meses
+------------------------- */
+
+  if(cmd.startsWith("anote ") && /\bem\s+\d+\s+mes/.test(cmd)){
+    const txt = cmd.replace(/^anote\s+/i, "").trim();
+
+    const mesesMatch = txt.match(/\bem\s+(\d+)\s+mes(?:es)?\b/i);
+    const prazoMeses = mesesMatch ? Number(mesesMatch[1]) : 0;
+    const valor = getFirstNumber(txt);
+
+    if(!valor || valor <= 0 || !prazoMeses || prazoMeses <= 0) return;
+
+    let nome = txt
+      .replace(/(\d+(?:[.,]\d+)?)/, " ")
+      .replace(/\bem\s+\d+\s+mes(?:es)?\b/i, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if(!nome) nome = "Investimento";
+
+    const id = uid();
+    const mensal = calcMensalAuto(valor, prazoMeses);
+
+    investFixos.push({
+      id,
+      nome,
+      metaFinal: valor,
+      prazoMeses,
+      mensal
+    });
+
+    const d = getDataMes(mesAtual);
+    if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
+    d.investStatus[id] = false;
+
+    renderEverything();
+    return;
+  }
+
+/* -------------------------
+ANOTE + DESC + VALOR + CATEGORIA
+Ex: anote mercado 120 alimentacao
+------------------------- */
+
+  if(cmd.startsWith("anote")){
+    let texto = cmd.replace(/^anote\b/i, "").trim();
+    const valor = getFirstNumber(texto);
+    if(!valor || valor <= 0) return;
+
+    let categoria = findCategoryInCommand(texto);
+    if(!categoria) categoria = detectarCategoria(texto) || "Outros";
+
+    let desc = removeFirstNumber(texto);
+    desc = removeCategoryFromText(desc, categoria);
+    desc = desc.trim();
+
+    const d = getDataMes(mesAtual);
+
+    d.items.push({
+      desc: desc || "anotação voz",
+      amount: valor,
+      category: categoria,
+      isFixo: false,
+      isInvestFixo: false,
+      paid: false
+    });
+
+    renderEverything();
+    return;
+  }
 
 }
 
