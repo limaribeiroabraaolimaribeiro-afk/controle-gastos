@@ -3281,5 +3281,152 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   applyThemeSettings();
 });
 </script>
+
+  <script>
+
+/* =========================
+VOICE BRIDGE (voz.html → index.html)
+NÃO ALTERA NADA DO APP
+APENAS ESCUTA COMANDOS
+========================= */
+
+(function(){
+
+const VOICE_KEY = "gastos_voice_command";
+
+function readVoiceCommand(){
+  try{
+    const cmd = localStorage.getItem(VOICE_KEY);
+    if(!cmd) return;
+    localStorage.removeItem(VOICE_KEY);
+    executeVoice(cmd.toLowerCase());
+  }catch(e){}
+}
+
+setInterval(readVoiceCommand, 700);
+
+
+/* =========================
+EXECUTOR DE COMANDOS
+========================= */
+
+function executeVoice(cmd){
+
+/* ABRIR TELAS */
+
+if(cmd.includes("abrir histórico")) openHistory();
+if(cmd.includes("abrir menu")) openMenu();
+if(cmd.includes("abrir tela principal")) goHome();
+if(cmd.includes("abrir categorias")) openScreen("screen-categories");
+if(cmd.includes("abrir gastos fixos")) openScreen("screen-fixos");
+if(cmd.includes("abrir investimentos fixos")) openScreen("screen-investfixos");
+if(cmd.includes("abrir simuladores")) openScreen("screen-simulators");
+if(cmd.includes("abrir configurações")) openScreen("screen-config");
+if(cmd.includes("abrir ia")) openIa();
+
+
+/* TEMAS */
+
+if(cmd.includes("tema roxo")){
+localStorage.setItem("theme_preset_v1","purple");
+applyThemeSettings();
+}
+
+if(cmd.includes("tema verde")){
+localStorage.setItem("theme_preset_v1","green");
+applyThemeSettings();
+}
+
+if(cmd.includes("tema minimal")){
+localStorage.setItem("theme_preset_v1","mono");
+applyThemeSettings();
+}
+
+if(cmd.includes("tema pôr do sol") || cmd.includes("tema por do sol")){
+localStorage.setItem("theme_preset_v1","sunset");
+applyThemeSettings();
+}
+
+if(cmd.includes("tema padrão") || cmd.includes("tema padrao")){
+localStorage.setItem("theme_preset_v1","default");
+applyThemeSettings();
+}
+
+
+/* PDF */
+
+if(cmd.includes("imprimir resumo do ano")){
+gerarPDFResumoAno();
+}
+
+if(cmd.includes("imprimir pdf do mês") || cmd.includes("imprimir pdf do mes")){
+gerarPDFCompleto();
+}
+
+
+/* ANOTAÇÕES */
+
+if(cmd.startsWith("anote")){
+
+let texto = cmd.replace("anote","").trim();
+
+let partes = texto.split(" ");
+
+let valor = parseFloat(partes.find(p=>!isNaN(p)));
+
+if(!valor) return;
+
+let categoria = categorias.find(c=>texto.includes(c.toLowerCase()));
+
+if(!categoria) categoria="Outros";
+
+let desc = texto.replace(valor,"").replace(categoria.toLowerCase(),"").trim();
+
+const d = getDataMes(mesAtual);
+
+d.items.push({
+desc: desc || "anotação voz",
+amount: valor,
+category: categoria,
+isFixo:false,
+isInvestFixo:false,
+paid:false
+});
+
+saveAll();
+render();
+
+}
+
+
+/* GUARDADO */
+
+if(cmd.includes("guardado")){
+
+let partes = cmd.split(" ");
+
+let valor = parseFloat(partes.find(p=>!isNaN(p)));
+
+if(!valor) return;
+
+const d = getDataMes(mesAtual);
+
+d.saved.unshift({
+value: valor,
+desc:"voz",
+date: new Date().toISOString().slice(0,10),
+source:"manual"
+});
+
+saveAll();
+renderSaved();
+renderKPIs();
+
+}
+
+}
+
+})();
+</script>
 </body>
 </html>
