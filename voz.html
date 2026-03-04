@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -7,529 +8,264 @@
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#569cff">
-<link rel="stylesheet" href="./ui.css">
 
 <style>
-#debugBox{
-  position:fixed; left:12px; right:12px; bottom:12px;
-  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
-  font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
+:root{
+--bg:#07101f;
+--panel:rgba(255,255,255,.06);
+--panel2:rgba(255,255,255,.08);
+--stroke:rgba(255,255,255,.10);
+--text:#eaf0ff;
+--muted:rgba(234,240,255,.72);
+--accent:#569cff;
+--good:#39d98a;
+--shadow:0 18px 60px rgba(0,0,0,.45);
 }
-.voiceCard{
-  border:1px solid var(--stroke);
-  border-radius:26px;
-  background:
-    radial-gradient(1200px 800px at 15% 0%, color-mix(in srgb, var(--accent), transparent 80%), transparent 60%),
-    radial-gradient(900px 700px at 85% 10%, rgba(57,217,138,.10), transparent 62%),
-    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-  box-shadow:var(--shadow);
-  backdrop-filter:var(--glass);
-  overflow:hidden;
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:system-ui,-apple-system,Segoe UI,Roboto;
+background:radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.18), transparent 60%),var(--bg);
+color:var(--text);
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:16px;
 }
-.voiceTop{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:14px;
-  border-bottom:1px solid var(--stroke);
+
+.wrap{
+max-width:520px;
+width:100%;
 }
-.voiceBrand{display:flex;align-items:center;gap:10px;min-width:0}
-.voiceLogo{
-  width:46px;height:46px;border-radius:18px;
-  display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(60px 50px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
-             linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 12%), color-mix(in srgb, var(--accent), #000 25%));
-  border:1px solid rgba(255,255,255,.18);
-  box-shadow:0 14px 38px rgba(0,0,0,.28);
-  font-weight:1000;color:#06162d;
+
+.card{
+background:linear-gradient(180deg,var(--panel2),var(--panel));
+border:1px solid var(--stroke);
+border-radius:22px;
+padding:18px;
+box-shadow:var(--shadow);
 }
-.voiceTitle .t{
-  font-weight:950;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+
+h1{
+margin:0;
+font-size:20px;
+font-weight:900;
 }
-.voiceTitle .s{font-size:12px;color:var(--muted);margin-top:2px}
-.voiceStatusPill{
-  display:inline-flex;gap:8px;align-items:center;
-  padding:8px 10px;border-radius:999px;
-  background:rgba(255,255,255,.10);
-  border:1px solid var(--stroke);
-  font-size:12px;color:var(--muted);
+
+.small{
+font-size:13px;
+color:var(--muted);
+margin-top:6px;
 }
-.voiceDot{
-  width:10px;height:10px;border-radius:999px;
-  background:var(--warn);
-  box-shadow:0 0 0 4px rgba(255,209,102,.12);
+
+.hr{
+height:1px;
+background:var(--stroke);
+margin:14px 0;
 }
-.voiceDot.ok{
-  background:var(--good);
-  box-shadow:0 0 0 4px rgba(57,217,138,.12);
+
+.status{
+text-align:center;
+font-size:28px;
+font-weight:900;
+margin:24px 0;
 }
-.voiceBody{padding:14px}
-.bigMic{
-  width:100%;
-  border-radius:22px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.06);
-  padding:14px;
+
+.mic{
+width:90px;
+height:90px;
+border-radius:50%;
+background:linear-gradient(135deg,#39d98a,#1e8e5a);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:36px;
+cursor:pointer;
+margin:auto;
+box-shadow:0 10px 30px rgba(0,0,0,.35);
 }
-.micBtn{
-  width:100%;
-  border:0;
-  border-radius:22px;
-  padding:18px 16px;
-  font-weight:1000;
-  font-size:16px;
-  cursor:pointer;
-  background:
-    radial-gradient(140px 110px at 30% 20%, rgba(255,255,255,.25), transparent 60%),
-    linear-gradient(135deg, rgba(255,209,102,.95), rgba(255,93,93,.45));
-  color:#1a1100;
-  box-shadow:0 18px 50px rgba(0,0,0,.35);
+
+.mic:active{
+transform:scale(.96);
 }
-.micBtn.listening{
-  background:
-    radial-gradient(140px 110px at 30% 20%, rgba(255,255,255,.30), transparent 60%),
-    linear-gradient(135deg, rgba(57,217,138,.95), rgba(86,156,255,.45));
-  color:#04152c;
+
+.result{
+margin-top:18px;
+font-size:14px;
+text-align:center;
+min-height:22px;
 }
-.transcript{
-  margin-top:12px;
-  border-radius:18px;
-  border:1px dashed var(--stroke);
-  padding:12px;
-  background:rgba(255,255,255,.04);
-  min-height:52px;
+
+.rules{
+margin-top:14px;
+font-size:13px;
+color:var(--muted);
+line-height:1.4;
 }
-.transcript .label{font-size:12px;color:var(--muted)}
-.transcript .text{margin-top:6px;font-weight:900;white-space:pre-wrap}
-.rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.voiceGroups{
-  margin-top:14px;
-  display:grid;
-  gap:12px;
+
+button{
+border:0;
+background:rgba(255,255,255,.08);
+color:var(--text);
+padding:10px 12px;
+border-radius:12px;
+cursor:pointer;
+font-weight:700;
 }
-.voiceGroup{
-  border:1px solid var(--stroke);
-  border-radius:18px;
-  background:rgba(255,255,255,.05);
-  padding:12px;
+
+.back{
+margin-bottom:10px;
 }
-.voiceGroup h3{
-  margin:0 0 8px;
-  font-size:14px;
-  color:var(--text);
-}
-.voiceExamples{
-  display:grid;
-  gap:8px;
-}
-.voiceEx{
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.04);
-  font-weight:850;
-}
-.voiceEx small{
-  display:block;
-  margin-top:4px;
-  font-weight:600;
-  color:var(--muted);
-}
-.tipBox{
-  margin-top:12px;
-  padding:12px;
-  border-radius:18px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.05);
-}
-@media (max-width:720px){
-  .rowBtns .btn{flex:1}
-}
+
 </style>
 </head>
+
 <body>
 
-<div class="wrap" style="max-width:980px">
-  <div class="backRow">
-    <a class="btn backBtn" href="./index.html" id="btnBack">← Voltar</a>
-    <div style="font-weight:900">Comando de Voz</div>
-  </div>
+<div class="wrap">
 
-  <div class="voiceCard">
-    <div class="voiceTop">
-      <div class="voiceBrand">
-        <div class="voiceLogo">🎙️</div>
-        <div class="voiceTitle">
-          <div class="t">Voz • Abrir telas e executar ações</div>
-          <div class="s">Toque no microfone, fale o comando e o sistema abre ou executa sozinho.</div>
-        </div>
-      </div>
-      <div class="voiceStatusPill">
-        <span class="voiceDot" id="dot"></span>
-        <span id="status">Pronto</span>
-      </div>
-    </div>
+<button class="back" onclick="voltar()">← Voltar</button>
 
-    <div class="voiceBody">
-      <div class="bigMic">
-        <button id="btnMic" class="micBtn" onclick="toggleListen()">🎙️ Gravar áudio</button>
+<div class="card">
 
-        <div class="transcript">
-          <div class="label">O que foi entendido:</div>
-          <div class="text" id="lastText">—</div>
-        </div>
+<h1>Comando de Voz</h1>
+<div class="small">Toque no microfone e fale o comando</div>
 
-        <div class="rowBtns">
-          <button class="btn" onclick="replayLast()">Repetir último comando</button>
-          <button class="btn danger" onclick="clearLast()">Limpar</button>
-        </div>
+<div class="status" id="status">...</div>
 
-        <div class="tipBox">
-          <div style="font-weight:900">Como falar certo</div>
-          <div class="small" style="margin-top:6px">
-            Fale sempre de forma direta, sem frases longas. Primeiro diga a ação, depois o conteúdo.
-            <br>Exemplo: <b>anote mercado 100 casa</b>
-            <br>Exemplo: <b>abrir histórico</b>
-          </div>
-        </div>
+<div class="mic" onclick="gravar()">🎤</div>
 
-        <div class="voiceGroups">
-          <div class="voiceGroup">
-            <h3>Grupo 1 — Abrir páginas</h3>
-            <div class="voiceExamples">
-              <div class="voiceEx">abrir histórico<small>Abre a tela do histórico</small></div>
-              <div class="voiceEx">abrir gastos fixos<small>Abre a tela de gastos fixos</small></div>
-              <div class="voiceEx">abrir investimentos fixos<small>Abre a tela de investimentos fixos</small></div>
-              <div class="voiceEx">abrir categorias<small>Abre a tela de categorias</small></div>
-              <div class="voiceEx">abrir simuladores<small>Abre a tela de simuladores</small></div>
-              <div class="voiceEx">abrir ia<small>Abre a IA na tela principal</small></div>
-              <div class="voiceEx">abrir menu<small>Abre o menu na tela principal</small></div>
-              <div class="voiceEx">abrir tela principal<small>Volta para a tela principal</small></div>
-            </div>
-          </div>
+<div class="result" id="texto"></div>
 
-          <div class="voiceGroup">
-            <h3>Grupo 2 — Comandos do index</h3>
-            <div class="voiceExamples">
-              <div class="voiceEx">anote mercado 100 casa<small>Anota um gasto normal: descrição + valor + categoria</small></div>
-              <div class="voiceEx">anote farmácia 60 saúde<small>Anota outro gasto normal</small></div>
-              <div class="voiceEx">anote como pago casa<small>Marca um item como pago</small></div>
-              <div class="voiceEx">anote como pendente casa<small>Marca um item como pendente</small></div>
-              <div class="voiceEx">anote guardado 300 de reserva<small>Adiciona valor ao guardado com descrição</small></div>
-              <div class="voiceEx">imprimir resumo do ano<small>Abre o PDF e gera o resumo anual</small></div>
-              <div class="voiceEx">imprimir pdf do mês<small>Abre o PDF e gera o relatório completo do mês</small></div>
-              <div class="voiceEx">tema roxo<small>Troca para o tema roxo</small></div>
-              <div class="voiceEx">tema verde<small>Troca para o tema verde</small></div>
-              <div class="voiceEx">tema minimal<small>Troca para o tema minimal</small></div>
-              <div class="voiceEx">tema padrão<small>Volta para o tema padrão</small></div>
-              <div class="voiceEx">tema pôr do sol<small>Troca para o tema pôr do sol</small></div>
-              <div class="voiceEx">abrir edição do painel<small>Abre a tela de edição do painel</small></div>
-            </div>
-          </div>
+<div class="hr"></div>
 
-          <div class="voiceGroup">
-            <h3>Grupo 3 — Comandos das páginas específicas</h3>
-            <div class="voiceExamples">
-              <div class="voiceEx">anote gastos fixos internet 99 casa<small>Vai para fixos.html e adiciona gasto fixo</small></div>
-              <div class="voiceEx">remover gasto fixo internet<small>Vai para fixos.html e remove o gasto fixo</small></div>
-              <div class="voiceEx">adicionar investimento fixo reserva 6000 12 10<small>Vai para investfixos.html e adiciona investimento fixo: nome + meta + meses + dia</small></div>
-              <div class="voiceEx">remover investimento fixo reserva<small>Vai para investfixos.html e remove investimento fixo</small></div>
-              <div class="voiceEx">adicionar categoria saúde<small>Vai para categorias.html e adiciona categoria</small></div>
-              <div class="voiceEx">remover categoria saúde<small>Vai para categorias.html e remove categoria</small></div>
-              <div class="voiceEx">buscar histórico mercado<small>Vai para historico.html e faz a busca</small></div>
-              <div class="voiceEx">abrir mês 2026-03<small>Vai para historico.html e abre o mês</small></div>
-              <div class="voiceEx">remover mês 2026-03<small>Vai para historico.html e remove o mês</small></div>
-              <div class="voiceEx">calcular investimento<small>Vai para simuladores.html e calcula investimento</small></div>
-              <div class="voiceEx">calcular empréstimo<small>Vai para simuladores.html e calcula empréstimo</small></div>
-            </div>
-          </div>
-        </div>
+<div class="rules">
 
-        <div class="small" style="margin-top:14px;color:var(--muted)">
-          Dica final: fale sempre nesse padrão:
-          <br><b>ação + conteúdo</b>
-          <br>Exemplo certo: <b>anote mercado 100 casa</b>
-          <br>Exemplo certo: <b>adicionar categoria saúde</b>
-          <br>Exemplo certo: <b>adicionar investimento fixo reserva 6000 12 10</b>
-        </div>
-      </div>
-    </div>
-  </div>
+<b>Como falar os comandos</b>
+
+<br><br>
+
+Fale simples e direto.
+
+<br><br>
+
+<b>Exemplos:</b>
+
+<br><br>
+
+anote mercado 120 alimentação  
+anote gasolina 50 transporte  
+anote guardado 300 reserva  
+
+<br><br>
+
+abrir histórico  
+abrir gastos fixos  
+abrir categorias  
+abrir simuladores  
+abrir menu  
+abrir tela principal  
+
+<br><br>
+
+tema roxo  
+tema verde  
+tema minimal  
+tema pôr do sol  
+tema padrão  
+
+<br><br>
+
+imprimir resumo do ano  
+imprimir pdf do mês  
+
+<br><br>
+
+Sempre fale primeiro a palavra principal:
+
+<br>
+
+<b>anote</b> → para gastos  
+<b>abrir</b> → para telas  
+<b>tema</b> → para mudar cor  
+<b>imprimir</b> → para PDF
+
 </div>
 
-<div id="debugBox"></div>
+</div>
+
+</div>
 
 <script>
-function dbg(msg){
-  const box = document.getElementById("debugBox");
-  if(!box) return;
-  box.style.display = "block";
-  box.textContent = String(msg);
+
+const KEY="gastos_voice_command"
+
+let recognition=null
+
+function voltar(){
+
+localStorage.removeItem(KEY)
+
+location.href="./index.html"
+
 }
-window.addEventListener("error", (e)=>{
-  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
-});
-window.addEventListener("unhandledrejection", (e)=>{
-  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
-});
+
+function gravar(){
+
+if(!('webkitSpeechRecognition'in window || 'SpeechRecognition'in window)){
+alert("Seu navegador não suporta comando de voz")
+return
+}
+
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition
+
+recognition=new SpeechRecognition()
+
+recognition.lang="pt-BR"
+
+recognition.continuous=false
+
+recognition.interimResults=false
+
+document.getElementById("status").textContent="🎙️"
+
+recognition.start()
+
+recognition.onresult=function(e){
+
+let texto=e.results[0][0].transcript.toLowerCase()
+
+document.getElementById("texto").textContent=texto
+
+localStorage.setItem(KEY,texto)
+
+document.getElementById("status").textContent="pronto"
+
+setTimeout(()=>{
+
+document.getElementById("status").textContent="..."
+
+},2000)
+
+}
+
+recognition.onerror=function(){
+
+document.getElementById("status").textContent="..."
+
+}
+
+recognition.onend=function(){
+
+}
+
+}
+
 </script>
 
-<script>
-const VOICE_CMD_KEY = "voice_cmd";
-const VOICE_LAST_KEY = "voice_last";
-const VOICE_TS_KEY   = "voice_ts";
-
-function normalize(text){
-  return String(text || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-function setStatus(text, ok){
-  document.getElementById("status").textContent = text;
-  document.getElementById("dot").classList.toggle("ok", !!ok);
-}
-
-function setLastText(text){
-  document.getElementById("lastText").textContent = text || "—";
-}
-
-function saveVoiceCommand(raw, persistCmd = true){
-  // sempre guarda o último comando pro botão "Repetir"
-  localStorage.setItem(VOICE_LAST_KEY, raw);
-  localStorage.setItem(VOICE_TS_KEY, String(Date.now()));
-
-  // só grava o comando para o index/páginas executarem quando precisar
-  if(persistCmd){
-    localStorage.setItem(VOICE_CMD_KEY, raw);
-  }else{
-    localStorage.removeItem(VOICE_CMD_KEY); // evita re-executar ao voltar pro index
-  }
-}
-
-// ======= NOVO: limpeza automática ao sair/voltar =======
-function clearVoiceCmdOnly(){
-  try{
-    localStorage.removeItem(VOICE_CMD_KEY);
-    localStorage.removeItem(VOICE_TS_KEY);
-  }catch(e){}
-}
-function clearAllVoiceKeys(){
-  try{
-    localStorage.removeItem(VOICE_CMD_KEY);
-    localStorage.removeItem(VOICE_TS_KEY);
-    localStorage.removeItem(VOICE_LAST_KEY);
-  }catch(e){}
-}
-// Ao clicar em "Voltar", limpa o comando pendente antes de sair
-document.addEventListener("DOMContentLoaded", ()=>{
-  const back = document.getElementById("btnBack");
-  if(back){
-    back.addEventListener("click", ()=>{
-      // não apaga o último comando (voice_last) por padrão, só o comando que executa no index
-      clearVoiceCmdOnly();
-    });
-  }
-});
-// Ao sair da tela (fechar, trocar de página, ir pra outro arquivo), limpa o comando pendente
-window.addEventListener("pagehide", clearVoiceCmdOnly);
-window.addEventListener("beforeunload", clearVoiceCmdOnly);
-// ================================================
-
-function routeCommand(raw){
-  const cmd = normalize(raw);
-  if(!cmd) return false;
-
-  // Grupo 1 — abrir páginas
-  if(cmd.includes("abrir historico") || cmd.includes("abrir histórico")){
-    saveVoiceCommand(raw, false);
-    location.href = "./historico.html";
-    return true;
-  }
-  if(cmd.includes("abrir gastos fixos")){
-    saveVoiceCommand(raw, false);
-    location.href = "./fixos.html";
-    return true;
-  }
-  if(cmd.includes("abrir investimentos fixos") || cmd.includes("abrir investimento fixo")){
-    saveVoiceCommand(raw, false);
-    location.href = "./investfixos.html";
-    return true;
-  }
-  if(cmd.includes("abrir categorias")){
-    saveVoiceCommand(raw, false);
-    location.href = "./categorias.html";
-    return true;
-  }
-  if(cmd.includes("abrir simuladores") || cmd.includes("abrir simulador")){
-    saveVoiceCommand(raw, false);
-    location.href = "./simuladores.html";
-    return true;
-  }
-  if(cmd.includes("abrir ia")){
-    saveVoiceCommand(raw, false);
-    location.href = "./index.html#ia";
-    return true;
-  }
-  if(cmd.includes("abrir menu")){
-    saveVoiceCommand(raw, false);
-    location.href = "./index.html#menu";
-    return true;
-  }
-  if(cmd.includes("abrir tela principal") || cmd.includes("abrir inicio") || cmd.includes("abrir início") || cmd.includes("ir para home")){
-    saveVoiceCommand(raw, false);
-    location.href = "./index.html";
-    return true;
-  }
-
-  // Grupo 3 — páginas específicas
-  if(cmd.includes("gastos fixos") && (cmd.startsWith("anote") || cmd.startsWith("anotar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir"))){
-    saveVoiceCommand(raw);
-    location.href = "./fixos.html";
-    return true;
-  }
-
-  if(cmd.includes("investimento fixo") && (cmd.startsWith("adicionar") || cmd.startsWith("anote") || cmd.startsWith("anotar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir"))){
-    saveVoiceCommand(raw);
-    location.href = "./investfixos.html";
-    return true;
-  }
-
-  if(cmd.includes("categoria") && (cmd.startsWith("adicionar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir") || cmd.startsWith("anote") || cmd.startsWith("anotar"))){
-    saveVoiceCommand(raw);
-    location.href = "./categorias.html";
-    return true;
-  }
-
-  if(cmd.startsWith("buscar historico") || cmd.startsWith("buscar histórico") || cmd.startsWith("abrir mês") || cmd.startsWith("abrir mes") || cmd.startsWith("remover mês") || cmd.startsWith("remover mes")){
-    saveVoiceCommand(raw);
-    location.href = "./historico.html";
-    return true;
-  }
-
-  if(cmd.includes("calcular investimento") || cmd.includes("calcular emprestimo") || cmd.includes("calcular empréstimo") || cmd.includes("abrir investimento") || cmd.includes("abrir empréstimo") || cmd.includes("abrir emprestimo")){
-    saveVoiceCommand(raw);
-    location.href = "./simuladores.html";
-    return true;
-  }
-
-  // Grupo 2 — index
-  const isIndexAction =
-    cmd.startsWith("anote") || cmd.startsWith("anotar") ||
-    cmd.includes("imprimir resumo do ano") ||
-    cmd.includes("imprimir pdf do mes") || cmd.includes("imprimir pdf do mês") ||
-    cmd.includes("tema roxo") || cmd.includes("tema verde") || cmd.includes("tema minimal") ||
-    cmd.includes("tema padrao") || cmd.includes("tema padrão") ||
-    cmd.includes("tema por do sol") || cmd.includes("tema pôr do sol") ||
-    cmd.includes("abrir edicao do painel") || cmd.includes("abrir edição do painel") || cmd.includes("editar painel");
-
-  if(isIndexAction){
-    saveVoiceCommand(raw);
-    location.href = "./index.html";
-    return true;
-  }
-
-  return false;
-}
-
-let recognition = null;
-let listening = false;
-
-function initRecognition(){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR) return null;
-
-  const r = new SR();
-  r.lang = "pt-BR";
-  r.interimResults = false;
-  r.maxAlternatives = 1;
-  r.continuous = false;
-
-  r.onstart = ()=>{
-    listening = true;
-    document.getElementById("btnMic").classList.add("listening");
-    document.getElementById("btnMic").textContent = "🟢 Ouvindo… toque para parar";
-    setStatus("Ouvindo…", true);
-  };
-
-  r.onend = ()=>{
-    listening = false;
-    document.getElementById("btnMic").classList.remove("listening");
-    document.getElementById("btnMic").textContent = "🎙️ Gravar áudio";
-    setStatus("Pronto", true);
-  };
-
-  r.onerror = (e)=>{
-    setStatus("Erro no microfone", false);
-    dbg("SpeechRecognition error: " + (e && e.error ? e.error : "desconhecido"));
-  };
-
-  r.onresult = (e)=>{
-    const text = e.results && e.results[0] && e.results[0][0] ? e.results[0][0].transcript : "";
-    const raw = String(text || "").trim();
-    setLastText(raw || "—");
-
-    if(!raw){
-      setStatus("Não entendi. Tente de novo.", false);
-      return;
-    }
-
-    setStatus("Pronto", true);
-
-    const ok = routeCommand(raw);
-    if(!ok){
-      saveVoiceCommand(raw);
-      location.href = "./index.html";
-    }
-  };
-
-  return r;
-}
-
-function toggleListen(){
-  if(!recognition) recognition = initRecognition();
-
-  if(!recognition){
-    alert("Seu celular ou navegador não suporta reconhecimento de voz. Use Chrome e permita o microfone.");
-    return;
-  }
-
-  try{
-    if(listening){
-      recognition.stop();
-      return;
-    }
-    recognition.start();
-  }catch(err){
-    dbg("Falha ao iniciar reconhecimento: " + (err && err.message ? err.message : String(err)));
-  }
-}
-
-function replayLast(){
-  const last = localStorage.getItem(VOICE_LAST_KEY);
-  if(!last) return alert("Nenhum comando anterior para repetir.");
-  setLastText(last);
-  setStatus("Executando…", true);
-  const ok = routeCommand(last);
-  if(!ok){
-    saveVoiceCommand(last);
-    location.href = "./index.html";
-  }
-}
-
-function clearLast(){
-  localStorage.removeItem(VOICE_LAST_KEY);
-  setLastText("—");
-  setStatus("Pronto", true);
-}
-
-document.addEventListener("DOMContentLoaded", ()=>{
-  setStatus("Pronto", true);
-  const last = localStorage.getItem(VOICE_LAST_KEY);
-  if(last) setLastText(last);
-  recognition = initRecognition();
-});
-</script>
 </body>
 </html>
+```
