@@ -1,363 +1,231 @@
-```html
-<!doctype html>
-<html lang="pt-BR">
-<head>
-
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-
-<title>Comando de Voz • Controle de Gastos PRO</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#569cff">
-
-<style>
-
-:root{
---bg:#07101f;
---panel:rgba(255,255,255,.06);
---panel2:rgba(255,255,255,.08);
---stroke:rgba(255,255,255,.10);
---text:#eaf0ff;
---muted:rgba(234,240,255,.72);
---accent:#569cff;
---good:#39d98a;
---shadow:0 18px 60px rgba(0,0,0,.45);
-}
-
-*{
-box-sizing:border-box
-}
-
-body{
-margin:0;
-font-family:system-ui,-apple-system,Segoe UI,Roboto;
-
-background:
-radial-gradient(900px 700px at 20% 10%, rgba(86,156,255,.22), transparent 60%),
-radial-gradient(900px 700px at 80% 30%, rgba(57,217,138,.18), transparent 60%),
-radial-gradient(900px 700px at 60% 90%, rgba(255,93,93,.12), transparent 60%),
-var(--bg);
-
-color:var(--text);
-
-min-height:100vh;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-padding:20px;
-}
-
-.wrap{
-width:100%;
-max-width:600px;
-}
-
-.card{
-
-background:
-linear-gradient(180deg,var(--panel2),var(--panel));
-
-border:1px solid var(--stroke);
-
-border-radius:26px;
-
-padding:26px;
-
-box-shadow:var(--shadow);
-
-backdrop-filter:blur(14px);
-
-}
-
-h1{
-margin:0;
-font-size:24px;
-font-weight:900;
-}
-
-.small{
-font-size:14px;
-color:var(--muted);
-margin-top:6px;
-}
-
-.hr{
-height:1px;
-background:var(--stroke);
-margin:18px 0;
-}
-
-.status{
-text-align:center;
-font-size:32px;
-font-weight:900;
-margin:28px 0;
-letter-spacing:.5px;
-}
-
-.mic{
-
-width:110px;
-height:110px;
-
-border-radius:50%;
-
-background:
-radial-gradient(60px 60px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
-linear-gradient(135deg,#39d98a,#1e8e5a);
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-font-size:40px;
-
-cursor:pointer;
-
-margin:auto;
-
-box-shadow:
-0 12px 40px rgba(0,0,0,.35),
-0 0 0 rgba(57,217,138,0);
-
-transition:.25s;
-}
-
-.mic:hover{
-transform:scale(1.05);
-}
-
-.mic:active{
-transform:scale(.95);
-}
-
-.mic.gravando{
-
-animation:pulse 1.2s infinite;
-
-}
-
-@keyframes pulse{
-
-0%{
-box-shadow:0 0 0 0 rgba(57,217,138,.6);
-}
-
-70%{
-box-shadow:0 0 0 25px rgba(57,217,138,0);
-}
-
-100%{
-box-shadow:0 0 0 0 rgba(57,217,138,0);
-}
-
-}
-
-.result{
-margin-top:20px;
-font-size:16px;
-text-align:center;
-min-height:24px;
-font-weight:600;
-}
-
-.rules{
-
-margin-top:18px;
-
-font-size:14px;
-
-color:var(--muted);
-
-line-height:1.6;
-
-}
-
-.rules b{
-color:#fff;
-}
-
-button{
-
-border:1px solid var(--stroke);
-
-background:rgba(255,255,255,.08);
-
-color:var(--text);
-
-padding:12px 14px;
-
-border-radius:14px;
-
-cursor:pointer;
-
-font-weight:800;
-
-}
-
-.back{
-margin-bottom:14px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="wrap">
-
-<button class="back" onclick="voltar()">← Voltar</button>
-
-<div class="card">
-
-<h1>Comando de Voz</h1>
-<div class="small">Toque no microfone e fale o comando</div>
-
-<div class="status" id="status">...</div>
-
-<div class="mic" id="mic" onclick="gravar()">🎤</div>
-
-<div class="result" id="texto"></div>
-
-<div class="hr"></div>
-
-<div class="rules">
-
-<b>Como falar os comandos</b>
-
-<br><br>
-
-Fale simples e direto.
-
-<br><br>
-
-<b>Exemplos:</b>
-
-<br><br>
-
-anote mercado 120 alimentação  
-anote gasolina 50 transporte  
-anote guardado 300 reserva  
-
-<br><br>
-
-abrir histórico  
-abrir gastos fixos  
-abrir categorias  
-abrir simuladores  
-abrir menu  
-abrir tela principal  
-
-<br><br>
-
-tema roxo  
-tema verde  
-tema minimal  
-tema pôr do sol  
-tema padrão  
-
-<br><br>
-
-imprimir resumo do ano  
-imprimir pdf do mês  
-
-<br><br>
-
-Sempre fale primeiro a palavra principal:
-
-<br><br>
-
-<b>anote</b> → para gastos  
-<b>abrir</b> → para telas  
-<b>tema</b> → para mudar cor  
-<b>imprimir</b> → para PDF
-
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-const KEY="gastos_voice_command"
-
-let recognition=null
-
-function voltar(){
-
-localStorage.removeItem(KEY)
-
-location.href="./index.html"
-
-}
-
-function gravar(){
-
-if(!('webkitSpeechRecognition'in window || 'SpeechRecognition'in window)){
-alert("Seu navegador não suporta comando de voz")
-return
-}
-
-const mic=document.getElementById("mic")
-
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition
-
-recognition=new SpeechRecognition()
-
-recognition.lang="pt-BR"
-
-recognition.continuous=false
-
-recognition.interimResults=false
-
-document.getElementById("status").textContent="🎙️ ouvindo..."
-
-mic.classList.add("gravando")
-
-recognition.start()
-
-recognition.onresult=function(e){
-
-let texto=e.results[0][0].transcript.toLowerCase()
-
-document.getElementById("texto").textContent=texto
-
-localStorage.setItem(KEY,texto)
-
-document.getElementById("status").textContent="✔ comando capturado"
-
-mic.classList.remove("gravando")
-
-setTimeout(()=>{
-
-document.getElementById("status").textContent="..."
-
-},2000)
-
-}
-
-recognition.onerror=function(){
-
-document.getElementById("status").textContent="erro"
-
-mic.classList.remove("gravando")
-
-}
-
-recognition.onend=function(){
-
-mic.classList.remove("gravando")
-
-}
-
-}
-
-</script>
-
-</body>
-</html>
+@media (prefers-reduced-motion: reduce){
+        .listening .mic,
+        .listening .micShell::before,
+        .listening .bar{
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  
+  <body>
+  
+    <div class="app" id="app">
+  
+      <!-- TOPBAR -->
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">🎙️</div>
+          <div class="titles">
+            <div class="t">Comando de Voz</div>
+            <div class="s">Controle de Gastos PRO</div>
+          </div>
+        </div>
+  
+        <button class="btn icon" onclick="voltar()" title="Voltar">←</button>
+      </div>
+  
+      <div class="content">
+  
+        <!-- HERO -->
+        <div class="card">
+          <div class="cardInner">
+  
+            <div class="heroTop">
+              <div>
+                <h1>Fale o comando</h1>
+                <div class="small">
+                  Toque no microfone e diga o que deseja fazer.
+                </div>
+              </div>
+  
+              <div class="statusPill">
+                <div class="dot" id="dot"></div>
+                <span id="status">Aguardando…</span>
+              </div>
+            </div>
+  
+            <div class="hr"></div>
+  
+            <div class="micArea" id="micArea">
+  
+              <div class="statusBig" id="statusBig">
+                Toque para começar
+              </div>
+  
+              <div class="micShell">
+                <div class="mic" id="mic" onclick="gravar()" aria-label="Iniciar gravação">
+                  🎤
+                </div>
+  
+                <div class="eq">
+                  <div class="bar"></div>
+                  <div class="bar"></div>
+                  <div class="bar"></div>
+                  <div class="bar"></div>
+                  <div class="bar"></div>
+                </div>
+              </div>
+  
+              <div class="bubble">
+                <div class="bubbleLabel">
+                  📝 Comando capturado
+                </div>
+                <div class="bubbleText" id="texto"></div>
+              </div>
+  
+            </div>
+  
+          </div>
+        </div>
+  
+        <!-- RULES -->
+        <div class="card">
+          <div class="cardInner">
+  
+            <div class="sectionTitle">Como falar os comandos</div>
+  
+            <div class="rules">
+              Fale simples e direto. Sempre comece pela palavra principal.
+            </div>
+  
+            <div class="cmdGrid">
+  
+              <div class="cmdCard">
+                <div class="cmdHead">
+                  <div class="k">🧾 anote</div>
+                  <div class="pill">Para gastos</div>
+                </div>
+                <div class="mono">
+  anote mercado 120 alimentação
+  anote gasolina 50 transporte
+  anote guardado 300 reserva
+                </div>
+              </div>
+  
+              <div class="cmdCard">
+                <div class="cmdHead">
+                  <div class="k">📂 abrir</div>
+                  <div class="pill">Para telas</div>
+                </div>
+                <div class="mono">
+  abrir histórico
+  abrir gastos fixos
+  abrir categorias
+  abrir simuladores
+  abrir menu
+  abrir tela principal
+                </div>
+              </div>
+  
+              <div class="cmdCard">
+                <div class="cmdHead">
+                  <div class="k">🎨 tema</div>
+                  <div class="pill">Mudar cor</div>
+                </div>
+                <div class="mono">
+  tema roxo
+  tema verde
+  tema minimal
+  tema pôr do sol
+  tema padrão
+                </div>
+              </div>
+  
+              <div class="cmdCard">
+                <div class="cmdHead">
+                  <div class="k">🖨 imprimir</div>
+                  <div class="pill">Gerar PDF</div>
+                </div>
+                <div class="mono">
+  imprimir resumo do ano
+  imprimir pdf do mês
+                </div>
+              </div>
+  
+            </div>
+  
+          </div>
+        </div>
+  
+      </div>
+  
+    </div>
+  
+    <script>
+  
+      const KEY = "gastos_voice_command"
+      let recognition = null
+  
+      function voltar(){
+        localStorage.removeItem(KEY)
+        location.href = "./index.html"
+      }
+  
+      function gravar(){
+  
+        if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)){
+          alert("Seu navegador não suporta comando de voz")
+          return
+        }
+  
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+        recognition = new SpeechRecognition()
+  
+        recognition.lang = "pt-BR"
+        recognition.continuous = false
+        recognition.interimResults = false
+  
+        const micArea = document.getElementById("micArea")
+        const status = document.getElementById("status")
+        const statusBig = document.getElementById("statusBig")
+        const dot = document.getElementById("dot")
+        const textoEl = document.getElementById("texto")
+  
+        status.textContent = "Ouvindo..."
+        statusBig.textContent = "Estou ouvindo..."
+        dot.classList.add("ok")
+        micArea.classList.add("listening")
+  
+        if(navigator.vibrate){
+          navigator.vibrate(30)
+        }
+  
+        recognition.start()
+  
+        recognition.onresult = function(e){
+  
+          let texto = e.results[0][0].transcript.toLowerCase()
+  
+          textoEl.textContent = texto
+          localStorage.setItem(KEY, texto)
+  
+          status.textContent = "Comando capturado"
+          statusBig.textContent = "Pronto ✔"
+  
+          micArea.classList.remove("listening")
+  
+          setTimeout(()=>{
+            status.textContent = "Aguardando…"
+            statusBig.textContent = "Toque para começar"
+            dot.classList.remove("ok")
+          }, 2000)
+        }
+  
+        recognition.onerror = function(){
+          status.textContent = "Erro"
+          statusBig.textContent = "Não consegui ouvir"
+          micArea.classList.remove("listening")
+          dot.classList.remove("ok")
+        }
+  
+        recognition.onend = function(){
+          micArea.classList.remove("listening")
+        }
+  
+      }
+  
+    </script>
+  
+  </body>
+  </html>
