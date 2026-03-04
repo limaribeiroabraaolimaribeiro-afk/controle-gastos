@@ -43,7 +43,9 @@ body{
     radial-gradient(900px 700px at 80% 30%, var(--grad2), transparent 60%),
     radial-gradient(800px 600px at 70% 90%, var(--grad3), transparent 60%),
     var(--bg);
-  overflow:hidden;
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
 }
 
 .wrap{
@@ -119,10 +121,8 @@ body{
 }
 
 .mainCard{
-  flex:1;
   display:flex;
   flex-direction:column;
-  min-height:0;
   padding:14px;
 }
 
@@ -181,13 +181,11 @@ body{
 }
 
 .micBox{
-  flex:1;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   padding:16px 10px 10px;
-  min-height:0;
 }
 
 .visual{
@@ -311,6 +309,7 @@ body{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:12px;
+  padding-bottom:18px;
 }
 
 .helpCard{
@@ -468,7 +467,6 @@ body{
 (function(){
 
 const VOICE_KEY = "gastos_voice_command";
-const CLEAR_KEYS = ["gastos_voice_command", "gastos_voice_result", "gastos_voice_last"];
 
 const liveText = document.getElementById("liveText");
 const resultText = document.getElementById("resultText");
@@ -483,14 +481,7 @@ let recognition = null;
 let listening = false;
 let finalTranscript = "";
 
-function clearVoiceStorage(){
-  try{
-    CLEAR_KEYS.forEach(k=>localStorage.removeItem(k));
-  }catch(e){}
-}
-
 function goHome(){
-  clearVoiceStorage();
   location.href = "./index.html";
 }
 
@@ -501,7 +492,7 @@ function setIdle(){
   statusSub.textContent = "Toque no microfone e fale.";
   liveText.textContent = "...";
   liveText.classList.add("muted");
-  resultText.innerHTML = 'Pronto para ouvir.';
+  resultText.innerHTML = "Pronto para ouvir.";
   statusDot.className = "dot";
   visual.classList.remove("listening");
   micBtn.classList.remove("stop");
@@ -516,7 +507,7 @@ function setListening(){
   statusSub.textContent = "Fale agora.";
   liveText.textContent = "...";
   liveText.classList.add("muted");
-  resultText.innerHTML = 'Escutando comando...';
+  resultText.innerHTML = "Escutando comando...";
   statusDot.className = "dot listening";
   visual.classList.add("listening");
   micBtn.classList.add("stop");
@@ -568,6 +559,7 @@ function normalizeCommand(text){
 
 function sendCommand(text){
   const cmd = normalizeCommand(text);
+
   if(!cmd){
     setError("Nenhum comando reconhecido.");
     setTimeout(setIdle, 1800);
@@ -581,12 +573,13 @@ function sendCommand(text){
   }catch(e){}
 
   setSending(cmd);
+
   setTimeout(()=>{
     setDone(cmd);
   }, 250);
 
   setTimeout(()=>{
-    goHome();
+    location.href = "./index.html";
   }, 700);
 }
 
@@ -598,6 +591,7 @@ function stopRecognition(){
 
 function startRecognition(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
   if(!SR){
     setError("Seu navegador não suporta reconhecimento de voz.");
     return;
@@ -649,12 +643,15 @@ function startRecognition(){
 
   recognition.onerror = function(event){
     let msg = "Não foi possível reconhecer.";
+
     if(event && event.error){
       if(event.error === "not-allowed") msg = "Permissão do microfone negada.";
       else if(event.error === "no-speech") msg = "Nenhuma fala detectada.";
       else if(event.error === "audio-capture") msg = "Microfone não encontrado.";
       else if(event.error === "network") msg = "Erro de rede no reconhecimento.";
+      else if(event.error === "aborted") return setIdle();
     }
+
     setError(msg);
     setTimeout(setIdle, 1800);
   };
@@ -685,9 +682,6 @@ function toggleMic(){
 
 micBtn.addEventListener("click", toggleMic);
 btnBack.addEventListener("click", goHome);
-
-window.addEventListener("beforeunload", clearVoiceStorage);
-window.addEventListener("pagehide", clearVoiceStorage);
 
 setIdle();
 
