@@ -164,6 +164,182 @@ html,body{min-height:100%}
 @media (max-width:720px){
   .iaTop{align-items:flex-start;flex-direction:column}
 }
+
+/* =========================================================
+   ChatGPT-like OVERRIDES (não remove nada, só “troca a roupa”)
+   ========================================================= */
+
+/* Coluna mais parecida com ChatGPT (mais focada/central) */
+.iaWrap{
+  max-width: 980px;
+}
+
+/* Shell mais “clean” */
+.iaShell{
+  background:
+    radial-gradient(900px 620px at 20% 0%, color-mix(in srgb, var(--accent), transparent 86%), transparent 58%),
+    radial-gradient(900px 620px at 90% 10%, rgba(57,217,138,.10), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+}
+
+/* Topbar com aspecto “sticky/vidro” */
+.iaTop{
+  background: color-mix(in srgb, rgba(0,0,0,.24), transparent 10%);
+  backdrop-filter: blur(10px);
+}
+
+/* Área do chat como feed vertical (ChatGPT vibe) */
+.iaChat{
+  display:flex;
+  flex-direction:column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  scroll-behavior: smooth;
+  background: rgba(0,0,0,.18);
+  border-color: color-mix(in srgb, var(--stroke), transparent 10%);
+}
+
+/* Scrollbar discreta */
+.iaChat::-webkit-scrollbar{ width: 10px; }
+.iaChat::-webkit-scrollbar-track{ background: transparent; }
+.iaChat::-webkit-scrollbar-thumb{
+  background: color-mix(in srgb, var(--stroke), transparent 55%);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.iaChat:hover::-webkit-scrollbar-thumb{
+  background: color-mix(in srgb, var(--stroke), transparent 35%);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* Mensagens com avatar + card */
+.msgRow{
+  margin: 0;
+  gap: 12px;
+  align-items:flex-start;
+}
+.msgRow.me{
+  flex-direction: row-reverse;
+  justify-content:flex-end;
+}
+.msgRow.bot{
+  justify-content:flex-start;
+}
+
+.msgAvatar{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 950;
+  font-size: 12px;
+  letter-spacing: .2px;
+  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  background: rgba(255,255,255,.08);
+  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+  flex: 0 0 auto;
+  user-select:none;
+}
+.msgAvatar.me{
+  background: color-mix(in srgb, var(--accent), transparent 70%);
+  border-color: color-mix(in srgb, var(--accent), transparent 45%);
+}
+.msgAvatar.bot{
+  background: rgba(255,255,255,.08);
+}
+
+.msg{
+  max-width: min(760px, 90%);
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+}
+.msg.me{
+  background: color-mix(in srgb, var(--accent), transparent 78%);
+  border-color: color-mix(in srgb, var(--accent), transparent 50%);
+}
+.msg.bot{
+  background: rgba(255,255,255,.06);
+}
+.msgContent{
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Chips estilo “sugestões” */
+.iaQuick{
+  gap: 10px;
+}
+.iaChip{
+  padding: 9px 12px;
+  background: rgba(255,255,255,.06);
+  border-color: color-mix(in srgb, var(--stroke), transparent 10%);
+  transition: transform .08s ease, background .2s ease, border-color .2s ease;
+}
+.iaChip:hover{
+  background: rgba(255,255,255,.08);
+  border-color: color-mix(in srgb, var(--stroke), transparent 0%);
+}
+.iaChip:active{
+  transform: translateY(1px);
+}
+
+/* Contexto mais “card” */
+.contextBox{
+  background: rgba(255,255,255,.04);
+  border-color: color-mix(in srgb, var(--stroke), transparent 10%);
+}
+
+/* Composer com cara de ChatGPT */
+.iaComposer{
+  gap: 12px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  background: rgba(255,255,255,.05);
+  padding: 10px;
+}
+
+.iaInputWrap{
+  border: 0;
+  background: transparent;
+  padding: 0 6px;
+}
+.iaInputWrap:focus-within{
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.iaInput{
+  min-height: 44px;
+  padding: 10px 8px;
+}
+
+/* Botão enviar mais “pill” */
+.iaComposer .btn.primary{
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+/* Light tweaks */
+.light .iaTop{
+  background: rgba(255,255,255,.60);
+}
+.light .iaChat{
+  background: rgba(255,255,255,.72);
+}
+.light .msg{
+  background: rgba(16,24,40,.04);
+}
+.light .msg.bot{
+  background: rgba(16,24,40,.04);
+}
 </style>
 </head>
 <body>
@@ -199,7 +375,7 @@ html,body{min-height:100%}
       </div>
 
       <div class="iaBody">
-        <div class="iaChat" id="iaChat"></div>
+        <div class="iaChat" id="iaChat" role="log" aria-live="polite"></div>
 
         <div class="iaQuick">
           <div class="iaChip" onclick="iaQuick('Me faça um resumo do mês e diga onde dá para economizar.')">Resumo do mês</div>
@@ -216,7 +392,7 @@ html,body{min-height:100%}
 
         <div class="iaComposer">
           <div class="iaInputWrap">
-            <textarea id="iaPrompt" class="iaInput" placeholder="Digite sua pergunta…"></textarea>
+            <textarea id="iaPrompt" class="iaInput" placeholder="Digite sua pergunta…" aria-label="Digite sua pergunta"></textarea>
             <div class="small" style="margin-top:8px">Pergunte sobre metas, corte de gastos, equilíbrio do mês e ideias para guardar mais.</div>
           </div>
           <button class="btn primary" style="flex:0 0 auto" onclick="iaSend()">Enviar</button>
@@ -266,23 +442,37 @@ function iaSetStatus(text, ok){
   document.getElementById("iaDot").classList.toggle("ok", !!ok);
 }
 
+/* ✅ Render estilo ChatGPT: avatar + card (sem remover nada) */
 function iaAdd(role, text){
   const box = document.getElementById("iaChat");
+
   const row = document.createElement("div");
   row.className = "msgRow " + (role === "me" ? "me" : "bot");
 
+  const avatar = document.createElement("div");
+  avatar.className = "msgAvatar " + (role === "me" ? "me" : "bot");
+  avatar.textContent = role === "me" ? "VC" : "IA";
+
   const bubble = document.createElement("div");
   bubble.className = "msg " + (role === "me" ? "me" : "bot");
-  bubble.textContent = text;
 
+  const content = document.createElement("div");
+  content.className = "msgContent";
+  content.textContent = text;
+
+  bubble.appendChild(content);
+  row.appendChild(avatar);
   row.appendChild(bubble);
+
   box.appendChild(row);
   box.scrollTop = box.scrollHeight;
 }
 
 function iaQuick(text){
-  document.getElementById("iaPrompt").value = text;
-  document.getElementById("iaPrompt").focus();
+  const ta = document.getElementById("iaPrompt");
+  ta.value = text;
+  ta.focus();
+  iaAutoResize();
 }
 
 function getMesAtualAberto(){
@@ -329,6 +519,7 @@ function buildIaContextObject(){
   };
 }
 
+/* ✅ Corrigido (mesmo conteúdo, só com template string válida) */
 function buildIaContextText(){
   const c = buildIaContextObject();
 
@@ -344,6 +535,7 @@ function buildIaContextText(){
   ].join("\n");
 }
 
+/* ✅ Corrigido (mesmo layout/infos, só string válida) */
 function renderContextPreview(){
   const c = buildIaContextObject();
   document.getElementById("contextPreview").innerHTML = `
@@ -352,7 +544,11 @@ function renderContextPreview(){
     <br>Gastos: <b>${App.money(c.spent)}</b>
     <br>Guardado: <b>${App.money(c.saved)}</b>
     <br>Sobra: <b>${App.money(c.left)}</b>
-    <br>Top categorias: <b>${c.topCats.length ? c.topCats.map(x => `${App.escapeHtml(x.cat)} (${App.money(x.val)})`).join(", ") : "sem dados"}</b>
+    <br>Top categorias: <b>${
+      c.topCats.length
+        ? c.topCats.map(x => `${App.escapeHtml(x.cat)} (${App.money(x.val)})`).join(", ")
+        : "sem dados"
+    }</b>
   `;
   document.getElementById("iaHint").textContent = `Usando dados do mês ${c.mes}`;
 }
@@ -397,6 +593,8 @@ async function iaSend(){
   if(!q) return;
 
   input.value = "";
+  iaAutoResize();
+
   iaAdd("me", q);
   iaSetStatus("Consultando…", false);
 
@@ -422,6 +620,15 @@ ${q}`;
     iaAdd("bot", "Erro ao conectar na IA: " + (e.message || e));
     iaSetStatus("Offline", false);
   }
+}
+
+/* ✅ Auto-resize do textarea (estilo ChatGPT) */
+function iaAutoResize(){
+  const ta = document.getElementById("iaPrompt");
+  if(!ta) return;
+  ta.style.height = "0px";
+  const h = Math.min(ta.scrollHeight, 180);
+  ta.style.height = h + "px";
 }
 
 function handleVoiceCommand(raw){
@@ -462,6 +669,7 @@ function handleVoiceCommand(raw){
   let m = cmd.match(/^pergunta\s+(.+)$/i);
   if(m){
     document.getElementById("iaPrompt").value = m[1] || "";
+    iaAutoResize();
     return true;
   }
 
@@ -497,6 +705,11 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     iaAdd("bot", "Estou pronta. Posso analisar seu mês, sugerir cortes de gastos, avaliar sua sobra e ajudar a montar metas.");
 
     const input = document.getElementById("iaPrompt");
+
+    /* Auto-resize inicial + durante digitação */
+    iaAutoResize();
+    input.addEventListener("input", iaAutoResize);
+
     input.addEventListener("keydown", (e)=>{
       if(e.key === "Enter" && !e.shiftKey){
         e.preventDefault();
