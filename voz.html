@@ -2,14 +2,17 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
+
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+
 <title>Comando de Voz • Controle de Gastos PRO</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#569cff">
 
 <style>
+
 :root{
 --bg:#07101f;
 --panel:rgba(255,255,255,.06);
@@ -22,41 +25,61 @@
 --shadow:0 18px 60px rgba(0,0,0,.45);
 }
 
-*{box-sizing:border-box}
+*{
+box-sizing:border-box
+}
 
 body{
 margin:0;
 font-family:system-ui,-apple-system,Segoe UI,Roboto;
-background:radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.18), transparent 60%),var(--bg);
+
+background:
+radial-gradient(900px 700px at 20% 10%, rgba(86,156,255,.22), transparent 60%),
+radial-gradient(900px 700px at 80% 30%, rgba(57,217,138,.18), transparent 60%),
+radial-gradient(900px 700px at 60% 90%, rgba(255,93,93,.12), transparent 60%),
+var(--bg);
+
 color:var(--text);
+
 min-height:100vh;
+
 display:flex;
 align-items:center;
 justify-content:center;
-padding:16px;
+
+padding:20px;
 }
 
 .wrap{
-max-width:520px;
 width:100%;
+max-width:600px;
 }
 
 .card{
-background:linear-gradient(180deg,var(--panel2),var(--panel));
+
+background:
+linear-gradient(180deg,var(--panel2),var(--panel));
+
 border:1px solid var(--stroke);
-border-radius:22px;
-padding:18px;
+
+border-radius:26px;
+
+padding:26px;
+
 box-shadow:var(--shadow);
+
+backdrop-filter:blur(14px);
+
 }
 
 h1{
 margin:0;
-font-size:20px;
+font-size:24px;
 font-weight:900;
 }
 
 .small{
-font-size:13px;
+font-size:14px;
 color:var(--muted);
 margin-top:6px;
 }
@@ -64,63 +87,123 @@ margin-top:6px;
 .hr{
 height:1px;
 background:var(--stroke);
-margin:14px 0;
+margin:18px 0;
 }
 
 .status{
 text-align:center;
-font-size:28px;
+font-size:32px;
 font-weight:900;
-margin:24px 0;
+margin:28px 0;
+letter-spacing:.5px;
 }
 
 .mic{
-width:90px;
-height:90px;
+
+width:110px;
+height:110px;
+
 border-radius:50%;
-background:linear-gradient(135deg,#39d98a,#1e8e5a);
+
+background:
+radial-gradient(60px 60px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
+linear-gradient(135deg,#39d98a,#1e8e5a);
+
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:36px;
+
+font-size:40px;
+
 cursor:pointer;
+
 margin:auto;
-box-shadow:0 10px 30px rgba(0,0,0,.35);
+
+box-shadow:
+0 12px 40px rgba(0,0,0,.35),
+0 0 0 rgba(57,217,138,0);
+
+transition:.25s;
+}
+
+.mic:hover{
+transform:scale(1.05);
 }
 
 .mic:active{
-transform:scale(.96);
+transform:scale(.95);
+}
+
+.mic.gravando{
+
+animation:pulse 1.2s infinite;
+
+}
+
+@keyframes pulse{
+
+0%{
+box-shadow:0 0 0 0 rgba(57,217,138,.6);
+}
+
+70%{
+box-shadow:0 0 0 25px rgba(57,217,138,0);
+}
+
+100%{
+box-shadow:0 0 0 0 rgba(57,217,138,0);
+}
+
 }
 
 .result{
-margin-top:18px;
-font-size:14px;
+margin-top:20px;
+font-size:16px;
 text-align:center;
-min-height:22px;
+min-height:24px;
+font-weight:600;
 }
 
 .rules{
-margin-top:14px;
-font-size:13px;
+
+margin-top:18px;
+
+font-size:14px;
+
 color:var(--muted);
-line-height:1.4;
+
+line-height:1.6;
+
+}
+
+.rules b{
+color:#fff;
 }
 
 button{
-border:0;
+
+border:1px solid var(--stroke);
+
 background:rgba(255,255,255,.08);
+
 color:var(--text);
-padding:10px 12px;
-border-radius:12px;
+
+padding:12px 14px;
+
+border-radius:14px;
+
 cursor:pointer;
-font-weight:700;
+
+font-weight:800;
+
 }
 
 .back{
-margin-bottom:10px;
+margin-bottom:14px;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -136,7 +219,7 @@ margin-bottom:10px;
 
 <div class="status" id="status">...</div>
 
-<div class="mic" onclick="gravar()">🎤</div>
+<div class="mic" id="mic" onclick="gravar()">🎤</div>
 
 <div class="result" id="texto"></div>
 
@@ -186,7 +269,7 @@ imprimir pdf do mês
 
 Sempre fale primeiro a palavra principal:
 
-<br>
+<br><br>
 
 <b>anote</b> → para gastos  
 <b>abrir</b> → para telas  
@@ -220,6 +303,8 @@ alert("Seu navegador não suporta comando de voz")
 return
 }
 
+const mic=document.getElementById("mic")
+
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition
 
 recognition=new SpeechRecognition()
@@ -230,7 +315,9 @@ recognition.continuous=false
 
 recognition.interimResults=false
 
-document.getElementById("status").textContent="🎙️"
+document.getElementById("status").textContent="🎙️ ouvindo..."
+
+mic.classList.add("gravando")
 
 recognition.start()
 
@@ -242,7 +329,9 @@ document.getElementById("texto").textContent=texto
 
 localStorage.setItem(KEY,texto)
 
-document.getElementById("status").textContent="pronto"
+document.getElementById("status").textContent="✔ comando capturado"
+
+mic.classList.remove("gravando")
 
 setTimeout(()=>{
 
@@ -254,11 +343,15 @@ document.getElementById("status").textContent="..."
 
 recognition.onerror=function(){
 
-document.getElementById("status").textContent="..."
+document.getElementById("status").textContent="erro"
+
+mic.classList.remove("gravando")
 
 }
 
 recognition.onend=function(){
+
+mic.classList.remove("gravando")
 
 }
 
@@ -268,4 +361,3 @@ recognition.onend=function(){
 
 </body>
 </html>
-```
