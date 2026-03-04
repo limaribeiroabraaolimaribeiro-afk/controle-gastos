@@ -3503,6 +3503,55 @@ function executeVoice(cmdRaw){
     return;
   }
 
+/* -------- PAGO (ANTES do PENDENTE / FIXO / GENÉRICO) --------
+Ex: anote material pago
+Ex: anote material escolar pago
+Ex: anote mercado 120 alimentacao pago  (vai marcar pelo texto, ignorando o valor)
+------------------------------------------------------------- */
+if(cmd.startsWith("anote ") && cmd.includes(" pago")){
+  const d = getDataMes(mesAtual);
+  let achou = false;
+
+  // tira "anote" e "pago"
+  let base = norm(cmd.replace(/^anote\s+/,"").replace(/\bpago\b/," ").trim());
+
+  // se vier com número/categoria, a gente remove pra focar na descrição
+  const valorTmp = parseNumberFlexible(base);
+  if(valorTmp) base = removeFirstNumberFlexible(base);
+
+  const catTmp = findCategoryInCommand(base);
+  if(catTmp) base = removeCategoryFromText(base, catTmp);
+
+  const descBusca = norm(base).trim();
+  if(!descBusca) return;
+
+  (d.items || []).forEach(it=>{
+    const di = norm(it.desc || "");
+    // compara dos 2 lados: "material" vs "material escolar"
+    if(di.includes(descBusca) || descBusca.includes(di)){
+      it.paid = true;
+      it.status = "pago";
+      it.isPaid = true;
+      it.pendente = false;
+      achou = true;
+
+      // mantém regra dos investimentos fixos se existir
+      if(it.isInvestFixo && it.invId){
+        try{
+          if(!d.investStatus || typeof d.investStatus !== "object") d.investStatus = {};
+          d.investStatus[it.invId] = true;
+          if(typeof addAutoSavedForInv === "function"){
+            addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
+          }
+        }catch(e){}
+      }
+    }
+  });
+
+  if(achou) renderEverything();
+  return;
+}
+
   /* -------- PENDENTE (antes do anote genérico) -------- */
   if(cmd.startsWith("anote ") && cmd.includes(" pendente")){
     const descBusca = norm(cmd.replace(/^anote\s+/,"").replace(/\bpendente\b/," ").trim());
