@@ -150,7 +150,7 @@
 
 <div class="wrap" style="max-width:980px">
   <div class="backRow">
-    <a class="btn backBtn" href="./index.html" onclick="onExitVoice(event)">← Voltar</a>
+    <a class="btn backBtn" href="./index.html" id="btnBack">← Voltar</a>
     <div style="font-weight:900">Comando de Voz</div>
   </div>
 
@@ -274,7 +274,7 @@ window.addEventListener("unhandledrejection", (e)=>{
 </script>
 
 <script>
-const VOICE_CMD_KEY  = "voice_cmd";
+const VOICE_CMD_KEY = "voice_cmd";
 const VOICE_LAST_KEY = "voice_last";
 const VOICE_TS_KEY   = "voice_ts";
 
@@ -295,37 +295,53 @@ function setLastText(text){
   document.getElementById("lastText").textContent = text || "—";
 }
 
-function clearVoiceCmd(){
-  // limpa o comando "executável" para não reabrir coisas ao voltar
-  localStorage.removeItem(VOICE_CMD_KEY);
-  // também remove timestamp do comando executável (opcional, mas ajuda)
-  localStorage.removeItem(VOICE_TS_KEY);
-}
-
-function onExitVoice(ev){
-  // quando clicar em voltar/sair do voz.html, limpa o comando executável
-  try{ clearVoiceCmd(); }catch(_){}
-  // segue a navegação normal do link
-}
-
 function saveVoiceCommand(raw, persistCmd = true){
   // sempre guarda o último comando pro botão "Repetir"
   localStorage.setItem(VOICE_LAST_KEY, raw);
+  localStorage.setItem(VOICE_TS_KEY, String(Date.now()));
 
   // só grava o comando para o index/páginas executarem quando precisar
   if(persistCmd){
     localStorage.setItem(VOICE_CMD_KEY, raw);
-    localStorage.setItem(VOICE_TS_KEY, String(Date.now()));
   }else{
-    clearVoiceCmd();
+    localStorage.removeItem(VOICE_CMD_KEY); // evita re-executar ao voltar pro index
   }
 }
+
+// ======= NOVO: limpeza automática ao sair/voltar =======
+function clearVoiceCmdOnly(){
+  try{
+    localStorage.removeItem(VOICE_CMD_KEY);
+    localStorage.removeItem(VOICE_TS_KEY);
+  }catch(e){}
+}
+function clearAllVoiceKeys(){
+  try{
+    localStorage.removeItem(VOICE_CMD_KEY);
+    localStorage.removeItem(VOICE_TS_KEY);
+    localStorage.removeItem(VOICE_LAST_KEY);
+  }catch(e){}
+}
+// Ao clicar em "Voltar", limpa o comando pendente antes de sair
+document.addEventListener("DOMContentLoaded", ()=>{
+  const back = document.getElementById("btnBack");
+  if(back){
+    back.addEventListener("click", ()=>{
+      // não apaga o último comando (voice_last) por padrão, só o comando que executa no index
+      clearVoiceCmdOnly();
+    });
+  }
+});
+// Ao sair da tela (fechar, trocar de página, ir pra outro arquivo), limpa o comando pendente
+window.addEventListener("pagehide", clearVoiceCmdOnly);
+window.addEventListener("beforeunload", clearVoiceCmdOnly);
+// ================================================
 
 function routeCommand(raw){
   const cmd = normalize(raw);
   if(!cmd) return false;
 
-  // Grupo 1 — abrir páginas (NÃO grava voice_cmd, só voice_last)
+  // Grupo 1 — abrir páginas
   if(cmd.includes("abrir historico") || cmd.includes("abrir histórico")){
     saveVoiceCommand(raw, false);
     location.href = "./historico.html";
@@ -367,38 +383,38 @@ function routeCommand(raw){
     return true;
   }
 
-  // Grupo 3 — páginas específicas (precisa mandar o comando para a página executar)
+  // Grupo 3 — páginas específicas
   if(cmd.includes("gastos fixos") && (cmd.startsWith("anote") || cmd.startsWith("anotar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir"))){
-    saveVoiceCommand(raw, true);
+    saveVoiceCommand(raw);
     location.href = "./fixos.html";
     return true;
   }
 
   if(cmd.includes("investimento fixo") && (cmd.startsWith("adicionar") || cmd.startsWith("anote") || cmd.startsWith("anotar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir"))){
-    saveVoiceCommand(raw, true);
+    saveVoiceCommand(raw);
     location.href = "./investfixos.html";
     return true;
   }
 
   if(cmd.includes("categoria") && (cmd.startsWith("adicionar") || cmd.startsWith("remover") || cmd.startsWith("apagar") || cmd.startsWith("excluir") || cmd.startsWith("anote") || cmd.startsWith("anotar"))){
-    saveVoiceCommand(raw, true);
+    saveVoiceCommand(raw);
     location.href = "./categorias.html";
     return true;
   }
 
   if(cmd.startsWith("buscar historico") || cmd.startsWith("buscar histórico") || cmd.startsWith("abrir mês") || cmd.startsWith("abrir mes") || cmd.startsWith("remover mês") || cmd.startsWith("remover mes")){
-    saveVoiceCommand(raw, true);
+    saveVoiceCommand(raw);
     location.href = "./historico.html";
     return true;
   }
 
   if(cmd.includes("calcular investimento") || cmd.includes("calcular emprestimo") || cmd.includes("calcular empréstimo") || cmd.includes("abrir investimento") || cmd.includes("abrir empréstimo") || cmd.includes("abrir emprestimo")){
-    saveVoiceCommand(raw, true);
+    saveVoiceCommand(raw);
     location.href = "./simuladores.html";
     return true;
   }
 
-  // Grupo 2 — index (precisa mandar o comando para o index executar)
+  // Grupo 2 — index
   const isIndexAction =
     cmd.startsWith("anote") || cmd.startsWith("anotar") ||
     cmd.includes("imprimir resumo do ano") ||
@@ -409,7 +425,7 @@ function routeCommand(raw){
     cmd.includes("abrir edicao do painel") || cmd.includes("abrir edição do painel") || cmd.includes("editar painel");
 
   if(isIndexAction){
-    saveVoiceCommand(raw, true);
+    saveVoiceCommand(raw);
     location.href = "./index.html";
     return true;
   }
@@ -463,8 +479,7 @@ function initRecognition(){
 
     const ok = routeCommand(raw);
     if(!ok){
-      // comando não reconhecido: manda pro index executar/decidir
-      saveVoiceCommand(raw, true);
+      saveVoiceCommand(raw);
       location.href = "./index.html";
     }
   };
@@ -498,25 +513,16 @@ function replayLast(){
   setStatus("Executando…", true);
   const ok = routeCommand(last);
   if(!ok){
-    saveVoiceCommand(last, true);
+    saveVoiceCommand(last);
     location.href = "./index.html";
   }
 }
 
 function clearLast(){
   localStorage.removeItem(VOICE_LAST_KEY);
-  clearVoiceCmd();
   setLastText("—");
   setStatus("Pronto", true);
 }
-
-// limpa automaticamente quando sair da tela (voltar do celular, trocar de página, etc.)
-window.addEventListener("pagehide", ()=>{
-  try{ clearVoiceCmd(); }catch(_){}
-});
-window.addEventListener("beforeunload", ()=>{
-  try{ clearVoiceCmd(); }catch(_){}
-});
 
 document.addEventListener("DOMContentLoaded", ()=>{
   setStatus("Pronto", true);
