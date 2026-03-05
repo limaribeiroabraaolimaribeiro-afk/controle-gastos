@@ -597,8 +597,33 @@ body::before{
 }
 
 /* deixa botões/labels mais vivos sem estourar */
-.btn, button, .pill, .chip{
-  filter: saturate(1.35) contrast(1.05) brightness(1.05);
+/* ===== REALCE DO TEMA (SEM MEXER NOS BOTÕES) ===== */
+:root{
+  --themeSat: 1.55;     /* saturação do fundo */
+  --themeCon: 1.12;     /* contraste do fundo */
+  --themeBri: 1.08;     /* brilho do fundo */
+  --themeGlow: 0.70;    /* “glow” das cores no fundo */
+}
+
+/* aplica o realce no fundo do app, não nos botões */
+body{
+  filter: saturate(var(--themeSat)) contrast(var(--themeCon)) brightness(var(--themeBri));
+}
+
+/* brilho colorido do tema no fundo (gradientes) */
+body::before{
+  content:"";
+  position: fixed;
+  inset: -30%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 700px at 20% 10%, var(--grad1), transparent 60%),
+    radial-gradient(900px 700px at 85% 30%, var(--grad2), transparent 60%),
+    radial-gradient(900px 700px at 55% 90%, var(--grad3), transparent 60%);
+  filter: blur(18px) saturate(1.35);
+  opacity: var(--themeGlow);
+  transform: translateZ(0);
 }
 
 </style>
