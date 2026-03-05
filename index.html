@@ -453,6 +453,102 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* =========================
+   GLASS / FINTECH PRO THEME
+   (só estilo — não mexe na lógica)
+========================= */
+
+:root{
+  --glass-bg: rgba(255,255,255,.06);
+  --glass-bg2: rgba(255,255,255,.10);
+  --glass-stroke: rgba(255,255,255,.12);
+  --glass-shadow: 0 18px 60px rgba(0,0,0,.45);
+  --glass-radius: 16px;
+}
+
+/* fundo com leve “profundidade” */
+body{
+  background:
+    radial-gradient(1000px 700px at 18% 10%, rgba(86,156,255,.18), transparent 55%),
+    radial-gradient(900px 650px at 80% 15%, rgba(57,217,138,.10), transparent 60%),
+    radial-gradient(900px 650px at 70% 80%, rgba(255,93,93,.10), transparent 60%),
+    var(--bg, #07101f) !important;
+}
+
+/* cards/painéis principais (muito compatível com seu layout atual) */
+.card, .panel, .box, .modal, .sheet, .dialog,
+section, article, .container .item, .kpi, .tile{
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-stroke) !important;
+  border-radius: var(--glass-radius) !important;
+  box-shadow: var(--glass-shadow) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* se você já usa --panel e --panel2, reforça o glass nelas */
+:root{
+  --panel: var(--glass-bg);
+  --panel2: var(--glass-bg2);
+  --stroke: var(--glass-stroke);
+  --shadow: var(--glass-shadow);
+  --radius: 16px;
+  --radius2: 20px;
+}
+
+/* botões com cara de fintech */
+button, .btn, [role="button"], a.button{
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background: rgba(255,255,255,.06) !important;
+  color: var(--text, #eaf0ff) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform .10s ease, filter .15s ease;
+}
+
+/* botão primário (se você usa classe .primary) */
+button.primary, .btn.primary{
+  background: rgba(86,156,255,.20) !important;
+  border-color: rgba(86,156,255,.30) !important;
+}
+
+/* efeito “pressionar” */
+button:active, .btn:active, [role="button"]:active{
+  transform: scale(.98);
+  filter: brightness(1.05);
+}
+
+/* inputs com glass */
+input, select, textarea{
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background: rgba(255,255,255,.05) !important;
+  color: var(--text, #eaf0ff) !important;
+  outline: none;
+}
+
+input::placeholder, textarea::placeholder{
+  color: rgba(234,240,255,.55);
+}
+
+/* listas/tabelas mais elegantes */
+hr, .divider{
+  border: 0;
+  height: 1px;
+  background: rgba(255,255,255,.10);
+}
+
+/* cabeçalhos e títulos */
+h1,h2,h3{
+  letter-spacing: .2px;
+}
+
+/* reduz “redondinho kids” */
+.pill, .chip{
+  border-radius: 10px !important;
+}
 </style>
 </head>
 
