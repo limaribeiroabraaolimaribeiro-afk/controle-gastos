@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "SEU.PACOTE.AQUI",
+      "package_name": "SEU.PACKAGE.NAME",
       "sha256_cert_fingerprints": [
-        "SEU_SHA256_AQUI"
+        "C6:66:C5:46:D1:FC:CB:EE:24:57:38:41:A0:AB:DE:B0:54:33:25:83:14:59:B9:AD:E4:B0:9A:AD:B7:E4:C0:81"
       ]
     }
   }
