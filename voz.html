@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<!-- ✅ BLOQUEIO DE ZOOM -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
 <title>Comando de Voz • Controle de Gastos PRO</title>
 
 <link rel="manifest" href="manifest.json">
@@ -33,7 +34,13 @@
 }
 
 *{box-sizing:border-box}
-html,body{height:100%}
+
+/* ✅ BLOQUEIO EXTRA: ajuda contra double-tap zoom e alguns pinch em browsers que respeitam */
+html,body{
+  height:100%;
+  touch-action: pan-x pan-y; /* permite scroll normal, mas evita gestos de zoom em alguns navegadores */
+}
+
 body{
   margin:0;
   color:var(--text);
@@ -448,25 +455,25 @@ body{
         </div>
       </div>
 
-<div class="card helpCard">
-  <div class="helpTitle">Status (pago / pendente)</div>
-  <div class="helpList">
-    <div>anote mercado como pago</div>
-    <div>anote aluguel como pago</div>
-    <div>anote internet pendente</div>
-    <div>anote luz pendente</div>
-  </div>
-</div>
+      <div class="card helpCard">
+        <div class="helpTitle">Status (pago / pendente)</div>
+        <div class="helpList">
+          <div>anote mercado como pago</div>
+          <div>anote aluguel como pago</div>
+          <div>anote internet pendente</div>
+          <div>anote luz pendente</div>
+        </div>
+      </div>
 
-<div class="card helpCard">
-  <div class="helpTitle">Novos comandos</div>
-  <div class="helpList">
-    <div>guardado 300 reserva</div>
-    <div>guardado 150 de emergência</div>
-    <div>anote aluguel 114 fixo</div>
-    <div>anote viagem 12000 em 24 meses</div>
-  </div>
-</div>
+      <div class="card helpCard">
+        <div class="helpTitle">Novos comandos</div>
+        <div class="helpList">
+          <div>guardado 300 reserva</div>
+          <div>guardado 150 de emergência</div>
+          <div>anote aluguel 114 fixo</div>
+          <div>anote viagem 12000 em 24 meses</div>
+        </div>
+      </div>
 
       <div class="card helpCard">
         <div class="helpTitle">Regras para falar certo</div>
@@ -486,6 +493,31 @@ body{
 <script>
 (function(){
 
+/* ✅ BLOQUEIO EXTRA DE ZOOM (iOS/Android/desktop) */
+(function blockZoom(){
+  const prevent = (e)=>{ try{ e.preventDefault(); }catch(_){} };
+
+  // iOS Safari (gesture events)
+  document.addEventListener("gesturestart", prevent, { passive:false });
+  document.addEventListener("gesturechange", prevent, { passive:false });
+  document.addEventListener("gestureend", prevent, { passive:false });
+
+  // Double-tap zoom (principalmente iOS)
+  let lastTouchEnd = 0;
+  document.addEventListener("touchend", function(e){
+    const now = Date.now();
+    if(now - lastTouchEnd <= 300){
+      prevent(e);
+    }
+    lastTouchEnd = now;
+  }, { passive:false });
+
+  // Ctrl + scroll (desktop)
+  window.addEventListener("wheel", function(e){
+    if(e.ctrlKey) prevent(e);
+  }, { passive:false });
+})();
+
 const VOICE_KEY = "gastos_voice_command";
 
 const liveText = document.getElementById("liveText");
@@ -501,12 +533,16 @@ let recognition = null;
 let listening = false;
 let finalTranscript = "";
 
+/* ✅ melhora: se o usuário apertar parar sem falar nada, não mostra erro */
+let manualStop = false;
+
 function goHome(){
   location.href = "./index.html";
 }
 
 function setIdle(){
   listening = false;
+  manualStop = false;
   finalTranscript = "";
   statusMain.textContent = "...";
   statusSub.textContent = "Toque no microfone e fale.";
@@ -522,6 +558,7 @@ function setIdle(){
 
 function setListening(){
   listening = true;
+  manualStop = false;
   finalTranscript = "";
   statusMain.textContent = "Ouvindo...";
   statusSub.textContent = "Fale agora.";
@@ -556,10 +593,12 @@ function setDone(text){
   micBtn.innerHTML = "🎤";
   micBtn.title = "Gravar comando";
   listening = false;
+  manualStop = false;
 }
 
 function setError(msg){
   listening = false;
+  manualStop = false;
   statusMain.textContent = "Erro";
   statusSub.textContent = msg || "Não foi possível usar o microfone.";
   resultText.innerHTML = '<span class="danger">Erro:</span> ' + (msg || "Não foi possível usar o microfone.");
@@ -603,7 +642,11 @@ function sendCommand(text){
   }, 700);
 }
 
-function stopRecognition(){
+/* ✅ agora aceita parar manual vs parar “natural” */
+function stopRecognition(opts){
+  const isManual = !!(opts && opts.manual);
+  if(isManual) manualStop = true;
+
   try{
     if(recognition) recognition.stop();
   }catch(e){}
@@ -676,10 +719,27 @@ function startRecognition(){
     setTimeout(setIdle, 1800);
   };
 
+  /* ✅ melhora: quando o usuário para de falar, finaliza mais rápido */
+  recognition.onspeechend = function(){
+    try{ recognition.stop(); }catch(e){}
+  };
+
   recognition.onend = function(){
-    if(finalTranscript && finalTranscript.trim()){
-      sendCommand(finalTranscript.trim());
-    }else if(listening){
+    const text = (finalTranscript || "").trim();
+
+    if(text){
+      sendCommand(text);
+      return;
+    }
+
+    /* ✅ se o usuário apertou parar sem falar, só volta pro idle */
+    if(manualStop){
+      setIdle();
+      return;
+    }
+
+    /* comportamento antigo: se acabou “sozinho” sem reconhecer, mostra aviso */
+    if(listening){
       setError("Nenhum comando reconhecido.");
       setTimeout(setIdle, 1800);
     }
@@ -694,7 +754,7 @@ function startRecognition(){
 
 function toggleMic(){
   if(listening){
-    stopRecognition();
+    stopRecognition({ manual:true });
   }else{
     startRecognition();
   }
