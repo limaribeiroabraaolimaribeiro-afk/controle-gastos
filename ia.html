@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
 <title>IA PRO • Controle de Gastos PRO</title>
 
 <link rel="manifest" href="manifest.json">
@@ -167,12 +167,15 @@ html,body{min-height:100%}
 
 /* =========================================================
    ChatGPT-like + FULLSCREEN (somente mensagens rolam)
+   + Sugestões em botão "+"
+   + Zoom desativado
    ========================================================= */
 
 /* ✅ trava scroll da página */
 html, body{
   height: 100%;
   overflow: hidden;
+  touch-action: pan-x pan-y; /* ajuda a evitar gestos de zoom em alguns browsers */
 }
 body{ overscroll-behavior: none; }
 
@@ -220,10 +223,7 @@ body{ overscroll-behavior: none; }
   background: color-mix(in srgb, rgba(0,0,0,.28), transparent 10%);
   backdrop-filter: blur(10px);
 }
-
-.light .iaTop{
-  background: rgba(255,255,255,.65);
-}
+.light .iaTop{ background: rgba(255,255,255,.65); }
 
 .iaCloseBtn{
   width: 40px;
@@ -344,25 +344,6 @@ body{ overscroll-behavior: none; }
   border-color: color-mix(in srgb, var(--accent), transparent 50%);
 }
 
-/* quick actions dentro do chat (não ocupa “tela” fora das mensagens) */
-.iaQuick{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 8px 0 14px;
-}
-@media (max-width:420px){
-  .iaQuick{ grid-template-columns: 1fr 1fr; }
-}
-.iaChip{
-  padding: 12px 12px;
-  border-radius: 18px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
-  font-size: 13px;
-  color: var(--text);
-}
-
 /* ✅ composer pequeno igual ChatGPT */
 .iaComposer{
   flex: 0 0 auto;
@@ -378,17 +359,19 @@ body{ overscroll-behavior: none; }
   backdrop-filter: blur(10px);
   box-shadow: 0 12px 30px rgba(0,0,0,.18);
 
+  display:flex;
   align-items: center;
+  gap: 8px;
 }
 
-/* tira a borda/padding grande interno */
 .iaInputWrap{
   border: 0;
   background: transparent;
   padding: 0 6px;
+  flex: 1;
 }
 
-/* ✅ esconde o texto extra (sem remover do HTML) pra ficar compacto */
+/* ✅ esconde texto extra pra ficar compacto (sem remover do HTML) */
 .iaInputWrap .small{ display:none; }
 
 .iaInput{
@@ -397,6 +380,24 @@ body{ overscroll-behavior: none; }
   padding: 8px 8px;
   font-size: 14px;
 }
+
+/* botão "+" (abre sugestões) */
+.iaIconBtn{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  font-weight: 1000;
+  font-size: 22px;
+  line-height: 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.iaIconBtn:active{ transform: translateY(1px); }
 
 /* botão enviar estilo “ícone” */
 .iaComposer .btn.primary{
@@ -419,6 +420,95 @@ body{ overscroll-behavior: none; }
 @media (max-width:420px){
   #iaStatus{ display:none; }
   .iaStatusPill{ padding: 8px; }
+}
+
+/* =========================================================
+   ✅ Drawer de Sugestões (não flutua no chat)
+   ========================================================= */
+.quickBackdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+  z-index: 50;
+}
+.quickBackdrop.open{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.quickDrawer{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  transform: translateY(110%);
+  transition: transform .22s ease;
+  z-index: 51;
+
+  padding: 12px 12px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  border-radius: 18px 18px 0 0;
+
+  background: color-mix(in srgb, rgba(0,0,0,.80), transparent 0%);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -18px 40px rgba(0,0,0,.35);
+}
+.light .quickDrawer{
+  background: rgba(255,255,255,.86);
+}
+
+.quickDrawer.open{
+  transform: translateY(0);
+}
+
+.quickHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  padding: 6px 6px 10px;
+}
+.quickTitle{
+  font-weight: 950;
+  letter-spacing: .2px;
+}
+.quickClose{
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+  font-weight: 1000;
+  font-size: 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.light .quickClose{
+  background: rgba(16,24,40,.05);
+  color: var(--text);
+}
+
+/* grid de chips dentro do drawer */
+.quickDrawer .iaQuick{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0;
+}
+.quickDrawer .iaChip{
+  padding: 14px 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  font-size: 13px;
+  color: var(--text);
+}
+.light .quickDrawer .iaChip{
+  background: rgba(16,24,40,.05);
 }
 </style>
 </head>
@@ -453,29 +543,43 @@ body{ overscroll-behavior: none; }
       </div>
 
       <div class="iaBody">
-        <div class="iaChat" id="iaChat" role="log" aria-live="polite">
-          <!-- Quick actions dentro do chat -->
-          <div class="iaQuick" id="iaQuick">
-            <div class="iaChip" onclick="iaQuick('Me faça um resumo do mês e diga onde dá para economizar.')">Resumo do mês</div>
-            <div class="iaChip" onclick="iaQuick('Qual foi a categoria que mais gastei e como reduzir?')">Onde reduzir</div>
-            <div class="iaChip" onclick="iaQuick('Monte um plano para guardar dinheiro todo mês.')">Plano de guardar</div>
-            <div class="iaChip" onclick="iaQuick('Analise se meu mês está saudável e me dê 3 ações práticas.')">Saúde financeira</div>
-            <div class="iaChip" onclick="iaQuick('Me sugira um investimento compatível com a minha sobra atual.')">Sugestão de investimento</div>
-          </div>
-        </div>
+        <div class="iaChat" id="iaChat" role="log" aria-live="polite"></div>
 
-        <!-- ✅ Contexto removido da tela (não atrapalha mais a visão) -->
+        <!-- Contexto removido da tela (continua sendo usado internamente no prompt) -->
 
         <div class="iaComposer">
+          <button class="iaIconBtn" type="button" id="quickBtn" aria-label="Sugestões">+</button>
+
           <div class="iaInputWrap">
             <textarea id="iaPrompt" class="iaInput" placeholder="Pergunte à IA PRO…" aria-label="Digite sua pergunta"></textarea>
             <div class="small" style="margin-top:8px">Pergunte sobre metas, corte de gastos, equilíbrio do mês e ideias para guardar mais.</div>
           </div>
+
           <button class="btn primary" style="flex:0 0 auto" onclick="iaSend()" aria-label="Enviar">Enviar</button>
         </div>
       </div>
+
     </div>
   </div>
+
+  <!-- Drawer de Sugestões -->
+  <div id="quickBackdrop" class="quickBackdrop" onclick="closeQuickDrawer()"></div>
+
+  <div id="quickDrawer" class="quickDrawer" aria-hidden="true">
+    <div class="quickHeader">
+      <div class="quickTitle">Sugestões rápidas</div>
+      <button class="quickClose" type="button" onclick="closeQuickDrawer()" aria-label="Fechar">✕</button>
+    </div>
+
+    <div class="iaQuick">
+      <div class="iaChip" onclick="iaQuick('Me faça um resumo do mês e diga onde dá para economizar.')">Resumo do mês</div>
+      <div class="iaChip" onclick="iaQuick('Qual foi a categoria que mais gastei e como reduzir?')">Onde reduzir</div>
+      <div class="iaChip" onclick="iaQuick('Monte um plano para guardar dinheiro todo mês.')">Plano de guardar</div>
+      <div class="iaChip" onclick="iaQuick('Analise se meu mês está saudável e me dê 3 ações práticas.')">Saúde financeira</div>
+      <div class="iaChip" onclick="iaQuick('Me sugira um investimento compatível com a minha sobra atual.')">Sugestão de investimento</div>
+    </div>
+  </div>
+
 </div>
 
 <div id="debugBox"></div>
@@ -493,6 +597,14 @@ window.addEventListener("error", (e)=>{
 window.addEventListener("unhandledrejection", (e)=>{
   dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
 });
+
+/* ✅ bloqueios extra de zoom (iOS/desktop) */
+document.addEventListener("gesturestart", (e)=>e.preventDefault());
+document.addEventListener("gesturechange", (e)=>e.preventDefault());
+document.addEventListener("gestureend", (e)=>e.preventDefault());
+window.addEventListener("wheel", (e)=>{
+  if(e.ctrlKey) e.preventDefault();
+}, { passive:false });
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -516,6 +628,29 @@ function normalize(text){
 function iaSetStatus(text, ok){
   document.getElementById("iaStatus").textContent = text;
   document.getElementById("iaDot").classList.toggle("ok", !!ok);
+}
+
+/* Drawer Sugestões */
+function openQuickDrawer(){
+  const d = document.getElementById("quickDrawer");
+  const b = document.getElementById("quickBackdrop");
+  if(!d || !b) return;
+  d.classList.add("open");
+  b.classList.add("open");
+  d.setAttribute("aria-hidden", "false");
+}
+function closeQuickDrawer(){
+  const d = document.getElementById("quickDrawer");
+  const b = document.getElementById("quickBackdrop");
+  if(!d || !b) return;
+  d.classList.remove("open");
+  b.classList.remove("open");
+  d.setAttribute("aria-hidden", "true");
+}
+function toggleQuickDrawer(){
+  const d = document.getElementById("quickDrawer");
+  if(!d) return;
+  d.classList.contains("open") ? closeQuickDrawer() : openQuickDrawer();
 }
 
 /* Render estilo ChatGPT: avatar + card */
@@ -545,6 +680,7 @@ function iaAdd(role, text){
 }
 
 function iaQuick(text){
+  closeQuickDrawer();          // ✅ fecha o menu
   const ta = document.getElementById("iaPrompt");
   ta.value = text;
   ta.focus();
@@ -610,8 +746,7 @@ function buildIaContextText(){
   ].join("\n");
 }
 
-/* ✅ Contexto NÃO aparece na tela, mas continua sendo usado.
-   Aqui só atualiza o hint do topo */
+/* Contexto não aparece na tela, mas atualiza o hint */
 function renderContextPreview(){
   const c = buildIaContextObject();
   document.getElementById("iaHint").textContent = `Mês aberto: ${c.mes}`;
@@ -766,10 +901,12 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     renderContextPreview();
     iaHealth();
 
+    const quickBtn = document.getElementById("quickBtn");
+    if(quickBtn) quickBtn.addEventListener("click", toggleQuickDrawer);
+
     iaAdd("bot", "Sou a ia PRO. Posso analisar seu mês, sugerir cortes de gastos, avaliar sua obra e ajudar a montar metas");
 
     const input = document.getElementById("iaPrompt");
-
     iaAutoResize();
     input.addEventListener("input", iaAutoResize);
 
