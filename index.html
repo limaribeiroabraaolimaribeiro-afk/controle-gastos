@@ -455,177 +455,94 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 }
 
 /* =========================
-   GLASS / FINTECH PRO THEME
-   (só estilo — não mexe na lógica)
+   GLASS / FINTECH PRO CLEAN
+   sem glow nos botões
+   tema mais forte
+   sem bug de fundo
 ========================= */
 
+/* glass mais profissional */
 :root{
-  --glass-bg: rgba(255,255,255,.06);
-  --glass-bg2: rgba(255,255,255,.10);
-  --glass-stroke: rgba(255,255,255,.12);
-  --glass-shadow: 0 18px 60px rgba(0,0,0,.45);
-  --glass-radius: 16px;
+  --panel: rgba(255,255,255,.07);
+  --panel2: rgba(255,255,255,.10);
+  --stroke: rgba(255,255,255,.12);
+  --shadow: 0 18px 50px rgba(0,0,0,.34);
+  --radius: 14px;
+  --radius2: 18px;
+
+  /* tema mais destacado */
+  --grad1: rgba(86,156,255,.34);
+  --grad2: rgba(57,217,138,.24);
+  --grad3: rgba(255,93,93,.18);
 }
 
-/* fundo com leve “profundidade” */
+/* remove qualquer bug de largura/altura */
+html, body{
+  overflow-x: hidden;
+}
+
+/* fundo mais vivo, sem criar scroll estranho */
 body{
+  margin:0;
+  min-height:100dvh;
   background:
-    radial-gradient(1000px 700px at 18% 10%, rgba(86,156,255,.18), transparent 55%),
-    radial-gradient(900px 650px at 80% 15%, rgba(57,217,138,.10), transparent 60%),
-    radial-gradient(900px 650px at 70% 80%, rgba(255,93,93,.10), transparent 60%),
-    var(--bg, #07101f) !important;
+    radial-gradient(1000px 700px at 18% 10%, var(--grad1), transparent 55%),
+    radial-gradient(900px 700px at 82% 24%, var(--grad2), transparent 60%),
+    radial-gradient(900px 700px at 55% 88%, var(--grad3), transparent 62%),
+    var(--bg);
+  color:var(--text);
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
 }
 
-/* cards/painéis principais (muito compatível com seu layout atual) */
-.card, .panel, .box, .modal, .sheet, .dialog,
-section, article, .container .item, .kpi, .tile{
-  background: var(--glass-bg) !important;
-  border: 1px solid var(--glass-stroke) !important;
-  border-radius: var(--glass-radius) !important;
-  box-shadow: var(--glass-shadow) !important;
+/* cards e painéis */
+.card, .modal, .kpi, .note, .layoutItem, .pdfPreview{
+  background: linear-gradient(180deg, var(--panel2), var(--panel)) !important;
+  border:1px solid var(--stroke) !important;
+  border-radius: var(--radius2) !important;
+  box-shadow: var(--shadow) !important;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* se você já usa --panel e --panel2, reforça o glass nelas */
-:root{
-  --panel: var(--glass-bg);
-  --panel2: var(--glass-bg2);
-  --stroke: var(--glass-stroke);
-  --shadow: var(--glass-shadow);
-  --radius: 16px;
-  --radius2: 20px;
-}
-
-/* botões com cara de fintech */
-button, .btn, [role="button"], a.button{
+/* botões sem glow exagerado */
+.btn,
+button,
+.pill,
+.chip,
+.fab{
   border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,.14) !important;
-  background: rgba(255,255,255,.06) !important;
-  color: var(--text, #eaf0ff) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: transform .10s ease, filter .15s ease;
+  box-shadow: 0 10px 22px rgba(0,0,0,.20) !important;
+  filter: none !important;
 }
 
-/* botão primário (se você usa classe .primary) */
-button.primary, .btn.primary{
-  background: rgba(86,156,255,.20) !important;
-  border-color: rgba(86,156,255,.30) !important;
+/* botões principais ainda elegantes */
+.btn.primary{
+  background: var(--accent) !important;
+  color:#fff !important;
+  border-color: color-mix(in srgb, var(--accent), transparent 50%) !important;
 }
 
-/* efeito “pressionar” */
-button:active, .btn:active, [role="button"]:active{
-  transform: scale(.98);
-  filter: brightness(1.05);
-}
-
-/* inputs com glass */
-input, select, textarea{
-  border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,.14) !important;
-  background: rgba(255,255,255,.05) !important;
-  color: var(--text, #eaf0ff) !important;
-  outline: none;
-}
-
-input::placeholder, textarea::placeholder{
-  color: rgba(234,240,255,.55);
-}
-
-/* listas/tabelas mais elegantes */
-hr, .divider{
-  border: 0;
-  height: 1px;
-  background: rgba(255,255,255,.10);
-}
-
-/* cabeçalhos e títulos */
-h1,h2,h3{
-  letter-spacing: .2px;
-}
-
-/* reduz “redondinho kids” */
+/* reduz ainda mais o aspecto “kids” */
 .pill, .chip{
   border-radius: 10px !important;
 }
 
-/* BOOST DE CORES (deixa os temas mais vivos) */
-:root{
-  --themeBoost: 1;
-  --themeGlow: .35;
+/* inputs mais bonitos */
+input, select, textarea{
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.05) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
 }
 
-/* Aumenta saturação + contraste do app inteiro, mas controlado */
-body{
-  filter: saturate(calc(1 + (var(--themeBoost) * .35)))
-          contrast(calc(1 + (var(--themeBoost) * .10)));
+/* divisores */
+hr, .divider, .hr{
+  background: rgba(255,255,255,.10);
 }
 
-/* Dá brilho no que usa a cor principal */
-.btn, button, .chip, .pill, .tab, .navbtn, .primary, .accent {
-  box-shadow: 0 10px 28px rgba(0,0,0,.25),
-              0 0 0 1px rgba(255,255,255,.08),
-              0 0 22px rgba(86,156,255, var(--themeGlow));
+/* títulos */
+h1,h2,h3{
+  letter-spacing:.2px;
 }
-
-/* Se seus botões usam variável --accent no background */
-.btn.primary, .btnAccent, button.primary {
-  filter: saturate(1.2) brightness(1.05);
-}
-
-/* TRUQUE "APP DE BANCO": overlay + glow do tema */
-:root{
-  --themeA: rgba(120, 90, 255, .22); /* ROXO (padrão) */
-  --themeB: rgba(255, 120, 60, .16); /* PÔR DO SOL (apoio) */
-  --themeGlow: .55;                  /* intensidade do brilho */
-}
-
-/* camada de cor por trás do app inteiro */
-body::before{
-  content:"";
-  position: fixed;
-  inset: -30%;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    radial-gradient(900px 700px at 18% 12%, rgba(255,255,255,.08), transparent 60%),
-    radial-gradient(900px 700px at 82% 18%, var(--themeA), transparent 62%),
-    radial-gradient(1100px 900px at 55% 92%, var(--themeB), transparent 65%);
-  filter: blur(18px) saturate(1.25);
-  opacity: var(--themeGlow);
-}
-
-/* deixa botões/labels mais vivos sem estourar */
-/* ===== REALCE DO TEMA (SEM MEXER NOS BOTÕES) ===== */
-:root{
-  --themeSat: 1.55;     /* saturação do fundo */
-  --themeCon: 1.12;     /* contraste do fundo */
-  --themeBri: 1.08;     /* brilho do fundo */
-  --themeGlow: 0.70;    /* “glow” das cores no fundo */
-}
-
-/* aplica o realce no fundo do app, não nos botões */
-body{
-  filter: saturate(var(--themeSat)) contrast(var(--themeCon)) brightness(var(--themeBri));
-}
-
-/* brilho colorido do tema no fundo (gradientes) */
-body::before{
-  content:"";
-  position: fixed;
-  inset: -30%;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(900px 700px at 20% 10%, var(--grad1), transparent 60%),
-    radial-gradient(900px 700px at 85% 30%, var(--grad2), transparent 60%),
-    radial-gradient(900px 700px at 55% 90%, var(--grad3), transparent 60%);
-  filter: blur(18px) saturate(1.35);
-  opacity: var(--themeGlow);
-  transform: translateZ(0);
-}
-
 </style>
 </head>
 
