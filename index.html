@@ -574,6 +574,33 @@ body{
   filter: saturate(1.2) brightness(1.05);
 }
 
+/* TRUQUE "APP DE BANCO": overlay + glow do tema */
+:root{
+  --themeA: rgba(120, 90, 255, .22); /* ROXO (padrão) */
+  --themeB: rgba(255, 120, 60, .16); /* PÔR DO SOL (apoio) */
+  --themeGlow: .55;                  /* intensidade do brilho */
+}
+
+/* camada de cor por trás do app inteiro */
+body::before{
+  content:"";
+  position: fixed;
+  inset: -30%;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(900px 700px at 18% 12%, rgba(255,255,255,.08), transparent 60%),
+    radial-gradient(900px 700px at 82% 18%, var(--themeA), transparent 62%),
+    radial-gradient(1100px 900px at 55% 92%, var(--themeB), transparent 65%);
+  filter: blur(18px) saturate(1.25);
+  opacity: var(--themeGlow);
+}
+
+/* deixa botões/labels mais vivos sem estourar */
+.btn, button, .pill, .chip{
+  filter: saturate(1.35) contrast(1.05) brightness(1.05);
+}
+
 </style>
 </head>
 
