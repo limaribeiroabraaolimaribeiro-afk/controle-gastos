@@ -166,41 +166,124 @@ html,body{min-height:100%}
 }
 
 /* =========================================================
-   ChatGPT-like OVERRIDES (não remove nada, só “troca a roupa”)
+   ChatGPT-like + FULLSCREEN (somente mensagens rolam)
    ========================================================= */
 
-/* Coluna mais parecida com ChatGPT (mais focada/central) */
+/* ✅ trava scroll da página */
+html, body{
+  height: 100%;
+  overflow: hidden;
+}
+body{ overscroll-behavior: none; }
+
+#app{
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ✅ layout em tela cheia */
 .iaWrap{
-  max-width: 980px;
+  max-width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display:flex;
+  flex-direction:column;
+  box-sizing:border-box;
 }
 
-/* Shell mais “clean” */
+/* ✅ shell ocupa tudo, sem “card” */
 .iaShell{
-  background:
-    radial-gradient(900px 620px at 20% 0%, color-mix(in srgb, var(--accent), transparent 86%), transparent 58%),
-    radial-gradient(900px 620px at 90% 10%, rgba(57,217,138,.10), transparent 62%),
-    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+  flex: 1;
+  min-height: 0;
+  display:flex;
+  flex-direction:column;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
 }
 
-/* Topbar com aspecto “sticky/vidro” */
+/* Topo estilo ChatGPT: X | IA PRO | status */
 .iaTop{
-  background: color-mix(in srgb, rgba(0,0,0,.24), transparent 10%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  background: color-mix(in srgb, rgba(0,0,0,.28), transparent 10%);
   backdrop-filter: blur(10px);
 }
 
-/* Área do chat como feed vertical (ChatGPT vibe) */
-.iaChat{
-  display:flex;
-  flex-direction:column;
-  gap: 14px;
-  padding: 18px;
-  border-radius: 18px;
-  scroll-behavior: smooth;
-  background: rgba(0,0,0,.18);
-  border-color: color-mix(in srgb, var(--stroke), transparent 10%);
+.light .iaTop{
+  background: rgba(255,255,255,.65);
 }
 
-/* Scrollbar discreta */
+.iaCloseBtn{
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color: var(--text);
+  font-weight: 1000;
+  font-size: 20px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+}
+.iaCloseBtn:active{ transform: translateY(1px); }
+
+/* centraliza o título */
+.iaBrand{
+  justify-self: center;
+  text-align: center;
+  gap: 0;
+}
+.iaTitle .t{
+  font-size: 16px;
+  font-weight: 1000;
+  letter-spacing: .3px;
+}
+.iaTitle .s{
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ✅ corpo ocupa o restante */
+.iaBody{
+  flex: 1;
+  min-height: 0;
+  display:flex;
+  flex-direction:column;
+  gap: 0;
+  padding: 0;
+}
+
+/* ✅ só as mensagens rolam */
+.iaChat{
+  flex: 1;
+  min-height: 0;
+  height: auto !important;
+  max-height: none !important;
+  overflow: auto;
+
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+
+  padding: 18px 14px;
+  scroll-behavior: smooth;
+}
+
+/* scrollbar discreta */
 .iaChat::-webkit-scrollbar{ width: 10px; }
 .iaChat::-webkit-scrollbar-track{ background: transparent; }
 .iaChat::-webkit-scrollbar-thumb{
@@ -211,11 +294,9 @@ html,body{min-height:100%}
 }
 .iaChat:hover::-webkit-scrollbar-thumb{
   background: color-mix(in srgb, var(--stroke), transparent 35%);
-  border: 3px solid transparent;
-  background-clip: content-box;
 }
 
-/* Mensagens com avatar + card */
+/* mensagens com avatar + card */
 .msgRow{
   margin: 0;
   gap: 12px;
@@ -241,7 +322,7 @@ html,body{min-height:100%}
   letter-spacing: .2px;
   border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
   background: rgba(255,255,255,.08);
-  box-shadow: 0 12px 30px rgba(0,0,0,.22);
+  box-shadow: 0 12px 30px rgba(0,0,0,.18);
   flex: 0 0 auto;
   user-select:none;
 }
@@ -249,184 +330,95 @@ html,body{min-height:100%}
   background: color-mix(in srgb, var(--accent), transparent 70%);
   border-color: color-mix(in srgb, var(--accent), transparent 45%);
 }
-.msgAvatar.bot{
-  background: rgba(255,255,255,.08);
-}
 
 .msg{
-  max-width: min(760px, 90%);
+  max-width: min(760px, 92%);
   padding: 12px 14px;
   border-radius: 16px;
   background: rgba(255,255,255,.06);
   border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
-  box-shadow: 0 10px 26px rgba(0,0,0,.18);
+  box-shadow: 0 10px 26px rgba(0,0,0,.14);
 }
 .msg.me{
   background: color-mix(in srgb, var(--accent), transparent 78%);
   border-color: color-mix(in srgb, var(--accent), transparent 50%);
 }
-.msg.bot{
-  background: rgba(255,255,255,.06);
-}
-.msgContent{
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
 
-/* Chips estilo “sugestões” */
+/* quick actions dentro do chat (não ocupa “tela” fora das mensagens) */
 .iaQuick{
-  gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 8px 0 14px;
+}
+@media (max-width:420px){
+  .iaQuick{ grid-template-columns: 1fr 1fr; }
 }
 .iaChip{
-  padding: 9px 12px;
-  background: rgba(255,255,255,.06);
-  border-color: color-mix(in srgb, var(--stroke), transparent 10%);
-  transition: transform .08s ease, background .2s ease, border-color .2s ease;
-}
-.iaChip:hover{
-  background: rgba(255,255,255,.08);
-  border-color: color-mix(in srgb, var(--stroke), transparent 0%);
-}
-.iaChip:active{
-  transform: translateY(1px);
-}
-
-/* Contexto mais “card” */
-.contextBox{
-  background: rgba(255,255,255,.04);
-  border-color: color-mix(in srgb, var(--stroke), transparent 10%);
-}
-
-/* Composer com cara de ChatGPT */
-.iaComposer{
-  gap: 12px;
+  padding: 12px 12px;
   border-radius: 18px;
+  background: rgba(255,255,255,.06);
   border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
-  background: rgba(255,255,255,.05);
-  padding: 10px;
+  font-size: 13px;
+  color: var(--text);
 }
 
+/* ✅ composer pequeno igual ChatGPT */
+.iaComposer{
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+
+  margin: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  border-radius: 999px;
+  padding: 6px 8px;
+
+  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  background: color-mix(in srgb, rgba(255,255,255,.06), transparent 0%);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.18);
+
+  align-items: center;
+}
+
+/* tira a borda/padding grande interno */
 .iaInputWrap{
   border: 0;
   background: transparent;
   padding: 0 6px;
 }
-.iaInputWrap:focus-within{
-  border-color: transparent;
-  box-shadow: none;
-}
+
+/* ✅ esconde o texto extra (sem remover do HTML) pra ficar compacto */
+.iaInputWrap .small{ display:none; }
 
 .iaInput{
-  min-height: 44px;
-  padding: 10px 8px;
+  min-height: 38px;
+  max-height: 140px;
+  padding: 8px 8px;
+  font-size: 14px;
 }
 
-/* Botão enviar mais “pill” */
+/* botão enviar estilo “ícone” */
 .iaComposer .btn.primary{
-  border-radius: 14px;
-  padding: 12px 14px;
-}
-
-/* Light tweaks */
-.light .iaTop{
-  background: rgba(255,255,255,.60);
-}
-.light .iaChat{
-  background: rgba(255,255,255,.72);
-}
-.light .msg{
-  background: rgba(16,24,40,.04);
-}
-.light .msg.bot{
-  background: rgba(16,24,40,.04);
-}
-
-/* =========================================================
-   ✅ FIX: só as mensagens rolam (sem arrastar a tela toda)
-   ========================================================= */
-
-/* trava o scroll da página inteira */
-html, body{
-  height: 100%;
-  overflow: hidden;
-}
-
-/* evita “puxar”/elastic overscroll */
-body{
-  overscroll-behavior: none;
-}
-
-/* app ocupa a tela */
-#app{
-  height: 100dvh;
-  overflow: hidden;
-}
-
-/* wrap vira coluna (backRow em cima + shell ocupando o resto) */
-.iaWrap{
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  /* não precisa daquele padding-bottom grande (isso forçava scroll),
-     então aqui só reduzimos visualmente */
-  padding-bottom: 16px;
-}
-
-/* shell ocupa o “resto da tela” */
-.iaShell{
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* body do chat também vira flex coluna */
-.iaBody{
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* ✅ SOMENTE o chat rola */
-.iaChat{
-  flex: 1;
-  min-height: 0;
-  height: auto;
-  max-height: none;
-
-  /* remove o min-height antigo que quebrava em telas pequenas */
-  /* (o override aqui é intencional) */
-  min-height: 0 !important;
-}
-
-/* Chips em 1 linha com scroll horizontal (não empurra a tela) */
-.iaQuick{
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
-  margin-top: 0;
-}
-.iaQuick::-webkit-scrollbar{ height: 8px; }
-.iaQuick::-webkit-scrollbar-track{ background: transparent; }
-.iaQuick::-webkit-scrollbar-thumb{
-  background: color-mix(in srgb, var(--stroke), transparent 55%);
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
+  padding: 0 !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 0; /* esconde texto visualmente */
 }
-.iaChip{ white-space: nowrap; }
+.iaComposer .btn.primary::before{
+  content: "➤";
+  font-size: 16px;
+  line-height: 1;
+}
 
-/* Composer sempre visível (parado) */
-.iaComposer{
-  margin-top: 0;
-  flex: 0 0 auto;
-  position: sticky;
-  bottom: 0;
-  /* dá um respiro em iPhone com barra/gestos */
-  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+/* status menor em telas bem pequenas */
+@media (max-width:420px){
+  #iaStatus{ display:none; }
+  .iaStatusPill{ padding: 8px; }
 }
 </style>
 </head>
@@ -441,18 +433,16 @@ body{
 
 <div id="app" style="display:none">
   <div class="iaWrap">
-    <div class="backRow">
-      <a class="btn backBtn" href="./index.html">← Voltar</a>
-      <div style="font-weight:900">IA PRO</div>
-    </div>
-
     <div class="iaShell">
+
+      <!-- Topo estilo ChatGPT -->
       <div class="iaTop">
+        <a class="iaCloseBtn" href="./index.html" aria-label="Fechar">✕</a>
+
         <div class="iaBrand">
-          <div class="iaLogo">IA</div>
           <div class="iaTitle">
-            <div class="t">IA PRO • Consultor Financeiro</div>
-            <div class="s" id="iaHint">Carregando contexto financeiro…</div>
+            <div class="t">IA PRO</div>
+            <div class="s" id="iaHint">Consultor Financeiro</div>
           </div>
         </div>
 
@@ -463,27 +453,25 @@ body{
       </div>
 
       <div class="iaBody">
-        <div class="iaChat" id="iaChat" role="log" aria-live="polite"></div>
-
-        <div class="iaQuick">
-          <div class="iaChip" onclick="iaQuick('Me faça um resumo do mês e diga onde dá para economizar.')">Resumo do mês</div>
-          <div class="iaChip" onclick="iaQuick('Qual foi a categoria que mais gastei e como reduzir?')">Onde reduzir</div>
-          <div class="iaChip" onclick="iaQuick('Monte um plano para guardar dinheiro todo mês.')">Plano de guardar</div>
-          <div class="iaChip" onclick="iaQuick('Analise se meu mês está saudável e me dê 3 ações práticas.')">Saúde financeira</div>
-          <div class="iaChip" onclick="iaQuick('Me sugira um investimento compatível com a minha sobra atual.')">Sugestão de investimento</div>
+        <div class="iaChat" id="iaChat" role="log" aria-live="polite">
+          <!-- Quick actions dentro do chat -->
+          <div class="iaQuick" id="iaQuick">
+            <div class="iaChip" onclick="iaQuick('Me faça um resumo do mês e diga onde dá para economizar.')">Resumo do mês</div>
+            <div class="iaChip" onclick="iaQuick('Qual foi a categoria que mais gastei e como reduzir?')">Onde reduzir</div>
+            <div class="iaChip" onclick="iaQuick('Monte um plano para guardar dinheiro todo mês.')">Plano de guardar</div>
+            <div class="iaChip" onclick="iaQuick('Analise se meu mês está saudável e me dê 3 ações práticas.')">Saúde financeira</div>
+            <div class="iaChip" onclick="iaQuick('Me sugira um investimento compatível com a minha sobra atual.')">Sugestão de investimento</div>
+          </div>
         </div>
 
-        <div class="contextBox">
-          <div style="font-weight:900">Contexto usado pela IA</div>
-          <div class="small" id="contextPreview" style="margin-top:6px">Carregando…</div>
-        </div>
+        <!-- ✅ Contexto removido da tela (não atrapalha mais a visão) -->
 
         <div class="iaComposer">
           <div class="iaInputWrap">
-            <textarea id="iaPrompt" class="iaInput" placeholder="Digite sua pergunta…" aria-label="Digite sua pergunta"></textarea>
+            <textarea id="iaPrompt" class="iaInput" placeholder="Pergunte à IA PRO…" aria-label="Digite sua pergunta"></textarea>
             <div class="small" style="margin-top:8px">Pergunte sobre metas, corte de gastos, equilíbrio do mês e ideias para guardar mais.</div>
           </div>
-          <button class="btn primary" style="flex:0 0 auto" onclick="iaSend()">Enviar</button>
+          <button class="btn primary" style="flex:0 0 auto" onclick="iaSend()" aria-label="Enviar">Enviar</button>
         </div>
       </div>
     </div>
@@ -530,7 +518,7 @@ function iaSetStatus(text, ok){
   document.getElementById("iaDot").classList.toggle("ok", !!ok);
 }
 
-/* ✅ Render estilo ChatGPT: avatar + card (sem remover nada) */
+/* Render estilo ChatGPT: avatar + card */
 function iaAdd(role, text){
   const box = document.getElementById("iaChat");
 
@@ -622,21 +610,11 @@ function buildIaContextText(){
   ].join("\n");
 }
 
+/* ✅ Contexto NÃO aparece na tela, mas continua sendo usado.
+   Aqui só atualiza o hint do topo */
 function renderContextPreview(){
   const c = buildIaContextObject();
-  document.getElementById("contextPreview").innerHTML = `
-    Mês: <b>${App.escapeHtml(c.mes)}</b>
-    <br>Salário: <b>${App.money(c.salary)}</b>
-    <br>Gastos: <b>${App.money(c.spent)}</b>
-    <br>Guardado: <b>${App.money(c.saved)}</b>
-    <br>Sobra: <b>${App.money(c.left)}</b>
-    <br>Top categorias: <b>${
-      c.topCats.length
-        ? c.topCats.map(x => `${App.escapeHtml(x.cat)} (${App.money(x.val)})`).join(", ")
-        : "sem dados"
-    }</b>
-  `;
-  document.getElementById("iaHint").textContent = `Usando dados do mês ${c.mes}`;
+  document.getElementById("iaHint").textContent = `Mês aberto: ${c.mes}`;
 }
 
 async function callIA(prompt) {
@@ -708,12 +686,12 @@ ${q}`;
   }
 }
 
-/* ✅ Auto-resize do textarea (estilo ChatGPT) */
+/* Auto-resize do textarea */
 function iaAutoResize(){
   const ta = document.getElementById("iaPrompt");
   if(!ta) return;
   ta.style.height = "0px";
-  const h = Math.min(ta.scrollHeight, 180);
+  const h = Math.min(ta.scrollHeight, 140);
   ta.style.height = h + "px";
 }
 
