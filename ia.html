@@ -340,6 +340,94 @@ html,body{min-height:100%}
 .light .msg.bot{
   background: rgba(16,24,40,.04);
 }
+
+/* =========================================================
+   ✅ FIX: só as mensagens rolam (sem arrastar a tela toda)
+   ========================================================= */
+
+/* trava o scroll da página inteira */
+html, body{
+  height: 100%;
+  overflow: hidden;
+}
+
+/* evita “puxar”/elastic overscroll */
+body{
+  overscroll-behavior: none;
+}
+
+/* app ocupa a tela */
+#app{
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* wrap vira coluna (backRow em cima + shell ocupando o resto) */
+.iaWrap{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  /* não precisa daquele padding-bottom grande (isso forçava scroll),
+     então aqui só reduzimos visualmente */
+  padding-bottom: 16px;
+}
+
+/* shell ocupa o “resto da tela” */
+.iaShell{
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* body do chat também vira flex coluna */
+.iaBody{
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ✅ SOMENTE o chat rola */
+.iaChat{
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+
+  /* remove o min-height antigo que quebrava em telas pequenas */
+  /* (o override aqui é intencional) */
+  min-height: 0 !important;
+}
+
+/* Chips em 1 linha com scroll horizontal (não empurra a tela) */
+.iaQuick{
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  margin-top: 0;
+}
+.iaQuick::-webkit-scrollbar{ height: 8px; }
+.iaQuick::-webkit-scrollbar-track{ background: transparent; }
+.iaQuick::-webkit-scrollbar-thumb{
+  background: color-mix(in srgb, var(--stroke), transparent 55%);
+  border-radius: 999px;
+}
+.iaChip{ white-space: nowrap; }
+
+/* Composer sempre visível (parado) */
+.iaComposer{
+  margin-top: 0;
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+  /* dá um respiro em iPhone com barra/gestos */
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+}
 </style>
 </head>
 <body>
@@ -519,7 +607,6 @@ function buildIaContextObject(){
   };
 }
 
-/* ✅ Corrigido (mesmo conteúdo, só com template string válida) */
 function buildIaContextText(){
   const c = buildIaContextObject();
 
@@ -535,7 +622,6 @@ function buildIaContextText(){
   ].join("\n");
 }
 
-/* ✅ Corrigido (mesmo layout/infos, só string válida) */
 function renderContextPreview(){
   const c = buildIaContextObject();
   document.getElementById("contextPreview").innerHTML = `
@@ -702,11 +788,10 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     renderContextPreview();
     iaHealth();
 
-    iaAdd("bot", "Estou pronta. Posso analisar seu mês, sugerir cortes de gastos, avaliar sua sobra e ajudar a montar metas.");
+    iaAdd("bot", "Sou a ia PRO. Posso analisar seu mês, sugerir cortes de gastos, avaliar sua obra e ajudar a montar metas");
 
     const input = document.getElementById("iaPrompt");
 
-    /* Auto-resize inicial + durante digitação */
     iaAutoResize();
     input.addEventListener("input", iaAutoResize);
 
