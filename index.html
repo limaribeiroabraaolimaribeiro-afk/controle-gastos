@@ -549,6 +549,31 @@ h1,h2,h3{
 .pill, .chip{
   border-radius: 10px !important;
 }
+
+/* BOOST DE CORES (deixa os temas mais vivos) */
+:root{
+  --themeBoost: 1;
+  --themeGlow: .35;
+}
+
+/* Aumenta saturação + contraste do app inteiro, mas controlado */
+body{
+  filter: saturate(calc(1 + (var(--themeBoost) * .35)))
+          contrast(calc(1 + (var(--themeBoost) * .10)));
+}
+
+/* Dá brilho no que usa a cor principal */
+.btn, button, .chip, .pill, .tab, .navbtn, .primary, .accent {
+  box-shadow: 0 10px 28px rgba(0,0,0,.25),
+              0 0 0 1px rgba(255,255,255,.08),
+              0 0 22px rgba(86,156,255, var(--themeGlow));
+}
+
+/* Se seus botões usam variável --accent no background */
+.btn.primary, .btnAccent, button.primary {
+  filter: saturate(1.2) brightness(1.05);
+}
+
 </style>
 </head>
 
