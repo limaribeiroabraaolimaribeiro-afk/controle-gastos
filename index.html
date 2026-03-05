@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Controle de Gastos PRO</title>
 
 <link rel="manifest" href="manifest.json">
@@ -36,6 +36,10 @@
   --radius2: 22px;
   --pad: 14px;
   --glass: blur(14px);
+}
+
+  html, body {
+  touch-action: pan-x pan-y;
 }
 
 .light{
@@ -3658,6 +3662,32 @@ if(cmd.startsWith("anote ") && cmd.includes(" pago")){
   }
 }
 
+})();
+</script>
+
+  <script>
+(function(){
+  // Bloqueia zoom por gesto (pinch) no iOS/Safari e alguns Android
+  document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, { passive:false });
+  document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, { passive:false });
+  document.addEventListener('gestureend', function(e){ e.preventDefault(); }, { passive:false });
+
+  // Bloqueia zoom por double-tap (principalmente iOS)
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e){
+    const now = Date.now();
+    if(now - lastTouchEnd <= 300){
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive:false });
+
+  // Bloqueia pinch via pointer events (Chrome/Android modernos)
+  document.addEventListener('touchmove', function(e){
+    if(e.touches && e.touches.length > 1){
+      e.preventDefault();
+    }
+  }, { passive:false });
 })();
 </script>
 </body>
