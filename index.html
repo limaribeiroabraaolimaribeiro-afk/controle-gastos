@@ -3780,5 +3780,102 @@ if(cmd.startsWith("anote ") && cmd.includes(" pago")){
   }, { passive:false });
 })();
 </script>
+
+<script>
+window.receberLancamentoBancario = function(dados){
+  try{
+    const item = typeof dados === "string" ? JSON.parse(dados) : dados;
+    if(!item) return;
+
+    const mesAtual = new Date().toISOString().slice(0,7);
+
+    let state = {};
+    try{
+      state = JSON.parse(localStorage.getItem("gastospro_notificacoes_banco") || "{}");
+    }catch(e){
+      state = {};
+    }
+
+    if(!state[mesAtual]) state[mesAtual] = [];
+
+    const jaExiste = state[mesAtual].some(x => x.hash && item.hash && x.hash === item.hash);
+    if(jaExiste) return;
+
+    state[mesAtual].unshift({
+      tipo: item.tipo || "saida",
+      valor: Number(item.valor || 0),
+      descricao: item.descricao || "Lançamento bancário",
+      banco: item.banco || "Banco",
+      dataHora: item.dataHora || new Date().toISOString(),
+      hash: item.hash || ("h_" + Date.now())
+    });
+
+    localStorage.setItem("gastospro_notificacoes_banco", JSON.stringify(state));
+
+    if(typeof window.importarLancamentosBancariosNoMes === "function"){
+      window.importarLancamentosBancariosNoMes();
+    }
+
+    if(typeof render === "function"){
+      render();
+    }
+
+    console.log("Lançamento bancário recebido:", item);
+  }catch(e){
+    console.error("Erro ao receber lançamento bancário:", e);
+  }
+};
+
+window.importarLancamentosBancariosNoMes = function(){
+  try{
+    const mesAtual = new Date().toISOString().slice(0,7);
+    const bancoState = JSON.parse(localStorage.getItem("gastospro_notificacoes_banco") || "{}");
+    const listaBanco = bancoState[mesAtual] || [];
+
+    if(typeof getDataMes !== "function") return;
+    if(typeof saveAll !== "function") return;
+
+    const d = getDataMes(mesAtual);
+    if(!d.items) d.items = [];
+
+    listaBanco.forEach(item => {
+      const idUnico = "bank_" + item.hash;
+      const jaExiste = d.items.some(x => x.bankHash === item.hash || x.id === idUnico);
+      if(jaExiste) return;
+
+      const categoriaAuto = item.tipo === "entrada" ? "Outros" : "Outros";
+
+      d.items.unshift({
+        id: idUnico,
+        desc: item.descricao || "Lançamento bancário",
+        amount: Number(item.valor || 0),
+        category: categoriaAuto,
+        paid: true,
+        isFixo: false,
+        isInvestFixo: false,
+        origemBanco: true,
+        tipoBanco: item.tipo || "saida",
+        banco: item.banco || "Banco",
+        dataHoraBanco: item.dataHora || new Date().toISOString(),
+        bankHash: item.hash
+      });
+    });
+
+    saveAll();
+  }catch(e){
+    console.error("Erro ao importar lançamentos bancários:", e);
+  }
+};
+
+window.listarLancamentosBancariosMes = function(){
+  try{
+    const mesAtual = new Date().toISOString().slice(0,7);
+    const bancoState = JSON.parse(localStorage.getItem("gastospro_notificacoes_banco") || "{}");
+    return bancoState[mesAtual] || [];
+  }catch(e){
+    return [];
+  }
+};
+</script>
 </body>
 </html>
