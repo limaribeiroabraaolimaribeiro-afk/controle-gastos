@@ -15,82 +15,120 @@ window.APP_KEY = "GastosPro@2026!";
 </script>
 
 <style>
+:root{
+  --glass-bg: rgba(255,255,255,.08);
+  --glass-bg-2: rgba(255,255,255,.12);
+  --glass-line: color-mix(in srgb, var(--stroke), transparent 10%);
+  --glass-line-strong: color-mix(in srgb, var(--stroke), transparent 0%);
+  --glass-shadow:
+    0 24px 70px rgba(0,0,0,.28),
+    0 10px 30px rgba(0,0,0,.18);
+  --glass-shadow-soft:
+    0 12px 28px rgba(0,0,0,.14);
+}
+
 html,body{min-height:100%}
+
 #debugBox{
   position:fixed; left:12px; right:12px; bottom:12px;
-  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:12px;
+  background:rgba(0,0,0,.78); color:#fff; padding:10px; border-radius:14px;
   font-size:12px; z-index:9999; display:none; white-space:pre-wrap;
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow: var(--glass-shadow-soft);
 }
+
 .iaWrap{
   max-width:1100px;
   margin:auto;
   padding:16px;
   padding-bottom:110px;
 }
+
 .iaShell{
-  border-radius:26px;
-  border:1px solid color-mix(in srgb, var(--stroke), transparent 20%);
+  border-radius:30px;
+  border:1px solid color-mix(in srgb, var(--stroke), transparent 16%);
   background:
-    radial-gradient(1200px 800px at 15% 0%, color-mix(in srgb, var(--accent), transparent 80%), transparent 60%),
-    radial-gradient(900px 700px at 85% 10%, rgba(57,217,138,.10), transparent 62%),
-    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-  box-shadow:var(--shadow);
-  backdrop-filter:var(--glass);
+    radial-gradient(1200px 800px at 15% 0%, color-mix(in srgb, var(--accent), transparent 82%), transparent 60%),
+    radial-gradient(900px 700px at 85% 10%, rgba(57,217,138,.11), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
   overflow:hidden;
+  position:relative;
 }
+.iaShell::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.10), transparent 24%, transparent 72%, rgba(255,255,255,.03));
+}
+
 .iaTop{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:14px;
-  border-bottom:1px solid var(--stroke);
+  border-bottom:1px solid var(--glass-line);
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
 }
+
 .iaBrand{
   display:flex;align-items:center;gap:12px;min-width:0;
 }
+
 .iaLogo{
-  width:48px;height:48px;border-radius:18px;
+  width:50px;height:50px;border-radius:18px;
   display:flex;align-items:center;justify-content:center;
   background:
     radial-gradient(60px 50px at 30% 20%, rgba(255,255,255,.35), transparent 60%),
     linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 12%), color-mix(in srgb, var(--accent), #000 25%));
   border:1px solid rgba(255,255,255,.18);
-  box-shadow:0 14px 38px rgba(0,0,0,.28);
+  box-shadow:0 16px 42px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.18);
   font-weight:1000;color:#06162d;font-size:15px;
 }
+
 .iaTitle .t{
   font-weight:950;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:.2px;
 }
 .iaTitle .s{
   font-size:12px;color:var(--muted);margin-top:2px;
 }
+
 .iaStatusPill{
   display:inline-flex;gap:8px;align-items:center;
-  padding:8px 10px;border-radius:999px;
+  padding:8px 11px;border-radius:999px;
   background:rgba(255,255,255,.10);
-  border:1px solid var(--stroke);
+  border:1px solid var(--glass-line);
   font-size:12px;color:var(--muted);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
 }
 .iaStatusDot{
   width:10px;height:10px;border-radius:999px;
   background:var(--warn);
-  box-shadow:0 0 0 4px rgba(255,209,102,.12);
+  box-shadow:0 0 0 5px rgba(255,209,102,.12), 0 0 14px rgba(255,209,102,.22);
 }
 .iaStatusDot.ok{
   background:var(--good);
-  box-shadow:0 0 0 4px rgba(57,217,138,.12);
+  box-shadow:0 0 0 5px rgba(57,217,138,.12), 0 0 14px rgba(57,217,138,.22);
 }
+
 .iaBody{padding:14px}
+
 .iaChat{
   height:min(68vh, 620px);
   min-height:360px;
   overflow:auto;
-  border-radius:20px;
-  border:1px solid var(--stroke);
+  border-radius:24px;
+  border:1px solid var(--glass-line);
   background:
     radial-gradient(900px 600px at 30% 20%, rgba(86,156,255,.12), transparent 55%),
     radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.10), transparent 60%),
     rgba(0,0,0,.14);
   padding:14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
 .light .iaChat{
   background:
@@ -98,43 +136,53 @@ html,body{min-height:100%}
     radial-gradient(900px 600px at 70% 85%, rgba(57,217,138,.08), transparent 60%),
     rgba(255,255,255,.65);
 }
+
 .msgRow{display:flex;margin:10px 0}
 .msgRow.me{justify-content:flex-end}
 .msgRow.bot{justify-content:flex-start}
+
 .msg{
   max-width:88%;
-  padding:12px 12px;
+  padding:12px 13px;
   border-radius:18px;
-  border:1px solid var(--stroke);
-  line-height:1.4;
+  border:1px solid var(--glass-line);
+  line-height:1.45;
   font-size:14px;
   white-space:pre-wrap;
+  box-shadow: var(--glass-shadow-soft);
 }
 .msg.me{
   background:
     radial-gradient(120px 90px at 20% 10%, rgba(255,255,255,.22), transparent 60%),
     color-mix(in srgb, var(--accent), transparent 78%);
+  border-color: color-mix(in srgb, var(--accent), transparent 45%);
 }
 .msg.bot{
   background:rgba(255,255,255,.08);
 }
+
 .iaComposer{
   margin-top:12px;
   display:flex;
   gap:10px;
   align-items:flex-end;
 }
+
 .iaInputWrap{
   flex:1;
-  border-radius:18px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.06);
-  padding:10px;
+  border-radius:20px;
+  border:1px solid var(--glass-line);
+  background:rgba(255,255,255,.07);
+  padding:10px 12px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
 .iaInputWrap:focus-within{
-  border-color:color-mix(in srgb, var(--accent), transparent 30%);
-  box-shadow:0 0 0 4px color-mix(in srgb, var(--accent), transparent 85%);
+  border-color:color-mix(in srgb, var(--accent), transparent 28%);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent), transparent 86%),
+    inset 0 1px 0 rgba(255,255,255,.05);
 }
+
 .iaInput{
   width:100%;
   min-height:48px;
@@ -143,23 +191,33 @@ html,body{min-height:100%}
   border:0;outline:none;background:transparent;color:var(--text);
   font-size:14px;padding:0;
 }
+
 .iaQuick{
   display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;
 }
 .iaChip{
-  padding:8px 10px;border-radius:999px;
+  padding:8px 11px;border-radius:999px;
   background:rgba(255,255,255,.08);
-  border:1px solid var(--stroke);
+  border:1px solid var(--glass-line);
   font-size:12px;color:var(--muted);
   cursor:pointer;user-select:none;
+  box-shadow: var(--glass-shadow-soft);
+  transition: transform .14s ease, border-color .14s ease, background .14s ease;
+}
+.iaChip:hover{
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--stroke), transparent 0%);
+  background: rgba(255,255,255,.10);
 }
 .iaChip:active{transform:translateY(1px)}
+
 .contextBox{
   margin-top:12px;
-  border-radius:18px;
-  border:1px solid var(--stroke);
+  border-radius:20px;
+  border:1px solid var(--glass-line);
   background:rgba(255,255,255,.05);
   padding:12px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
 @media (max-width:720px){
   .iaTop{align-items:flex-start;flex-direction:column}
@@ -171,20 +229,34 @@ html,body{min-height:100%}
    + Zoom desativado
    ========================================================= */
 
-/* ✅ trava scroll da página */
 html, body{
   height: 100%;
   overflow: hidden;
-  touch-action: pan-x pan-y; /* ajuda a evitar gestos de zoom em alguns browsers */
+  touch-action: pan-x pan-y;
 }
-body{ overscroll-behavior: none; }
+body{
+  overscroll-behavior: none;
+  background:
+    radial-gradient(1200px 800px at 15% 0%, color-mix(in srgb, var(--accent), transparent 86%), transparent 58%),
+    radial-gradient(1000px 800px at 85% 18%, rgba(57,217,138,.10), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg), #081221 0%), color-mix(in srgb, var(--bg), #0d1727 25%));
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(rgba(255,255,255,.03), rgba(255,255,255,0)),
+    radial-gradient(circle at top left, rgba(255,255,255,.04), transparent 24%);
+  mix-blend-mode:screen;
+}
 
 #app{
   height: 100dvh;
   overflow: hidden;
 }
 
-/* ✅ layout em tela cheia */
 .iaWrap{
   max-width: 100%;
   height: 100%;
@@ -195,7 +267,6 @@ body{ overscroll-behavior: none; }
   box-sizing:border-box;
 }
 
-/* ✅ shell ocupa tudo, sem “card” */
 .iaShell{
   flex: 1;
   min-height: 0;
@@ -204,10 +275,10 @@ body{ overscroll-behavior: none; }
   border-radius: 0;
   border: 0;
   box-shadow: none;
-  background: transparent;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
 }
 
-/* Topo estilo ChatGPT: X | IA PRO | status */
 .iaTop{
   position: sticky;
   top: 0;
@@ -219,11 +290,15 @@ body{ overscroll-behavior: none; }
   gap: 10px;
 
   padding: 10px 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
-  background: color-mix(in srgb, rgba(0,0,0,.28), transparent 10%);
-  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-line);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
 }
-.light .iaTop{ background: rgba(255,255,255,.65); }
+.light .iaTop{
+  background: rgba(255,255,255,.66);
+}
 
 .iaCloseBtn{
   width: 40px;
@@ -236,12 +311,18 @@ body{ overscroll-behavior: none; }
   color: var(--text);
   font-weight: 1000;
   font-size: 20px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  background: rgba(255,255,255,.10);
+  border: 1px solid var(--glass-line);
+  box-shadow: var(--glass-shadow-soft), inset 0 1px 0 rgba(255,255,255,.06);
+  transition: transform .14s ease, background .14s ease, border-color .14s ease;
+}
+.iaCloseBtn:hover{
+  background: rgba(255,255,255,.14);
+  border-color: var(--glass-line-strong);
+  transform: translateY(-1px);
 }
 .iaCloseBtn:active{ transform: translateY(1px); }
 
-/* centraliza o título */
 .iaBrand{
   justify-self: center;
   text-align: center;
@@ -257,7 +338,6 @@ body{ overscroll-behavior: none; }
   margin-top: 2px;
 }
 
-/* ✅ corpo ocupa o restante */
 .iaBody{
   flex: 1;
   min-height: 0;
@@ -267,7 +347,6 @@ body{ overscroll-behavior: none; }
   padding: 0;
 }
 
-/* ✅ só as mensagens rolam */
 .iaChat{
   flex: 1;
   min-height: 0;
@@ -283,7 +362,6 @@ body{ overscroll-behavior: none; }
   scroll-behavior: smooth;
 }
 
-/* scrollbar discreta */
 .iaChat::-webkit-scrollbar{ width: 10px; }
 .iaChat::-webkit-scrollbar-track{ background: transparent; }
 .iaChat::-webkit-scrollbar-thumb{
@@ -296,9 +374,8 @@ body{ overscroll-behavior: none; }
   background: color-mix(in srgb, var(--stroke), transparent 35%);
 }
 
-/* mensagens com avatar + card */
 .msgRow{
-  margin: 0;
+  margin: 0 0 14px 0;
   gap: 12px;
   align-items:flex-start;
 }
@@ -311,40 +388,41 @@ body{ overscroll-behavior: none; }
 }
 
 .msgAvatar{
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 13px;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight: 950;
   font-size: 12px;
   letter-spacing: .2px;
-  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  border: 1px solid var(--glass-line);
   background: rgba(255,255,255,.08);
-  box-shadow: 0 12px 30px rgba(0,0,0,.18);
+  box-shadow: 0 12px 30px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05);
   flex: 0 0 auto;
   user-select:none;
 }
 .msgAvatar.me{
-  background: color-mix(in srgb, var(--accent), transparent 70%);
+  background: color-mix(in srgb, var(--accent), transparent 72%);
   border-color: color-mix(in srgb, var(--accent), transparent 45%);
 }
 
 .msg{
   max-width: min(760px, 92%);
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
-  box-shadow: 0 10px 26px rgba(0,0,0,.14);
+  padding: 13px 15px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid var(--glass-line);
+  box-shadow: 0 14px 30px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.05);
 }
 .msg.me{
-  background: color-mix(in srgb, var(--accent), transparent 78%);
+  background:
+    radial-gradient(120px 90px at 20% 10%, rgba(255,255,255,.18), transparent 60%),
+    color-mix(in srgb, var(--accent), transparent 80%);
   border-color: color-mix(in srgb, var(--accent), transparent 50%);
 }
 
-/* ✅ composer pequeno igual ChatGPT */
 .iaComposer{
   flex: 0 0 auto;
   position: sticky;
@@ -354,10 +432,12 @@ body{ overscroll-behavior: none; }
   border-radius: 999px;
   padding: 6px 8px;
 
-  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
-  background: color-mix(in srgb, rgba(255,255,255,.06), transparent 0%);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 12px 30px rgba(0,0,0,.18);
+  border: 1px solid var(--glass-line);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: 0 16px 40px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05);
 
   display:flex;
   align-items: center;
@@ -369,9 +449,9 @@ body{ overscroll-behavior: none; }
   background: transparent;
   padding: 0 6px;
   flex: 1;
+  box-shadow:none;
 }
 
-/* ✅ esconde texto extra pra ficar compacto (sem remover do HTML) */
 .iaInputWrap .small{ display:none; }
 
 .iaInput{
@@ -381,13 +461,13 @@ body{ overscroll-behavior: none; }
   font-size: 14px;
 }
 
-/* botão "+" (abre sugestões) */
 .iaIconBtn{
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
-  background: rgba(255,255,255,.06);
+  border: 1px solid var(--glass-line);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
   color: var(--text);
   font-weight: 1000;
   font-size: 22px;
@@ -396,10 +476,17 @@ body{ overscroll-behavior: none; }
   align-items:center;
   justify-content:center;
   cursor:pointer;
+  box-shadow: var(--glass-shadow-soft), inset 0 1px 0 rgba(255,255,255,.05);
+  transition: transform .14s ease, background .14s ease, border-color .14s ease;
+}
+.iaIconBtn:hover{
+  transform: translateY(-1px);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+  border-color: var(--glass-line-strong);
 }
 .iaIconBtn:active{ transform: translateY(1px); }
 
-/* botão enviar estilo “ícone” */
 .iaComposer .btn.primary{
   width: 44px;
   height: 44px;
@@ -408,22 +495,32 @@ body{ overscroll-behavior: none; }
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size: 0; /* esconde texto visualmente */
+  font-size: 0;
+  border:1px solid color-mix(in srgb, var(--accent), transparent 40%);
+  background:
+    radial-gradient(60px 50px at 30% 20%, rgba(255,255,255,.28), transparent 60%),
+    linear-gradient(135deg, color-mix(in srgb, var(--accent), #fff 8%), color-mix(in srgb, var(--accent), #000 12%));
+  box-shadow: 0 14px 36px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
 }
 .iaComposer .btn.primary::before{
   content: "➤";
   font-size: 16px;
   line-height: 1;
 }
+.iaComposer .btn.primary:hover{
+  transform: translateY(-1px);
+}
+.iaComposer .btn.primary:active{
+  transform: translateY(1px);
+}
 
-/* status menor em telas bem pequenas */
 @media (max-width:420px){
   #iaStatus{ display:none; }
   .iaStatusPill{ padding: 8px; }
 }
 
 /* =========================================================
-   ✅ Drawer de Sugestões (não flutua no chat)
+   Drawer de Sugestões
    ========================================================= */
 .quickBackdrop{
   position: fixed;
@@ -433,6 +530,7 @@ body{ overscroll-behavior: none; }
   pointer-events: none;
   transition: opacity .18s ease;
   z-index: 50;
+  backdrop-filter: blur(2px);
 }
 .quickBackdrop.open{
   opacity: 1;
@@ -447,15 +545,17 @@ body{ overscroll-behavior: none; }
   z-index: 51;
 
   padding: 12px 12px calc(14px + env(safe-area-inset-bottom));
-  border-top: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
-  border-radius: 18px 18px 0 0;
+  border-top: 1px solid var(--glass-line);
+  border-radius: 22px 22px 0 0;
 
-  background: color-mix(in srgb, rgba(0,0,0,.80), transparent 0%);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 -18px 40px rgba(0,0,0,.35);
+  background:
+    linear-gradient(180deg, rgba(18,24,38,.90), rgba(18,24,38,.84));
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: 0 -18px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
 }
 .light .quickDrawer{
-  background: rgba(255,255,255,.86);
+  background: rgba(255,255,255,.88);
 }
 
 .quickDrawer.open{
@@ -477,7 +577,7 @@ body{ overscroll-behavior: none; }
   width: 38px;
   height: 38px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  border: 1px solid var(--glass-line);
   background: rgba(255,255,255,.08);
   color: var(--text);
   font-weight: 1000;
@@ -486,13 +586,21 @@ body{ overscroll-behavior: none; }
   align-items:center;
   justify-content:center;
   cursor:pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  transition: transform .14s ease, background .14s ease;
+}
+.quickClose:hover{
+  background: rgba(255,255,255,.12);
+  transform: translateY(-1px);
+}
+.quickClose:active{
+  transform: translateY(1px);
 }
 .light .quickClose{
   background: rgba(16,24,40,.05);
   color: var(--text);
 }
 
-/* grid de chips dentro do drawer */
 .quickDrawer .iaQuick{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -502,13 +610,25 @@ body{ overscroll-behavior: none; }
 .quickDrawer .iaChip{
   padding: 14px 12px;
   border-radius: 18px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid color-mix(in srgb, var(--stroke), transparent 10%);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+  border: 1px solid var(--glass-line);
   font-size: 13px;
   color: var(--text);
+  box-shadow: var(--glass-shadow-soft), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.quickDrawer .iaChip:hover{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
 }
 .light .quickDrawer .iaChip{
   background: rgba(16,24,40,.05);
+}
+
+@media (max-width:720px){
+  .quickDrawer .iaQuick{
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
