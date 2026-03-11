@@ -256,6 +256,23 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   -webkit-overflow-scrolling: touch;
   padding-right: 4px;
 }
+.confirmModal{
+  max-width: 460px;
+}
+
+.confirmModal .modalBody{
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+#confirmCategoriaTitulo{
+  line-height: 1.2;
+}
+
+#confirmCategoriaTexto{
+  font-size: 14px;
+  line-height: 1.45;
+}
 .modalFooter{
   padding:14px;border-top:1px solid var(--stroke);
   display:flex;gap:10px;justify-content:flex-end;
@@ -2097,19 +2114,45 @@ function renderCategorias(){
   if(selF) selF.innerHTML = opts;
   if(selM) selM.innerHTML = opts;
 }
-function removeCategoria(idx){
-  if(!USER_ID){ alert("Faça login primeiro"); return; }
-  if(idx<0 || idx>=categorias.length) return;
+let pendingRemoveCategoriaIndex = null;
+
+function openConfirmCategoria(idx, nome){
+  pendingRemoveCategoriaIndex = idx;
+
+  const titulo = document.getElementById("confirmCategoriaTitulo");
+  const texto = document.getElementById("confirmCategoriaTexto");
+
+  if(titulo) titulo.textContent = `Remover categoria "${nome}"`;
+  if(texto) texto.innerHTML = `
+    Os gastos dessa categoria vão para <b>"Outros"</b>.<br><br>
+    Essa ação remove a categoria da sua lista.
+  `;
+
+  openModal("overlay-confirmCategoria");
+}
+
+function closeConfirmCategoria(){
+  pendingRemoveCategoriaIndex = null;
+  closeModal("overlay-confirmCategoria");
+}
+
+function confirmRemoveCategoriaNow(){
+  const idx = pendingRemoveCategoriaIndex;
+  if(idx == null) return;
+
+  closeModal("overlay-confirmCategoria");
+  pendingRemoveCategoriaIndex = null;
+
+  if(idx < 0 || idx >= categorias.length) return;
+
   const cat = categorias[idx];
   const lower = String(cat).toLowerCase();
-  if(lower==="investimentos") return alert("A categoria Investimentos não pode ser removida.");
-
-  if(!confirm(`Remover a categoria "${cat}"? Gastos dessa categoria vão para "Outros".`)) return;
+  if(lower === "investimentos") return alert("A categoria Investimentos não pode ser removida.");
 
   categorias.splice(idx,1);
 
   fixos = (fixos||[]).map(f=>{
-    if(String(f.category||"")===cat) return { ...f, category:"Outros" };
+    if(String(f.category||"") === cat) return { ...f, category:"Outros" };
     return f;
   });
 
@@ -2118,7 +2161,7 @@ function removeCategoria(idx){
     if(!d) return;
     if(Array.isArray(d.items)){
       d.items = d.items.map(it=>{
-        if(String(it.category||"")===cat) return { ...it, category:"Outros" };
+        if(String(it.category||"") === cat) return { ...it, category:"Outros" };
         return it;
       });
     }
@@ -2129,7 +2172,19 @@ function removeCategoria(idx){
   renderFixos();
   render();
 }
+function removeCategoria(idx){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  if(idx < 0 || idx >= categorias.length) return;
 
+  const cat = categorias[idx];
+  const lower = String(cat).toLowerCase();
+
+  if(lower === "investimentos"){
+    return alert("A categoria Investimentos não pode ser removida.");
+  }
+
+  openConfirmCategoria(idx, cat);
+}
 function renderFixos(){
   const div = document.getElementById("listaFixos");
   if(!div) return;
@@ -4067,5 +4122,25 @@ window.listarLancamentosBancariosMes = function(){
   }
 };
 </script>
+<div class="overlay" id="overlay-confirmCategoria">
+  <div class="modal confirmModal">
+    <div class="modalHeader">
+      <div class="title">⚠️ Confirmar remoção</div>
+      <div class="closeX" onclick="closeConfirmCategoria()">✕</div>
+    </div>
+    <div class="modalBody">
+      <div class="note">
+        <div style="font-weight:950;font-size:16px" id="confirmCategoriaTitulo">Remover categoria</div>
+        <div class="small" style="margin-top:8px" id="confirmCategoriaTexto">
+          Tem certeza que deseja remover esta categoria?
+        </div>
+      </div>
+    </div>
+    <div class="modalFooter">
+      <button class="btn" onclick="closeConfirmCategoria()">Cancelar</button>
+      <button class="btn danger" onclick="confirmRemoveCategoriaNow()">Remover</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
