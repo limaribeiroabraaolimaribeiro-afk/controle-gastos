@@ -2486,10 +2486,25 @@ function drawChart(items){
   if(grafico) grafico.destroy();
   const canvas = document.getElementById("chart");
   if(!canvas) return;
+
   grafico=new Chart(canvas,{
     type:"doughnut",
     data:{ labels, datasets:[{ data: valores }] },
-    options:{ plugins:{ legend:{ labels:{ color: getComputedStyle(document.body).getPropertyValue("--text") } } } }
+    options:{
+      plugins:{
+        legend:{
+          labels:{
+            color: getComputedStyle(document.body).getPropertyValue("--text")
+          }
+        }
+      },
+      onClick: function(evt, elements){
+        if(!elements || !elements.length) return;
+        const index = elements[0].index;
+        const categoria = labels[index];
+        if(categoria) openCategoriaResumo(categoria);
+      }
+    }
   });
 }
 function drawEvolucao(){
@@ -2515,14 +2530,14 @@ function renderList(){
   if(!table) return;
 
   if(!d.items.length){
-    table.innerHTML = `<tr><td class="small">Nenhum gasto neste mês. Toque em “+” para adicionar.</td></tr>`;
+    table.innerHTML = <tr><td class="small">Nenhum gasto neste mês. Toque em “+” para adicionar.</td></tr>;
     return;
   }
 
   table.innerHTML = d.items.map((i,idx)=>{
     const paid = !!i.paid;
-    const statusBadge = paid ? `<span class="badge good">Pago</span>` : `<span class="badge warn">Pendente</span>`;
-    const fixBadge = i.isInvestFixo ? `<span class="badge">Juntar</span>` : (i.isFixo ? `<span class="badge">Fixo</span>` : ``);
+    const statusBadge = paid ? <span class="badge good">Pago</span> : <span class="badge warn">Pendente</span>;
+    const fixBadge = i.isInvestFixo ? <span class="badge">Juntar</span> : (i.isFixo ? <span class="badge">Fixo</span> : ``);
     const btnPaidClass = paid ? "good" : "warn";
     const btnPaidText = paid ? "✅ Pago" : "⏳ Pendente";
 
@@ -2532,7 +2547,9 @@ function renderList(){
           <div style="font-weight:900">
             ${escapeHtml(i.desc||"")}
             ${fixBadge}
-            <span class="badge">${escapeHtml(i.category||"Outros")}</span>
+            <button class="categoryChipBtn" onclick="openCategoriaResumo('${escapeJsSingle(i.category||"Outros")}')" title="Ver total da categoria">
+              ${escapeHtml(i.category||"Outros")}
+            </button>
             ${statusBadge}
           </div>
           <div class="small">${money(i.amount||0)}</div>
