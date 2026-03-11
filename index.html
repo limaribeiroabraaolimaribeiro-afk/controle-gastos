@@ -2530,14 +2530,21 @@ function renderList(){
   if(!table) return;
 
   if(!d.items.length){
-    table.innerHTML = <tr><td class="small">Nenhum gasto neste mês. Toque em “+” para adicionar.</td></tr>;
+    table.innerHTML = `<tr><td class="small">Nenhum gasto neste mês. Toque em "+" para adicionar.</td></tr>`;
     return;
   }
 
   table.innerHTML = d.items.map((i,idx)=>{
     const paid = !!i.paid;
-    const statusBadge = paid ? <span class="badge good">Pago</span> : <span class="badge warn">Pendente</span>;
-    const fixBadge = i.isInvestFixo ? <span class="badge">Juntar</span> : (i.isFixo ? <span class="badge">Fixo</span> : ``);
+
+    const statusBadge = paid
+      ? `<span class="badge good">Pago</span>`
+      : `<span class="badge warn">Pendente</span>`;
+
+    const fixBadge = i.isInvestFixo
+      ? `<span class="badge">Juntar</span>`
+      : (i.isFixo ? `<span class="badge">Fixo</span>` : ``);
+
     const btnPaidClass = paid ? "good" : "warn";
     const btnPaidText = paid ? "✅ Pago" : "⏳ Pendente";
 
