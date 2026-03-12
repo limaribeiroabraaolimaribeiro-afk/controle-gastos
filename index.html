@@ -4142,5 +4142,30 @@ window.listarLancamentosBancariosMes = function(){
     </div>
   </div>
 </div>
+  <div class="overlay" id="overlay-confirmHistory">
+  <div class="modal confirmModal">
+    <div class="modalHeader">
+      <div class="title">🗑️ Remover mês</div>
+      <div class="closeX" onclick="closeConfirmHistory()">✕</div>
+    </div>
+
+    <div class="modalBody">
+      <div class="note">
+        <div style="font-weight:950;font-size:16px" id="confirmHistoryTitulo">
+          Remover mês do histórico
+        </div>
+
+        <div class="small" style="margin-top:8px" id="confirmHistoryTexto">
+          Tem certeza que deseja apagar este mês?
+        </div>
+      </div>
+    </div>
+
+    <div class="modalFooter">
+      <button class="btn" onclick="closeConfirmHistory()">Cancelar</button>
+      <button class="btn danger" onclick="confirmDeleteHistory()">Apagar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
