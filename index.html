@@ -2115,6 +2115,43 @@ function renderCategorias(){
   if(selM) selM.innerHTML = opts;
 }
 let pendingRemoveCategoriaIndex = null;
+  let pendingDeleteMonth = null;
+
+  function openConfirmHistory(mes, label){
+  pendingDeleteMonth = mes;
+
+  const titulo = document.getElementById("confirmHistoryTitulo");
+  const texto = document.getElementById("confirmHistoryTexto");
+
+  if(titulo) titulo.textContent = `Remover ${label} do histórico`;
+  if(texto) texto.innerHTML =
+    `Este mês será apagado permanentemente.<br><br>
+     Todos os gastos e guardados dele serão removidos.`;
+
+  openModal("overlay-confirmHistory");
+}
+
+function closeConfirmHistory(){
+  pendingDeleteMonth = null;
+  closeModal("overlay-confirmHistory");
+}
+
+function confirmDeleteHistory(){
+  const m = pendingDeleteMonth;
+  closeConfirmHistory();
+  if(!m) return;
+
+  delete state.meses[m];
+  saveAll();
+
+  if(mesAtual === m){
+    mesAtual = new Date().toISOString().slice(0,7);
+  }
+
+  buildMonthSelect();
+  buildHistoryUI();
+  render();
+}
 
 function openConfirmCategoria(idx, nome){
   pendingRemoveCategoriaIndex = idx;
@@ -2252,17 +2289,10 @@ function deleteMonth(m){
 
   const dt = new Date(m+"-01T00:00:00");
   const label = dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
-  if(!confirm(`Deletar o mês de ${label} do histórico?`)) return;
 
-  delete state.meses[m];
-  saveAll();
-
-  if(mesAtual === m) mesAtual = new Date().toISOString().slice(0,7);
-
-  buildMonthSelect();
-  buildHistoryUI();
-  render();
+  openConfirmHistory(m, label);
 }
+
 function buildHistoryUI(){
   const div = document.getElementById("historyList");
   if(!div) return;
