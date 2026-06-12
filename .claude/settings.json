@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(cd \"/c/Users/abraao.ribeiro.AFM/Documents/Controle de gastos/controle-gastos\" && grep -n \"id=\\\\\"kpiLeft\\\\\"\" index.html)",
+      "Read(//c/c/Users/abraao.ribeiro.AFM/Documents/Controle de gastos/controle-gastos/**)",
+      "Bash(awk '/UPGRADE PRO UI/,/^<\\\\/style>/' index.html)",
+      "Bash(awk '/^const CATEGORY_ICONS/,/^function render\\\\\\(\\\\\\)\\\\{|^function render\\\\\\(\\\\\\){/' index.html)",
+      "Bash(awk '/^const CATEGORY_ICONS/,/^function render\\\\\\(\\\\\\){/' index.html)"
+    ]
+  }
+}
