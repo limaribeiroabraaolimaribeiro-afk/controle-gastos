@@ -611,6 +611,281 @@ h1,h2,h3{
   border-radius:16px;
   padding:10px 12px;
 }
+
+/* =========================
+   ===== UPGRADE PRO UI =====
+   Novas seções: Saúde Financeira,
+   Alertas, Progresso da meta,
+   Resumo rápido, listas e PDF.
+========================= */
+
+/* respiro geral no mobile */
+@media (max-width:480px){
+  .wrap{ padding:12px; padding-bottom:130px; }
+  .grid2{ gap:10px; }
+  .card{ padding:12px; }
+}
+
+/* topo estilo fintech */
+.topbar{
+  padding:14px 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent), transparent 78%), rgba(255,255,255,.04));
+  border:1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  margin-bottom:14px;
+}
+.topbar h1{
+  font-size:19px;
+  font-weight:950;
+  letter-spacing:.3px;
+}
+.topbar .small{
+  margin-top:4px;
+  max-width:46ch;
+}
+@media (max-width:480px){
+  .topbar{ flex-wrap:wrap; }
+  .topbar .right{ width:100%; justify-content:flex-end; }
+}
+
+/* ===== KPIs coloridos ===== */
+.kpiGrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+@media (max-width:480px){
+  .kpiGrid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+}
+.kpiPro{
+  position:relative;
+  border-radius:18px;
+  padding:14px;
+  border:1px solid var(--stroke);
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+.kpiPro .kpiIcon{
+  width:34px;height:34px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;margin-bottom:8px;
+  background: rgba(255,255,255,.10);
+  border:1px solid var(--stroke);
+}
+.kpiPro .kpiLabel{ font-size:12px;color:var(--muted);font-weight:700 }
+.kpiPro .kpiValue{ font-size:19px;font-weight:900;margin-top:4px }
+.kpiPro.kpi-salary{ border-color: color-mix(in srgb, var(--accent), transparent 55%); }
+.kpiPro.kpi-salary .kpiIcon{ background: color-mix(in srgb, var(--accent), transparent 75%); color: var(--accent); }
+.kpiPro.kpi-spent{ border-color: color-mix(in srgb, var(--danger), transparent 60%); }
+.kpiPro.kpi-spent .kpiIcon{ background: color-mix(in srgb, var(--danger), transparent 78%); color: var(--danger); }
+.kpiPro.kpi-spent .kpiValue{ color: var(--danger); }
+.kpiPro.kpi-left .kpiIcon{ background: color-mix(in srgb, var(--good), transparent 78%); color: var(--good); }
+.kpiPro.kpi-left .kpiValue.good{ color: var(--good); }
+.kpiPro.kpi-left .kpiValue.bad{ color: var(--danger); }
+.kpiPro.kpi-saved .kpiIcon{ background: color-mix(in srgb, var(--good), transparent 78%); color: var(--good); }
+.kpiPro.kpi-saved .kpiValue{ color: var(--good); }
+
+/* ===== Saúde financeira ===== */
+.healthCard{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.healthRing{
+  --p: 0;
+  width:88px;height:88px;border-radius:50%;
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  background: conic-gradient(var(--health-color, var(--good)) calc(var(--p)*1%), rgba(255,255,255,.08) 0);
+  position:relative;
+}
+.healthRing::before{
+  content:"";
+  position:absolute;
+  inset:7px;
+  border-radius:50%;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--stroke);
+}
+.healthRing .healthNum{
+  position:relative;
+  font-size:20px;
+  font-weight:950;
+}
+.healthInfo{ min-width:0; flex:1; }
+.healthInfo .healthTitle{ font-weight:950; font-size:15px; }
+.healthInfo .healthLabel{
+  display:inline-flex; margin-top:6px;
+  padding:4px 10px;border-radius:999px;
+  font-size:12px;font-weight:800;
+  border:1px solid var(--stroke);
+}
+.healthInfo .healthTip{ margin-top:8px; }
+
+/* ===== Alertas inteligentes ===== */
+.alertsList{
+  display:grid;
+  gap:10px;
+  margin-top:10px;
+}
+.alertItem{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.05);
+  font-size:13px;
+  line-height:1.4;
+}
+.alertItem .alertIcon{ font-size:16px; line-height:1.4; }
+.alertItem.good{ border-color: rgba(57,217,138,.35); background: rgba(57,217,138,.08); color: var(--good); }
+.alertItem.warn{ border-color: rgba(255,209,102,.35); background: rgba(255,209,102,.08); color: var(--warn); }
+.alertItem.danger{ border-color: rgba(255,93,93,.35); background: rgba(255,93,93,.08); color: var(--danger); }
+
+/* ===== Barra de progresso da meta ===== */
+.progressHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.progressBarTrack{
+  width:100%;
+  height:14px;
+  border-radius:999px;
+  background: rgba(255,255,255,.08);
+  border:1px solid var(--stroke);
+  overflow:hidden;
+  margin-top:10px;
+}
+.progressBarFill{
+  height:100%;
+  border-radius:999px;
+  transition: width .3s ease;
+  background: var(--good);
+}
+.progressBarFill.warn{ background: var(--warn); }
+.progressBarFill.danger{ background: var(--danger); }
+.progressFoot{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:8px;
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* ===== Resumo rápido ===== */
+.quickGrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+@media (max-width:480px){
+  .quickGrid{ grid-template-columns:1fr 1fr; }
+}
+.quickItem{
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.05);
+  border-radius:14px;
+  padding:10px 12px;
+}
+.quickItem .quickLabel{ font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px }
+.quickItem .quickValue{ font-size:15px;font-weight:900;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+
+/* ===== Lista de gastos (cards) ===== */
+.expenseCard{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.05);
+  margin-bottom:10px;
+}
+.expenseIcon{
+  width:42px;height:42px;border-radius:14px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  font-size:19px;
+  background: rgba(255,255,255,.08);
+  border:1px solid var(--stroke);
+}
+.expenseMain{ flex:1; min-width:0; }
+.expenseTitle{
+  font-weight:900;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.expenseMeta{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  margin-top:4px;
+}
+.expenseActions{
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:0 0 auto;
+}
+.expenseValue{ font-weight:950; white-space:nowrap; }
+.expenseDelete{
+  width:30px;height:30px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background: transparent;
+  border:1px solid var(--stroke);
+  color: var(--muted);
+  font-size:12px;
+  opacity:.75;
+}
+.expenseDelete:hover{ opacity:1; color: var(--danger); border-color: rgba(255,93,93,.35); }
+#list{ border-spacing:0; }
+#list tr{ background:transparent; border:none; display:block; }
+#list td{ padding:0; display:block; }
+
+/* ===== Menu lateral / cards do menu ===== */
+.menuGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+@media (max-width:480px){
+  .menuGrid{ grid-template-columns:1fr; }
+}
+.menuItem{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  border-radius:16px;
+  text-align:left;
+  font-weight:800;
+}
+.menuItem .menuIcon{
+  width:38px;height:38px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+  background: rgba(255,255,255,.08);
+  border:1px solid var(--stroke);
+  flex:0 0 auto;
+}
+
+/* ===== IA PRO - respostas em cards ===== */
+.iaCard{
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.06);
+  border-radius:14px;
+  padding:10px 12px;
+  margin-top:8px;
+}
+.iaCard:first-child{ margin-top:0; }
+.iaCardTitle{ font-weight:900; margin-bottom:4px; }
+.iaBulletList{ margin:0; padding-left:18px; }
+.iaBulletList li{ margin:3px 0; }
+
+/* ===== Backup / Exportação ===== */
+.backupRow{ display:flex; gap:10px; flex-wrap:wrap; }
+.backupRow .btn{ flex:1 1 160px; }
 </style>
 </head>
 
@@ -693,23 +968,91 @@ h1,h2,h3{
           </div>
         </div>
 
+        <div data-home="saude" style="margin-top:12px">
+          <div class="card healthCard">
+            <div class="healthRing" id="healthRing">
+              <div class="healthNum" id="healthScore">0</div>
+            </div>
+            <div class="healthInfo">
+              <div class="healthTitle">Saúde Financeira</div>
+              <div class="healthLabel" id="healthLabel">—</div>
+              <div class="small healthTip" id="healthTip">Preencha salário e meta para ver sua nota.</div>
+            </div>
+          </div>
+        </div>
+
+        <div data-home="alertas" style="margin-top:12px">
+          <div class="card">
+            <h3>Alertas inteligentes</h3>
+            <div class="alertsList" id="alertsList"></div>
+          </div>
+        </div>
+
+        <div data-home="progresso" style="margin-top:12px">
+          <div class="card">
+            <div class="progressHead">
+              <h3 style="margin:0">Progresso da meta mensal</h3>
+              <span class="badge" id="progressPct">0%</span>
+            </div>
+            <div class="progressBarTrack">
+              <div class="progressBarFill" id="progressBarFill" style="width:0%"></div>
+            </div>
+            <div class="progressFoot">
+              <span id="progressSpentLabel">Gasto: R$ 0,00</span>
+              <span id="progressLeftLabel">Falta: R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+
         <div data-home="kpis" style="margin-top:12px">
-          <div class="grid2">
-            <div class="kpi">
-              <div class="small">Salário</div>
-              <div class="v" id="kpiSalary">R$ 0,00</div>
+          <div class="kpiGrid">
+            <div class="kpiPro kpi-salary">
+              <div class="kpiIcon">💰</div>
+              <div class="kpiLabel">Salário</div>
+              <div class="kpiValue" id="kpiSalary">R$ 0,00</div>
             </div>
-            <div class="kpi">
-              <div class="small">Gasto</div>
-              <div class="v" id="kpiSpent">R$ 0,00</div>
+            <div class="kpiPro kpi-spent">
+              <div class="kpiIcon">🧾</div>
+              <div class="kpiLabel">Gasto</div>
+              <div class="kpiValue" id="kpiSpent">R$ 0,00</div>
             </div>
-            <div class="kpi">
-              <div class="small">Sobra</div>
-              <div class="v" id="kpiLeft">R$ 0,00</div>
+            <div class="kpiPro kpi-left">
+              <div class="kpiIcon">📊</div>
+              <div class="kpiLabel">Sobra</div>
+              <div class="kpiValue" id="kpiLeft">R$ 0,00</div>
             </div>
-            <div class="kpi">
-              <div class="small">Guardado</div>
-              <div class="v" id="kpiSaved">R$ 0,00</div>
+            <div class="kpiPro kpi-saved">
+              <div class="kpiIcon">🏦</div>
+              <div class="kpiLabel">Guardado</div>
+              <div class="kpiValue" id="kpiSaved">R$ 0,00</div>
+            </div>
+          </div>
+        </div>
+
+        <div data-home="resumoRapido" style="margin-top:12px">
+          <div class="card">
+            <h3>Resumo rápido</h3>
+            <div class="quickGrid">
+              <div class="quickItem">
+                <div class="quickLabel">Maior categoria</div>
+                <div class="quickValue" id="quickTopCat">—</div>
+              </div>
+              <div class="quickItem">
+                <div class="quickLabel">Lançamentos</div>
+                <div class="quickValue" id="quickQtd">0</div>
+              </div>
+              <div class="quickItem">
+                <div class="quickLabel">Total pago</div>
+                <div class="quickValue" id="quickPago">R$ 0,00</div>
+              </div>
+              <div class="quickItem">
+                <div class="quickLabel">Total pendente</div>
+                <div class="quickValue" id="quickPendente">R$ 0,00</div>
+              </div>
+              <div class="quickItem" style="grid-column:1/-1">
+                <div class="quickLabel">Melhor mês salvo</div>
+                <div class="quickValue" id="quickBestMonth">—</div>
+              </div>
             </div>
           </div>
         </div>
@@ -749,12 +1092,12 @@ h1,h2,h3{
         <div style="font-weight:900">Menu</div>
       </div>
 
-      <div class="grid1">
-        <button class="btn" onclick="openScreen('screen-config')">⚙️ Configurações</button>
-        <button class="btn" onclick="openScreen('screen-simulators')">🧠 Simuladores</button>
-        <button class="btn" onclick="openScreen('screen-categories')">📂 Minhas Categorias</button>
-        <button class="btn" onclick="openScreen('screen-fixos')">📌 Gastos Fixos</button>
-        <button class="btn" onclick="openScreen('screen-investfixos')">📈 Investimentos Fixos</button>
+      <div class="menuGrid">
+        <button class="btn menuItem" onclick="openScreen('screen-config')"><span class="menuIcon">⚙️</span> Configurações</button>
+        <button class="btn menuItem" onclick="openScreen('screen-simulators')"><span class="menuIcon">🧠</span> Simuladores</button>
+        <button class="btn menuItem" onclick="openScreen('screen-categories')"><span class="menuIcon">📂</span> Minhas Categorias</button>
+        <button class="btn menuItem" onclick="openScreen('screen-fixos')"><span class="menuIcon">📌</span> Gastos Fixos</button>
+        <button class="btn menuItem" onclick="openScreen('screen-investfixos')"><span class="menuIcon">📈</span> Investimentos Fixos</button>
       </div>
 
       <div class="hr"></div>
@@ -788,6 +1131,21 @@ h1,h2,h3{
         <div class="small">Acesse seu histórico completo de meses.</div>
         <div class="hr"></div>
         <button class="btn primary" onclick="openHistory()">📅 Abrir histórico</button>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>Backup dos dados</h3>
+        <div class="small">
+          Exporte um arquivo JSON com seus meses, categorias, gastos fixos e investimentos fixos.
+          Use “Importar” para restaurar em outro dispositivo.
+        </div>
+        <div class="hr"></div>
+        <div class="backupRow">
+          <button class="btn" onclick="exportData()">⬇️ Exportar dados</button>
+          <button class="btn" onclick="document.getElementById('importFile').click()">⬆️ Importar dados</button>
+        </div>
+        <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(this.files[0])">
+        <div class="small" id="backupStatus" style="margin-top:10px"></div>
       </div>
 
       <div class="card" style="margin-top:12px">
@@ -1747,7 +2105,11 @@ function resetThemes(){
 ========================= */
 const HOME_SECTIONS = [
   { id:"resumo",  title:"Resumo do mês" },
+  { id:"saude",   title:"Saúde Financeira" },
+  { id:"alertas", title:"Alertas inteligentes" },
+  { id:"progresso", title:"Progresso da meta mensal" },
   { id:"kpis",    title:"Cards (Salário/Gasto/Sobra/Guardado)" },
+  { id:"resumoRapido", title:"Resumo rápido" },
   { id:"chartCat",title:"Gráfico por categoria" },
   { id:"chartEvo",title:"Gráfico evolução" },
   { id:"lista",   title:"Lista do mês" }
@@ -1931,6 +2293,65 @@ function saveAll(){
   localStorage.setItem(kCat(), JSON.stringify(categorias));
   localStorage.setItem(kFix(), JSON.stringify(fixos));
   localStorage.setItem(kInv(), JSON.stringify(investFixos));
+}
+
+/* =========================
+   BACKUP / EXPORT / IMPORT
+========================= */
+function exportData(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const payload = {
+    app: "Controle de Gastos PRO",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    userId: USER_ID,
+    state,
+    categorias,
+    fixos,
+    investFixos
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `controle_gastos_pro_backup_${todayISO()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  const status = document.getElementById("backupStatus");
+  if(status) status.textContent = "Backup exportado ✅";
+}
+function importData(file){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  if(!file) return;
+  const status = document.getElementById("backupStatus");
+
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data || typeof data !== "object") throw new Error("Arquivo inválido");
+
+      if(data.state && data.state.meses) state = data.state;
+      if(Array.isArray(data.categorias) && data.categorias.length) categorias = data.categorias;
+      if(Array.isArray(data.fixos)) fixos = data.fixos.map(f=>({ ...f, isFixo:true }));
+      if(Array.isArray(data.investFixos)) investFixos = data.investFixos;
+
+      saveAll();
+      buildMonthSelect();
+      renderCategorias();
+      renderFixos();
+      renderInvestFixos();
+      render();
+
+      if(status) status.textContent = "Backup importado com sucesso ✅";
+    }catch(err){
+      if(status) status.textContent = "Erro ao importar: " + (err.message||err);
+    }
+  };
+  reader.readAsText(file);
 }
 
 function detectarCategoria(desc){
@@ -2640,7 +3061,7 @@ function renderList(){
   if(!table) return;
 
   if(!d.items.length){
-    table.innerHTML = `<tr><td class="small">Nenhum gasto neste mês. Toque em "+" para adicionar.</td></tr>`;
+    table.innerHTML = `<tr><td><div class="empty small">Nenhum gasto neste mês. Toque em "+" para adicionar.</div></td></tr>`;
     return;
   }
 
@@ -2661,21 +3082,26 @@ function renderList(){
     return `
       <tr>
         <td>
-          <div style="font-weight:900">
-            ${escapeHtml(i.desc||"")}
-            ${fixBadge}
-            <button class="categoryChipBtn" onclick="openCategoriaResumo('${escapeJsSingle(i.category||"Outros")}')" title="Ver total da categoria">
-              ${escapeHtml(i.category||"Outros")}
-            </button>
-            ${statusBadge}
+          <div class="expenseCard">
+            <div class="expenseIcon">${categoryIcon(i.category)}</div>
+            <div class="expenseMain">
+              <div class="expenseTitle">${escapeHtml(i.desc||"")}</div>
+              <div class="expenseMeta">
+                ${fixBadge}
+                <button class="categoryChipBtn" onclick="openCategoriaResumo('${escapeJsSingle(i.category||"Outros")}')" title="Ver total da categoria">
+                  ${escapeHtml(i.category||"Outros")}
+                </button>
+                ${statusBadge}
+              </div>
+              <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn ${btnPaidClass} mini" onclick="togglePaid(${idx})">${btnPaidText}</button>
+              </div>
+            </div>
+            <div class="expenseActions">
+              <div class="expenseValue">${money(i.amount||0)}</div>
+              <button class="expenseDelete" onclick="delItemSmart(${idx})" title="Remover">✕</button>
+            </div>
           </div>
-          <div class="small">${money(i.amount||0)}</div>
-          <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn ${btnPaidClass} mini" onclick="togglePaid(${idx})">${btnPaidText}</button>
-          </div>
-        </td>
-        <td style="width:64px;text-align:right">
-          <button class="btn icon mini" onclick="delItemSmart(${idx})" title="Remover">✕</button>
         </td>
       </tr>
     `;
@@ -2695,13 +3121,242 @@ function renderKPIs(){
   const s4 = document.getElementById("kpiSaved");
   if(s1) s1.textContent = money(salary);
   if(s2) s2.textContent = money(spent);
-  if(s3) s3.textContent = money(left);
+  if(s3){
+    s3.textContent = money(left);
+    s3.classList.toggle("good", left>=0);
+    s3.classList.toggle("bad", left<0);
+  }
   if(s4) s4.textContent = money(saved);
 
   const salaryEl = document.getElementById("salary");
   const metaEl = document.getElementById("meta");
   if(salaryEl) salaryEl.value = salary ? salary : "";
   if(metaEl) metaEl.value = d.meta ? d.meta : "";
+}
+
+/* =========================
+   SAÚDE FINANCEIRA, ALERTAS,
+   PROGRESSO DA META, RESUMO RÁPIDO
+========================= */
+const CATEGORY_ICONS = {
+  "casa":"🏠",
+  "alimentação":"🍔",
+  "alimentacao":"🍔",
+  "transporte":"🚗",
+  "lazer":"🎮",
+  "pets":"🐾",
+  "investimentos":"📈",
+  "saúde":"💊",
+  "saude":"💊",
+  "educação":"🎓",
+  "educacao":"🎓",
+  "viagem":"✈️",
+  "assinaturas":"📺",
+  "roupas":"👕",
+  "outros":"📦"
+};
+function categoryIcon(cat){
+  const key = normalizeText(cat||"");
+  return CATEGORY_ICONS[key] || "📦";
+}
+
+function plannedMonthlySavings(){
+  return (investFixos||[]).reduce((a,b)=>a+Number(b.mensal||0),0);
+}
+
+function computeHealthScore(d){
+  const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+  const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
+  const salary = Number(d.salary||0);
+  const meta = Number(d.meta||0);
+  const left = salary - spent;
+
+  let score = 0;
+
+  // Sobra do salário (até 40 pts) - meta: sobrar pelo menos 20% do salário
+  if(salary>0){
+    const leftPct = left/salary;
+    score += Math.max(0, Math.min(1, leftPct/0.20)) * 40;
+  }
+
+  // Guardado no mês (até 30 pts)
+  const planned = plannedMonthlySavings();
+  if(planned>0){
+    score += Math.max(0, Math.min(1, saved/planned)) * 30;
+  }else if(salary>0){
+    score += Math.max(0, Math.min(1, saved/(salary*0.10))) * 30;
+  }else if(saved>0){
+    score += 15;
+  }
+
+  // Dentro da meta de gastos (até 15 pts)
+  if(meta>0){
+    score += (spent<=meta ? 15 : Math.max(0, 15 - ((spent-meta)/meta)*15));
+  }else{
+    score += 7.5;
+  }
+
+  // Percentual gasto do salário (até 15 pts) - bom se <=70%
+  if(salary>0){
+    const pct = spent/salary;
+    score += pct<=0.70 ? 15 : Math.max(0, 15 - ((pct-0.70)/0.30)*15);
+  }else{
+    score += 7.5;
+  }
+
+  score = Math.round(Math.max(0, Math.min(100, score)));
+
+  let label, color, tip;
+  if(score>=80){ label="Excelente"; color="var(--good)"; tip="Seu mês está muito saudável. Continue assim!"; }
+  else if(score>=60){ label="Boa"; color="var(--good)"; tip="Mês saudável, com espaço para guardar um pouco mais."; }
+  else if(score>=40){ label="Regular"; color="var(--warn)"; tip="Atenção aos gastos e tente guardar mais este mês."; }
+  else { label="Atenção"; color="var(--danger)"; tip="Seus gastos estão pesando no orçamento. Revise sua lista de gastos."; }
+
+  return { score, label, color, tip };
+}
+function renderHealthPanel(){
+  const d = getDataMes(mesAtual);
+  const h = computeHealthScore(d);
+
+  const ring = document.getElementById("healthRing");
+  const num = document.getElementById("healthScore");
+  const label = document.getElementById("healthLabel");
+  const tip = document.getElementById("healthTip");
+
+  if(ring){
+    ring.style.setProperty("--p", h.score);
+    ring.style.setProperty("--health-color", h.color);
+  }
+  if(num) num.textContent = String(h.score);
+  if(label){
+    label.textContent = h.label;
+    label.style.color = h.color;
+    label.style.borderColor = h.color;
+  }
+  if(tip) tip.textContent = h.tip;
+}
+
+function computeAlerts(d){
+  const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+  const saved = (d.saved||[]).reduce((a,b)=>a+Number(b.value||0),0);
+  const salary = Number(d.salary||0);
+  const meta = Number(d.meta||0);
+  const left = salary - spent;
+  const alerts = [];
+
+  if(salary>0){
+    const pct = spent/salary;
+    if(pct>0.70){
+      alerts.push({ type:"warn", icon:"⚠️", text:`Você gastou ${Math.round(pct*100)}% do salário (mais de 70%).` });
+    }
+    if(left < salary*0.10){
+      alerts.push({ type: left<0 ? "danger" : "warn", icon:"📉", text:"Sua sobra está baixa este mês." });
+    }
+  }
+
+  if(meta>0){
+    if(spent<=meta){
+      alerts.push({ type:"good", icon:"✅", text:"Você está dentro da meta de gastos." });
+    }else{
+      alerts.push({ type:"danger", icon:"🚨", text:`Você passou da meta em ${money(spent-meta)}.` });
+    }
+  }
+
+  const planned = plannedMonthlySavings();
+  if(planned>0 && saved<planned){
+    alerts.push({ type:"warn", icon:"🏦", text:"Você guardou menos do que o planejado este mês." });
+  }
+
+  if(!alerts.length){
+    alerts.push({ type:"good", icon:"👍", text:"Tudo certo por aqui! Continue acompanhando seus gastos." });
+  }
+
+  return alerts;
+}
+function renderAlerts(){
+  const d = getDataMes(mesAtual);
+  const div = document.getElementById("alertsList");
+  if(!div) return;
+  const alerts = computeAlerts(d);
+  div.innerHTML = alerts.map(a=>`
+    <div class="alertItem ${a.type}">
+      <span class="alertIcon">${a.icon}</span>
+      <span>${escapeHtml(a.text)}</span>
+    </div>
+  `).join("");
+}
+
+function renderMetaProgress(){
+  const d = getDataMes(mesAtual);
+  const spent = (d.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+  const meta = Number(d.meta||0);
+  const salary = Number(d.salary||0);
+
+  const base = meta>0 ? meta : salary;
+  const pct = base>0 ? Math.min(999, (spent/base)*100) : 0;
+  const pctClamped = Math.min(100, pct);
+
+  const fill = document.getElementById("progressBarFill");
+  const pctLabel = document.getElementById("progressPct");
+  const spentLabel = document.getElementById("progressSpentLabel");
+  const leftLabel = document.getElementById("progressLeftLabel");
+
+  if(fill){
+    fill.style.width = pctClamped + "%";
+    fill.classList.remove("warn","danger");
+    if(pct>=100) fill.classList.add("danger");
+    else if(pct>=70) fill.classList.add("warn");
+  }
+  if(pctLabel) pctLabel.textContent = Math.round(pct) + "%";
+  if(spentLabel) spentLabel.textContent = "Gasto: " + money(spent);
+  if(leftLabel){
+    const falta = base - spent;
+    leftLabel.textContent = base>0
+      ? (falta>=0 ? ("Falta: " + money(falta)) : ("Excedeu: " + money(Math.abs(falta))))
+      : "Defina uma meta ou salário";
+  }
+}
+
+function renderQuickSummary(){
+  const d = getDataMes(mesAtual);
+  const items = d.items||[];
+
+  const byCat = {};
+  items.forEach(it=>{
+    const c = it.category||"Outros";
+    byCat[c] = (byCat[c]||0) + Number(it.amount||0);
+  });
+  const topCat = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+
+  const pago = items.filter(x=>!!x.paid).reduce((a,b)=>a+Number(b.amount||0),0);
+  const pendente = items.filter(x=>!x.paid).reduce((a,b)=>a+Number(b.amount||0),0);
+
+  let bestMonth = null;
+  Object.keys(state.meses||{}).forEach(m=>{
+    const dm = getDataMes(m);
+    const sobra = Number(dm.salary||0) - (dm.items||[]).reduce((a,b)=>a+Number(b.amount||0),0);
+    if(!bestMonth || sobra>bestMonth.sobra) bestMonth = { m, sobra };
+  });
+
+  const topCatEl = document.getElementById("quickTopCat");
+  const qtdEl = document.getElementById("quickQtd");
+  const pagoEl = document.getElementById("quickPago");
+  const pendEl = document.getElementById("quickPendente");
+  const bestEl = document.getElementById("quickBestMonth");
+
+  if(topCatEl) topCatEl.textContent = topCat ? `${categoryIcon(topCat[0])} ${topCat[0]} (${money(topCat[1])})` : "—";
+  if(qtdEl) qtdEl.textContent = String(items.length);
+  if(pagoEl) pagoEl.textContent = money(pago);
+  if(pendEl) pendEl.textContent = money(pendente);
+  if(bestEl){
+    if(bestMonth){
+      const dt = new Date(bestMonth.m+"-01T00:00:00");
+      const label = dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+      bestEl.textContent = `${label} (sobra de ${money(bestMonth.sobra)})`;
+    }else{
+      bestEl.textContent = "—";
+    }
+  }
 }
 
 function render(){
@@ -2728,6 +3383,10 @@ function render(){
   renderKPIs();
   renderSaved();
   renderList();
+  renderHealthPanel();
+  renderAlerts();
+  renderMetaProgress();
+  renderQuickSummary();
   drawChart(d.items||[]);
   drawEvolucao();
 
@@ -2796,6 +3455,10 @@ function render(){
       renderKPIs();
       renderSaved();
       renderList();
+      renderHealthPanel();
+      renderAlerts();
+      renderMetaProgress();
+      renderQuickSummary();
       drawChart(d.items||[]);
       drawEvolucao();
     })
@@ -2931,6 +3594,46 @@ function getIaBase(){
   const v = (window.API_BASE_URL || "").trim();
   return v.replace(/\/$/, "");
 }
+function formatIaResponse(text){
+  const lines = String(text||"").split("\n").map(l=>l.trim());
+  let html = "";
+  let listBuffer = [];
+
+  const flushList = ()=>{
+    if(!listBuffer.length) return;
+    html += `<ul class="iaBulletList">${listBuffer.map(l=>`<li>${escapeHtml(l)}</li>`).join("")}</ul>`;
+    listBuffer = [];
+  };
+
+  let cardOpen = false;
+  lines.forEach(line=>{
+    if(!line){ return; }
+
+    const bulletMatch = line.match(/^[-•*]\s+(.*)$/);
+    if(bulletMatch){
+      listBuffer.push(bulletMatch[1]);
+      return;
+    }
+
+    flushList();
+
+    const isTitle = /^#{1,3}\s+/.test(line) || (line.length<=60 && line.endsWith(":"));
+    const clean = line.replace(/^#{1,3}\s+/,"").replace(/\*\*/g,"");
+
+    if(isTitle){
+      if(cardOpen) html += `</div>`;
+      html += `<div class="iaCard"><div class="iaCardTitle">${escapeHtml(clean)}</div>`;
+      cardOpen = true;
+    }else{
+      if(!cardOpen){ html += `<div class="iaCard">`; cardOpen = true; }
+      html += `<div>${escapeHtml(clean)}</div>`;
+    }
+  });
+  flushList();
+  if(cardOpen) html += `</div>`;
+
+  return html || `<div class="iaCard">${escapeHtml(text)}</div>`;
+}
 function iaAdd(role, text){
   const box = document.getElementById("iaChat");
   if(!box) return;
@@ -2938,7 +3641,11 @@ function iaAdd(role, text){
   row.className = "msgRow " + (role==="me" ? "me" : "bot");
   const bubble = document.createElement("div");
   bubble.className = "msg " + (role==="me" ? "me" : "bot");
-  bubble.textContent = text;
+  if(role==="me"){
+    bubble.textContent = text;
+  }else{
+    bubble.innerHTML = formatIaResponse(text);
+  }
   row.appendChild(bubble);
   box.appendChild(row);
   box.scrollTop = box.scrollHeight;
@@ -3043,6 +3750,28 @@ function aggregateYear(year){
   const topCat = catsSorted[0] ? { cat: catsSorted[0][0], value: catsSorted[0][1] } : { cat:"—", value:0 };
   return { months, byCat, byMonth, topCat };
 }
+function pdfBrandBand(subtitle){
+  const dt = new Date();
+  const dataEmissao = dt.toLocaleDateString("pt-BR") + " " + dt.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;
+                background:linear-gradient(135deg,#569cff,#3a6df0);
+                color:#fff;border-radius:14px;padding:14px 18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.18);
+                    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px">IA</div>
+        <div>
+          <div style="font-size:18px;font-weight:900;letter-spacing:.3px">Controle de Gastos PRO</div>
+          <div style="font-size:12px;opacity:.9">${escapeHtml(subtitle)}</div>
+        </div>
+      </div>
+      <div style="text-align:right;font-size:11px;opacity:.95">
+        <div>Emitido em</div>
+        <div style="font-weight:800">${escapeHtml(dataEmissao)}</div>
+      </div>
+    </div>
+  `;
+}
 async function renderPdfAndSave(wrap, filename){
   const canvas = await html2canvas(wrap, { scale: 2, backgroundColor:"#ffffff" });
   const imgData = canvas.toDataURL("image/png");
@@ -3087,9 +3816,10 @@ async function gerarPDFResumoAno(){
     wrap.style.color = "#111";
     wrap.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
     wrap.innerHTML = `
+      ${pdfBrandBand("Resumo do Ano")}
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
         <div>
-          <div style="font-size:22px;font-weight:900">Resumo do Ano • Controle de Gastos PRO</div>
+          <div style="font-size:22px;font-weight:900">Resumo do Ano</div>
           <div style="font-size:13px;color:#444">Ano: <b>${escapeHtml(year)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
           <div style="font-size:13px;color:#444">Usuário: <b>${escapeHtml(USER?.displayName||"Usuário")}</b></div>
         </div>
@@ -3212,9 +3942,10 @@ async function gerarPDFMes(){
     wrap.style.color = "#111";
     wrap.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
     wrap.innerHTML = `
+      ${pdfBrandBand("Relatório do Mês")}
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
         <div>
-          <div style="font-size:22px;font-weight:900">Relatório do Mês • Controle de Gastos PRO</div>
+          <div style="font-size:22px;font-weight:900">Relatório do Mês</div>
           <div style="font-size:13px;color:#444">Mês: <b style="text-transform:capitalize">${escapeHtml(mesLabel)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
           <div style="font-size:13px;color:#444">Usuário: <b>${escapeHtml(USER?.displayName||"Usuário")}</b></div>
         </div>
@@ -3326,9 +4057,10 @@ async function gerarPDFCompleto(){
     wrap.style.color = "#111";
     wrap.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
     wrap.innerHTML = `
+      ${pdfBrandBand("Relatório Completo")}
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
         <div>
-          <div style="font-size:22px;font-weight:900">Relatório Completo • Controle de Gastos PRO</div>
+          <div style="font-size:22px;font-weight:900">Relatório Completo</div>
           <div style="font-size:13px;color:#444">Ano: <b>${escapeHtml(year)}</b> • Gerado em: ${escapeHtml(todayISO())}</div>
           <div style="font-size:13px;color:#444">Usuário: <b>${escapeHtml(USER?.displayName||"Usuário")}</b></div>
         </div>
