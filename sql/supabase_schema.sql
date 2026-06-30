@@ -112,7 +112,173 @@ CREATE POLICY "monthly_settings_delete_own"
     ON monthly_settings FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================
--- 3. EXPENSES
+-- 3. CATEGORIES
+-- Categorias personalizadas de gastos
+-- ============================================================
+CREATE TABLE IF NOT EXISTS categories (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    nome       text NOT NULL,
+    ordem      int DEFAULT 0,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_categories_user_nome
+    ON categories(user_id, lower(nome));
+
+DROP TRIGGER IF EXISTS categories_updated_at ON categories;
+CREATE TRIGGER categories_updated_at
+    BEFORE UPDATE ON categories
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "categories_select_own" ON categories;
+CREATE POLICY "categories_select_own"
+    ON categories FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "categories_insert_own" ON categories;
+CREATE POLICY "categories_insert_own"
+    ON categories FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "categories_update_own" ON categories;
+CREATE POLICY "categories_update_own"
+    ON categories FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "categories_delete_own" ON categories;
+CREATE POLICY "categories_delete_own"
+    ON categories FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 4. FIXED_EXPENSES
+-- Gastos fixos mensais (aluguel, luz, água etc.)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS fixed_expenses (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    descricao  text NOT NULL,
+    categoria  text DEFAULT 'Outros',
+    valor      numeric NOT NULL CHECK (valor > 0),
+    ordem      int DEFAULT 0,
+    ativo      boolean DEFAULT true,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+DROP TRIGGER IF EXISTS fixed_expenses_updated_at ON fixed_expenses;
+CREATE TRIGGER fixed_expenses_updated_at
+    BEFORE UPDATE ON fixed_expenses
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE fixed_expenses ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "fixed_expenses_select_own" ON fixed_expenses;
+CREATE POLICY "fixed_expenses_select_own"
+    ON fixed_expenses FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "fixed_expenses_insert_own" ON fixed_expenses;
+CREATE POLICY "fixed_expenses_insert_own"
+    ON fixed_expenses FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "fixed_expenses_update_own" ON fixed_expenses;
+CREATE POLICY "fixed_expenses_update_own"
+    ON fixed_expenses FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "fixed_expenses_delete_own" ON fixed_expenses;
+CREATE POLICY "fixed_expenses_delete_own"
+    ON fixed_expenses FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 5. FIXED_INVESTMENTS
+-- Investimentos fixos com meta e prazo
+-- Criado antes de saved_amounts (que referencia esta tabela)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS fixed_investments (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    nome        text NOT NULL,
+    meta_final  numeric DEFAULT 0,
+    prazo_meses int DEFAULT 12,
+    mensal      numeric DEFAULT 0,
+    dia_pagar   int DEFAULT 0,
+    ativo       boolean DEFAULT true,
+    created_at  timestamptz DEFAULT now(),
+    updated_at  timestamptz DEFAULT now()
+);
+
+DROP TRIGGER IF EXISTS fixed_investments_updated_at ON fixed_investments;
+CREATE TRIGGER fixed_investments_updated_at
+    BEFORE UPDATE ON fixed_investments
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE fixed_investments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "fixed_investments_select_own" ON fixed_investments;
+CREATE POLICY "fixed_investments_select_own"
+    ON fixed_investments FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "fixed_investments_insert_own" ON fixed_investments;
+CREATE POLICY "fixed_investments_insert_own"
+    ON fixed_investments FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "fixed_investments_update_own" ON fixed_investments;
+CREATE POLICY "fixed_investments_update_own"
+    ON fixed_investments FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "fixed_investments_delete_own" ON fixed_investments;
+CREATE POLICY "fixed_investments_delete_own"
+    ON fixed_investments FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 6. SAVED_AMOUNTS
+-- Valores guardados/poupados por mês
+-- investment_id aponta para fixed_investments(id)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS saved_amounts (
+    id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id       uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    mes           text NOT NULL,
+    valor         numeric NOT NULL CHECK (valor > 0),
+    descricao     text,
+    data          date DEFAULT CURRENT_DATE,
+    source        text DEFAULT 'manual',
+    investment_id uuid REFERENCES fixed_investments(id) ON DELETE SET NULL,
+    created_at    timestamptz DEFAULT now(),
+    updated_at    timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_saved_amounts_user_mes
+    ON saved_amounts(user_id, mes);
+
+CREATE INDEX IF NOT EXISTS idx_saved_amounts_investment
+    ON saved_amounts(investment_id);
+
+DROP TRIGGER IF EXISTS saved_amounts_updated_at ON saved_amounts;
+CREATE TRIGGER saved_amounts_updated_at
+    BEFORE UPDATE ON saved_amounts
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE saved_amounts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "saved_amounts_select_own" ON saved_amounts;
+CREATE POLICY "saved_amounts_select_own"
+    ON saved_amounts FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "saved_amounts_insert_own" ON saved_amounts;
+CREATE POLICY "saved_amounts_insert_own"
+    ON saved_amounts FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "saved_amounts_update_own" ON saved_amounts;
+CREATE POLICY "saved_amounts_update_own"
+    ON saved_amounts FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "saved_amounts_delete_own" ON saved_amounts;
+CREATE POLICY "saved_amounts_delete_own"
+    ON saved_amounts FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 7. EXPENSES
 -- Gastos variáveis por mês
 -- ============================================================
 CREATE TABLE IF NOT EXISTS expenses (
@@ -161,184 +327,19 @@ CREATE POLICY "expenses_delete_own"
     ON expenses FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================
--- 4. SAVED_AMOUNTS
--- Valores guardados/poupados por mês
--- ============================================================
-CREATE TABLE IF NOT EXISTS saved_amounts (
-    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    mes        text NOT NULL,
-    valor      numeric NOT NULL CHECK (valor > 0),
-    descricao  text,
-    data       date DEFAULT CURRENT_DATE,
-    source     text DEFAULT 'manual',
-    inv_id     text,
-    created_at timestamptz DEFAULT now(),
-    updated_at timestamptz DEFAULT now()
-);
-
-CREATE INDEX IF NOT EXISTS idx_saved_amounts_user_mes
-    ON saved_amounts(user_id, mes);
-
-DROP TRIGGER IF EXISTS saved_amounts_updated_at ON saved_amounts;
-CREATE TRIGGER saved_amounts_updated_at
-    BEFORE UPDATE ON saved_amounts
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-ALTER TABLE saved_amounts ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "saved_amounts_select_own" ON saved_amounts;
-CREATE POLICY "saved_amounts_select_own"
-    ON saved_amounts FOR SELECT USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "saved_amounts_insert_own" ON saved_amounts;
-CREATE POLICY "saved_amounts_insert_own"
-    ON saved_amounts FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "saved_amounts_update_own" ON saved_amounts;
-CREATE POLICY "saved_amounts_update_own"
-    ON saved_amounts FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "saved_amounts_delete_own" ON saved_amounts;
-CREATE POLICY "saved_amounts_delete_own"
-    ON saved_amounts FOR DELETE USING (auth.uid() = user_id);
-
--- ============================================================
--- 5. CATEGORIES
--- Categorias personalizadas de gastos
--- ============================================================
-CREATE TABLE IF NOT EXISTS categories (
-    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    nome       text NOT NULL,
-    ordem      int DEFAULT 0,
-    created_at timestamptz DEFAULT now(),
-    updated_at timestamptz DEFAULT now()
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_categories_user_nome
-    ON categories(user_id, lower(nome));
-
-DROP TRIGGER IF EXISTS categories_updated_at ON categories;
-CREATE TRIGGER categories_updated_at
-    BEFORE UPDATE ON categories
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "categories_select_own" ON categories;
-CREATE POLICY "categories_select_own"
-    ON categories FOR SELECT USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "categories_insert_own" ON categories;
-CREATE POLICY "categories_insert_own"
-    ON categories FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "categories_update_own" ON categories;
-CREATE POLICY "categories_update_own"
-    ON categories FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "categories_delete_own" ON categories;
-CREATE POLICY "categories_delete_own"
-    ON categories FOR DELETE USING (auth.uid() = user_id);
-
--- ============================================================
--- 6. FIXED_EXPENSES
--- Gastos fixos mensais (aluguel, luz, água etc.)
--- ============================================================
-CREATE TABLE IF NOT EXISTS fixed_expenses (
-    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    descricao  text NOT NULL,
-    categoria  text DEFAULT 'Outros',
-    valor      numeric NOT NULL CHECK (valor > 0),
-    ordem      int DEFAULT 0,
-    ativo      boolean DEFAULT true,
-    created_at timestamptz DEFAULT now(),
-    updated_at timestamptz DEFAULT now()
-);
-
-DROP TRIGGER IF EXISTS fixed_expenses_updated_at ON fixed_expenses;
-CREATE TRIGGER fixed_expenses_updated_at
-    BEFORE UPDATE ON fixed_expenses
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-ALTER TABLE fixed_expenses ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "fixed_expenses_select_own" ON fixed_expenses;
-CREATE POLICY "fixed_expenses_select_own"
-    ON fixed_expenses FOR SELECT USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "fixed_expenses_insert_own" ON fixed_expenses;
-CREATE POLICY "fixed_expenses_insert_own"
-    ON fixed_expenses FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "fixed_expenses_update_own" ON fixed_expenses;
-CREATE POLICY "fixed_expenses_update_own"
-    ON fixed_expenses FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "fixed_expenses_delete_own" ON fixed_expenses;
-CREATE POLICY "fixed_expenses_delete_own"
-    ON fixed_expenses FOR DELETE USING (auth.uid() = user_id);
-
--- ============================================================
--- 7. FIXED_INVESTMENTS
--- Investimentos fixos com meta e prazo
--- ============================================================
-CREATE TABLE IF NOT EXISTS fixed_investments (
-    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    inv_id      text NOT NULL,  -- ID interno do app (UUID local)
-    nome        text NOT NULL,
-    meta_final  numeric DEFAULT 0,
-    prazo_meses int DEFAULT 12,
-    mensal      numeric DEFAULT 0,
-    dia_pagar   int DEFAULT 0,
-    ativo       boolean DEFAULT true,
-    created_at  timestamptz DEFAULT now(),
-    updated_at  timestamptz DEFAULT now()
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_fixed_investments_user_invid
-    ON fixed_investments(user_id, inv_id);
-
-DROP TRIGGER IF EXISTS fixed_investments_updated_at ON fixed_investments;
-CREATE TRIGGER fixed_investments_updated_at
-    BEFORE UPDATE ON fixed_investments
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-ALTER TABLE fixed_investments ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "fixed_investments_select_own" ON fixed_investments;
-CREATE POLICY "fixed_investments_select_own"
-    ON fixed_investments FOR SELECT USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "fixed_investments_insert_own" ON fixed_investments;
-CREATE POLICY "fixed_investments_insert_own"
-    ON fixed_investments FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "fixed_investments_update_own" ON fixed_investments;
-CREATE POLICY "fixed_investments_update_own"
-    ON fixed_investments FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "fixed_investments_delete_own" ON fixed_investments;
-CREATE POLICY "fixed_investments_delete_own"
-    ON fixed_investments FOR DELETE USING (auth.uid() = user_id);
-
--- ============================================================
 -- 8. HISTORY
 -- Snapshot completo de cada mês para histórico
 -- ============================================================
 CREATE TABLE IF NOT EXISTS history (
     id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id      uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    mes          text NOT NULL,   -- "YYYY-MM"
+    mes          text NOT NULL,  -- formato: "YYYY-MM"
     salary       numeric DEFAULT 0,
     meta         numeric DEFAULT 0,
     total_gastos numeric DEFAULT 0,
     total_saved  numeric DEFAULT 0,
     saldo        numeric DEFAULT 0,
-    snapshot     jsonb,           -- cópia completa do mês em JSON
+    snapshot     jsonb,
     created_at   timestamptz DEFAULT now(),
     updated_at   timestamptz DEFAULT now()
 );
@@ -404,21 +405,21 @@ CREATE POLICY "app_backups_delete_own"
 -- Detecções do app Android Leitor Bancário
 -- ============================================================
 CREATE TABLE IF NOT EXISTS bank_notification_imports (
-    id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id            uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    type               text NOT NULL CHECK (type IN ('entrada', 'saida')),
-    amount             numeric NOT NULL CHECK (amount > 0),
-    category           text,
-    bank_name          text,
-    app_package        text,
-    notification_time  timestamptz,
-    description        text,
-    raw_hash           text NOT NULL,
-    status             text NOT NULL DEFAULT 'pending'
-                           CHECK (status IN ('pending', 'confirmed', 'ignored', 'auto_confirmed')),
-    confidence_score   int DEFAULT 0 CHECK (confidence_score BETWEEN 0 AND 100),
-    created_at         timestamptz DEFAULT now(),
-    updated_at         timestamptz DEFAULT now()
+    id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id           uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    type              text NOT NULL CHECK (type IN ('entrada', 'saida')),
+    amount            numeric NOT NULL CHECK (amount > 0),
+    category          text,
+    bank_name         text,
+    app_package       text,
+    notification_time timestamptz,
+    description       text,
+    raw_hash          text NOT NULL,
+    status            text NOT NULL DEFAULT 'pending'
+                          CHECK (status IN ('pending', 'confirmed', 'ignored', 'auto_confirmed')),
+    confidence_score  int DEFAULT 0 CHECK (confidence_score BETWEEN 0 AND 100),
+    created_at        timestamptz DEFAULT now(),
+    updated_at        timestamptz DEFAULT now()
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_bank_imports_user_hash
@@ -456,6 +457,7 @@ CREATE POLICY "bank_imports_delete_own"
 -- ============================================================
 -- 11. INCOME_ENTRIES
 -- Entradas/receitas (Pix recebido, vendas etc.)
+-- Criado depois de bank_notification_imports (FK para ela)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS income_entries (
     id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),

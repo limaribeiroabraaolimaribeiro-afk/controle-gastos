@@ -1121,7 +1121,6 @@
     if (!investimentos.length) return true;
     const rows = investimentos.map(inv => ({
       user_id: user.id,
-      inv_id: inv.id || inv.inv_id || String(Date.now()),
       nome: inv.nome || "",
       meta_final: Number(inv.metaFinal || inv.meta_final) || 0,
       prazo_meses: Number(inv.prazo || inv.prazo_meses) || 12,
