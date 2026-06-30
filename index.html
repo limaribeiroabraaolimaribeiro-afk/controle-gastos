@@ -1726,8 +1726,6 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="./app.js"></script>
 
 <script>
-const API = "https://api-rf1w.onrender.com";
-
 let USER = null;
 let USER_ID = null;
 
@@ -1943,12 +1941,6 @@ function processVoiceAddCommand(raw){
   if(window.App && typeof App.syncSaveOneExpense === "function"){
     App.syncSaveOneExpense(mesAtual, voiceItem).catch(()=>{});
   }
-
-  fetch(API+"/addGasto",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc: titleCase(desc), amount: value, category })
-  }).catch(()=>{});
 
   render();
   return true;
@@ -2923,11 +2915,10 @@ function saveSettings(){
   d.meta   = Number(document.getElementById("meta").value||0);
   saveAll();
 
-  fetch(API+"/salvarMes",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ userId: USER_ID, mes: mesAtual, salary: d.salary, meta: d.meta })
-  }).catch(()=>{});
+  // Sync configurações mensais no Supabase
+  if (window.App && typeof App.syncSaveMonthlySettings === "function") {
+    App.syncSaveMonthlySettings(mesAtual, d.salary, d.meta).catch(()=>{});
+  }
 
   render();
 }
@@ -2976,14 +2967,6 @@ function delItemMonthOnly(idx){
   if(!it) return;
   d.items.splice(idx,1);
   saveAll();
-
-  if(!it.isFixo){
-    fetch(API+"/delGasto",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc: it.desc, amount: it.amount })
-    }).catch(()=>{});
-  }
 }
 function delItemSmart(idx){
   const d = getDataMes(mesAtual);
@@ -3055,12 +3038,6 @@ function confirmAddExpense(){
   if(window.App && typeof App.syncSaveOneExpense === "function"){
     App.syncSaveOneExpense(mesAtual, newItem).catch(()=>{});
   }
-
-  fetch(API+"/addGasto",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ userId: USER_ID, mes: mesAtual, desc, amount, category: cat })
-  }).catch(()=>{});
 
   closeModal("overlay-addExpense");
   render();
@@ -3453,80 +3430,6 @@ function render(){
   renderQuickSummary();
   drawChart(d.items||[]);
   drawEvolucao();
-
-  fetch(API+"/mes/"+USER_ID+"/"+mesAtual)
-    .then(r=>r.json())
-    .then(data=>{
-      if(!Array.isArray(data)) return;
-
-      if(data.length){
-        const first = data[0] || {};
-        if(first.salary!=null) d.salary = Number(first.salary||d.salary||0);
-        if(first.meta!=null) d.meta = Number(first.meta||d.meta||0);
-      }
-
-      const apiItems = data
-        .filter(x=>x && x.desc)
-        .map(x=>ensureItemDefaults({
-          desc: x.desc,
-          amount: Number(x.amount||0),
-          category: (x.category && categorias.includes(x.category)) ? x.category : (x.category || detectarCategoria(x.desc)),
-          isFixo:false,
-          isInvestFixo:false
-        }));
-
-      const hidden = new Set((d.hiddenFixos||[]).map(String));
-      const merged = [];
-      const seen = new Set();
-
-      const fresh = getDataMes(mesAtual);
-
-      for(const it of (fresh.items||[]).filter(x=>x.isFixo)){
-        const fk = fixKey(it.desc,it.amount,it.category);
-        if(hidden.has(fk)) continue;
-        const k = fk + "|fix";
-        if(!seen.has(k)){ merged.push(it); seen.add(k); }
-      }
-
-      for(const it of (d.items||[]).filter(x=>!x.isFixo)){
-        const k = fixKey(it.desc,it.amount,it.category) + "|loc";
-        if(!seen.has(k)){ merged.push(it); seen.add(k); }
-      }
-
-      for(const it of apiItems){
-        const k = fixKey(it.desc,it.amount,it.category) + "|api";
-        if(!seen.has(k)){ merged.push(it); seen.add(k); }
-      }
-
-      d.items = merged.map(ensureItemDefaults);
-
-      ensureMonthInvestStatus(d);
-      d.items.forEach(it=>{
-        if(it && it.isInvestFixo && it.invId){
-          if(typeof d.investStatus[it.invId] !== "boolean") d.investStatus[it.invId] = false;
-          it.paid = !!d.investStatus[it.invId];
-          if(it.paid){
-            addAutoSavedForInv(d, it.invId, mesAtual, Number(it.amount||0), `Automático: ${it.desc}`);
-          }else{
-            removeAutoSavedForInv(d, it.invId, mesAtual);
-          }
-        }
-      });
-
-      saveAll();
-
-      applyHomeLayoutToDOM();
-      renderKPIs();
-      renderSaved();
-      renderList();
-      renderHealthPanel();
-      renderAlerts();
-      renderMetaProgress();
-      renderQuickSummary();
-      drawChart(d.items||[]);
-      drawEvolucao();
-    })
-    .catch(()=>{});
 }
 
 /* =========================

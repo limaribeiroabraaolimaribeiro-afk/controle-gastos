@@ -7,7 +7,7 @@
   /* =========================
      CONFIG
   ========================= */
-  App.API = "https://api-rf1w.onrender.com";
+  App.API = ""; // API legada removida — usar Supabase
 
   App.DEFAULT_CATEGORIAS = [
     "Casa",
@@ -633,57 +633,8 @@
   };
 
   /* =========================
-     NETWORK
+     NETWORK (legado removido — usar Supabase)
   ========================= */
-  App.postJSON = async function (url, body) {
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type":"application/json" },
-      body: JSON.stringify(body)
-    });
-    return resp;
-  };
-
-  App.syncSalvarMes = function (mes, salary, meta) {
-    if (!App.USER_ID) return Promise.resolve(null);
-    return App.postJSON(App.API + "/salvarMes", {
-      userId: App.USER_ID,
-      mes,
-      salary,
-      meta
-    }).catch(() => null);
-  };
-
-  App.syncAddGasto = function (mes, desc, amount, category) {
-    if (!App.USER_ID) return Promise.resolve(null);
-    return App.postJSON(App.API + "/addGasto", {
-      userId: App.USER_ID,
-      mes,
-      desc,
-      amount,
-      category
-    }).catch(() => null);
-  };
-
-  App.syncDelGasto = function (mes, desc, amount) {
-    if (!App.USER_ID) return Promise.resolve(null);
-    return App.postJSON(App.API + "/delGasto", {
-      userId: App.USER_ID,
-      mes,
-      desc,
-      amount
-    }).catch(() => null);
-  };
-
-  App.fetchMes = async function (mes) {
-    if (!App.USER_ID) return [];
-    try {
-      const r = await fetch(App.API + "/mes/" + App.USER_ID + "/" + mes);
-      return await r.json();
-    } catch (e) {
-      return [];
-    }
-  };
 
   /* =========================
      AUTH

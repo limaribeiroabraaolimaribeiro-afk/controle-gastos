@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v5-fix-expenses-payload";
+const SW_VERSION = "gastos-pro-v6-remover-api-render";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
