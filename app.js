@@ -993,4 +993,199 @@
     if (pendingEl) pendingEl.textContent = pending > 0 ? `${pending} pendente${pending>1?"s":""}` : "—";
   };
 
+  /* =========================
+     SUPABASE — SYNC NUVEM
+     Salva e carrega dados do PWA no Supabase
+     com fallback para localStorage.
+  ========================= */
+  App._syncStatus = "idle"; // idle | syncing | ok | error
+
+  App.setSyncStatus = function (status, msg) {
+    App._syncStatus = status;
+    const el = document.getElementById("syncStatusBar");
+    if (!el) return;
+    const map = {
+      syncing: { text: "☁️ Sincronizando…", color: "var(--accent)" },
+      ok:      { text: "✅ Salvo na nuvem", color: "var(--good)" },
+      local:   { text: "💾 Salvo localmente", color: "var(--text-muted)" },
+      error:   { text: "⚠️ Erro ao sincronizar", color: "var(--danger)" },
+      idle:    { text: "", color: "transparent" }
+    };
+    const s = map[status] || map.idle;
+    el.textContent = s.text;
+    el.style.color = s.color;
+    el.style.display = s.text ? "block" : "none";
+    if (msg) console.warn("[Sync]", msg);
+  };
+
+  App.syncSaveMonthlySettings = async function (mes, salary, meta) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) { App.setSyncStatus("local"); return false; }
+    App.setSyncStatus("syncing");
+    const { error } = await sb.from("monthly_settings").upsert(
+      { user_id: user.id, mes, salary, meta },
+      { onConflict: "user_id,mes" }
+    );
+    if (error) { App.setSyncStatus("error", error.message); return false; }
+    App.setSyncStatus("ok");
+    return true;
+  };
+
+  App.syncLoadMonthlySettings = async function (mes) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const { data, error } = await sb
+      .from("monthly_settings")
+      .select("salary,meta")
+      .eq("user_id", user.id)
+      .eq("mes", mes)
+      .maybeSingle();
+    if (error) { console.warn("[Sync] monthly_settings:", error.message); return null; }
+    return data;
+  };
+
+  App.syncSaveExpenses = async function (mes, expenses) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) { App.setSyncStatus("local"); return false; }
+    App.setSyncStatus("syncing");
+    await sb.from("expenses").delete().eq("user_id", user.id).eq("mes", mes).eq("origem", "manual");
+    if (expenses.length === 0) { App.setSyncStatus("ok"); return true; }
+    const rows = expenses.map(e => ({
+      user_id: user.id, mes,
+      descricao: e.desc || e.descricao || "",
+      categoria: e.cat || e.categoria || "Outros",
+      valor: Number(e.valor) || 0,
+      data: e.data || null,
+      paid: !!e.paid,
+      is_fixo: !!e.fixo,
+      origem: "manual"
+    })).filter(r => r.valor > 0);
+    const { error } = await sb.from("expenses").insert(rows);
+    if (error) { App.setSyncStatus("error", error.message); return false; }
+    App.setSyncStatus("ok");
+    return true;
+  };
+
+  App.syncSaveCategories = async function (categorias) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    await sb.from("categories").delete().eq("user_id", user.id);
+    if (!categorias.length) return true;
+    const rows = categorias.map((nome, i) => ({ user_id: user.id, nome, ordem: i }));
+    const { error } = await sb.from("categories").insert(rows);
+    if (error) { console.warn("[Sync] categories:", error.message); return false; }
+    return true;
+  };
+
+  App.syncLoadCategories = async function () {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const { data, error } = await sb
+      .from("categories")
+      .select("nome")
+      .eq("user_id", user.id)
+      .order("ordem");
+    if (error) { console.warn("[Sync] categories:", error.message); return null; }
+    return data ? data.map(r => r.nome) : null;
+  };
+
+  App.syncSaveFixedExpenses = async function (fixos) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    await sb.from("fixed_expenses").delete().eq("user_id", user.id);
+    if (!fixos.length) return true;
+    const rows = fixos.map((f, i) => ({
+      user_id: user.id,
+      descricao: f.desc || f.descricao || "",
+      categoria: f.cat || f.categoria || "Outros",
+      valor: Number(f.valor) || 0,
+      ordem: i,
+      ativo: f.ativo !== false
+    })).filter(r => r.valor > 0);
+    const { error } = await sb.from("fixed_expenses").insert(rows);
+    if (error) { console.warn("[Sync] fixed_expenses:", error.message); return false; }
+    return true;
+  };
+
+  App.syncSaveFixedInvestments = async function (investimentos) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    await sb.from("fixed_investments").delete().eq("user_id", user.id);
+    if (!investimentos.length) return true;
+    const rows = investimentos.map(inv => ({
+      user_id: user.id,
+      inv_id: inv.id || inv.inv_id || String(Date.now()),
+      nome: inv.nome || "",
+      meta_final: Number(inv.metaFinal || inv.meta_final) || 0,
+      prazo_meses: Number(inv.prazo || inv.prazo_meses) || 12,
+      mensal: Number(inv.mensal) || 0,
+      dia_pagar: Number(inv.diaPagar || inv.dia_pagar) || 0,
+      ativo: inv.ativo !== false
+    })).filter(r => r.nome);
+    const { error } = await sb.from("fixed_investments").insert(rows);
+    if (error) { console.warn("[Sync] fixed_investments:", error.message); return false; }
+    return true;
+  };
+
+  App.syncSaveHistory = async function (mes, snapshot) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    const row = {
+      user_id: user.id, mes,
+      salary:       Number(snapshot.salary || snapshot.salario) || 0,
+      meta:         Number(snapshot.meta) || 0,
+      total_gastos: Number(snapshot.totalGastos || snapshot.total_gastos) || 0,
+      total_saved:  Number(snapshot.totalSaved || snapshot.total_saved) || 0,
+      saldo:        Number(snapshot.saldo) || 0,
+      snapshot
+    };
+    const { error } = await sb.from("history").upsert(row, { onConflict: "user_id,mes" });
+    if (error) { console.warn("[Sync] history:", error.message); return false; }
+    return true;
+  };
+
+  App.syncLoadHistory = async function () {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    const { data, error } = await sb
+      .from("history")
+      .select("mes,salary,meta,total_gastos,total_saved,saldo,snapshot")
+      .eq("user_id", user.id)
+      .order("mes", { ascending: false })
+      .limit(24);
+    if (error) { console.warn("[Sync] history:", error.message); return []; }
+    return data || [];
+  };
+
+  App.syncAll = async function (dadosMes) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) { App.setSyncStatus("local"); return false; }
+    App.setSyncStatus("syncing");
+    try {
+      const { mes, salary, meta, expenses, categorias, fixos, investimentos } = dadosMes;
+      await Promise.all([
+        App.syncSaveMonthlySettings(mes, salary, meta),
+        App.syncSaveExpenses(mes, expenses || []),
+        categorias ? App.syncSaveCategories(categorias) : Promise.resolve(),
+        fixos ? App.syncSaveFixedExpenses(fixos) : Promise.resolve(),
+        investimentos ? App.syncSaveFixedInvestments(investimentos) : Promise.resolve()
+      ]);
+      App.setSyncStatus("ok");
+      return true;
+    } catch (e) {
+      App.setSyncStatus("error", e.message);
+      return false;
+    }
+  };
+
 })();

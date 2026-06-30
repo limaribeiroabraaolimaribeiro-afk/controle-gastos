@@ -17,8 +17,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "SUPABASE_URL", "\"https://your-project.supabase.co\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"your-anon-key-here\"")
+        // ⚠️ Substitua pelo Project URL do seu projeto Supabase
+        // Encontre em: Supabase Dashboard → Project Settings → API → Project URL
+        // Formato: https://XXXXXXXXXXX.supabase.co
+        buildConfigField("String", "SUPABASE_URL", "\"https://COLE_AQUI_O_PROJECT_URL.supabase.co\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"sb_publishable_Ag-AwAqJWfaB7wykzwHQLQ_z4uZxwfT\"")
     }
 
     buildTypes {
