@@ -862,4 +862,135 @@
     return true;
   };
 
+  /* =========================
+     SUPABASE — LEITOR ANDROID
+     Conecta ao Supabase para ler e confirmar
+     importações detectadas pelo app Android.
+  ========================= */
+  App.SUPABASE_URL = window.SUPABASE_URL || "";
+  App.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "";
+  App._supabase = null;
+  App._androidImportsAll = [];
+  App._androidImportsFilter = "todos";
+
+  App.getSupabaseClient = function () {
+    if (!App._supabase && window.supabase && App.SUPABASE_URL && App.SUPABASE_ANON_KEY) {
+      App._supabase = window.supabase.createClient(App.SUPABASE_URL, App.SUPABASE_ANON_KEY);
+    }
+    return App._supabase;
+  };
+
+  App.supabaseGetSession = async function () {
+    const sb = App.getSupabaseClient();
+    if (!sb) return null;
+    const { data } = await sb.auth.getSession();
+    return data?.session?.user || null;
+  };
+
+  App.loadAndroidImports = async function () {
+    const sb = App.getSupabaseClient();
+    if (!sb) return [];
+    const user = await App.supabaseGetSession();
+    if (!user) return [];
+    const { data, error } = await sb
+      .from("bank_notification_imports")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("notification_time", { ascending: false })
+      .limit(100);
+    if (error) { console.warn("Importações Android:", error.message); return []; }
+    App._androidImportsAll = data || [];
+    return App._androidImportsAll;
+  };
+
+  App.confirmAndroidImport = async function (imp) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    const mes = (imp.notification_time || imp.created_at || "").slice(0, 7) || App.currentMonthKeyFromDate();
+    const data = (imp.notification_time || imp.created_at || "").slice(0, 10) || App.todayISO();
+    const isEntrada = imp.type === "entrada";
+    const tabela = isEntrada ? "income_entries" : "expenses";
+    await sb.from(tabela).insert({
+      user_id: user.id, mes,
+      descricao: imp.description || (isEntrada ? "Receita bancária" : "Gasto bancário"),
+      categoria: imp.category || (isEntrada ? "Entrada" : "Outros"),
+      valor: imp.amount, data, origem: "notificacao_banco", bank_import_id: imp.id
+    });
+    const { error } = await sb.from("bank_notification_imports").update({ status: "confirmed" }).eq("id", imp.id);
+    return !error;
+  };
+
+  App.ignoreAndroidImport = async function (importId) {
+    const sb = App.getSupabaseClient();
+    if (!sb) return false;
+    const { error } = await sb.from("bank_notification_imports").update({ status: "ignored" }).eq("id", importId);
+    return !error;
+  };
+
+  App.deleteAndroidImport = async function (importId) {
+    const sb = App.getSupabaseClient();
+    if (!sb) return false;
+    const { error } = await sb.from("bank_notification_imports").delete().eq("id", importId);
+    return !error;
+  };
+
+  App.renderAndroidImports = function (items) {
+    const list = document.getElementById("androidImportsList");
+    const badge = document.getElementById("androidImportsBadge");
+    if (!list) return;
+    if (badge) badge.textContent = `${items.length} ite${items.length === 1 ? "m" : "ns"}`;
+    if (!items.length) {
+      list.innerHTML = `<div class="small" style="text-align:center;padding:24px;opacity:.6">
+        Nenhuma importação encontrada. Use o app Android para detectar transações.</div>`;
+      return;
+    }
+    list.innerHTML = items.map(imp => {
+      const isEntrada = imp.type === "entrada";
+      const valor = Number(imp.amount || 0).toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+      const dataStr = (imp.notification_time || imp.created_at || "").slice(0, 16).replace("T", " ");
+      const statusMap = { pending:"⏳ Pendente", confirmed:"✅ Confirmado", ignored:"🚫 Ignorado", auto_confirmed:"⚡ Auto" };
+      const isPending = imp.status === "pending";
+      const cor = isEntrada ? "var(--good)" : "var(--danger)";
+      const pref = isEntrada ? "+" : "-";
+      return `<div class="card" style="margin-bottom:10px">
+        <div class="row" style="align-items:flex-start;gap:10px">
+          <div style="flex:1;min-width:0">
+            <div class="small">${App.escapeHtml(imp.bank_name||"Banco")}</div>
+            <div style="font-weight:900;margin-top:2px">${App.escapeHtml(imp.description||"—")}</div>
+            <div class="small" style="margin-top:4px">${App.escapeHtml(dataStr)}</div>
+          </div>
+          <div style="font-weight:900;white-space:nowrap;color:${cor}">${pref} ${valor}</div>
+        </div>
+        <div class="row" style="margin-top:6px;gap:6px;align-items:center;flex-wrap:wrap">
+          <span class="badge">${statusMap[imp.status]||imp.status}</span>
+          <span class="badge small">${App.escapeHtml(imp.category||"outro")}</span>
+          <span class="small">${imp.confidence_score||0}% conf.</span>
+        </div>
+        ${isPending?`<div class="row" style="margin-top:10px;gap:8px">
+          <button class="btn primary mini" style="flex:1" onclick="androidConfirm('${imp.id}')">✅ Lançar</button>
+          <button class="btn mini" style="flex:1;color:var(--danger)" onclick="androidIgnore('${imp.id}')">🚫 Ignorar</button>
+          <button class="btn mini" onclick="androidDelete('${imp.id}')">🗑️</button>
+        </div>`:""}
+      </div>`;
+    }).join("");
+  };
+
+  App.filterAndroidImports = function (filter) {
+    App._androidImportsFilter = filter;
+    let items = App._androidImportsAll;
+    if (filter === "pending") items = items.filter(i => i.status === "pending");
+    else if (filter === "confirmed") items = items.filter(i => ["confirmed","auto_confirmed"].includes(i.status));
+    else if (filter === "ignored") items = items.filter(i => i.status === "ignored");
+    App.renderAndroidImports(items);
+  };
+
+  App.updateAndroidReaderStatus = function () {
+    const statusEl = document.getElementById("androidReaderStatus");
+    const pendingEl = document.getElementById("androidPendingCount");
+    const pending = App._androidImportsAll.filter(i => i.status === "pending").length;
+    if (statusEl) statusEl.textContent = App._androidImportsAll.length > 0 ? "Conectado ✅" : "Nunca conectado";
+    if (pendingEl) pendingEl.textContent = pending > 0 ? `${pending} pendente${pending>1?"s":""}` : "—";
+  };
+
 })();

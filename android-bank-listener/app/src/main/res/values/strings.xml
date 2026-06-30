@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Controle PRO Leitor Bancário</string>
+    <string name="notification_service_label">Leitor de Notificações Bancárias</string>
+
+    <string name="welcome_title">Controle PRO\nLeitor Bancário</string>
+    <string name="welcome_subtitle">Detecte automaticamente gastos e receitas nas notificações dos seus bancos e registre no Controle de Gastos PRO.</string>
+
+    <string name="permission_title">Acesso às Notificações</string>
+    <string name="permission_desc">Para ler as notificações dos bancos, o Android exige que você conceda acesso manualmente nas configurações do sistema.</string>
+
+    <string name="privacy_title">Sua Privacidade é Prioridade</string>
+    <string name="privacy_desc">O app lê apenas notificações dos bancos que você permitir. Nunca salvamos senhas, códigos, tokens, CVV, dados completos de cartão ou informações pessoais sensíveis. Apenas o valor, tipo e uma descrição resumida da transação são registrados.</string>
+</resources>

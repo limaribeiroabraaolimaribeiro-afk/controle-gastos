@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v2";
+const SW_VERSION = "gastos-pro-v3-android";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

@@ -1169,6 +1169,62 @@ h1,h2,h3{
 
         <button class="btn" onclick="toggleTheme()">🌙/☀️ Alternar tema</button>
       </div>
+
+      <!-- ===== LEITOR BANCÁRIO ANDROID ===== -->
+      <div class="card" style="margin-top:12px" id="androidReaderCard">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="font-size:20px">📱</span>
+          <h3 style="margin:0">Leitor Bancário Android</h3>
+        </div>
+        <div class="small" style="margin-bottom:10px">
+          Funciona apenas no Android. O app leitor detecta automaticamente Pix, compras, boletos e transferências nas notificações dos seus bancos e registra aqui.
+        </div>
+        <div class="hr"></div>
+        <div class="row" style="margin-bottom:10px;gap:12px">
+          <div>
+            <div class="small">Status</div>
+            <div style="font-weight:900" id="androidReaderStatus">Verificando...</div>
+          </div>
+          <div>
+            <div class="small">Pendentes</div>
+            <div style="font-weight:900;color:var(--warn)" id="androidPendingCount">—</div>
+          </div>
+        </div>
+        <div class="row" style="gap:8px">
+          <button class="btn primary" style="flex:1" onclick="openAndroidImports()">📲 Ver importações</button>
+          <button class="btn" onclick="refreshAndroidImports()">🔄 Atualizar</button>
+        </div>
+        <div class="small" style="margin-top:10px;opacity:.7">
+          Baixe o app <b>Controle PRO Leitor Bancário</b> no seu Android para começar.
+          O APK está disponível no repositório do projeto.
+        </div>
+      </div>
+    </div>
+
+    <!-- Tela: Importações Android -->
+    <div class="screen" id="screen-android-imports">
+      <div class="backRow">
+        <button class="btn backBtn" onclick="openScreen('screen-config')">← Voltar</button>
+        <div style="font-weight:900">📲 Importações Android</div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <button class="btn mini" onclick="filterAndroidImports('todos')">Todos</button>
+          <button class="btn mini" onclick="filterAndroidImports('pending')">⏳ Pendentes</button>
+          <button class="btn mini" onclick="filterAndroidImports('confirmed')">✅ Confirmados</button>
+          <button class="btn mini" onclick="filterAndroidImports('ignored')">🚫 Ignorados</button>
+        </div>
+        <div class="hr"></div>
+        <div class="row" style="gap:8px">
+          <button class="btn primary" onclick="refreshAndroidImports()">🔄 Atualizar lista</button>
+          <span class="badge" id="androidImportsBadge">0 itens</span>
+        </div>
+      </div>
+
+      <div id="androidImportsList">
+        <div class="small" style="text-align:center;padding:20px;opacity:.6">Carregando importações...</div>
+      </div>
     </div>
 
     <div class="screen" id="screen-pdf">
@@ -1662,10 +1718,20 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
+<!-- Supabase JS (para o painel de importações Android) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
 <script src="./config.js"></script>
+
+<!-- Configurações do Supabase para o painel de importações Android -->
+<!-- Substitua pelos valores do seu projeto Supabase -->
+<script>
+  window.SUPABASE_URL = window.SUPABASE_URL || "https://your-project.supabase.co";
+  window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "your-anon-key";
+</script>
 
 <script>
 const FIREBASE_CONFIG = {
@@ -4929,5 +4995,55 @@ window.listarLancamentosBancariosMes = function(){
     </div>
   </div>
 </div>
+<!-- ===== FUNÇÕES GLOBAIS: PAINEL ANDROID ===== -->
+<script>
+function openAndroidImports() {
+  openScreen("screen-android-imports");
+  refreshAndroidImports();
+}
+
+async function refreshAndroidImports() {
+  const list = document.getElementById("androidImportsList");
+  if (list) list.innerHTML = '<div class="small" style="text-align:center;padding:20px;opacity:.6">Carregando...</div>';
+  const App = window.App;
+  if (!App) return;
+  await App.loadAndroidImports();
+  App.filterAndroidImports(App._androidImportsFilter || "todos");
+  App.updateAndroidReaderStatus();
+}
+
+function filterAndroidImports(filter) {
+  if (window.App) window.App.filterAndroidImports(filter);
+}
+
+async function androidConfirm(id) {
+  if (!window.App) return;
+  const imp = window.App._androidImportsAll.find(i => i.id === id);
+  if (!imp) return;
+  const ok = await window.App.confirmAndroidImport(imp);
+  if (ok) { imp.status = "confirmed"; window.App.filterAndroidImports(window.App._androidImportsFilter); }
+  else alert("Erro ao confirmar. Verifique se você está logado no Supabase.");
+}
+
+async function androidIgnore(id) {
+  if (!window.App) return;
+  const ok = await window.App.ignoreAndroidImport(id);
+  if (ok) {
+    const imp = window.App._androidImportsAll.find(i => i.id === id);
+    if (imp) imp.status = "ignored";
+    window.App.filterAndroidImports(window.App._androidImportsFilter);
+  }
+}
+
+async function androidDelete(id) {
+  if (!window.App || !confirm("Excluir esta importação?")) return;
+  const ok = await window.App.deleteAndroidImport(id);
+  if (ok) {
+    window.App._androidImportsAll = window.App._androidImportsAll.filter(i => i.id !== id);
+    window.App.filterAndroidImports(window.App._androidImportsFilter);
+  }
+}
+</script>
+
 </body>
 </html>
