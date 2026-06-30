@@ -193,6 +193,11 @@ input:focus{
   </div>
 </div>
 
+<!-- Supabase JS (sign-in paralelo ao Firebase) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- Variáveis do projeto: SUPABASE_URL e SUPABASE_ANON_KEY -->
+<script src="./config.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
@@ -249,6 +254,47 @@ async function initFirebase(){
   return true;
 }
 
+// ─── Supabase auth paralelo ao Firebase ───────────────────
+function _getSupabaseClient(){
+  const url = (typeof window.SUPABASE_URL !== "undefined" ? window.SUPABASE_URL : "");
+  const key = (typeof window.SUPABASE_ANON_KEY !== "undefined" ? window.SUPABASE_ANON_KEY : "");
+  if(!window.supabase || !url || url.includes("COLE_AQUI") || url.includes("your-project") || !key || key==="your-anon-key"){
+    console.warn("[Supabase] config.js não configurado — pulando login Supabase");
+    return null;
+  }
+  return window.supabase.createClient(url, key);
+}
+
+async function _supabaseSignIn(email, senha){
+  const sb = _getSupabaseClient();
+  if(!sb) return;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+  if(error){
+    console.warn("[Supabase] Login falhou (não bloqueia o app):", error.message);
+  } else {
+    console.log("[Supabase] ✅ Login OK:", data.user.email);
+  }
+}
+
+async function _supabaseSignUp(email, senha){
+  const sb = _getSupabaseClient();
+  if(!sb) return;
+  // Tenta login primeiro (conta pode já existir)
+  const { data: signInData, error: signInErr } = await sb.auth.signInWithPassword({ email, password: senha });
+  if(!signInErr && signInData.user){
+    console.log("[Supabase] ✅ Conta já existia, login OK:", signInData.user.email);
+    return;
+  }
+  // Se não existe, cria
+  const { data, error } = await sb.auth.signUp({ email, password: senha });
+  if(error){
+    console.warn("[Supabase] Cadastro falhou (não bloqueia o app):", error.message);
+  } else {
+    console.log("[Supabase] ✅ Cadastro OK:", data.user?.email);
+  }
+}
+// ──────────────────────────────────────────────────────────
+
 function loginEmail(){
   const email = (document.getElementById("email").value||"").trim();
   const senha = (document.getElementById("senha").value||"").trim();
@@ -256,7 +302,10 @@ function loginEmail(){
 
   setLoading(true);
   auth.signInWithEmailAndPassword(email, senha)
-    .then(()=> location.replace("./index.html"))
+    .then(async () => {
+      await _supabaseSignIn(email, senha);
+      location.replace("./index.html");
+    })
     .catch(e=>{
       setLoading(false);
       alert((e.code||"") + " - " + e.message);
@@ -271,7 +320,10 @@ function criarConta(){
 
   setLoading(true);
   auth.createUserWithEmailAndPassword(email, senha)
-    .then(()=> location.replace("./index.html"))
+    .then(async () => {
+      await _supabaseSignUp(email, senha);
+      location.replace("./index.html");
+    })
     .catch(e=>{
       setLoading(false);
       alert((e.code||"") + " - " + e.message);

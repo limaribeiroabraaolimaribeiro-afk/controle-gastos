@@ -1729,12 +1729,7 @@ window.addEventListener("unhandledrejection", (e)=>{
 
 <script src="./config.js"></script>
 
-<!-- Configurações do Supabase para o painel de importações Android -->
-<!-- Substitua pelos valores do seu projeto Supabase -->
-<script>
-  window.SUPABASE_URL = window.SUPABASE_URL || "https://your-project.supabase.co";
-  window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "your-anon-key";
-</script>
+<!-- Supabase URL e ANON KEY vêm de config.js (carregado acima) -->
 
 <script>
 const FIREBASE_CONFIG = {
@@ -1951,9 +1946,15 @@ function processVoiceAddCommand(raw){
   if(!desc) desc = "Gasto";
 
   const category = lastCat || detectarCategoria(desc);
+  const voiceItem = ensureItemDefaults({ desc: titleCase(desc), amount: value, category, isFixo:false, isInvestFixo:false });
   const d = getDataMes(mesAtual);
-  d.items.push(ensureItemDefaults({ desc: titleCase(desc), amount: value, category, isFixo:false, isInvestFixo:false }));
+  d.items.push(voiceItem);
   saveAll();
+
+  // Sync com Supabase (não bloqueia)
+  if(window.App && typeof App.syncSaveOneExpense === "function"){
+    App.syncSaveOneExpense(mesAtual, voiceItem).catch(()=>{});
+  }
 
   fetch(API+"/addGasto",{
     method:"POST",
@@ -3057,9 +3058,15 @@ function confirmAddExpense(){
   const sug = detectarCategoria(desc);
   if(cat==="Outros" && sug!=="Outros") cat=sug;
 
+  const newItem = ensureItemDefaults({ desc, amount, category: cat, isFixo:false, isInvestFixo:false });
   const d = getDataMes(mesAtual);
-  d.items.push(ensureItemDefaults({ desc, amount, category: cat, isFixo:false, isInvestFixo:false }));
+  d.items.push(newItem);
   saveAll();
+
+  // Sync com Supabase (não bloqueia a UI)
+  if(window.App && typeof App.syncSaveOneExpense === "function"){
+    App.syncSaveOneExpense(mesAtual, newItem).catch(()=>{});
+  }
 
   fetch(API+"/addGasto",{
     method:"POST",
@@ -4337,6 +4344,11 @@ async function initFirebase(){
     render();
     iaHealth();
     startVoiceBridge();
+
+    // Verifica sessão Supabase e loga status no console
+    if(window.App && typeof App.supabaseAutoSession === "function"){
+      App.supabaseAutoSession();
+    }
   });
 
   return true;

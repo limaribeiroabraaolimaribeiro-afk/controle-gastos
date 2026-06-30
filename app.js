@@ -874,8 +874,16 @@
   App._androidImportsFilter = "todos";
 
   App.getSupabaseClient = function () {
-    if (!App._supabase && window.supabase && App.SUPABASE_URL && App.SUPABASE_ANON_KEY) {
-      App._supabase = window.supabase.createClient(App.SUPABASE_URL, App.SUPABASE_ANON_KEY);
+    if (!App._supabase) {
+      const url  = App.SUPABASE_URL  || window.SUPABASE_URL  || "";
+      const key  = App.SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "";
+      if (window.supabase && url && !url.includes("COLE_AQUI") && !url.includes("your-project") && key && key !== "your-anon-key") {
+        App._supabase = window.supabase.createClient(url, key);
+        console.log("[Supabase] ✅ Cliente criado para:", url);
+      } else {
+        if (!url || url.includes("COLE_AQUI")) console.warn("[Supabase] ⚠️ SUPABASE_URL não configurada em config.js");
+        if (!key || key === "your-anon-key") console.warn("[Supabase] ⚠️ SUPABASE_ANON_KEY não configurada em config.js");
+      }
     }
     return App._supabase;
   };
@@ -885,6 +893,63 @@
     if (!sb) return null;
     const { data } = await sb.auth.getSession();
     return data?.session?.user || null;
+  };
+
+  App.supabaseAutoSession = async function () {
+    const sb = App.getSupabaseClient();
+    if (!sb) {
+      console.warn("[Supabase] ⚠️ Cliente não inicializado. Verifique config.js: SUPABASE_URL e SUPABASE_ANON_KEY");
+      return null;
+    }
+    const { data, error } = await sb.auth.getSession();
+    if (error) { console.warn("[Supabase] Erro ao verificar sessão:", error.message); return null; }
+    if (data?.session?.user) {
+      console.log("[Supabase] ✅ Sessão ativa:", data.session.user.email);
+      return data.session.user;
+    }
+    console.warn("[Supabase] ⚠️ Sem sessão ativa. Use login com email/senha para sincronizar com a nuvem. Login com Google não conecta ao Supabase.");
+    return null;
+  };
+
+  App.syncSaveOneExpense = async function (mes, item) {
+    const sb = App.getSupabaseClient();
+    if (!sb) {
+      console.warn("[Supabase] syncSaveOneExpense: cliente não inicializado");
+      App.setSyncStatus("local");
+      return false;
+    }
+    const user = await App.supabaseGetSession();
+    if (!user) {
+      console.warn("[Supabase] syncSaveOneExpense: sem sessão — gasto salvo apenas localmente");
+      App.setSyncStatus("local");
+      return false;
+    }
+    const row = {
+      user_id:   user.id,
+      mes:       mes,
+      descricao: item.desc || item.descricao || "",
+      categoria: item.category || item.categoria || "Outros",
+      valor:     Number(item.amount || item.valor) || 0,
+      data:      item.data || new Date().toISOString().slice(0, 10),
+      paid:      !!(item.paid),
+      is_fixo:   !!(item.isFixo || item.is_fixo),
+      origem:    "manual"
+    };
+    if (row.valor <= 0) {
+      console.warn("[Supabase] syncSaveOneExpense: valor inválido, expense ignorado:", row);
+      return false;
+    }
+    console.log("[Supabase] Tentando salvar expense…", row);
+    App.setSyncStatus("syncing");
+    const { data, error } = await sb.from("expenses").insert(row).select("id").single();
+    if (error) {
+      console.error("[Supabase] ❌ Erro ao salvar expense:", error.message, error);
+      App.setSyncStatus("error", error.message);
+      return false;
+    }
+    console.log("[Supabase] ✅ Expense salvo! id:", data?.id);
+    App.setSyncStatus("ok");
+    return true;
   };
 
   App.loadAndroidImports = async function () {
