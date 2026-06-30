@@ -718,6 +718,8 @@
 
       App.USER = session.user;
       App.USER_ID = session.user.id;
+      console.log("[Supabase] Sessão ativa:", session.user.email);
+      console.log("[Supabase] User ID:", session.user.id);
 
       const t = localStorage.getItem("theme");
       if (t === "light") document.body.classList.add("light");
@@ -848,6 +850,7 @@
     if (!App._supabase) {
       const url  = App.SUPABASE_URL  || window.SUPABASE_URL  || "";
       const key  = App.SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "";
+      console.log("[Supabase] URL carregada:", url || "(não definida)");
       if (window.supabase && url && !url.includes("COLE_AQUI") && !url.includes("your-project") && key && key !== "your-anon-key") {
         App._supabase = window.supabase.createClient(url, key);
         console.log("[Supabase] ✅ Cliente criado para:", url);
@@ -902,23 +905,23 @@
       categoria: item.category || item.categoria || "Outros",
       valor:     Number(item.amount || item.valor) || 0,
       data:      item.data || new Date().toISOString().slice(0, 10),
-      paid:      !!(item.paid),
-      is_fixo:   !!(item.isFixo || item.is_fixo),
-      origem:    "manual"
+      status:    "ativo",
+      pago:      !!(item.paid)
     };
     if (row.valor <= 0) {
       console.warn("[Supabase] syncSaveOneExpense: valor inválido, expense ignorado:", row);
       return false;
     }
-    console.log("[Supabase] Tentando salvar expense…", row);
+    console.log("[Supabase] Tentando salvar expense…");
+    console.log("[Supabase] Payload expense:", JSON.stringify(row));
     App.setSyncStatus("syncing");
     const { data, error } = await sb.from("expenses").insert(row).select("id").single();
     if (error) {
-      console.error("[Supabase] ❌ Erro ao salvar expense:", error.message, error);
+      console.error("[Supabase] Erro ao salvar:", error.message, error);
       App.setSyncStatus("error", error.message);
       return false;
     }
-    console.log("[Supabase] ✅ Expense salvo! id:", data?.id);
+    console.log("[Supabase] Expense salvo com sucesso! id:", data?.id);
     App.setSyncStatus("ok");
     return true;
   };
@@ -1090,14 +1093,14 @@
     await sb.from("expenses").delete().eq("user_id", user.id).eq("mes", mes).eq("origem", "manual");
     if (expenses.length === 0) { App.setSyncStatus("ok"); return true; }
     const rows = expenses.map(e => ({
-      user_id: user.id, mes,
+      user_id:   user.id,
+      mes,
       descricao: e.desc || e.descricao || "",
-      categoria: e.cat || e.categoria || "Outros",
-      valor: Number(e.valor) || 0,
-      data: e.data || null,
-      paid: !!e.paid,
-      is_fixo: !!e.fixo,
-      origem: "manual"
+      categoria: e.category || e.categoria || "Outros",
+      valor:     Number(e.amount || e.valor) || 0,
+      data:      e.data || null,
+      status:    "ativo",
+      pago:      !!e.paid
     })).filter(r => r.valor > 0);
     const { error } = await sb.from("expenses").insert(rows);
     if (error) { App.setSyncStatus("error", error.message); return false; }

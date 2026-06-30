@@ -4260,6 +4260,7 @@ async function gerarPDFCompleto(){
    AUTH
 ========================= */
 async function initSupabaseAuth() {
+  console.log("[Supabase] URL carregada:", window.SUPABASE_URL || "(não definida)");
   const sb = (window.App && App.getSupabaseClient) ? App.getSupabaseClient() : null;
   if (!sb) {
     dbg("Supabase não configurado — verifique config.js");
@@ -4292,6 +4293,8 @@ async function initSupabaseAuth() {
       const u = session.user;
       USER = u;
       USER_ID = u.id;
+      console.log("[Supabase] Sessão ativa:", u.email);
+      console.log("[Supabase] User ID:", u.id);
 
       document.getElementById("userName").textContent =
         (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || "Usuário";

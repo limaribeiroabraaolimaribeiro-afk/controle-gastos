@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v4-supabase-sync";
+const SW_VERSION = "gastos-pro-v5-fix-expenses-payload";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
