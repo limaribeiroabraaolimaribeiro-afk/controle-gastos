@@ -193,122 +193,111 @@ input:focus{
   </div>
 </div>
 
+<!-- credenciais inline — garante funcionamento mesmo se config.js falhar -->
+<script>
+window.SUPABASE_URL = 'https://uhdmjgycsyvetrjhwcpy.supabase.co';
+window.SUPABASE_ANON_KEY = 'sb_publishable_Ag-AwAqJWfaB7wykzwHQLQ_z4uZxwfT';
+</script>
+<!-- config.js sobrescreve se carregar com sucesso -->
 <script src=”./config.js”></script>
-<script src=”https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js”></script>
+<!-- Supabase CDN oficial -->
+<script src=”https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2”></script>
 
 <script>
-const REDIRECT_URL = “https://limaribeiroabraaolimaribeiro-afk.github.io/controle-gastos/”;
+(function () {
+  'use strict';
 
-let _sb = null;
-function getSB() {
-  if (!_sb) {
-    const url = window.SUPABASE_URL || “”;
-    const key = window.SUPABASE_ANON_KEY || “”;
-    if (window.supabase && url && key) {
-      _sb = window.supabase.createClient(url, key);
+  var REDIRECT = 'https://limaribeiroabraaolimaribeiro-afk.github.io/controle-gastos/';
+  var sb = null;
+
+  function dbg(msg) {
+    var box = document.getElementById('debugBox');
+    if (!box) return;
+    box.style.display = 'block';
+    box.textContent = String(msg);
+    console.error('[Login]', msg);
+  }
+
+  function initSB() {
+    if (sb) return sb;
+    var url = window.SUPABASE_URL || '';
+    var key = window.SUPABASE_ANON_KEY || '';
+    console.log('[Supabase] URL carregada:', url || '(nao definida)');
+    if (!window.supabase) { dbg('CDN do Supabase nao carregou. Verifique sua conexao.'); return null; }
+    if (!url || !key) { dbg('Credenciais ausentes — SUPABASE_URL ou SUPABASE_ANON_KEY nao definidas.'); return null; }
+    sb = window.supabase.createClient(url, key);
+    return sb;
+  }
+
+  function setLoading(on) {
+    ['btnLoginEmail', 'btnCriarConta', 'btnGoogle'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.disabled = on;
+    });
+  }
+
+  async function loginEmail() {
+    var email = (document.getElementById('email').value || '').trim();
+    var senha = (document.getElementById('senha').value || '').trim();
+    if (!email || !senha) { alert('Preencha email e senha'); return; }
+    var client = initSB();
+    if (!client) return;
+    setLoading(true);
+    var res = await client.auth.signInWithPassword({ email: email, password: senha });
+    if (res.error) { setLoading(false); alert(res.error.message); return; }
+    console.log('[Supabase] Sessao ativa:', res.data.user.email);
+    console.log('[Supabase] User ID:', res.data.user.id);
+    location.replace('./index.html');
+  }
+
+  async function criarConta() {
+    var email = (document.getElementById('email').value || '').trim();
+    var senha = (document.getElementById('senha').value || '').trim();
+    if (!email || !senha) { alert('Preencha email e senha'); return; }
+    if (senha.length < 6) { alert('A senha deve ter pelo menos 6 caracteres'); return; }
+    var client = initSB();
+    if (!client) return;
+    setLoading(true);
+    var res = await client.auth.signUp({ email: email, password: senha });
+    if (res.error) { setLoading(false); alert(res.error.message); return; }
+    if (res.data.user && !res.data.session) {
+      setLoading(false);
+      alert('Conta criada! Verifique seu email para confirmar antes de entrar.');
+      return;
     }
+    location.replace('./index.html');
   }
-  return _sb;
-}
 
-function dbg(msg) {
-  const box = document.getElementById(“debugBox”);
-  box.style.display = “block”;
-  box.textContent = String(msg);
-}
-
-window.addEventListener(“error”, (e) => {
-  dbg(“Erro JS:\n” + (e.message || e.type) + “\n” + (e.filename || “”) + “:” + (e.lineno || “”) + “:” + (e.colno || “”));
-});
-window.addEventListener(“unhandledrejection”, (e) => {
-  dbg(“Promise rejeitada:\n” + (e.reason && (e.reason.message || e.reason.code) ? (e.reason.code + “ - “ + e.reason.message) : String(e.reason)));
-});
-
-function setLoading(isLoading) {
-  const b1 = document.getElementById(“btnLoginEmail”);
-  const b2 = document.getElementById(“btnCriarConta”);
-  const b3 = document.getElementById(“btnGoogle”);
-  b1.disabled = b2.disabled = b3.disabled = isLoading;
-}
-
-async function loginEmail() {
-  const email = (document.getElementById(“email”).value || “”).trim();
-  const senha = (document.getElementById(“senha”).value || “”).trim();
-  if (!email || !senha) { alert(“Preencha email e senha”); return; }
-
-  const sb = getSB();
-  if (!sb) { dbg(“Supabase não configurado. Verifique config.js”); return; }
-
-  setLoading(true);
-  const { error } = await sb.auth.signInWithPassword({ email, password: senha });
-  if (error) {
-    setLoading(false);
-    alert(error.message);
-    return;
+  async function loginGoogle() {
+    var client = initSB();
+    if (!client) return;
+    setLoading(true);
+    var res = await client.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: REDIRECT, queryParams: { prompt: 'select_account' } }
+    });
+    if (res.error) { setLoading(false); alert(res.error.message); }
   }
-  location.replace(“./index.html”);
-}
 
-async function criarConta() {
-  const email = (document.getElementById(“email”).value || “”).trim();
-  const senha = (document.getElementById(“senha”).value || “”).trim();
-  if (!email || !senha) { alert(“Preencha email e senha”); return; }
-  if (senha.length < 6) { alert(“A senha deve ter pelo menos 6 caracteres”); return; }
-
-  const sb = getSB();
-  if (!sb) { dbg(“Supabase não configurado. Verifique config.js”); return; }
-
-  setLoading(true);
-  const { data, error } = await sb.auth.signUp({ email, password: senha });
-  if (error) {
-    setLoading(false);
-    alert(error.message);
-    return;
-  }
-  if (data.user && !data.session) {
-    setLoading(false);
-    alert(“Conta criada! Verifique seu email para confirmar antes de entrar.”);
-    return;
-  }
-  location.replace(“./index.html”);
-}
-
-async function loginGoogle() {
-  const sb = getSB();
-  if (!sb) { dbg(“Supabase não configurado. Verifique config.js”); return; }
-
-  setLoading(true);
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: “google”,
-    options: {
-      redirectTo: REDIRECT_URL,
-      queryParams: { prompt: “select_account” }
+  document.addEventListener('DOMContentLoaded', async function () {
+    var client = initSB();
+    if (!client) {
+      dbg('Supabase nao inicializado.\nURL: ' + (window.SUPABASE_URL || 'nao definida'));
+      return;
     }
+    var res = await client.auth.getSession();
+    if (res.data && res.data.session) {
+      console.log('[Supabase] Sessao ativa:', res.data.session.user.email);
+      location.replace('./index.html');
+      return;
+    }
+    setLoading(false);
+    document.getElementById('btnLoginEmail').addEventListener('click', loginEmail);
+    document.getElementById('btnCriarConta').addEventListener('click', criarConta);
+    document.getElementById('btnGoogle').addEventListener('click', loginGoogle);
   });
-  if (error) {
-    setLoading(false);
-    alert(error.message);
-  }
-}
 
-document.addEventListener(“DOMContentLoaded”, async () => {
-  const sb = getSB();
-  if (!sb) {
-    dbg(“Supabase não configurado — verifique config.js\nURL: “ + (window.SUPABASE_URL || “não definida”));
-    return;
-  }
-
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    location.replace(“./index.html”);
-    return;
-  }
-
-  setLoading(false);
-  document.getElementById(“btnLoginEmail”).addEventListener(“click”, loginEmail);
-  document.getElementById(“btnCriarConta”).addEventListener(“click”, criarConta);
-  document.getElementById(“btnGoogle”).addEventListener(“click”, loginGoogle);
-});
+}());
 </script>
 
 </body>

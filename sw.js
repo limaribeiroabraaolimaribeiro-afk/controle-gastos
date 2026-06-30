@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v7-fix-supabase-cdn";
+const SW_VERSION = "gastos-pro-v8-cdn-final";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
