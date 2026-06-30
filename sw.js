@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v6-remover-api-render";
+const SW_VERSION = "gastos-pro-v7-fix-supabase-cdn";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
