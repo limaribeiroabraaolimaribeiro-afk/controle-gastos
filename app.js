@@ -7,12 +7,6 @@
   /* =========================
      CONFIG
   ========================= */
-  App.FIREBASE_CONFIG = {
-    apiKey: "AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-    authDomain: "controle-gastos-pro.firebaseapp.com",
-    projectId: "controle-gastos-pro"
-  };
-
   App.API = "https://api-rf1w.onrender.com";
 
   App.DEFAULT_CATEGORIAS = [
@@ -81,7 +75,6 @@
   /* =========================
      STATE
   ========================= */
-  App.auth = null;
   App.USER = null;
   App.USER_ID = null;
 
@@ -695,68 +688,50 @@
   /* =========================
      AUTH
   ========================= */
-  App.initFirebase = async function () {
-    if (!window.firebase) return false;
-
-    try {
-      if (!firebase.apps || !firebase.apps.length) {
-        firebase.initializeApp(App.FIREBASE_CONFIG);
-      }
-    } catch (e) {}
-
-    App.auth = firebase.auth();
-
-    try {
-      await App.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    } catch (e) {}
-
-    return true;
-  };
-
   App.requireAuth = function (onReady) {
-    if (!App.auth) return;
+    const sb = App.getSupabaseClient();
+    if (!sb) {
+      console.warn("[Auth] Supabase não configurado.");
+      setTimeout(() => location.replace("./login.html"), 100);
+      return;
+    }
 
-    App.auth.onAuthStateChanged((u) => {
-      App.USER = u || null;
+    let _ready = false;
 
-      if (!App.USER) {
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        App.USER = null;
         App.USER_ID = null;
         location.replace("./login.html");
         return;
       }
 
-      App.USER_ID = App.USER.uid;
+      if (event !== "INITIAL_SESSION" && event !== "SIGNED_IN") return;
+      if (!session) {
+        if (event === "INITIAL_SESSION") {
+          setTimeout(() => location.replace("./login.html"), 50);
+        }
+        return;
+      }
+      if (_ready) return;
+      _ready = true;
+
+      App.USER = session.user;
+      App.USER_ID = session.user.id;
 
       const t = localStorage.getItem("theme");
       if (t === "light") document.body.classList.add("light");
       App.applyThemeSettings();
 
       App.loadAll();
-      if (typeof onReady === "function") onReady(App.USER);
+      if (typeof onReady === "function") onReady(session.user);
       App.showApp();
     });
   };
 
-  App.loginGoogle = async function () {
-    if (!window.firebase || !App.auth) return;
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt:"select_account" });
-
-    try {
-      try {
-        await App.auth.signInWithPopup(provider);
-      } catch (e) {
-        await App.auth.signInWithRedirect(provider);
-      }
-    } catch (e) {
-      throw e;
-    }
-  };
-
   App.logout = async function () {
-    try {
-      if (App.auth) await App.auth.signOut();
-    } catch (e) {}
+    const sb = App.getSupabaseClient();
+    try { if (sb) await sb.auth.signOut(); } catch (e) {}
     location.replace("./login.html");
   };
 
@@ -854,10 +829,6 @@
   App.boot = async function (onReady) {
     App.showLoading();
     App.applyThemeSettings();
-
-    const ok = await App.initFirebase();
-    if (!ok) return false;
-
     App.requireAuth(onReady);
     return true;
   };

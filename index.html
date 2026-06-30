@@ -1721,25 +1721,13 @@ window.addEventListener("unhandledrejection", (e)=>{
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-<!-- Supabase JS (para o painel de importações Android) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-
 <script src="./config.js"></script>
-
-<!-- Supabase URL e ANON KEY vêm de config.js (carregado acima) -->
+<script src="./app.js"></script>
 
 <script>
-const FIREBASE_CONFIG = {
-  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-  authDomain:"controle-gastos-pro.firebaseapp.com",
-  projectId:"controle-gastos-pro"
-};
 const API = "https://api-rf1w.onrender.com";
 
-let auth = null;
 let USER = null;
 let USER_ID = null;
 
@@ -4271,103 +4259,114 @@ async function gerarPDFCompleto(){
 /* =========================
    AUTH
 ========================= */
-async function initFirebase(){
-  if(!window.firebase){ dbg("Firebase não carregou."); return false; }
+async function initSupabaseAuth() {
+  const sb = (window.App && App.getSupabaseClient) ? App.getSupabaseClient() : null;
+  if (!sb) {
+    dbg("Supabase não configurado — verifique config.js");
+    setTimeout(() => location.replace("./login.html"), 100);
+    return false;
+  }
 
-  try{ if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); }catch(e){}
-  auth = firebase.auth();
-  try{ await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); }catch(e){}
+  let _appReady = false;
 
-  auth.onAuthStateChanged((u)=>{
-    USER = u || null;
-    if(!USER){ USER_ID=null; setTimeout(()=>location.replace("./login.html"),50); return; }
-
-    USER_ID = USER.uid;
-    document.getElementById("userName").textContent = USER.displayName || "Usuário";
-    document.getElementById("userEmail").textContent = USER.email || "";
-
-    const t = localStorage.getItem("theme");
-    if(t==="light") document.body.classList.add("light");
-
-    applyThemeSettings();
-
-    loadAll();
-
-    if(localStorage.getItem(kVoiceEnabled()) == null) localStorage.setItem(kVoiceEnabled(), "0");
-    applyVoiceVisibility();
-
-    buildMonthSelect();
-    renderCategorias();
-    renderFixos();
-    renderInvestFixos();
-    updateInvestUI();
-    updateInvResumo();
-    buildPdfSelectors();
-
-    const tipoSel = document.getElementById("tipoSimulacao");
-    if(tipoSel && !tipoSel.dataset.bound){
-      tipoSel.addEventListener("change", ()=>{
-        const v = tipoSel.value;
-        document.getElementById("areaInvestimento").style.display = (v==="investimento") ? "block" : "none";
-        document.getElementById("areaEmprestimo").style.display = (v==="emprestimo") ? "block" : "none";
-      });
-      tipoSel.dataset.bound = "1";
-    }
-
-    const investSel = document.getElementById("investTipo");
-    if(investSel && !investSel.dataset.bound){
-      investSel.addEventListener("change", updateInvestUI);
-      investSel.dataset.bound = "1";
-    }
-
-    ["invNome","invMetaFinal","invPrazoMeses"].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el && !el.dataset.bound){
-        el.addEventListener("input", updateInvResumo);
-        el.dataset.bound="1";
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (_appReady) {
+      if (event === "SIGNED_OUT") {
+        USER = null;
+        USER_ID = null;
+        location.replace("./login.html");
       }
-    });
+      return;
+    }
 
-    const iaInput = document.getElementById("iaPrompt");
-    if(iaInput && !iaInput.dataset.bound){
-      iaInput.addEventListener("keydown",(e)=>{
-        if(e.key==="Enter" && !e.shiftKey){
-          e.preventDefault();
-          iaSend();
+    if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+      if (!session) {
+        if (event === "INITIAL_SESSION") {
+          setTimeout(() => location.replace("./login.html"), 50);
+        }
+        return;
+      }
+
+      _appReady = true;
+
+      const u = session.user;
+      USER = u;
+      USER_ID = u.id;
+
+      document.getElementById("userName").textContent =
+        (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || "Usuário";
+      document.getElementById("userEmail").textContent = u.email || "";
+
+      const t = localStorage.getItem("theme");
+      if (t === "light") document.body.classList.add("light");
+
+      applyThemeSettings();
+      loadAll();
+
+      if (localStorage.getItem(kVoiceEnabled()) == null) localStorage.setItem(kVoiceEnabled(), "0");
+      applyVoiceVisibility();
+
+      buildMonthSelect();
+      renderCategorias();
+      renderFixos();
+      renderInvestFixos();
+      updateInvestUI();
+      updateInvResumo();
+      buildPdfSelectors();
+
+      const tipoSel = document.getElementById("tipoSimulacao");
+      if (tipoSel && !tipoSel.dataset.bound) {
+        tipoSel.addEventListener("change", () => {
+          const v = tipoSel.value;
+          document.getElementById("areaInvestimento").style.display = (v === "investimento") ? "block" : "none";
+          document.getElementById("areaEmprestimo").style.display = (v === "emprestimo") ? "block" : "none";
+        });
+        tipoSel.dataset.bound = "1";
+      }
+
+      const investSel = document.getElementById("investTipo");
+      if (investSel && !investSel.dataset.bound) {
+        investSel.addEventListener("change", updateInvestUI);
+        investSel.dataset.bound = "1";
+      }
+
+      ["invNome", "invMetaFinal", "invPrazoMeses"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && !el.dataset.bound) {
+          el.addEventListener("input", updateInvResumo);
+          el.dataset.bound = "1";
         }
       });
-      iaInput.dataset.bound="1";
-    }
 
-    showApp();
-    goHome();
-    render();
-    iaHealth();
-    startVoiceBridge();
+      const iaInput = document.getElementById("iaPrompt");
+      if (iaInput && !iaInput.dataset.bound) {
+        iaInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            iaSend();
+          }
+        });
+        iaInput.dataset.bound = "1";
+      }
 
-    // Verifica sessão Supabase e loga status no console
-    if(window.App && typeof App.supabaseAutoSession === "function"){
-      App.supabaseAutoSession();
+      showApp();
+      goHome();
+      render();
+      iaHealth();
+      startVoiceBridge();
     }
   });
 
   return true;
 }
 
-async function loginGoogle(){
-  try{
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt:"select_account" });
-    try{ await auth.signInWithPopup(provider); }
-    catch(e){ await auth.signInWithRedirect(provider); }
-  }catch(e){
-    const msg = (e && e.message) ? e.message : String(e);
-    const el = document.getElementById("loginMsg");
-    if(el) el.textContent = "Erro: " + msg;
-  }
+function loginGoogle() {
+  location.replace("./login.html");
 }
-async function logout(){
-  try{ if(auth) await auth.signOut(); }catch(e){}
+
+async function logout() {
+  const sb = (window.App && App.getSupabaseClient) ? App.getSupabaseClient() : null;
+  try { if (sb) await sb.auth.signOut(); } catch (e) {}
   location.replace("./login.html");
 }
 
@@ -4454,12 +4453,11 @@ function openCategoriaResumo(categoria){
 /* =========================
    BOOT
 ========================= */
-document.addEventListener("DOMContentLoaded", async ()=>{
+document.addEventListener("DOMContentLoaded", async () => {
   applyThemeSettings();
   showLoading();
   renderHomeEditorUI();
-  const ok = await initFirebase();
-  if(!ok) return;
+  await initSupabaseAuth();
   applyThemeSettings();
 });
 </script>

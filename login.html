@@ -193,200 +193,121 @@ input:focus{
   </div>
 </div>
 
-<!-- Supabase JS (sign-in paralelo ao Firebase) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<!-- Variáveis do projeto: SUPABASE_URL e SUPABASE_ANON_KEY -->
-<script src="./config.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src=”https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js”></script>
+<script src=”./config.js”></script>
 
 <script>
-const FIREBASE_CONFIG = {
-  apiKey:"AIzaSyAlzYNuMGe1UZbgYjCDATv8ChO0ysrEPLE",
-  authDomain:"controle-gastos-pro.firebaseapp.com",
-  projectId:"controle-gastos-pro"
-};
+const REDIRECT_URL = “https://limaribeiroabraaolimaribeiro-afk.github.io/controle-gastos/”;
 
-function dbg(msg){
-  const box = document.getElementById("debugBox");
-  box.style.display = "block";
+let _sb = null;
+function getSB() {
+  if (!_sb) {
+    const url = window.SUPABASE_URL || “”;
+    const key = window.SUPABASE_ANON_KEY || “”;
+    if (window.supabase && url && key) {
+      _sb = window.supabase.createClient(url, key);
+    }
+  }
+  return _sb;
+}
+
+function dbg(msg) {
+  const box = document.getElementById(“debugBox”);
+  box.style.display = “block”;
   box.textContent = String(msg);
 }
 
-window.addEventListener("error", (e)=>{
-  dbg("Erro JS:\n" + (e.message || e.type) + "\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||""));
+window.addEventListener(“error”, (e) => {
+  dbg(“Erro JS:\n” + (e.message || e.type) + “\n” + (e.filename || “”) + “:” + (e.lineno || “”) + “:” + (e.colno || “”));
 });
-window.addEventListener("unhandledrejection", (e)=>{
-  dbg("Promise rejeitada:\n" + (e.reason && (e.reason.code || e.reason.message) ? (e.reason.code + " - " + e.reason.message) : String(e.reason)));
+window.addEventListener(“unhandledrejection”, (e) => {
+  dbg(“Promise rejeitada:\n” + (e.reason && (e.reason.message || e.reason.code) ? (e.reason.code + “ - “ + e.reason.message) : String(e.reason)));
 });
 
-let auth = null;
-
-function setLoading(isLoading){
-  const b1 = document.getElementById("btnLoginEmail");
-  const b2 = document.getElementById("btnCriarConta");
-  const b3 = document.getElementById("btnGoogle");
+function setLoading(isLoading) {
+  const b1 = document.getElementById(“btnLoginEmail”);
+  const b2 = document.getElementById(“btnCriarConta”);
+  const b3 = document.getElementById(“btnGoogle”);
   b1.disabled = b2.disabled = b3.disabled = isLoading;
 }
 
-async function initFirebase(){
-  if(!window.firebase){
-    dbg("Firebase não carregou (sem internet ou bloqueado).");
-    return false;
-  }
+async function loginEmail() {
+  const email = (document.getElementById(“email”).value || “”).trim();
+  const senha = (document.getElementById(“senha”).value || “”).trim();
+  if (!email || !senha) { alert(“Preencha email e senha”); return; }
 
-  try{
-    if(!firebase.apps || !firebase.apps.length){
-      firebase.initializeApp(FIREBASE_CONFIG);
-    }
-  }catch(e){}
+  const sb = getSB();
+  if (!sb) { dbg(“Supabase não configurado. Verifique config.js”); return; }
 
-  auth = firebase.auth();
-
-  // ✅ sessão persistente
-  try{
-    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-  }catch(e){
-    dbg("Persistência:\n" + (e.code||"") + " - " + (e.message||e));
-  }
-
-  return true;
-}
-
-// ─── Supabase auth paralelo ao Firebase ───────────────────
-function _getSupabaseClient(){
-  const url = (typeof window.SUPABASE_URL !== "undefined" ? window.SUPABASE_URL : "");
-  const key = (typeof window.SUPABASE_ANON_KEY !== "undefined" ? window.SUPABASE_ANON_KEY : "");
-  if(!window.supabase || !url || url.includes("COLE_AQUI") || url.includes("your-project") || !key || key==="your-anon-key"){
-    console.warn("[Supabase] config.js não configurado — pulando login Supabase");
-    return null;
-  }
-  return window.supabase.createClient(url, key);
-}
-
-async function _supabaseSignIn(email, senha){
-  const sb = _getSupabaseClient();
-  if(!sb) return;
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
-  if(error){
-    console.warn("[Supabase] Login falhou (não bloqueia o app):", error.message);
-  } else {
-    console.log("[Supabase] ✅ Login OK:", data.user.email);
-  }
-}
-
-async function _supabaseSignUp(email, senha){
-  const sb = _getSupabaseClient();
-  if(!sb) return;
-  // Tenta login primeiro (conta pode já existir)
-  const { data: signInData, error: signInErr } = await sb.auth.signInWithPassword({ email, password: senha });
-  if(!signInErr && signInData.user){
-    console.log("[Supabase] ✅ Conta já existia, login OK:", signInData.user.email);
+  setLoading(true);
+  const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+  if (error) {
+    setLoading(false);
+    alert(error.message);
     return;
   }
-  // Se não existe, cria
+  location.replace(“./index.html”);
+}
+
+async function criarConta() {
+  const email = (document.getElementById(“email”).value || “”).trim();
+  const senha = (document.getElementById(“senha”).value || “”).trim();
+  if (!email || !senha) { alert(“Preencha email e senha”); return; }
+  if (senha.length < 6) { alert(“A senha deve ter pelo menos 6 caracteres”); return; }
+
+  const sb = getSB();
+  if (!sb) { dbg(“Supabase não configurado. Verifique config.js”); return; }
+
+  setLoading(true);
   const { data, error } = await sb.auth.signUp({ email, password: senha });
-  if(error){
-    console.warn("[Supabase] Cadastro falhou (não bloqueia o app):", error.message);
-  } else {
-    console.log("[Supabase] ✅ Cadastro OK:", data.user?.email);
-  }
-}
-// ──────────────────────────────────────────────────────────
-
-function loginEmail(){
-  const email = (document.getElementById("email").value||"").trim();
-  const senha = (document.getElementById("senha").value||"").trim();
-  if(!email || !senha){ alert("Preencha email e senha"); return; }
-
-  setLoading(true);
-  auth.signInWithEmailAndPassword(email, senha)
-    .then(async () => {
-      await _supabaseSignIn(email, senha);
-      location.replace("./index.html");
-    })
-    .catch(e=>{
-      setLoading(false);
-      alert((e.code||"") + " - " + e.message);
-    });
-}
-
-function criarConta(){
-  const email = (document.getElementById("email").value||"").trim();
-  const senha = (document.getElementById("senha").value||"").trim();
-  if(!email || !senha){ alert("Preencha email e senha"); return; }
-  if(senha.length < 6){ alert("A senha deve ter pelo menos 6 caracteres"); return; }
-
-  setLoading(true);
-  auth.createUserWithEmailAndPassword(email, senha)
-    .then(async () => {
-      await _supabaseSignUp(email, senha);
-      location.replace("./index.html");
-    })
-    .catch(e=>{
-      setLoading(false);
-      alert((e.code||"") + " - " + e.message);
-    });
-}
-
-// ✅ Google com seletor de conta
-async function loginGoogle(){
-  try{
-    setLoading(true);
-
-    const provider = new firebase.auth.GoogleAuthProvider();
-
-    // força o “escolher conta” sempre
-    provider.setCustomParameters({
-      prompt: "select_account"
-    });
-
-    // em mobile, popup pode falhar -> fallback para redirect
-    try{
-      await auth.signInWithPopup(provider);
-      location.replace("./index.html");
-    }catch(e){
-      // se o popup for bloqueado, usa redirect
-      if(String(e.code||"").includes("popup") || String(e.message||"").toLowerCase().includes("popup")){
-        await auth.signInWithRedirect(provider);
-      }else{
-        throw e;
-      }
-    }
-  }catch(e){
+  if (error) {
     setLoading(false);
-    alert((e.code||"") + " - " + e.message);
+    alert(error.message);
+    return;
   }
+  if (data.user && !data.session) {
+    setLoading(false);
+    alert(“Conta criada! Verifique seu email para confirmar antes de entrar.”);
+    return;
+  }
+  location.replace(“./index.html”);
 }
 
-document.addEventListener("DOMContentLoaded", async ()=>{
-  const ok = await initFirebase();
-  if(!ok) return;
+async function loginGoogle() {
+  const sb = getSB();
+  if (!sb) { dbg(“Supabase não configurado. Verifique config.js”); return; }
 
-  // ✅ se voltar de redirect do google
-  try{
-    const res = await auth.getRedirectResult();
-    if(res && res.user){
-      location.replace("./index.html");
-      return;
-    }
-  }catch(e){
-    // não bloqueia a tela
-  }
-
-  // ✅ se já estiver logado, entra direto
-  auth.onAuthStateChanged((user)=>{
-    if(user){
-      location.replace("./index.html");
-    }else{
-      setLoading(false);
+  setLoading(true);
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: “google”,
+    options: {
+      redirectTo: REDIRECT_URL,
+      queryParams: { prompt: “select_account” }
     }
   });
+  if (error) {
+    setLoading(false);
+    alert(error.message);
+  }
+}
 
-  document.getElementById("btnLoginEmail").addEventListener("click", loginEmail);
-  document.getElementById("btnCriarConta").addEventListener("click", criarConta);
-  document.getElementById("btnGoogle").addEventListener("click", loginGoogle);
+document.addEventListener(“DOMContentLoaded”, async () => {
+  const sb = getSB();
+  if (!sb) {
+    dbg(“Supabase não configurado — verifique config.js\nURL: “ + (window.SUPABASE_URL || “não definida”));
+    return;
+  }
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    location.replace(“./index.html”);
+    return;
+  }
+
+  setLoading(false);
+  document.getElementById(“btnLoginEmail”).addEventListener(“click”, loginEmail);
+  document.getElementById(“btnCriarConta”).addEventListener(“click”, criarConta);
+  document.getElementById(“btnGoogle”).addEventListener(“click”, loginGoogle);
 });
 </script>
 
