@@ -1,11 +1,16 @@
 -- ============================================================
--- Controle de Gastos PRO — Schema Supabase Completo
--- Seguro para rodar mais de uma vez (idempotente)
+-- Controle de Gastos PRO -- Schema Supabase Completo
+-- Idempotente: pode rodar mais de uma vez sem erro
 -- ============================================================
 
 -- ------------------------------------------------------------
--- FUNÇÃO: atualiza updated_at automaticamente
--- CREATE OR REPLACE é idempotente
+-- GRANTS DE SCHEMA (necessario para authenticated acessar tabelas)
+-- Supabase exige GRANT antes das policies funcionarem
+-- ------------------------------------------------------------
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+
+-- ------------------------------------------------------------
+-- FUNCAO: atualiza updated_at automaticamente
 -- ------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -17,7 +22,6 @@ $$ LANGUAGE plpgsql;
 
 -- ============================================================
 -- 1. PROFILES
--- Perfil do usuário (nome, avatar, preferências de tema)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS profiles (
     id           uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -38,6 +42,8 @@ CREATE TRIGGER profiles_updated_at
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON profiles TO authenticated;
+
 DROP POLICY IF EXISTS "profiles_select_own" ON profiles;
 CREATE POLICY "profiles_select_own"
     ON profiles FOR SELECT USING (auth.uid() = id);
@@ -54,7 +60,7 @@ DROP POLICY IF EXISTS "profiles_delete_own" ON profiles;
 CREATE POLICY "profiles_delete_own"
     ON profiles FOR DELETE USING (auth.uid() = id);
 
--- Trigger para criar perfil automaticamente ao registrar
+-- Trigger: cria perfil automaticamente ao registrar usuario
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -72,12 +78,11 @@ CREATE TRIGGER on_auth_user_created
 
 -- ============================================================
 -- 2. MONTHLY_SETTINGS
--- Salário, meta e configurações por mês
 -- ============================================================
 CREATE TABLE IF NOT EXISTS monthly_settings (
     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    mes        text NOT NULL,  -- formato: "YYYY-MM"
+    mes        text NOT NULL,
     salary     numeric DEFAULT 0,
     meta       numeric DEFAULT 0,
     notes      text,
@@ -94,6 +99,8 @@ CREATE TRIGGER monthly_settings_updated_at
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE monthly_settings ENABLE ROW LEVEL SECURITY;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON monthly_settings TO authenticated;
 
 DROP POLICY IF EXISTS "monthly_settings_select_own" ON monthly_settings;
 CREATE POLICY "monthly_settings_select_own"
@@ -113,7 +120,6 @@ CREATE POLICY "monthly_settings_delete_own"
 
 -- ============================================================
 -- 3. CATEGORIES
--- Categorias personalizadas de gastos
 -- ============================================================
 CREATE TABLE IF NOT EXISTS categories (
     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -134,6 +140,8 @@ CREATE TRIGGER categories_updated_at
 
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON categories TO authenticated;
+
 DROP POLICY IF EXISTS "categories_select_own" ON categories;
 CREATE POLICY "categories_select_own"
     ON categories FOR SELECT USING (auth.uid() = user_id);
@@ -152,7 +160,6 @@ CREATE POLICY "categories_delete_own"
 
 -- ============================================================
 -- 4. FIXED_EXPENSES
--- Gastos fixos mensais (aluguel, luz, água etc.)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS fixed_expenses (
     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -173,6 +180,8 @@ CREATE TRIGGER fixed_expenses_updated_at
 
 ALTER TABLE fixed_expenses ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON fixed_expenses TO authenticated;
+
 DROP POLICY IF EXISTS "fixed_expenses_select_own" ON fixed_expenses;
 CREATE POLICY "fixed_expenses_select_own"
     ON fixed_expenses FOR SELECT USING (auth.uid() = user_id);
@@ -191,8 +200,6 @@ CREATE POLICY "fixed_expenses_delete_own"
 
 -- ============================================================
 -- 5. FIXED_INVESTMENTS
--- Investimentos fixos com meta e prazo
--- Criado antes de saved_amounts (que referencia esta tabela)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS fixed_investments (
     id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -214,6 +221,8 @@ CREATE TRIGGER fixed_investments_updated_at
 
 ALTER TABLE fixed_investments ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON fixed_investments TO authenticated;
+
 DROP POLICY IF EXISTS "fixed_investments_select_own" ON fixed_investments;
 CREATE POLICY "fixed_investments_select_own"
     ON fixed_investments FOR SELECT USING (auth.uid() = user_id);
@@ -232,8 +241,6 @@ CREATE POLICY "fixed_investments_delete_own"
 
 -- ============================================================
 -- 6. SAVED_AMOUNTS
--- Valores guardados/poupados por mês
--- investment_id aponta para fixed_investments(id)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS saved_amounts (
     id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -261,6 +268,8 @@ CREATE TRIGGER saved_amounts_updated_at
 
 ALTER TABLE saved_amounts ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON saved_amounts TO authenticated;
+
 DROP POLICY IF EXISTS "saved_amounts_select_own" ON saved_amounts;
 CREATE POLICY "saved_amounts_select_own"
     ON saved_amounts FOR SELECT USING (auth.uid() = user_id);
@@ -279,23 +288,31 @@ CREATE POLICY "saved_amounts_delete_own"
 
 -- ============================================================
 -- 7. EXPENSES
--- Gastos variáveis por mês
+-- Gastos variaveis por mes
+-- Colunas alinhadas com o payload do app:
+--   user_id, mes, descricao, categoria, valor, data, status, pago
 -- ============================================================
 CREATE TABLE IF NOT EXISTS expenses (
-    id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id        uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    mes            text NOT NULL,
-    descricao      text,
-    categoria      text DEFAULT 'Outros',
-    valor          numeric NOT NULL CHECK (valor > 0),
-    data           date,
-    paid           boolean DEFAULT false,
-    is_fixo        boolean DEFAULT false,
-    origem         text DEFAULT 'manual',
-    bank_import_id uuid,
-    created_at     timestamptz DEFAULT now(),
-    updated_at     timestamptz DEFAULT now()
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    mes        text NOT NULL,
+    descricao  text,
+    categoria  text DEFAULT 'Outros',
+    valor      numeric NOT NULL CHECK (valor > 0),
+    data       date,
+    status     text DEFAULT 'ativo',
+    pago       boolean DEFAULT false,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
 );
+
+-- Colunas adicionadas em versao anterior (manter compatibilidade se ja existirem)
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS paid      boolean DEFAULT false;
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS is_fixo   boolean DEFAULT false;
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS origem    text DEFAULT 'manual';
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS status    text DEFAULT 'ativo';
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS pago      boolean DEFAULT false;
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS bank_import_id uuid;
 
 CREATE INDEX IF NOT EXISTS idx_expenses_user_mes
     ON expenses(user_id, mes);
@@ -309,6 +326,8 @@ CREATE TRIGGER expenses_updated_at
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON expenses TO authenticated;
 
 DROP POLICY IF EXISTS "expenses_select_own" ON expenses;
 CREATE POLICY "expenses_select_own"
@@ -328,12 +347,11 @@ CREATE POLICY "expenses_delete_own"
 
 -- ============================================================
 -- 8. HISTORY
--- Snapshot completo de cada mês para histórico
 -- ============================================================
 CREATE TABLE IF NOT EXISTS history (
     id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id      uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    mes          text NOT NULL,  -- formato: "YYYY-MM"
+    mes          text NOT NULL,
     salary       numeric DEFAULT 0,
     meta         numeric DEFAULT 0,
     total_gastos numeric DEFAULT 0,
@@ -354,6 +372,8 @@ CREATE TRIGGER history_updated_at
 
 ALTER TABLE history ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON history TO authenticated;
+
 DROP POLICY IF EXISTS "history_select_own" ON history;
 CREATE POLICY "history_select_own"
     ON history FOR SELECT USING (auth.uid() = user_id);
@@ -372,7 +392,6 @@ CREATE POLICY "history_delete_own"
 
 -- ============================================================
 -- 9. APP_BACKUPS
--- Backup completo do estado do app em JSON
 -- ============================================================
 CREATE TABLE IF NOT EXISTS app_backups (
     id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -388,6 +407,8 @@ CREATE INDEX IF NOT EXISTS idx_app_backups_user
 
 ALTER TABLE app_backups ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_backups TO authenticated;
+
 DROP POLICY IF EXISTS "app_backups_select_own" ON app_backups;
 CREATE POLICY "app_backups_select_own"
     ON app_backups FOR SELECT USING (auth.uid() = user_id);
@@ -402,7 +423,6 @@ CREATE POLICY "app_backups_delete_own"
 
 -- ============================================================
 -- 10. BANK_NOTIFICATION_IMPORTS
--- Detecções do app Android Leitor Bancário
 -- ============================================================
 CREATE TABLE IF NOT EXISTS bank_notification_imports (
     id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -438,6 +458,8 @@ CREATE TRIGGER bank_imports_updated_at
 
 ALTER TABLE bank_notification_imports ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON bank_notification_imports TO authenticated;
+
 DROP POLICY IF EXISTS "bank_imports_select_own" ON bank_notification_imports;
 CREATE POLICY "bank_imports_select_own"
     ON bank_notification_imports FOR SELECT USING (auth.uid() = user_id);
@@ -456,8 +478,6 @@ CREATE POLICY "bank_imports_delete_own"
 
 -- ============================================================
 -- 11. INCOME_ENTRIES
--- Entradas/receitas (Pix recebido, vendas etc.)
--- Criado depois de bank_notification_imports (FK para ela)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS income_entries (
     id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -487,6 +507,8 @@ CREATE TRIGGER income_entries_updated_at
 
 ALTER TABLE income_entries ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON income_entries TO authenticated;
+
 DROP POLICY IF EXISTS "income_select_own" ON income_entries;
 CREATE POLICY "income_select_own"
     ON income_entries FOR SELECT USING (auth.uid() = user_id);
@@ -504,7 +526,7 @@ CREATE POLICY "income_delete_own"
     ON income_entries FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================
--- VIEW: resumo mensal de importações Android
+-- VIEW: resumo mensal de importacoes Android
 -- ============================================================
 CREATE OR REPLACE VIEW bank_imports_summary AS
 SELECT
@@ -520,3 +542,9 @@ SELECT
     COUNT(*)                                                          AS total
 FROM bank_notification_imports
 GROUP BY user_id, LEFT(COALESCE(notification_time::text, created_at::text), 7);
+
+-- ============================================================
+-- GRANTS FINAIS: sequences e view
+-- ============================================================
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+GRANT SELECT ON bank_imports_summary TO authenticated;
