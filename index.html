@@ -1104,6 +1104,16 @@ h1,h2,h3{
       </div>
 
       <div class="hr"></div>
+      <h3 style="margin:0 0 10px;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px">Financeiro PRO</h3>
+      <div class="menuGrid">
+        <button class="btn menuItem" onclick="openReceitas()"><span class="menuIcon">💰</span> Receitas</button>
+        <button class="btn menuItem" onclick="openContas()"><span class="menuIcon">🏦</span> Contas</button>
+        <button class="btn menuItem" onclick="openOrcamentos()"><span class="menuIcon">📊</span> Orçamentos</button>
+        <button class="btn menuItem" onclick="openMetas()"><span class="menuIcon">🎯</span> Metas</button>
+        <button class="btn menuItem" onclick="openCartoes()"><span class="menuIcon">💳</span> Cartões</button>
+      </div>
+
+      <div class="hr"></div>
 
       <div class="card">
         <h3>Conta</h3>
@@ -1612,6 +1622,197 @@ h1,h2,h3{
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ===== TELA: RECEITAS ===== -->
+  <div class="screen" id="screen-receitas">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">💰 Receitas</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <h3>Adicionar receita</h3>
+      <label>Descrição</label>
+      <input id="recDesc" placeholder="Ex: Salário, Freela, Pix...">
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Valor (R$)</label>
+          <input id="recValor" type="number" placeholder="Ex: 3500">
+        </div>
+        <div>
+          <label>Origem</label>
+          <select id="recOrigem">
+            <option value="salario">Salário</option>
+            <option value="pix">Pix recebido</option>
+            <option value="renda_extra">Renda extra</option>
+            <option value="venda">Venda</option>
+            <option value="reembolso">Reembolso</option>
+            <option value="presente">Presente</option>
+            <option value="manual">Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Data</label>
+          <input id="recData" type="date">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn primary" style="width:100%" onclick="addReceita()">Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Receitas do mês — <span id="recTotalLabel">R$ 0,00</span></h3>
+      <div id="listaReceitas" class="small"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: CONTAS ===== -->
+  <div class="screen" id="screen-contas">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">🏦 Contas e Carteiras</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <h3>Adicionar conta</h3>
+      <label>Nome</label>
+      <input id="contaNome" placeholder="Ex: Nubank, Caixa, Dinheiro...">
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Tipo</label>
+          <select id="contaTipo">
+            <option value="conta_corrente">Conta Corrente</option>
+            <option value="poupanca">Poupança</option>
+            <option value="carteira">Carteira (dinheiro)</option>
+            <option value="investimento">Investimentos</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div>
+          <label>Saldo inicial (R$)</label>
+          <input id="contaSaldo" type="number" placeholder="0">
+        </div>
+      </div>
+      <button class="btn primary" style="margin-top:10px;width:100%" onclick="addConta()">Adicionar</button>
+    </div>
+
+    <div class="card">
+      <h3>Minhas contas</h3>
+      <div id="listaContas" class="small"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: ORÇAMENTOS ===== -->
+  <div class="screen" id="screen-orcamentos">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">📊 Orçamentos por Categoria</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <h3>Definir limite por categoria</h3>
+      <div class="grid2">
+        <div>
+          <label>Categoria</label>
+          <select id="orcCategoria"></select>
+        </div>
+        <div>
+          <label>Limite mensal (R$)</label>
+          <input id="orcLimite" type="number" placeholder="Ex: 500">
+        </div>
+      </div>
+      <button class="btn primary" style="margin-top:10px;width:100%" onclick="addOrcamento()">Salvar limite</button>
+    </div>
+
+    <div class="card">
+      <h3>Orçamentos do mês</h3>
+      <div id="listaOrcamentos"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: METAS ===== -->
+  <div class="screen" id="screen-metas">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">🎯 Metas Financeiras</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <h3>Criar meta</h3>
+      <label>Nome da meta</label>
+      <input id="metaNome" placeholder="Ex: Reserva de emergência, Notebook, Viagem...">
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Valor objetivo (R$)</label>
+          <input id="metaObjetivo" type="number" placeholder="Ex: 10000">
+        </div>
+        <div>
+          <label>Prazo (opcional)</label>
+          <input id="metaPrazo" type="date">
+        </div>
+      </div>
+      <button class="btn primary" style="margin-top:10px;width:100%" onclick="addMeta()">Criar meta</button>
+    </div>
+
+    <div class="card">
+      <h3>Minhas metas</h3>
+      <div id="listaMetas"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: CARTÕES ===== -->
+  <div class="screen" id="screen-cartoes">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">💳 Cartões de Crédito</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <h3>Adicionar cartão</h3>
+      <label>Nome do cartão</label>
+      <input id="cardNome" placeholder="Ex: Nubank, Itaú Platinum...">
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Limite (R$)</label>
+          <input id="cardLimite" type="number" placeholder="Ex: 5000">
+        </div>
+        <div>
+          <label>Dia de vencimento</label>
+          <input id="cardVenc" type="number" min="1" max="31" placeholder="Ex: 5">
+        </div>
+      </div>
+      <button class="btn primary" style="margin-top:10px;width:100%" onclick="addCartao()">Adicionar cartão</button>
+    </div>
+
+    <div class="card">
+      <h3>Meus cartões</h3>
+      <div id="listaCartoes" class="small"></div>
+    </div>
+  </div>
+
+  <!-- ===== MODAIS NOVOS ===== -->
+  <div class="overlay" id="overlay-addMeta">
+    <div class="modal confirmModal">
+      <div class="modalHeader">
+        <div class="title">💰 Adicionar valor à meta</div>
+        <div class="closeX" onclick="closeModal('overlay-addMeta')">✕</div>
+      </div>
+      <div class="modalBody">
+        <div id="metaAporteNome" style="font-weight:900;margin-bottom:10px"></div>
+        <label>Valor a adicionar (R$)</label>
+        <input id="metaAporteValor" type="number" placeholder="Ex: 500">
+        <label style="margin-top:10px">Descrição (opcional)</label>
+        <input id="metaAporteDesc" placeholder="Ex: Guardei do salário">
+      </div>
+      <div class="modalFooter">
+        <button class="btn" onclick="closeModal('overlay-addMeta')">Cancelar</button>
+        <button class="btn good" onclick="confirmarAporteMeta()">Adicionar</button>
+      </div>
     </div>
   </div>
 
@@ -4344,6 +4545,13 @@ async function initSupabaseAuth() {
             fixos       = App.fixos.length       ? App.fixos       : fixos;
             investFixos = App.investFixos.length  ? App.investFixos  : investFixos;
 
+            // Sincroniza novos módulos financeiros com variáveis locais
+            if (App.accounts && App.accounts.length) window._contas = App.accounts.slice();
+            if (App.creditCards && App.creditCards.length) window._cartoes = App.creditCards.slice();
+            if (App.financialGoals && App.financialGoals.length) window._metas = App.financialGoals.slice();
+            if (App.categoryBudgets) window._orcamentos = App.categoryBudgets.filter(function(b){ return b.mes===mesAtual; });
+            if (App.incomeEntries && App.incomeEntries[mesAtual]) window._receitas = App.incomeEntries[mesAtual];
+
             // Aplica configurações de tema/preferências da nuvem
             if (App._cloudAppSettings) {
               const s = App._cloudAppSettings;
@@ -5028,6 +5236,323 @@ window.listarLancamentosBancariosMes = function(){
     </div>
   </div>
 </div>
+<!-- ===== FINANCEIRO PRO: RECEITAS, CONTAS, ORÇAMENTOS, METAS, CARTÕES ===== -->
+<script>
+/* --- Estado local dos novos módulos --- */
+var _receitas       = [];   // [{_sbid, desc, categoria, valor, data, origem}]
+var _contas         = [];   // [{_sbid, nome, tipo, saldo_inicial, cor}]
+var _orcamentos     = [];   // [{_sbid, mes, categoria, limite}]
+var _metas          = [];   // [{_sbid, nome, valor_objetivo, valor_atual, prazo}]
+var _cartoes        = [];   // [{_sbid, nome, limite, dia_vencimento}]
+var _metaAporteId   = null; // ID do _sbid da meta em edição
+
+/* ========== RECEITAS ========== */
+function openReceitas(){
+  _receitas = (window.App && App.incomeEntries && App.incomeEntries[mesAtual]) || [];
+  document.getElementById("recData").value = todayISO();
+  renderReceitas();
+  openScreen("screen-receitas");
+}
+function renderReceitas(){
+  const list = document.getElementById("listaReceitas");
+  const totalEl = document.getElementById("recTotalLabel");
+  if(!list) return;
+  const items = _receitas;
+  const total = items.reduce((a,b)=>a+Number(b.valor||0),0);
+  if(totalEl) totalEl.textContent = money(total);
+  if(!items.length){ list.innerHTML='<div style="padding:12px;opacity:.6">Nenhuma receita neste mês.</div>'; return; }
+  list.innerHTML = items.map((r,idx)=>`
+    <div class="layoutItem" style="margin-bottom:8px">
+      <div class="layoutLeft">
+        <div>
+          <div class="layoutTitle">${escapeHtml(r.descricao||r.desc||"")}</div>
+          <div class="small">${escapeHtml(r.origem||"")} • ${escapeHtml(r.data||"")}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="font-weight:900;color:var(--good)">${money(r.valor||0)}</div>
+        <button class="btn icon mini" onclick="removeReceita(${idx})" title="Remover">✕</button>
+      </div>
+    </div>`).join("");
+}
+function addReceita(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const desc  = (document.getElementById("recDesc").value||"").trim();
+  const valor = Number(document.getElementById("recValor").value||0);
+  const origem= document.getElementById("recOrigem").value || "manual";
+  const data  = document.getElementById("recData").value || todayISO();
+  if(!desc) return alert("Preencha a descrição.");
+  if(!valor||valor<=0) return alert("Preencha o valor.");
+  const entry = { descricao:desc, categoria:origem, valor, data, origem, mes:mesAtual };
+  _receitas.unshift(entry);
+  if(window.App && App.incomeEntries){ App.incomeEntries[mesAtual] = _receitas; }
+  document.getElementById("recDesc").value="";
+  document.getElementById("recValor").value="";
+  renderReceitas();
+  // Sync Supabase
+  if(window.App && typeof App.syncSaveOneIncomeEntry==="function"){
+    App.syncSaveOneIncomeEntry(entry).then(function(id){
+      if(id) entry._sbid = id;
+    }).catch(()=>{});
+  }
+}
+function removeReceita(idx){
+  const r = _receitas[idx];
+  if(!r) return;
+  _receitas.splice(idx,1);
+  if(window.App && App.incomeEntries){ App.incomeEntries[mesAtual] = _receitas; }
+  renderReceitas();
+  if(r._sbid && window.App && typeof App.syncDeleteIncomeEntry==="function"){
+    App.syncDeleteIncomeEntry(r._sbid).catch(()=>{});
+  }
+}
+
+/* ========== CONTAS ========== */
+function openContas(){
+  _contas = (window.App && App.accounts) ? App.accounts.slice() : [];
+  renderContas();
+  openScreen("screen-contas");
+}
+function renderContas(){
+  const list = document.getElementById("listaContas");
+  if(!list) return;
+  if(!_contas.length){ list.innerHTML='<div style="padding:12px;opacity:.6">Nenhuma conta cadastrada.</div>'; return; }
+  list.innerHTML = _contas.map((c,idx)=>`
+    <div class="layoutItem" style="margin-bottom:8px">
+      <div class="layoutLeft">
+        <div style="width:34px;height:34px;border-radius:10px;background:${escapeHtml(c.cor||"#569cff")}22;display:flex;align-items:center;justify-content:center;font-size:18px">${escapeHtml(c.icone||"🏦")}</div>
+        <div>
+          <div class="layoutTitle">${escapeHtml(c.nome||"")}</div>
+          <div class="small">${escapeHtml(c.tipo||"")} • Saldo inicial: ${money(c.saldo_inicial||0)}</div>
+        </div>
+      </div>
+      <button class="btn icon mini" onclick="removeConta(${idx})" title="Remover">✕</button>
+    </div>`).join("");
+}
+function addConta(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const nome  = (document.getElementById("contaNome").value||"").trim();
+  const tipo  = document.getElementById("contaTipo").value || "conta_corrente";
+  const saldo = Number(document.getElementById("contaSaldo").value||0);
+  if(!nome) return alert("Digite o nome da conta.");
+  const conta = { nome, tipo, saldo_inicial:saldo, cor:"#569cff", icone:"🏦", ativo:true };
+  _contas.push(conta);
+  if(window.App) App.accounts = _contas;
+  document.getElementById("contaNome").value="";
+  document.getElementById("contaSaldo").value="";
+  renderContas();
+  if(window.App && typeof App.syncSaveOneAccount==="function"){
+    App.syncSaveOneAccount(conta).then(function(id){ if(id) conta._sbid=id; }).catch(()=>{});
+  }
+}
+function removeConta(idx){
+  const c = _contas[idx];
+  if(!c) return;
+  _contas.splice(idx,1);
+  if(window.App) App.accounts = _contas;
+  renderContas();
+  if(c._sbid && window.App && typeof App.syncDeleteAccount==="function"){
+    App.syncDeleteAccount(c._sbid).catch(()=>{});
+  }
+}
+
+/* ========== ORÇAMENTOS ========== */
+function openOrcamentos(){
+  _orcamentos = (window.App && App.categoryBudgets) ? App.categoryBudgets.filter(b=>b.mes===mesAtual) : [];
+  const sel = document.getElementById("orcCategoria");
+  if(sel) sel.innerHTML = categorias.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+  renderOrcamentos();
+  openScreen("screen-orcamentos");
+}
+function renderOrcamentos(){
+  const list = document.getElementById("listaOrcamentos");
+  if(!list) return;
+  const d = getDataMes(mesAtual);
+  const gastosPorCat = {};
+  (d.items||[]).forEach(it=>{ const c=it.category||"Outros"; gastosPorCat[c]=(gastosPorCat[c]||0)+Number(it.amount||0); });
+  if(!_orcamentos.length){ list.innerHTML='<div class="small" style="padding:12px;opacity:.6">Nenhum orçamento definido.</div>'; return; }
+  list.innerHTML = _orcamentos.map((o,idx)=>{
+    const gasto = gastosPorCat[o.categoria]||0;
+    const pct   = Math.min(100, o.limite>0 ? Math.round((gasto/o.limite)*100) : 0);
+    const cls   = pct>=100?"danger":pct>=90?"warn":pct>=70?"warn":"good";
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <div style="font-weight:900">${escapeHtml(o.categoria)}</div>
+        <div class="small">${money(gasto)} / ${money(o.limite)} <button class="btn icon mini" style="margin-left:6px" onclick="removeOrcamento(${idx})">✕</button></div>
+      </div>
+      <div class="progressBarTrack"><div class="progressBarFill ${cls}" style="width:${pct}%"></div></div>
+      <div class="small" style="margin-top:4px">${pct}% usado — falta ${money(Math.max(0,o.limite-gasto))}</div>
+    </div>`;
+  }).join("");
+}
+function addOrcamento(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const cat   = document.getElementById("orcCategoria").value;
+  const lim   = Number(document.getElementById("orcLimite").value||0);
+  if(!cat) return alert("Escolha a categoria.");
+  if(!lim||lim<=0) return alert("Digite um limite maior que zero.");
+  const existing = _orcamentos.findIndex(o=>o.categoria===cat);
+  if(existing>=0){ _orcamentos[existing].limite=lim; } else { _orcamentos.push({mes:mesAtual,categoria:cat,limite:lim}); }
+  if(window.App) App.categoryBudgets = (App.categoryBudgets||[]).filter(b=>!(b.mes===mesAtual&&b.categoria===cat)).concat(_orcamentos.filter(b=>b.mes===mesAtual&&b.categoria===cat));
+  document.getElementById("orcLimite").value="";
+  renderOrcamentos();
+  if(window.App && typeof App.syncSaveCategoryBudget==="function"){
+    App.syncSaveCategoryBudget(mesAtual, cat, lim).catch(()=>{});
+  }
+}
+function removeOrcamento(idx){
+  const o = _orcamentos[idx];
+  if(!o) return;
+  _orcamentos.splice(idx,1);
+  if(window.App) App.categoryBudgets = (App.categoryBudgets||[]).filter(b=>!(b.mes===mesAtual&&b.categoria===o.categoria));
+  renderOrcamentos();
+  if(o._sbid && window.App && typeof App.syncDeleteCategoryBudget==="function"){
+    App.syncDeleteCategoryBudget(o._sbid).catch(()=>{});
+  }
+}
+
+/* ========== METAS ========== */
+function openMetas(){
+  _metas = (window.App && App.financialGoals) ? App.financialGoals.slice() : [];
+  renderMetas();
+  openScreen("screen-metas");
+}
+function renderMetas(){
+  const list = document.getElementById("listaMetas");
+  if(!list) return;
+  if(!_metas.length){ list.innerHTML='<div class="small" style="padding:12px;opacity:.6">Nenhuma meta cadastrada. Crie sua primeira meta!</div>'; return; }
+  list.innerHTML = _metas.map((m,idx)=>{
+    const pct = m.valor_objetivo>0 ? Math.min(100,Math.round((m.valor_atual/m.valor_objetivo)*100)) : 0;
+    const falta = Math.max(0,m.valor_objetivo-m.valor_atual);
+    const cls = pct>=100?"good":pct>=60?"warn":"";
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <div style="font-size:22px">${escapeHtml(m.icone||"🎯")}</div>
+          <div style="font-weight:950;margin-top:4px">${escapeHtml(m.nome||"")}</div>
+          ${m.prazo?`<div class="small">Prazo: ${escapeHtml(m.prazo)}</div>`:""}
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:900;color:var(--good)">${money(m.valor_atual||0)}</div>
+          <div class="small">de ${money(m.valor_objetivo||0)}</div>
+          <div class="small">Falta: ${money(falta)}</div>
+        </div>
+      </div>
+      <div class="progressBarTrack" style="margin-top:8px"><div class="progressBarFill ${cls}" style="width:${pct}%"></div></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn primary mini" style="flex:1" onclick="openAporteMeta(${idx})">+ Aportar</button>
+        <button class="btn mini danger" onclick="removeMeta(${idx})">✕ Remover</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+function addMeta(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const nome = (document.getElementById("metaNome").value||"").trim();
+  const obj  = Number(document.getElementById("metaObjetivo").value||0);
+  const prazo= document.getElementById("metaPrazo").value || null;
+  if(!nome) return alert("Digite o nome da meta.");
+  if(!obj||obj<=0) return alert("Digite o valor objetivo.");
+  const meta = { nome, valor_objetivo:obj, valor_atual:0, prazo, cor:"#39d98a", icone:"🎯", ativo:true };
+  _metas.push(meta);
+  if(window.App) App.financialGoals = _metas;
+  document.getElementById("metaNome").value="";
+  document.getElementById("metaObjetivo").value="";
+  document.getElementById("metaPrazo").value="";
+  renderMetas();
+  if(window.App && typeof App.syncSaveOneGoal==="function"){
+    App.syncSaveOneGoal(meta).then(function(id){ if(id) meta._sbid=id; }).catch(()=>{});
+  }
+}
+function openAporteMeta(idx){
+  const m = _metas[idx];
+  if(!m) return;
+  _metaAporteId = idx;
+  const el = document.getElementById("metaAporteNome");
+  if(el) el.textContent = m.nome;
+  document.getElementById("metaAporteValor").value="";
+  document.getElementById("metaAporteDesc").value="";
+  openModal("overlay-addMeta");
+}
+function confirmarAporteMeta(){
+  const idx  = _metaAporteId;
+  const m    = _metas[idx];
+  if(!m) return;
+  const val  = Number(document.getElementById("metaAporteValor").value||0);
+  const desc = (document.getElementById("metaAporteDesc").value||"").trim();
+  if(!val||val<=0){ alert("Digite um valor."); return; }
+  m.valor_atual = Number(m.valor_atual||0) + val;
+  closeModal("overlay-addMeta");
+  renderMetas();
+  if(window.App){
+    if(m._sbid && typeof App.syncUpdateGoalValue==="function")
+      App.syncUpdateGoalValue(m._sbid, m.valor_atual).catch(()=>{});
+    if(m._sbid && typeof App.syncSaveGoalContribution==="function")
+      App.syncSaveGoalContribution(m._sbid, val, desc).catch(()=>{});
+  }
+}
+function removeMeta(idx){
+  const m = _metas[idx];
+  if(!m) return;
+  _metas.splice(idx,1);
+  if(window.App) App.financialGoals = _metas;
+  renderMetas();
+  if(m._sbid && window.App && typeof App.syncDeleteGoal==="function"){
+    App.syncDeleteGoal(m._sbid).catch(()=>{});
+  }
+}
+
+/* ========== CARTÕES ========== */
+function openCartoes(){
+  _cartoes = (window.App && App.creditCards) ? App.creditCards.slice() : [];
+  renderCartoes();
+  openScreen("screen-cartoes");
+}
+function renderCartoes(){
+  const list = document.getElementById("listaCartoes");
+  if(!list) return;
+  if(!_cartoes.length){ list.innerHTML='<div style="padding:12px;opacity:.6">Nenhum cartão cadastrado.</div>'; return; }
+  list.innerHTML = _cartoes.map((c,idx)=>`
+    <div class="layoutItem" style="margin-bottom:8px">
+      <div class="layoutLeft">
+        <div style="width:34px;height:34px;border-radius:10px;background:${escapeHtml(c.cor||"#ff5d5d")}33;display:flex;align-items:center;justify-content:center;font-size:18px">💳</div>
+        <div>
+          <div class="layoutTitle">${escapeHtml(c.nome||"")}</div>
+          <div class="small">Limite: ${money(c.limite||0)} • Vence dia ${c.dia_vencimento||5}</div>
+        </div>
+      </div>
+      <button class="btn icon mini" onclick="removeCartao(${idx})" title="Remover">✕</button>
+    </div>`).join("");
+}
+function addCartao(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const nome  = (document.getElementById("cardNome").value||"").trim();
+  const lim   = Number(document.getElementById("cardLimite").value||0);
+  const venc  = Number(document.getElementById("cardVenc").value||5);
+  if(!nome) return alert("Digite o nome do cartão.");
+  const card = { nome, limite:lim, dia_fechamento:20, dia_vencimento:venc, cor:"#ff5d5d", ativo:true };
+  _cartoes.push(card);
+  if(window.App) App.creditCards = _cartoes;
+  document.getElementById("cardNome").value="";
+  document.getElementById("cardLimite").value="";
+  document.getElementById("cardVenc").value="";
+  renderCartoes();
+  if(window.App && typeof App.syncSaveOneCard==="function"){
+    App.syncSaveOneCard(card).then(function(id){ if(id) card._sbid=id; }).catch(()=>{});
+  }
+}
+function removeCartao(idx){
+  const c = _cartoes[idx];
+  if(!c) return;
+  _cartoes.splice(idx,1);
+  if(window.App) App.creditCards = _cartoes;
+  renderCartoes();
+  if(c._sbid && window.App && typeof App.syncDeleteCreditCard==="function"){
+    App.syncDeleteCreditCard(c._sbid).catch(()=>{});
+  }
+}
+</script>
+
 <!-- ===== FUNÇÕES GLOBAIS: PAINEL ANDROID ===== -->
 <script>
 function openAndroidImports() {

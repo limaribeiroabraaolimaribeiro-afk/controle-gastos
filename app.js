@@ -83,6 +83,14 @@
   App.fixos = [];
   App.investFixos = [];
 
+  // Novos modulos financeiros
+  App.accounts        = [];   // Contas e carteiras
+  App.categoryBudgets = [];   // Orcamentos por categoria [{mes, categoria, limite, _sbid}]
+  App.creditCards     = [];   // Cartoes de credito
+  App.financialGoals  = [];   // Metas financeiras
+  App.goalContributions = []; // Aportes nas metas
+  App.incomeEntries   = {};   // {mes: [...]} Receitas/entradas
+
   /* =========================
      HELPERS
   ========================= */
@@ -1189,24 +1197,30 @@
         sb.from("fixed_expenses").select("*").eq("user_id", uid).order("created_at", { ascending: true }),
         sb.from("fixed_investments").select("*").eq("user_id", uid),
         sb.from("saved_amounts").select("*").eq("user_id", uid).order("created_at", { ascending: true }),
-        sb.from("app_settings").select("*").eq("user_id", uid).maybeSingle()
+        sb.from("app_settings").select("*").eq("user_id", uid).maybeSingle(),
+        sb.from("accounts").select("*").eq("user_id", uid).order("created_at"),
+        sb.from("category_budgets").select("*").eq("user_id", uid).order("created_at"),
+        sb.from("credit_cards").select("*").eq("user_id", uid).order("created_at"),
+        sb.from("financial_goals").select("*").eq("user_id", uid).order("created_at"),
+        sb.from("income_entries").select("*").eq("user_id", uid).order("data", { ascending: false })
       ]);
 
-      const expList    = (results[0].data || []);
-      const setList    = (results[1].data || []);
-      const catList    = (results[2].data || []);
-      const fexpList   = (results[3].data || []);
-      const fInvList   = (results[4].data || []);
-      const savList    = (results[5].data || []);
-      const appSetting = results[6].data || null;
+      const expList    = (results[0].data  || []);
+      const setList    = (results[1].data  || []);
+      const catList    = (results[2].data  || []);
+      const fexpList   = (results[3].data  || []);
+      const fInvList   = (results[4].data  || []);
+      const savList    = (results[5].data  || []);
+      const appSetting = results[6].data   || null;
+      const accList    = (results[7].data  || []);
+      const budgList   = (results[8].data  || []);
+      const cardList   = (results[9].data  || []);
+      const goalList   = (results[10].data || []);
+      const incList    = (results[11].data || []);
 
-      if (results[0].error) console.warn("[Supabase] expenses:", results[0].error.message);
-      if (results[1].error) console.warn("[Supabase] monthly_settings:", results[1].error.message);
-      if (results[2].error) console.warn("[Supabase] categories:", results[2].error.message);
-      if (results[3].error) console.warn("[Supabase] fixed_expenses:", results[3].error.message);
-      if (results[4].error) console.warn("[Supabase] fixed_investments:", results[4].error.message);
-      if (results[5].error) console.warn("[Supabase] saved_amounts:", results[5].error.message);
-      if (results[6].error) console.warn("[Supabase] app_settings:", results[6].error.message);
+      [0,1,2,3,4,5,6,7,8,9,10,11].forEach(function(i) {
+        if (results[i] && results[i].error) console.warn("[Supabase] query[" + i + "]:", results[i].error.message);
+      });
 
       console.log("[Supabase] Expenses encontrados:", expList.length);
       console.log("[Supabase] Monthly settings encontrados:", setList.length);
@@ -1215,6 +1229,11 @@
       console.log("[Supabase] Fixed investments encontrados:", fInvList.length);
       console.log("[Supabase] Saved amounts encontrados:", savList.length);
       console.log("[Supabase] App settings encontrados:", appSetting ? 1 : 0);
+      console.log("[Supabase] Accounts encontrados:", accList.length);
+      console.log("[Supabase] Category budgets encontrados:", budgList.length);
+      console.log("[Supabase] Credit cards encontrados:", cardList.length);
+      console.log("[Supabase] Financial goals encontrados:", goalList.length);
+      console.log("[Supabase] Income entries encontrados:", incList.length);
 
       const cloudHasData = expList.length > 0 || setList.length > 0 ||
                            catList.length > 0 || fexpList.length > 0 || fInvList.length > 0;
@@ -1294,6 +1313,37 @@
 
       App.state = newState;
       App.saveAll();
+
+      // Novos modulos financeiros
+      if (accList.length > 0) {
+        App.accounts = accList.map(function(a) {
+          return { _sbid: a.id, nome: a.nome, tipo: a.tipo, saldo_inicial: Number(a.saldo_inicial||0), cor: a.cor, icone: a.icone, ativo: a.ativo };
+        });
+      }
+      if (budgList.length > 0) {
+        App.categoryBudgets = budgList.map(function(b) {
+          return { _sbid: b.id, mes: b.mes, categoria: b.categoria, limite: Number(b.limite||0) };
+        });
+      }
+      if (cardList.length > 0) {
+        App.creditCards = cardList.map(function(c) {
+          return { _sbid: c.id, nome: c.nome, limite: Number(c.limite||0), dia_fechamento: c.dia_fechamento, dia_vencimento: c.dia_vencimento, cor: c.cor, ativo: c.ativo };
+        });
+      }
+      if (goalList.length > 0) {
+        App.financialGoals = goalList.map(function(g) {
+          return { _sbid: g.id, nome: g.nome, valor_objetivo: Number(g.valor_objetivo||0), valor_atual: Number(g.valor_atual||0), prazo: g.prazo, cor: g.cor, icone: g.icone, ativo: g.ativo };
+        });
+      }
+      // Income entries agrupadas por mes
+      if (incList.length > 0) {
+        App.incomeEntries = {};
+        incList.forEach(function(e) {
+          var m = e.mes;
+          if (!App.incomeEntries[m]) App.incomeEntries[m] = [];
+          App.incomeEntries[m].push({ _sbid: e.id, descricao: e.descricao, categoria: e.categoria, valor: Number(e.valor||0), data: e.data, origem: e.origem });
+        });
+      }
 
       // Expoe app_settings para o caller aplicar tema/preferencias
       if (appSetting) App._cloudAppSettings = appSetting;
@@ -1401,6 +1451,277 @@
       App.setSyncStatus("error", e.message);
       return false;
     }
+  };
+
+  /* =========================
+     NOVOS MODULOS FINANCEIROS
+  ========================= */
+
+  // ---------- INCOME ENTRIES ----------
+  App.syncSaveIncomeEntries = async function (mes, entries) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    await sb.from("income_entries").delete().eq("user_id", user.id).eq("mes", mes);
+    const rows = (entries || []).filter(e => Number(e.valor || 0) > 0).map(e => ({
+      user_id: user.id, mes,
+      descricao: e.desc || e.descricao || "",
+      categoria: e.categoria || e.category || "Outro",
+      valor:     Number(e.valor || 0),
+      data:      e.data || new Date().toISOString().slice(0,10),
+      origem:    e.origem || "manual"
+    }));
+    if (!rows.length) return true;
+    const { error } = await sb.from("income_entries").insert(rows);
+    if (error) { console.warn("[Supabase] syncSaveIncomeEntries:", error.message); return false; }
+    return true;
+  };
+
+  App.syncSaveOneIncomeEntry = async function (entry) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const row = {
+      user_id: user.id, mes: entry.mes,
+      descricao: entry.desc || entry.descricao || "",
+      categoria: entry.categoria || "Outro",
+      valor:     Number(entry.valor || 0),
+      data:      entry.data || new Date().toISOString().slice(0,10),
+      origem:    entry.origem || "manual"
+    };
+    if (row.valor <= 0) return null;
+    const { data, error } = await sb.from("income_entries").insert(row).select("id").single();
+    if (error) { console.warn("[Supabase] syncSaveOneIncomeEntry:", error.message); return null; }
+    return data && data.id;
+  };
+
+  App.syncDeleteIncomeEntry = async function (sbid) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("income_entries").delete().eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncDeleteIncomeEntry:", error.message); return false; }
+    return true;
+  };
+
+  App.syncLoadIncomeEntries = async function (mes) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    let q = sb.from("income_entries").select("*").eq("user_id", user.id).order("data", { ascending: false });
+    if (mes) q = q.eq("mes", mes);
+    const { data, error } = await q;
+    if (error) { console.warn("[Supabase] syncLoadIncomeEntries:", error.message); return []; }
+    return data || [];
+  };
+
+  // ---------- ACCOUNTS ----------
+  App.syncSaveAccounts = async function (accounts) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    await sb.from("accounts").delete().eq("user_id", user.id);
+    const rows = (accounts || []).filter(a => a.nome).map(a => ({
+      user_id: user.id, nome: a.nome,
+      tipo: a.tipo || "conta_corrente",
+      saldo_inicial: Number(a.saldo_inicial || 0),
+      cor: a.cor || "#569cff", icone: a.icone || "🏦", ativo: a.ativo !== false
+    }));
+    if (!rows.length) return true;
+    const { data, error } = await sb.from("accounts").insert(rows).select("id,nome");
+    if (error) { console.warn("[Supabase] syncSaveAccounts:", error.message); return false; }
+    return data;
+  };
+
+  App.syncSaveOneAccount = async function (account) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const row = {
+      user_id: user.id, nome: account.nome,
+      tipo: account.tipo || "conta_corrente",
+      saldo_inicial: Number(account.saldo_inicial || 0),
+      cor: account.cor || "#569cff", icone: account.icone || "🏦", ativo: true
+    };
+    const { data, error } = await sb.from("accounts").insert(row).select("id").single();
+    if (error) { console.warn("[Supabase] syncSaveOneAccount:", error.message); return null; }
+    return data && data.id;
+  };
+
+  App.syncDeleteAccount = async function (sbid) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("accounts").delete().eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncDeleteAccount:", error.message); return false; }
+    return true;
+  };
+
+  App.syncLoadAccounts = async function () {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    const { data, error } = await sb.from("accounts").select("*").eq("user_id", user.id).order("created_at");
+    if (error) { console.warn("[Supabase] syncLoadAccounts:", error.message); return []; }
+    return data || [];
+  };
+
+  // ---------- CATEGORY BUDGETS ----------
+  App.syncSaveCategoryBudget = async function (mes, categoria, limite) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    const { error } = await sb.from("category_budgets").upsert(
+      { user_id: user.id, mes, categoria, limite: Number(limite) },
+      { onConflict: "user_id,mes,categoria" }
+    );
+    if (error) { console.warn("[Supabase] syncSaveCategoryBudget:", error.message); return false; }
+    return true;
+  };
+
+  App.syncDeleteCategoryBudget = async function (sbid) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("category_budgets").delete().eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncDeleteCategoryBudget:", error.message); return false; }
+    return true;
+  };
+
+  App.syncLoadCategoryBudgets = async function (mes) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    let q = sb.from("category_budgets").select("*").eq("user_id", user.id);
+    if (mes) q = q.eq("mes", mes);
+    const { data, error } = await q;
+    if (error) { console.warn("[Supabase] syncLoadCategoryBudgets:", error.message); return []; }
+    return data || [];
+  };
+
+  // ---------- CREDIT CARDS ----------
+  App.syncSaveCreditCards = async function (cards) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    await sb.from("credit_cards").delete().eq("user_id", user.id);
+    const rows = (cards || []).filter(c => c.nome).map(c => ({
+      user_id: user.id, nome: c.nome, limite: Number(c.limite || 0),
+      dia_fechamento: Number(c.dia_fechamento || 20), dia_vencimento: Number(c.dia_vencimento || 5),
+      cor: c.cor || "#ff5d5d", ativo: c.ativo !== false
+    }));
+    if (!rows.length) return true;
+    const { data, error } = await sb.from("credit_cards").insert(rows).select("id,nome");
+    if (error) { console.warn("[Supabase] syncSaveCreditCards:", error.message); return false; }
+    return data;
+  };
+
+  App.syncSaveOneCard = async function (card) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const row = {
+      user_id: user.id, nome: card.nome, limite: Number(card.limite || 0),
+      dia_fechamento: Number(card.dia_fechamento || 20), dia_vencimento: Number(card.dia_vencimento || 5),
+      cor: card.cor || "#ff5d5d", ativo: true
+    };
+    const { data, error } = await sb.from("credit_cards").insert(row).select("id").single();
+    if (error) { console.warn("[Supabase] syncSaveOneCard:", error.message); return null; }
+    return data && data.id;
+  };
+
+  App.syncDeleteCreditCard = async function (sbid) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("credit_cards").delete().eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncDeleteCreditCard:", error.message); return false; }
+    return true;
+  };
+
+  App.syncLoadCreditCards = async function () {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    const { data, error } = await sb.from("credit_cards").select("*").eq("user_id", user.id).order("created_at");
+    if (error) { console.warn("[Supabase] syncLoadCreditCards:", error.message); return []; }
+    return data || [];
+  };
+
+  // ---------- INSTALLMENT PURCHASES ----------
+  App.syncSaveInstallmentPurchase = async function (purchase) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const row = {
+      user_id: user.id,
+      descricao: purchase.descricao || "",
+      categoria: purchase.categoria || "Outros",
+      valor_total:   Number(purchase.valor_total || 0),
+      valor_parcela: Number(purchase.valor_parcela || 0),
+      parcelas_total: Number(purchase.parcelas_total || 1),
+      data_compra: purchase.data_compra || new Date().toISOString().slice(0,10),
+      primeiro_mes: purchase.primeiro_mes || new Date().toISOString().slice(0,7),
+      card_id: purchase.card_id || null
+    };
+    const { data, error } = await sb.from("installment_purchases").insert(row).select("id").single();
+    if (error) { console.warn("[Supabase] syncSaveInstallmentPurchase:", error.message); return null; }
+    return data && data.id;
+  };
+
+  App.syncLoadInstallmentPurchases = async function () {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    const { data, error } = await sb.from("installment_purchases").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    if (error) { console.warn("[Supabase] syncLoadInstallmentPurchases:", error.message); return []; }
+    return data || [];
+  };
+
+  // ---------- FINANCIAL GOALS ----------
+  App.syncSaveOneGoal = async function (goal) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const row = {
+      user_id: user.id, nome: goal.nome,
+      valor_objetivo: Number(goal.valor_objetivo || 0),
+      valor_atual: Number(goal.valor_atual || 0),
+      prazo: goal.prazo || null,
+      cor: goal.cor || "#39d98a", icone: goal.icone || "🎯", ativo: true
+    };
+    const { data, error } = await sb.from("financial_goals").insert(row).select("id").single();
+    if (error) { console.warn("[Supabase] syncSaveOneGoal:", error.message); return null; }
+    return data && data.id;
+  };
+
+  App.syncUpdateGoalValue = async function (sbid, valor_atual) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("financial_goals").update({ valor_atual: Number(valor_atual) }).eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncUpdateGoalValue:", error.message); return false; }
+    return true;
+  };
+
+  App.syncDeleteGoal = async function (sbid) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("financial_goals").delete().eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncDeleteGoal:", error.message); return false; }
+    return true;
+  };
+
+  App.syncLoadFinancialGoals = async function () {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    const { data, error } = await sb.from("financial_goals").select("*").eq("user_id", user.id).order("created_at");
+    if (error) { console.warn("[Supabase] syncLoadFinancialGoals:", error.message); return []; }
+    return data || [];
+  };
+
+  App.syncSaveGoalContribution = async function (goalId, valor, descricao) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const row = {
+      user_id: user.id, goal_id: goalId,
+      valor: Number(valor), descricao: descricao || "",
+      data: new Date().toISOString().slice(0,10)
+    };
+    const { data, error } = await sb.from("goal_contributions").insert(row).select("id").single();
+    if (error) { console.warn("[Supabase] syncSaveGoalContribution:", error.message); return null; }
+    return data && data.id;
+  };
+
+  App.syncLoadGoalContributions = async function (goalId) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    let q = sb.from("goal_contributions").select("*").eq("user_id", user.id).order("data", { ascending: false });
+    if (goalId) q = q.eq("goal_id", goalId);
+    const { data, error } = await q;
+    if (error) { console.warn("[Supabase] syncLoadGoalContributions:", error.message); return []; }
+    return data || [];
   };
 
   App.syncAll = async function (dadosMes) {

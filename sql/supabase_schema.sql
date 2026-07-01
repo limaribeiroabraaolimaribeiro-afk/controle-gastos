@@ -556,7 +556,223 @@ FROM bank_notification_imports
 GROUP BY user_id, LEFT(COALESCE(notification_time::text, created_at::text), 7);
 
 -- ============================================================
--- 12. APP_SETTINGS
+-- 12. ACCOUNTS (Contas e Carteiras)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS accounts (
+    id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id       uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    nome          text NOT NULL,
+    tipo          text DEFAULT 'conta_corrente',
+    saldo_inicial numeric DEFAULT 0,
+    cor           text DEFAULT '#569cff',
+    icone         text DEFAULT '🏦',
+    ativo         boolean DEFAULT true,
+    created_at    timestamptz DEFAULT now(),
+    updated_at    timestamptz DEFAULT now()
+);
+
+DROP TRIGGER IF EXISTS accounts_updated_at ON accounts;
+CREATE TRIGGER accounts_updated_at
+    BEFORE UPDATE ON accounts
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON accounts TO authenticated;
+
+DROP POLICY IF EXISTS "accounts_select_own" ON accounts;
+CREATE POLICY "accounts_select_own" ON accounts FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "accounts_insert_own" ON accounts;
+CREATE POLICY "accounts_insert_own" ON accounts FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "accounts_update_own" ON accounts;
+CREATE POLICY "accounts_update_own" ON accounts FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "accounts_delete_own" ON accounts;
+CREATE POLICY "accounts_delete_own" ON accounts FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 13. CATEGORY_BUDGETS (Orcamentos por categoria)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS category_budgets (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    mes        text NOT NULL,
+    categoria  text NOT NULL,
+    limite     numeric NOT NULL CHECK (limite > 0),
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now(),
+    CONSTRAINT category_budgets_unique UNIQUE (user_id, mes, categoria)
+);
+
+DROP TRIGGER IF EXISTS category_budgets_updated_at ON category_budgets;
+CREATE TRIGGER category_budgets_updated_at
+    BEFORE UPDATE ON category_budgets
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE category_budgets ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON category_budgets TO authenticated;
+
+DROP POLICY IF EXISTS "cat_budgets_select_own" ON category_budgets;
+CREATE POLICY "cat_budgets_select_own" ON category_budgets FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "cat_budgets_insert_own" ON category_budgets;
+CREATE POLICY "cat_budgets_insert_own" ON category_budgets FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "cat_budgets_update_own" ON category_budgets;
+CREATE POLICY "cat_budgets_update_own" ON category_budgets FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "cat_budgets_delete_own" ON category_budgets;
+CREATE POLICY "cat_budgets_delete_own" ON category_budgets FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 14. CREDIT_CARDS (Cartoes de credito)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS credit_cards (
+    id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    nome            text NOT NULL,
+    limite          numeric DEFAULT 0,
+    dia_fechamento  int DEFAULT 20 CHECK (dia_fechamento BETWEEN 1 AND 31),
+    dia_vencimento  int DEFAULT 5  CHECK (dia_vencimento BETWEEN 1 AND 31),
+    cor             text DEFAULT '#ff5d5d',
+    ativo           boolean DEFAULT true,
+    account_id      uuid REFERENCES accounts(id) ON DELETE SET NULL,
+    created_at      timestamptz DEFAULT now(),
+    updated_at      timestamptz DEFAULT now()
+);
+
+DROP TRIGGER IF EXISTS credit_cards_updated_at ON credit_cards;
+CREATE TRIGGER credit_cards_updated_at
+    BEFORE UPDATE ON credit_cards
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE credit_cards ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON credit_cards TO authenticated;
+
+DROP POLICY IF EXISTS "credit_cards_select_own" ON credit_cards;
+CREATE POLICY "credit_cards_select_own" ON credit_cards FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "credit_cards_insert_own" ON credit_cards;
+CREATE POLICY "credit_cards_insert_own" ON credit_cards FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "credit_cards_update_own" ON credit_cards;
+CREATE POLICY "credit_cards_update_own" ON credit_cards FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "credit_cards_delete_own" ON credit_cards;
+CREATE POLICY "credit_cards_delete_own" ON credit_cards FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 15. INSTALLMENT_PURCHASES (Compras parceladas)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS installment_purchases (
+    id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id        uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    card_id        uuid REFERENCES credit_cards(id) ON DELETE SET NULL,
+    descricao      text NOT NULL,
+    categoria      text DEFAULT 'Outros',
+    valor_total    numeric NOT NULL CHECK (valor_total > 0),
+    valor_parcela  numeric NOT NULL CHECK (valor_parcela > 0),
+    parcelas_total int NOT NULL DEFAULT 1 CHECK (parcelas_total >= 1),
+    data_compra    date DEFAULT CURRENT_DATE,
+    primeiro_mes   text NOT NULL,
+    account_id     uuid REFERENCES accounts(id) ON DELETE SET NULL,
+    created_at     timestamptz DEFAULT now(),
+    updated_at     timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_installments_user
+    ON installment_purchases(user_id, primeiro_mes);
+
+DROP TRIGGER IF EXISTS installments_updated_at ON installment_purchases;
+CREATE TRIGGER installments_updated_at
+    BEFORE UPDATE ON installment_purchases
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE installment_purchases ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON installment_purchases TO authenticated;
+
+DROP POLICY IF EXISTS "installments_select_own" ON installment_purchases;
+CREATE POLICY "installments_select_own" ON installment_purchases FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "installments_insert_own" ON installment_purchases;
+CREATE POLICY "installments_insert_own" ON installment_purchases FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "installments_update_own" ON installment_purchases;
+CREATE POLICY "installments_update_own" ON installment_purchases FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "installments_delete_own" ON installment_purchases;
+CREATE POLICY "installments_delete_own" ON installment_purchases FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 16. FINANCIAL_GOALS (Metas financeiras)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS financial_goals (
+    id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id        uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    nome           text NOT NULL,
+    valor_objetivo numeric NOT NULL CHECK (valor_objetivo > 0),
+    valor_atual    numeric DEFAULT 0,
+    prazo          date,
+    cor            text DEFAULT '#39d98a',
+    icone          text DEFAULT '🎯',
+    ativo          boolean DEFAULT true,
+    created_at     timestamptz DEFAULT now(),
+    updated_at     timestamptz DEFAULT now()
+);
+
+DROP TRIGGER IF EXISTS goals_updated_at ON financial_goals;
+CREATE TRIGGER goals_updated_at
+    BEFORE UPDATE ON financial_goals
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE financial_goals ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON financial_goals TO authenticated;
+
+DROP POLICY IF EXISTS "goals_select_own" ON financial_goals;
+CREATE POLICY "goals_select_own" ON financial_goals FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "goals_insert_own" ON financial_goals;
+CREATE POLICY "goals_insert_own" ON financial_goals FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "goals_update_own" ON financial_goals;
+CREATE POLICY "goals_update_own" ON financial_goals FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "goals_delete_own" ON financial_goals;
+CREATE POLICY "goals_delete_own" ON financial_goals FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 17. GOAL_CONTRIBUTIONS (Aportes nas metas)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS goal_contributions (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    goal_id    uuid NOT NULL REFERENCES financial_goals(id) ON DELETE CASCADE,
+    valor      numeric NOT NULL CHECK (valor > 0),
+    data       date DEFAULT CURRENT_DATE,
+    descricao  text,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_goal_contributions_goal
+    ON goal_contributions(goal_id, created_at DESC);
+
+DROP TRIGGER IF EXISTS contributions_updated_at ON goal_contributions;
+CREATE TRIGGER contributions_updated_at
+    BEFORE UPDATE ON goal_contributions
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE goal_contributions ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON goal_contributions TO authenticated;
+
+DROP POLICY IF EXISTS "contributions_select_own" ON goal_contributions;
+CREATE POLICY "contributions_select_own" ON goal_contributions FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "contributions_insert_own" ON goal_contributions;
+CREATE POLICY "contributions_insert_own" ON goal_contributions FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "contributions_update_own" ON goal_contributions;
+CREATE POLICY "contributions_update_own" ON goal_contributions FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "contributions_delete_own" ON goal_contributions;
+CREATE POLICY "contributions_delete_own" ON goal_contributions FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- Colunas novas em tabelas existentes
+-- ============================================================
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS account_id                uuid REFERENCES accounts(id) ON DELETE SET NULL;
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS credit_card_id            uuid REFERENCES credit_cards(id) ON DELETE SET NULL;
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS installment_purchase_id   uuid REFERENCES installment_purchases(id) ON DELETE SET NULL;
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS parcela_numero            int;
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS parcelas_total_exp        int;
+
+ALTER TABLE income_entries ADD COLUMN IF NOT EXISTS account_id uuid REFERENCES accounts(id) ON DELETE SET NULL;
+
+-- ============================================================
+-- 18. APP_SETTINGS
 -- Preferencias do app por usuario (tema, voz, moeda etc.)
 -- UNIQUE (user_id) garante apenas uma linha por usuario
 -- ============================================================
