@@ -916,6 +916,71 @@ DROP POLICY IF EXISTS "receipt_delete_own" ON receipt_imports;
 CREATE POLICY "receipt_delete_own" ON receipt_imports FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================
+-- 21. APP_ALERTS (Central de Alertas — opcional, gerado dinamicamente)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS app_alerts (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    titulo     text NOT NULL,
+    descricao  text,
+    tipo       text DEFAULT 'info',
+    nivel      text DEFAULT 'info' CHECK (nivel IN ('info', 'warning', 'danger', 'success')),
+    lido       boolean DEFAULT false,
+    data_ref   date,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_app_alerts_user ON app_alerts(user_id, created_at DESC);
+ALTER TABLE app_alerts ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_alerts TO authenticated;
+DROP POLICY IF EXISTS "alerts_select_own" ON app_alerts;
+CREATE POLICY "alerts_select_own" ON app_alerts FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "alerts_insert_own" ON app_alerts;
+CREATE POLICY "alerts_insert_own" ON app_alerts FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "alerts_update_own" ON app_alerts;
+CREATE POLICY "alerts_update_own" ON app_alerts FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "alerts_delete_own" ON app_alerts;
+CREATE POLICY "alerts_delete_own" ON app_alerts FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 22. ACTIVITY_LOGS (Historico de atividades)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS activity_logs (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    acao        text NOT NULL,
+    entidade    text,
+    entidade_id uuid,
+    descricao   text,
+    created_at  timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_logs(user_id, created_at DESC);
+ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT ON activity_logs TO authenticated;
+DROP POLICY IF EXISTS "activity_select_own" ON activity_logs;
+CREATE POLICY "activity_select_own" ON activity_logs FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "activity_insert_own" ON activity_logs;
+CREATE POLICY "activity_insert_own" ON activity_logs FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================
+-- Soft delete e status em tabelas principais
+-- ============================================================
+ALTER TABLE expenses         ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+ALTER TABLE income_entries   ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+ALTER TABLE financial_goals  ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+ALTER TABLE financial_reminders ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+
+-- app_settings: sincronizacao e modo demo
+ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS last_sync_at  timestamptz;
+ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS demo_mode     boolean DEFAULT false;
+
+-- profiles: avatar e nome completo
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nome text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url text;
+
+-- ============================================================
 -- GRANTS FINAIS: sequences e view
 -- ============================================================
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;

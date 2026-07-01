@@ -1363,6 +1363,8 @@
 
       console.log("[Supabase] Dados aplicados no estado local");
       App.setSyncStatus("ok");
+      App._lastSyncAt = new Date().toISOString();
+      App.syncUpdateLastSync().catch(function(){});
       return true;
 
     } catch (err) {
@@ -1892,6 +1894,71 @@
     const { data, error } = await sb.from("receipt_imports").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
     if (error) { console.warn("[Supabase] syncLoadReceiptImports:", error.message); return []; }
     return data || [];
+  };
+
+  // ---------- ACTIVITY LOGS ----------
+  App.syncLogActivity = async function (acao, entidade, entidade_id, descricao) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    const row = { user_id: user.id, acao, entidade: entidade || null, entidade_id: entidade_id || null, descricao: descricao || null };
+    const { error } = await sb.from("activity_logs").insert(row);
+    if (error) { console.warn("[Supabase] syncLogActivity:", error.message); return false; }
+    return true;
+  };
+
+  App.syncLoadActivityLogs = async function (limit) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    const { data, error } = await sb.from("activity_logs").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(limit || 50);
+    if (error) { console.warn("[Supabase] syncLoadActivityLogs:", error.message); return []; }
+    return data || [];
+  };
+
+  // ---------- SOFT DELETE ----------
+  App.syncSoftDeleteExpense = async function (sbid) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("expenses").update({ deleted_at: new Date().toISOString() }).eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncSoftDeleteExpense:", error.message); return false; }
+    App.syncLogActivity("delete", "expense", sbid, "Gasto excluido para lixeira");
+    return true;
+  };
+
+  App.syncRestoreExpense = async function (sbid) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("expenses").update({ deleted_at: null }).eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncRestoreExpense:", error.message); return false; }
+    App.syncLogActivity("restore", "expense", sbid, "Gasto restaurado da lixeira");
+    return true;
+  };
+
+  App.syncLoadTrash = async function () {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    const { data, error } = await sb.from("expenses").select("*").eq("user_id", user.id).not("deleted_at", "is", null).order("deleted_at", { ascending: false });
+    if (error) { console.warn("[Supabase] syncLoadTrash:", error.message); return []; }
+    return data || [];
+  };
+
+  App.syncHardDeleteExpense = async function (sbid) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("expenses").delete().eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncHardDeleteExpense:", error.message); return false; }
+    return true;
+  };
+
+  // ---------- UPDATE LAST SYNC ----------
+  App.syncUpdateLastSync = async function () {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    const { error } = await sb.from("app_settings").upsert(
+      { user_id: user.id, last_sync_at: new Date().toISOString() },
+      { onConflict: "user_id" }
+    );
+    if (error) { console.warn("[Supabase] syncUpdateLastSync:", error.message); return false; }
+    return true;
   };
 
   App.syncAll = async function (dadosMes) {

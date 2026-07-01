@@ -127,6 +127,7 @@ footer{
   <div class="nav-links">
     <a href="#recursos" class="btn">Recursos</a>
     <a href="#planos" class="btn">Planos</a>
+    <a href="./index.html?demo=1" class="btn" style="background:rgba(255,209,102,.10);color:#ffd166;border-color:rgba(255,209,102,.3)">🎭 Demo</a>
     <a href="./login.html" class="btn primary">Entrar</a>
   </div>
 </nav>
@@ -140,7 +141,7 @@ footer{
   <p>Organize receitas, gastos, metas, cartoes e parcelamentos. Tudo sincronizado entre seus dispositivos com Supabase e IA PRO para analises avancadas.</p>
   <div class="hero-cta">
     <a href="./login.html" class="btn primary">Comecar gratis →</a>
-    <a href="./index.html" class="btn">Ver o app</a>
+    <a href="./index.html?demo=1" class="btn" style="background:rgba(255,209,102,.10);color:#ffd166;border-color:rgba(255,209,102,.3)">🎭 Ver demonstracao</a>
   </div>
 </section>
 
@@ -255,6 +256,61 @@ footer{
   </div>
 </section>
 
+<!-- COMO FUNCIONA -->
+<section style="padding:60px 0;background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)">
+  <div class="wrap">
+    <h2 style="text-align:center;font-size:32px;font-weight:950;margin-bottom:10px">Como funciona</h2>
+    <p style="text-align:center;color:rgba(234,240,255,.7);margin-bottom:40px">Em 3 passos simples</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px">
+      <div style="text-align:center;padding:24px">
+        <div style="font-size:40px;margin-bottom:12px">1️⃣</div>
+        <h3 style="font-weight:950;margin-bottom:8px">Crie sua conta</h3>
+        <p style="font-size:13px;color:rgba(234,240,255,.7)">Registro rapido com e-mail. Sem cartao de credito. Sem mensalidade.</p>
+      </div>
+      <div style="text-align:center;padding:24px">
+        <div style="font-size:40px;margin-bottom:12px">2️⃣</div>
+        <h3 style="font-weight:950;margin-bottom:8px">Lance seus dados</h3>
+        <p style="font-size:13px;color:rgba(234,240,255,.7)">Adicione gastos, receitas, metas e cartoes. Use voz, comprovante ou digitacao manual.</p>
+      </div>
+      <div style="text-align:center;padding:24px">
+        <div style="font-size:40px;margin-bottom:12px">3️⃣</div>
+        <h3 style="font-weight:950;margin-bottom:8px">Controle em qualquer lugar</h3>
+        <p style="font-size:13px;color:rgba(234,240,255,.7)">Tudo sincronizado na nuvem. Acesse do celular, tablet ou computador com os mesmos dados.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="padding:60px 0">
+  <div class="wrap">
+    <h2 style="text-align:center;font-size:32px;font-weight:950;margin-bottom:10px">Perguntas frequentes</h2>
+    <p style="text-align:center;color:rgba(234,240,255,.7);margin-bottom:40px">Tudo que voce precisa saber</p>
+    <div style="display:flex;flex-direction:column;gap:16px;max-width:680px;margin:0 auto">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:20px">
+        <div style="font-weight:900;margin-bottom:8px">E gratuito?</div>
+        <p style="font-size:14px;color:rgba(234,240,255,.75)">Sim! O plano Free e completamente gratuito e ja inclui todas as funcionalidades principais. O plano PRO com recursos avancados esta sendo desenvolvido.</p>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:20px">
+        <div style="font-weight:900;margin-bottom:8px">Meus dados ficam seguros?</div>
+        <p style="font-size:14px;color:rgba(234,240,255,.75)">Sim. Usamos Supabase com Row Level Security. Cada usuario acessa apenas seus proprios dados. Nunca compartilhamos suas informacoes.</p>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:20px">
+        <div style="font-weight:900;margin-bottom:8px">Funciona offline?</div>
+        <p style="font-size:14px;color:rgba(234,240,255,.75)">Sim. O app e um PWA (Progressive Web App). Voce pode instalar no celular e usar offline. Os dados sincronizam automaticamente quando a conexao voltar.</p>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:20px">
+        <div style="font-weight:900;margin-bottom:8px">Posso usar em varios dispositivos?</div>
+        <p style="font-size:14px;color:rgba(234,240,255,.75)">Sim. Seus dados sincronizam em tempo real entre todos os seus dispositivos. Cadastre um gasto no celular e ele aparece no computador instantaneamente.</p>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:20px">
+        <div style="font-weight:900;margin-bottom:8px">O que e o leitor bancario Android?</div>
+        <p style="font-size:14px;color:rgba(234,240,255,.75)">E um app Android separado que detecta automaticamente Pix, compras e transferencias nas notificacoes dos seus bancos e registra no Controle de Gastos PRO. Disponivel no repositorio do projeto.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CTA FINAL -->
 <section class="cta-final">
   <h2>Pronto para organizar suas financas?</h2>
@@ -267,6 +323,13 @@ footer{
 
 <footer>
   <p>Controle de Gastos PRO &copy; 2026 — Feito com ❤️ para quem quer organizar o dinheiro de verdade</p>
+  <p style="margin-top:8px">
+    <a href="./privacy.html" style="color:rgba(234,240,255,.4);text-decoration:none">Privacidade</a>
+    &nbsp;·&nbsp;
+    <a href="./terms.html" style="color:rgba(234,240,255,.4);text-decoration:none">Termos</a>
+    &nbsp;·&nbsp;
+    <a href="./index.html?demo=1" style="color:rgba(234,240,255,.4);text-decoration:none">Demonstracao</a>
+  </p>
 </footer>
 
 </body>

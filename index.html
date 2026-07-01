@@ -921,6 +921,8 @@ h1,h2,h3{
 
     <!-- Barra de status de sincronização com Supabase -->
     <div id="syncStatusBar" style="display:none;text-align:center;font-size:.8rem;padding:4px 12px;border-radius:8px;margin:0 0 6px;transition:color .3s"></div>
+    <!-- Badge modo demonstração -->
+    <div id="demoBadge" style="display:none;text-align:center;padding:6px;border-radius:8px;margin:0 0 6px;background:rgba(255,209,102,.15);border:1px solid rgba(255,209,102,.35);color:var(--warn);font-size:12px;font-weight:900">🎭 Modo Demonstração — dados fictícios, nada será salvo</div>
 
     <div class="screen active" id="screen-home">
       <div id="homeContainer">
@@ -1153,7 +1155,18 @@ h1,h2,h3{
         <button class="btn menuItem" onclick="openCalendario()"><span class="menuIcon">🗓️</span> Calendário</button>
         <button class="btn menuItem" onclick="openRelatorio()"><span class="menuIcon">📈</span> Relatório</button>
         <button class="btn menuItem" onclick="openComprovante()"><span class="menuIcon">📷</span> Comprovante</button>
+        <button class="btn menuItem" onclick="openAlertas()"><span class="menuIcon">🔔</span> Alertas</button>
+        <button class="btn menuItem" onclick="openLixeira()"><span class="menuIcon">🗑️</span> Lixeira</button>
+        <button class="btn menuItem" onclick="openAtividades()"><span class="menuIcon">📜</span> Atividades</button>
+      </div>
+
+      <div class="hr"></div>
+      <h3 style="margin:0 0 10px;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px">Conta</h3>
+      <div class="menuGrid">
+        <button class="btn menuItem" onclick="openPerfil()"><span class="menuIcon">👤</span> Meu Perfil</button>
         <button class="btn menuItem" onclick="openMeuPlano()"><span class="menuIcon">💎</span> Meu Plano</button>
+        <button class="btn menuItem" onclick="openSeguranca()"><span class="menuIcon">🔒</span> Segurança</button>
+        <button class="btn menuItem" onclick="openDiagnostico()"><span class="menuIcon">⚡</span> Diagnóstico</button>
       </div>
 
       <div class="hr"></div>
@@ -1909,6 +1922,119 @@ h1,h2,h3{
       <div class="small" style="margin:8px 0">Aguarde o lançamento. Todas as funcionalidades PRO estão disponíveis no plano Free durante o período de testes.</div>
       <button class="btn primary" onclick="alert('Em breve! Por enquanto você tem acesso total como usuário de teste.')">Me avisar quando lançar</button>
     </div>
+  </div>
+
+  <!-- ===== TELA: ALERTAS ===== -->
+  <div class="screen" id="screen-alertas">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">🔔 Central de Alertas</div>
+    </div>
+    <div id="alertasContent"></div>
+  </div>
+
+  <!-- ===== TELA: LIXEIRA ===== -->
+  <div class="screen" id="screen-lixeira">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">🗑️ Lixeira</div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="small">Itens excluídos ficam aqui por 30 dias. Você pode restaurar ou excluir definitivamente.</div>
+    </div>
+    <div id="lixeiraContent"></div>
+  </div>
+
+  <!-- ===== TELA: ATIVIDADES ===== -->
+  <div class="screen" id="screen-atividades">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">📜 Histórico de Atividades</div>
+    </div>
+    <div class="card">
+      <div id="atividadesContent">
+        <div class="small" style="opacity:.6;padding:12px">Carregando atividades...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: PERFIL ===== -->
+  <div class="screen" id="screen-perfil">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">👤 Meu Perfil</div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:16px;padding:8px 0">
+        <div id="perfilAvatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--good));display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">👤</div>
+        <div>
+          <div style="font-weight:950;font-size:18px" id="perfilNome">Usuário</div>
+          <div class="small" id="perfilEmail"></div>
+          <div id="perfilBadgePlano" style="display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;background:rgba(86,156,255,.2);color:var(--accent)">Free</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <h3>Informações</h3>
+      <label>Nome de exibição</label>
+      <input id="perfilNomeInput" placeholder="Seu nome">
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" onclick="salvarPerfil()">Salvar nome</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <h3>Preferências</h3>
+      <label>Tema</label>
+      <select id="perfilTema" onchange="toggleTheme()">
+        <option value="dark">Escuro</option>
+        <option value="light">Claro</option>
+      </select>
+      <label style="margin-top:10px">Moeda</label>
+      <select id="perfilMoeda">
+        <option value="BRL">R$ — Real Brasileiro</option>
+        <option value="USD">$ — Dólar Americano</option>
+        <option value="EUR">€ — Euro</option>
+      </select>
+      <button class="btn" style="margin-top:10px;width:100%" onclick="salvarPreferencias()">Salvar preferências</button>
+    </div>
+    <div class="card">
+      <div class="small">Membro desde: <span id="perfilSince">—</span></div>
+      <div class="small">Última sincronização: <span id="perfilLastSync">—</span></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: SEGURANÇA ===== -->
+  <div class="screen" id="screen-seguranca">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">🔒 Segurança e Privacidade</div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <h3>Sessão</h3>
+      <button class="btn" style="width:100%;margin-bottom:8px" onclick="logout()">🚪 Sair da conta</button>
+      <button class="btn" style="width:100%" onclick="exportData()">⬇️ Exportar meus dados</button>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <h3>Privacidade</h3>
+      <div class="row">
+        <a href="./privacy.html" target="_blank" class="btn" style="flex:1;text-align:center">📄 Política de Privacidade</a>
+        <a href="./terms.html" target="_blank" class="btn" style="flex:1;text-align:center">📋 Termos de Uso</a>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Excluir conta</h3>
+      <div class="small" style="margin-bottom:10px;color:var(--danger)">Atenção: esta ação é irreversível. Todos os seus dados serão permanentemente removidos.</div>
+      <button class="btn danger" style="width:100%" onclick="confirmarExcluirConta()">🗑️ Excluir minha conta</button>
+    </div>
+  </div>
+
+  <!-- ===== TELA: DIAGNÓSTICO ===== -->
+  <div class="screen" id="screen-diagnostico">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">⚡ Status do App</div>
+    </div>
+    <div id="diagnosticoContent"></div>
   </div>
 
   <!-- ===== TELA: HOJE ===== -->
@@ -3544,19 +3670,11 @@ function delItemMonthOnly(idx){
   d.items.splice(idx,1);
   saveAll();
 
-  // Deleta do Supabase se o item tem ID
-  if(sbid && window.App && App.getSupabaseClient){
-    const sb = App.getSupabaseClient();
-    if(sb && USER_ID){
-      sb.from("expenses")
-        .delete()
-        .eq("id", sbid)
-        .eq("user_id", USER_ID)
-        .then(function(res){
-          if(res.error) console.warn("[Supabase] Erro ao excluir expense:", res.error.message);
-          else console.log("[Supabase] Expense excluido:", sbid);
-        });
-    }
+  // Soft delete no Supabase (vai para lixeira)
+  if(sbid && window.App && typeof App.syncSoftDeleteExpense==="function" && !_demoMode){
+    App.syncSoftDeleteExpense(sbid).then(function(ok){
+      if(ok) App.syncLogActivity("delete","expense",sbid,"Gasto movido para lixeira").catch(()=>{});
+    }).catch(()=>{});
   }
 }
 function delItemSmart(idx){
@@ -4128,6 +4246,315 @@ function renderComparacaoMeses(){
   if(topUp) html+=`<div class="small" style="margin-top:8px">📈 <b>${escapeHtml(topUp.cat)}</b> aumentou ${money(topUp.d)}.</div>`;
   if(topDown) html+=`<div class="small" style="margin-top:4px">📉 <b>${escapeHtml(topDown.cat)}</b> caiu ${money(Math.abs(topDown.d))}.</div>`;
   el.innerHTML = html;
+}
+
+/* ========== MODO DEMONSTRAÇÃO ========== */
+var _demoMode = false;
+function ativarModoDemo(){
+  _demoMode = true;
+  var badge = document.getElementById("demoBadge");
+  if(badge) badge.style.display = "block";
+  // Dados fictícios
+  categorias = ["Casa","Alimentação","Transporte","Lazer","Saúde","Educação","Investimentos","Outros"];
+  fixos = [
+    { desc:"Aluguel", amount:1200, category:"Casa", isFixo:true },
+    { desc:"Internet", amount:99, category:"Casa", isFixo:true },
+    { desc:"Netflix", amount:55.90, category:"Lazer", isFixo:true }
+  ];
+  var mes = mesAtual;
+  state = { meses:{} };
+  state.meses[mes] = {
+    salary: 5000, meta: 3000,
+    items: [
+      { desc:"Supermercado", amount:850, category:"Alimentação", paid:true, isFixo:false, data:mes+"-05" },
+      { desc:"Aluguel", amount:1200, category:"Casa", paid:true, isFixo:true, data:mes+"-01" },
+      { desc:"Uber", amount:45, category:"Transporte", paid:false, isFixo:false, data:mes+"-10" },
+      { desc:"Farmácia", amount:120, category:"Saúde", paid:false, isFixo:false, data:mes+"-08" },
+      { desc:"Restaurante", amount:95, category:"Alimentação", paid:true, isFixo:false, data:mes+"-12" },
+      { desc:"Notebook 3/12", amount:200, category:"Educação", paid:false, isFixo:false, tipo_lancamento:"parcela", data:mes+"-15" }
+    ],
+    saved: [{ value:500, desc:"Reserva", date:mes+"-01", source:"manual" }],
+    hiddenFixos: [], investStatus: {}
+  };
+  window._receitas = [
+    { descricao:"Salário", valor:5000, data:mes+"-05", categoria:"Salário" },
+    { descricao:"Freela design", valor:800, data:mes+"-15", categoria:"Renda extra" }
+  ];
+  window._contas = [
+    { nome:"Nubank", tipo:"conta_corrente", saldo_inicial:2500, cor:"#8a05be", icone:"💜" },
+    { nome:"Caixa", tipo:"conta_corrente", saldo_inicial:1800, cor:"#0066b3", icone:"🏦" }
+  ];
+  window._metas = [
+    { nome:"Reserva de emergência", valor_objetivo:10000, valor_atual:3500, prazo:"2026-12-31", cor:"#39d98a", icone:"🛡️" },
+    { nome:"Notebook novo", valor_objetivo:4500, valor_atual:1200, prazo:"2026-09-30", cor:"#569cff", icone:"💻" }
+  ];
+  window._cartoes = [
+    { nome:"Nubank Gold", limite:5000, dia_vencimento:10, cor:"#8a05be" }
+  ];
+  window._orcamentos = [
+    { mes, categoria:"Alimentação", limite:900, _sbid:null },
+    { mes, categoria:"Lazer", limite:300, _sbid:null }
+  ];
+  saveAll();
+  buildMonthSelect();
+  renderCategorias();
+  render();
+  console.log("[Demo] Modo demonstração ativado com dados fictícios");
+  if(typeof openHoje === "function") openHoje();
+}
+
+/* ========== ALERTAS ========== */
+function openAlertas(){
+  renderAlertas();
+  openScreen("screen-alertas");
+}
+function renderAlertas(){
+  const el = document.getElementById("alertasContent");
+  if(!el) return;
+  const alertas = gerarAlertasDinamicos();
+  if(!alertas.length){
+    el.innerHTML = '<div class="card"><div class="alertItem good"><span class="alertIcon">✅</span> Tudo em ordem! Nenhum alerta no momento.</div></div>';
+    return;
+  }
+  el.innerHTML = '<div class="card"><div class="alertsList">' +
+    alertas.map(function(a){
+      return `<div class="alertItem ${a.nivel}">
+        <span class="alertIcon">${a.icon}</span>
+        <div>
+          <div style="font-weight:900">${escapeHtml(a.titulo)}</div>
+          <div class="small">${escapeHtml(a.desc)}</div>
+        </div>
+      </div>`;
+    }).join("") + '</div></div>';
+}
+function gerarAlertasDinamicos(){
+  var alertas = [];
+  var d = getDataMes(mesAtual);
+  var items = d.items||[];
+  var salary = Number(d.salary||0);
+  var spent = items.reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  var saved = (d.saved||[]).reduce(function(a,b){ return a+Number(b.value||0); },0);
+  var receitas = (window._receitas||[]).reduce(function(a,b){ return a+Number(b.valor||0); },0);
+  var saldoReal = salary + receitas - spent;
+
+  // Saldo negativo
+  if(saldoReal < 0) alertas.push({ nivel:"danger", icon:"🚨", titulo:"Saldo do mês negativo", desc:"Seus gastos estão "+money(Math.abs(saldoReal))+" acima da receita." });
+
+  // Pendentes
+  var pendentes = items.filter(function(it){ return !it.paid; });
+  if(pendentes.length > 5) alertas.push({ nivel:"warn", icon:"⏳", titulo:pendentes.length+" gastos pendentes", desc:"Verifique as contas pendentes do mês." });
+
+  // Orçamentos
+  var catMap = {};
+  items.forEach(function(it){ var c=it.category||"Outros"; catMap[c]=(catMap[c]||0)+Number(it.amount||0); });
+  (window._orcamentos||[]).forEach(function(o){
+    var gasto = catMap[o.categoria]||0;
+    if(o.limite>0){
+      var pct = Math.round((gasto/o.limite)*100);
+      if(pct>=100) alertas.push({ nivel:"danger", icon:"🚫", titulo:"Limite ultrapassado: "+o.categoria, desc:money(gasto)+" de "+money(o.limite)+" ("+pct+"%)." });
+      else if(pct>=90) alertas.push({ nivel:"danger", icon:"⚠️", titulo:"Limite em 90%: "+o.categoria, desc:"Já usou "+pct+"% do limite de "+money(o.limite)+"." });
+      else if(pct>=70) alertas.push({ nivel:"warn", icon:"📊", titulo:"Atenção: "+o.categoria, desc:"Já usou "+pct+"% do limite mensal." });
+    }
+  });
+
+  // Metas atrasadas
+  var hoje = new Date().toISOString().slice(0,10);
+  (window._metas||[]).forEach(function(m){
+    if(m.prazo && m.prazo < hoje && m.valor_atual < m.valor_objetivo)
+      alertas.push({ nivel:"warn", icon:"🎯", titulo:"Meta atrasada: "+m.nome, desc:"Prazo foi "+m.prazo+". Falta "+money(m.valor_objetivo-m.valor_atual)+"." });
+  });
+
+  // Lembretes vencidos
+  (window._lembretes||[]).filter(function(r){ return r.status==="ativo"&&r.data&&r.data<hoje; }).forEach(function(r){
+    alertas.push({ nivel:"warn", icon:"🔔", titulo:"Lembrete vencido: "+r.titulo, desc:"Era para "+r.data+"." });
+  });
+
+  // Sem salário
+  if(!salary) alertas.push({ nivel:"info", icon:"💰", titulo:"Salário não configurado", desc:"Vá em Resumo do mês e informe seu salário." });
+
+  if(!alertas.length) return [];
+  return alertas.sort(function(a,b){ var ord={danger:0,warn:1,info:2}; return (ord[a.nivel]||2)-(ord[b.nivel]||2); });
+}
+
+/* ========== LIXEIRA ========== */
+function openLixeira(){
+  const el = document.getElementById("lixeiraContent");
+  if(el) el.innerHTML='<div class="small" style="text-align:center;padding:20px;opacity:.6">Carregando...</div>';
+  openScreen("screen-lixeira");
+  if(window.App && typeof App.syncLoadTrash==="function"){
+    App.syncLoadTrash().then(function(rows){
+      renderLixeira(rows||[]);
+    }).catch(function(){ renderLixeira([]); });
+  } else { renderLixeira([]); }
+}
+function renderLixeira(rows){
+  const el = document.getElementById("lixeiraContent");
+  if(!el) return;
+  if(!rows.length){
+    el.innerHTML='<div class="card"><div class="small" style="text-align:center;padding:20px;opacity:.6">Nenhum item na lixeira.</div></div>';
+    return;
+  }
+  el.innerHTML = rows.map(function(r){
+    var excluido = r.deleted_at ? r.deleted_at.slice(0,10) : "—";
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <div style="font-weight:900">${escapeHtml(r.descricao||"")}</div>
+          <div class="small">${money(r.valor||0)} • ${escapeHtml(r.categoria||"")} • ${escapeHtml(r.mes||"")}</div>
+          <div class="small" style="opacity:.6">Excluído em: ${escapeHtml(excluido)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn good mini" onclick="restaurarItem('${r.id}')">↩️ Restaurar</button>
+          <button class="btn danger mini" onclick="excluirDefinitivamente('${r.id}')">🗑️ Excluir</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function restaurarItem(sbid){
+  if(!window.App || typeof App.syncRestoreExpense!=="function") return;
+  App.syncRestoreExpense(sbid).then(function(ok){
+    if(ok){ openLixeira(); }
+    else alert("Erro ao restaurar item.");
+  });
+}
+function excluirDefinitivamente(sbid){
+  if(!confirm("Excluir permanentemente? Esta ação não pode ser desfeita.")) return;
+  if(!window.App || typeof App.syncHardDeleteExpense!=="function") return;
+  App.syncHardDeleteExpense(sbid).then(function(ok){
+    if(ok){ openLixeira(); }
+    else alert("Erro ao excluir item.");
+  });
+}
+
+/* ========== HISTÓRICO DE ATIVIDADES ========== */
+function openAtividades(){
+  openScreen("screen-atividades");
+  const el = document.getElementById("atividadesContent");
+  if(!el) return;
+  if(!window.App || typeof App.syncLoadActivityLogs!=="function"){
+    el.innerHTML='<div class="small" style="opacity:.6;padding:12px">Nenhuma atividade registrada.</div>';
+    return;
+  }
+  App.syncLoadActivityLogs(50).then(function(rows){
+    if(!rows||!rows.length){
+      el.innerHTML='<div class="small" style="opacity:.6;padding:12px">Nenhuma atividade registrada ainda.</div>';
+      return;
+    }
+    const icons = { delete:"🗑️",restore:"↩️",create:"✅",update:"✏️",export:"⬇️",login:"🔑" };
+    el.innerHTML = rows.map(function(r){
+      var data = r.created_at ? r.created_at.slice(0,16).replace("T"," ") : "";
+      return `<div class="layoutItem" style="margin-bottom:6px">
+        <div class="layoutLeft">
+          <span style="font-size:18px">${icons[r.acao]||"📋"}</span>
+          <div>
+            <div class="layoutTitle">${escapeHtml(r.descricao||r.acao||"")}</div>
+            <div class="small">${escapeHtml(data)}</div>
+          </div>
+        </div>
+        ${r.entidade?`<div class="badge">${escapeHtml(r.entidade)}</div>`:""}
+      </div>`;
+    }).join("");
+  }).catch(function(){
+    el.innerHTML='<div class="small" style="opacity:.6;padding:12px">Erro ao carregar atividades.</div>';
+  });
+}
+
+/* ========== PERFIL ========== */
+function openPerfil(){
+  var nomeEl = document.getElementById("perfilNome");
+  var emailEl = document.getElementById("perfilEmail");
+  var nomeInputEl = document.getElementById("perfilNomeInput");
+  var sinceEl = document.getElementById("perfilSince");
+  var syncEl = document.getElementById("perfilLastSync");
+  var badgeEl = document.getElementById("perfilBadgePlano");
+  var temaEl = document.getElementById("perfilTema");
+
+  if(USER) {
+    var displayName = (USER.user_metadata&&(USER.user_metadata.full_name||USER.user_metadata.name))||USER.email||"Usuário";
+    if(nomeEl) nomeEl.textContent = displayName;
+    if(emailEl) emailEl.textContent = USER.email||"";
+    if(nomeInputEl) nomeInputEl.value = displayName;
+    if(sinceEl) sinceEl.textContent = USER.created_at ? USER.created_at.slice(0,10) : "—";
+  }
+  var plan = (window.App&&App._cloudAppSettings&&App._cloudAppSettings.plan)||"free";
+  if(badgeEl) badgeEl.textContent = plan==="pro"?"💎 PRO":"Free";
+  if(syncEl) syncEl.textContent = (window.App&&App._lastSyncAt) ? App._lastSyncAt.slice(0,19).replace("T"," ") : "—";
+  if(temaEl) temaEl.value = document.body.classList.contains("light")?"light":"dark";
+  openScreen("screen-perfil");
+}
+function salvarPerfil(){
+  var nome = (document.getElementById("perfilNomeInput").value||"").trim();
+  if(!nome) return alert("Digite um nome.");
+  document.getElementById("perfilNome").textContent = nome;
+  alert("Nome salvo!");
+  if(window.App && typeof App.syncLogActivity==="function")
+    App.syncLogActivity("update","profile",null,"Nome do perfil atualizado").catch(()=>{});
+}
+function salvarPreferencias(){
+  var tema = document.getElementById("perfilTema").value;
+  var atual = document.body.classList.contains("light")?"light":"dark";
+  if(tema !== atual) toggleTheme();
+  alert("Preferências salvas!");
+}
+
+/* ========== SEGURANÇA ========== */
+function openSeguranca(){ openScreen("screen-seguranca"); }
+function confirmarExcluirConta(){
+  var ok = confirm("ATENÇÃO: Todos os seus dados serão removidos permanentemente.\n\nDigite OK para confirmar.");
+  if(!ok) return;
+  alert("Funcionalidade em desenvolvimento. Entre em contato com o suporte para solicitar a exclusão.");
+}
+
+/* ========== DIAGNÓSTICO ========== */
+function openDiagnostico(){
+  renderDiagnostico();
+  openScreen("screen-diagnostico");
+}
+function renderDiagnostico(){
+  const el = document.getElementById("diagnosticoContent");
+  if(!el) return;
+  var sbOk = !!(window.App && App._supabase);
+  var online = navigator.onLine;
+  var d = getDataMes(mesAtual);
+  var gastos = (d.items||[]).length;
+  var receitas = (window._receitas||[]).length;
+  var contas = (window._contas||[]).length;
+  var metas = (window._metas||[]).length;
+  var lastSync = (window.App&&App._lastSyncAt) ? App._lastSyncAt.slice(0,19).replace("T"," ") : "—";
+
+  el.innerHTML = `
+  <div class="card" style="margin-bottom:12px">
+    <h3>Conexão</h3>
+    <div class="layoutItem" style="margin-bottom:6px">
+      <div class="layoutLeft"><span>🌐</span><div class="layoutTitle">Internet</div></div>
+      <span class="badge ${online?"good":"danger"}">${online?"Online":"Offline"}</span>
+    </div>
+    <div class="layoutItem">
+      <div class="layoutLeft"><span>☁️</span><div class="layoutTitle">Supabase</div></div>
+      <span class="badge ${sbOk?"good":"warn"}">${sbOk?"Conectado":"Não inicializado"}</span>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <h3>Dados carregados</h3>
+    <div class="grid2">
+      <div class="kpi"><div class="small">Gastos</div><div class="v">${gastos}</div></div>
+      <div class="kpi"><div class="small">Receitas</div><div class="v">${receitas}</div></div>
+      <div class="kpi"><div class="small">Contas</div><div class="v">${contas}</div></div>
+      <div class="kpi"><div class="small">Metas</div><div class="v">${metas}</div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <h3>App</h3>
+    <div class="small">Versão SW: <b>gastos-pro-v18-revisao-final</b></div>
+    <div class="small" style="margin-top:6px">Usuário: <b>${USER?escapeHtml(USER.email||""):"Não logado"}</b></div>
+    <div class="small" style="margin-top:6px">Última sync: <b>${lastSync}</b></div>
+    <div class="small" style="margin-top:6px">Modo demo: <b>${_demoMode?"Ativo":"Inativo"}</b></div>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <button class="btn primary" onclick="if(window.App&&typeof App.syncLoadAllFromCloud==='function'){App.syncLoadAllFromCloud().then(function(){alert('Sincronização concluída!');});}">🔄 Sincronizar agora</button>
+    <button class="btn" onclick="renderDiagnostico()">Atualizar</button>
+  </div>`;
 }
 
 /* ========== COMPROVANTE ========== */
@@ -5216,6 +5643,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   applyThemeSettings();
   showLoading();
   renderHomeEditorUI();
+
+  // Modo demonstração via URL ?demo=1
+  if(new URLSearchParams(window.location.search).get("demo")==="1"){
+    // Simula login mínimo para exibir o app
+    USER_ID = "demo-user";
+    USER = { email:"demo@gastospro.app", id:"demo-user", created_at:new Date().toISOString() };
+    if(window.App){ App.USER=USER; App.USER_ID="demo-user"; }
+    const t = localStorage.getItem("theme");
+    if(t === "light") document.body.classList.add("light");
+    applyThemeSettings();
+    loadAll();
+    buildMonthSelect();
+    renderCategorias();
+    renderFixos();
+    showApp();
+    goHome();
+    ativarModoDemo();
+    return;
+  }
+
   await initSupabaseAuth();
   applyThemeSettings();
 });

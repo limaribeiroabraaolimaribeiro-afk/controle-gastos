@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v18-revisao-final";
+const SW_VERSION = "gastos-pro-v19-fase-final-produto";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
