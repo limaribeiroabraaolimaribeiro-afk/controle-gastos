@@ -4287,7 +4287,9 @@ async function initSupabaseAuth() {
       showApp();
       goHome();
       render();
-      iaHealth();
+      // Não chamar iaHealth() automaticamente — evita ERR_NAME_NOT_RESOLVED no console
+      // A IA só é verificada quando o usuário abre a página ia.html
+      if (typeof iaSetStatus === "function") iaSetStatus("IA PRO temporariamente indisponivel", false);
       startVoiceBridge();
 
       // Carregamento da nuvem (async — atualiza a UI quando os dados chegarem)

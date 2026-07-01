@@ -90,6 +90,11 @@ CREATE TABLE IF NOT EXISTS monthly_settings (
     updated_at timestamptz DEFAULT now()
 );
 
+-- Garante colunas salary e meta em tabelas criadas antes desta versao do schema
+ALTER TABLE monthly_settings ADD COLUMN IF NOT EXISTS salary numeric DEFAULT 0;
+ALTER TABLE monthly_settings ADD COLUMN IF NOT EXISTS meta   numeric DEFAULT 0;
+ALTER TABLE monthly_settings ADD COLUMN IF NOT EXISTS notes  text;
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_monthly_settings_user_mes
     ON monthly_settings(user_id, mes);
 
@@ -125,10 +130,13 @@ CREATE TABLE IF NOT EXISTS categories (
     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id    uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     nome       text NOT NULL,
-    ordem      int DEFAULT 0,
+    sort_order integer DEFAULT 0,
     created_at timestamptz DEFAULT now(),
     updated_at timestamptz DEFAULT now()
 );
+
+-- Compatibilidade com tabelas criadas sem sort_order
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_categories_user_nome
     ON categories(user_id, lower(nome));
@@ -167,11 +175,15 @@ CREATE TABLE IF NOT EXISTS fixed_expenses (
     descricao  text NOT NULL,
     categoria  text DEFAULT 'Outros',
     valor      numeric NOT NULL CHECK (valor > 0),
-    ordem      int DEFAULT 0,
+    sort_order integer DEFAULT 0,
     ativo      boolean DEFAULT true,
     created_at timestamptz DEFAULT now(),
     updated_at timestamptz DEFAULT now()
 );
+
+-- Compatibilidade com tabelas criadas sem sort_order
+ALTER TABLE fixed_expenses ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0;
+ALTER TABLE fixed_expenses ADD COLUMN IF NOT EXISTS ativo     boolean DEFAULT true;
 
 DROP TRIGGER IF EXISTS fixed_expenses_updated_at ON fixed_expenses;
 CREATE TRIGGER fixed_expenses_updated_at

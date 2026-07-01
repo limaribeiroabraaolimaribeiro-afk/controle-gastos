@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v11-cloud-sync";
+const SW_VERSION = "gastos-pro-v12-fix-secondary-errors";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

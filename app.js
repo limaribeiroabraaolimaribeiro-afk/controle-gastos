@@ -1019,10 +1019,14 @@
     if (!sb || !user) { App.setSyncStatus("local"); return false; }
     App.setSyncStatus("syncing");
     const { error } = await sb.from("monthly_settings").upsert(
-      { user_id: user.id, mes, salary, meta },
+      { user_id: user.id, mes: mes, salary: Number(salary || 0), meta: Number(meta || 0) },
       { onConflict: "user_id,mes" }
     );
-    if (error) { App.setSyncStatus("error", error.message); return false; }
+    if (error) {
+      console.warn("[Supabase] syncSaveMonthlySettings erro:", error.message);
+      App.setSyncStatus("error", error.message);
+      return false;
+    }
     App.setSyncStatus("ok");
     return true;
   };
@@ -1070,7 +1074,7 @@
     if (!sb || !user) return false;
     await sb.from("categories").delete().eq("user_id", user.id);
     if (!categorias.length) return true;
-    const rows = categorias.map((nome, i) => ({ user_id: user.id, nome, ordem: i }));
+    const rows = categorias.map((nome) => ({ user_id: user.id, nome }));
     const { error } = await sb.from("categories").insert(rows);
     if (error) { console.warn("[Sync] categories:", error.message); return false; }
     return true;
@@ -1084,7 +1088,7 @@
       .from("categories")
       .select("nome")
       .eq("user_id", user.id)
-      .order("ordem");
+      .order("created_at", { ascending: true });
     if (error) { console.warn("[Sync] categories:", error.message); return null; }
     return data ? data.map(r => r.nome) : null;
   };
@@ -1095,13 +1099,12 @@
     if (!sb || !user) return false;
     await sb.from("fixed_expenses").delete().eq("user_id", user.id);
     if (!fixos.length) return true;
-    const rows = fixos.map((f, i) => ({
-      user_id: user.id,
+    const rows = fixos.map((f) => ({
+      user_id:   user.id,
       descricao: f.desc || f.descricao || "",
-      categoria: f.cat || f.categoria || "Outros",
-      valor: Number(f.valor) || 0,
-      ordem: i,
-      ativo: f.ativo !== false
+      categoria: f.category || f.categoria || "Outros",
+      valor:     Number(f.amount || f.valor) || 0,
+      ativo:     f.ativo !== false
     })).filter(r => r.valor > 0);
     const { error } = await sb.from("fixed_expenses").insert(rows);
     if (error) { console.warn("[Sync] fixed_expenses:", error.message); return false; }
@@ -1182,8 +1185,8 @@
       const results = await Promise.all([
         sb.from("expenses").select("*").eq("user_id", uid).order("created_at", { ascending: true }),
         sb.from("monthly_settings").select("*").eq("user_id", uid),
-        sb.from("categories").select("*").eq("user_id", uid).order("ordem"),
-        sb.from("fixed_expenses").select("*").eq("user_id", uid).order("ordem"),
+        sb.from("categories").select("*").eq("user_id", uid).order("created_at", { ascending: true }),
+        sb.from("fixed_expenses").select("*").eq("user_id", uid).order("created_at", { ascending: true }),
         sb.from("fixed_investments").select("*").eq("user_id", uid),
         sb.from("saved_amounts").select("*").eq("user_id", uid).order("created_at", { ascending: true })
       ]);
