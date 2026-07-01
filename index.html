@@ -2287,8 +2287,18 @@ function goBackFromHistory(){ showScreen(lastNonHistoryScreen || "screen-home");
 
 function toggleTheme(){
   document.body.classList.toggle("light");
-  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+  const newTheme = document.body.classList.contains("light") ? "light" : "dark";
+  localStorage.setItem("theme", newTheme);
   applyThemeSettings();
+  // Sync tema no Supabase
+  if(window.App && typeof App.syncSaveAppSettings === "function"){
+    App.syncSaveAppSettings({
+      theme:        newTheme,
+      themePreset:  localStorage.getItem(THEME_KEYS.preset) || "default",
+      accentColor:  localStorage.getItem(THEME_KEYS.accent) || "#569cff",
+      voiceEnabled: isVoiceEnabled()
+    }).catch(()=>{});
+  }
 }
 
 function openModal(id){ const o=document.getElementById(id); if(o) o.style.display="flex"; }
@@ -2679,6 +2689,10 @@ function confirmRemoveCategoriaNow(){
   renderCategorias();
   renderFixos();
   render();
+  if(window.App && typeof App.syncSaveCategories === "function"){
+    console.log("[Supabase] Removendo categoria:", cat);
+    App.syncSaveCategories(categorias).catch(()=>{});
+  }
 }
 function removeCategoria(idx){
   if(!USER_ID){ alert("Faça login primeiro"); return; }
@@ -2816,6 +2830,10 @@ function addCategoria(){
   input.value="";
   saveAll();
   renderCategorias();
+  if(window.App && typeof App.syncSaveCategories === "function"){
+    console.log("[Supabase] Salvando categoria:", nome);
+    App.syncSaveCategories(categorias).catch(()=>{});
+  }
 }
 
 function addFixo(){
@@ -2833,6 +2851,10 @@ function addFixo(){
   saveAll();
   renderFixos();
   render();
+  if(window.App && typeof App.syncSaveFixedExpenses === "function"){
+    console.log("[Supabase] Salvando fixo:", desc);
+    App.syncSaveFixedExpenses(fixos).catch(()=>{});
+  }
 }
 function removeFixo(idx){
   if(idx<0 || idx>=fixos.length) return;
@@ -2840,6 +2862,9 @@ function removeFixo(idx){
   saveAll();
   renderFixos();
   render();
+  if(window.App && typeof App.syncSaveFixedExpenses === "function"){
+    App.syncSaveFixedExpenses(fixos).catch(()=>{});
+  }
 }
 
 function addInvestFixo(){
@@ -2867,6 +2892,10 @@ function addInvestFixo(){
   saveAll();
   renderInvestFixos();
   render();
+  if(window.App && typeof App.syncSaveFixedInvestments === "function"){
+    console.log("[Supabase] Salvando investimento:", nome);
+    App.syncSaveFixedInvestments(investFixos).catch(()=>{});
+  }
 }
 function removeInvestFixo(idx){
   if(idx<0 || idx>=investFixos.length) return;
@@ -2882,6 +2911,9 @@ function removeInvestFixo(idx){
   saveAll();
   renderInvestFixos();
   render();
+  if(window.App && typeof App.syncSaveFixedInvestments === "function"){
+    App.syncSaveFixedInvestments(investFixos).catch(()=>{});
+  }
 }
 
 function addSaved(){
@@ -2897,6 +2929,9 @@ function addSaved(){
   saveAll();
   renderSaved();
   renderKPIs();
+  if(window.App && typeof App.syncSaveSavedAmounts === "function"){
+    App.syncSaveSavedAmounts(mesAtual, d.saved).catch(()=>{});
+  }
 }
 function removeSaved(idx){
   const d = getDataMes(mesAtual);
@@ -2906,6 +2941,9 @@ function removeSaved(idx){
   saveAll();
   renderSaved();
   renderKPIs();
+  if(window.App && typeof App.syncSaveSavedAmounts === "function"){
+    App.syncSaveSavedAmounts(mesAtual, d.saved).catch(()=>{});
+  }
 }
 
 function saveSettings(){
@@ -2915,9 +2953,13 @@ function saveSettings(){
   d.meta   = Number(document.getElementById("meta").value||0);
   saveAll();
 
-  // Sync configurações mensais no Supabase
-  if (window.App && typeof App.syncSaveMonthlySettings === "function") {
-    App.syncSaveMonthlySettings(mesAtual, d.salary, d.meta).catch(()=>{});
+  if(window.App){
+    // Salva configurações mensais
+    if(typeof App.syncSaveMonthlySettings === "function")
+      App.syncSaveMonthlySettings(mesAtual, d.salary, d.meta).catch(()=>{});
+    // Salva histórico com métricas do mês
+    if(typeof App.syncSaveMonthHistory === "function")
+      App.syncSaveMonthHistory(mesAtual, d).then(()=>console.log("[Supabase] Salvando histórico")).catch(()=>{});
   }
 
   render();
@@ -4296,11 +4338,28 @@ async function initSupabaseAuth() {
       if (window.App && typeof App.syncLoadAllFromCloud === "function") {
         App.syncLoadAllFromCloud().then(function (cloudResult) {
           if (cloudResult === true) {
-            // Sincroniza as variáveis locais do index.html com o estado vindo da nuvem
+            // Sincroniza variáveis locais com estado da nuvem
             state       = App.state;
             categorias  = App.categorias.length ? App.categorias : categorias;
             fixos       = App.fixos.length       ? App.fixos       : fixos;
             investFixos = App.investFixos.length  ? App.investFixos  : investFixos;
+
+            // Aplica configurações de tema/preferências da nuvem
+            if (App._cloudAppSettings) {
+              const s = App._cloudAppSettings;
+              if (s.theme) {
+                document.body.classList.toggle("light", s.theme === "light");
+                localStorage.setItem("theme", s.theme);
+              }
+              if (s.accent_color) localStorage.setItem(THEME_KEYS.accent, s.accent_color);
+              if (s.theme_preset) localStorage.setItem(THEME_KEYS.preset, s.theme_preset);
+              applyThemeSettings();
+              if (s.voice_enabled !== undefined) {
+                localStorage.setItem(kVoiceEnabled(), s.voice_enabled ? "1" : "0");
+                applyVoiceVisibility();
+              }
+            }
+
             // Re-renderiza com dados da nuvem
             buildMonthSelect();
             renderCategorias();

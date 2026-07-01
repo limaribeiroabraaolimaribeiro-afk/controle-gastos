@@ -1176,7 +1176,7 @@
       return false;
     }
 
-    console.log("[Supabase] Carregando dados da nuvem...");
+    console.log("[Supabase] Carregando tudo da nuvem...");
     App.setSyncStatus("syncing");
 
     try {
@@ -1188,15 +1188,17 @@
         sb.from("categories").select("*").eq("user_id", uid).order("created_at", { ascending: true }),
         sb.from("fixed_expenses").select("*").eq("user_id", uid).order("created_at", { ascending: true }),
         sb.from("fixed_investments").select("*").eq("user_id", uid),
-        sb.from("saved_amounts").select("*").eq("user_id", uid).order("created_at", { ascending: true })
+        sb.from("saved_amounts").select("*").eq("user_id", uid).order("created_at", { ascending: true }),
+        sb.from("app_settings").select("*").eq("user_id", uid).maybeSingle()
       ]);
 
-      const expList  = (results[0].data || []);
-      const setList  = (results[1].data || []);
-      const catList  = (results[2].data || []);
-      const fexpList = (results[3].data || []);
-      const fInvList = (results[4].data || []);
-      const savList  = (results[5].data || []);
+      const expList    = (results[0].data || []);
+      const setList    = (results[1].data || []);
+      const catList    = (results[2].data || []);
+      const fexpList   = (results[3].data || []);
+      const fInvList   = (results[4].data || []);
+      const savList    = (results[5].data || []);
+      const appSetting = results[6].data || null;
 
       if (results[0].error) console.warn("[Supabase] expenses:", results[0].error.message);
       if (results[1].error) console.warn("[Supabase] monthly_settings:", results[1].error.message);
@@ -1204,9 +1206,15 @@
       if (results[3].error) console.warn("[Supabase] fixed_expenses:", results[3].error.message);
       if (results[4].error) console.warn("[Supabase] fixed_investments:", results[4].error.message);
       if (results[5].error) console.warn("[Supabase] saved_amounts:", results[5].error.message);
+      if (results[6].error) console.warn("[Supabase] app_settings:", results[6].error.message);
 
       console.log("[Supabase] Expenses encontrados:", expList.length);
       console.log("[Supabase] Monthly settings encontrados:", setList.length);
+      console.log("[Supabase] Categories encontradas:", catList.length);
+      console.log("[Supabase] Fixed expenses encontrados:", fexpList.length);
+      console.log("[Supabase] Fixed investments encontrados:", fInvList.length);
+      console.log("[Supabase] Saved amounts encontrados:", savList.length);
+      console.log("[Supabase] App settings encontrados:", appSetting ? 1 : 0);
 
       const cloudHasData = expList.length > 0 || setList.length > 0 ||
                            catList.length > 0 || fexpList.length > 0 || fInvList.length > 0;
@@ -1287,6 +1295,9 @@
       App.state = newState;
       App.saveAll();
 
+      // Expoe app_settings para o caller aplicar tema/preferencias
+      if (appSetting) App._cloudAppSettings = appSetting;
+
       console.log("[Supabase] Dados aplicados no estado local");
       App.setSyncStatus("ok");
       return true;
@@ -1294,6 +1305,100 @@
     } catch (err) {
       console.error("[Supabase] Erro ao carregar dados da nuvem:", err);
       App.setSyncStatus("error", err.message);
+      return false;
+    }
+  };
+
+  /* ---- App Settings ---- */
+  App.syncSaveAppSettings = async function (settings) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    const row = {
+      user_id:       user.id,
+      theme:         settings.theme         || "dark",
+      accent_color:  settings.accentColor   || settings.accent_color  || "#569cff",
+      theme_preset:  settings.themePreset   || settings.theme_preset  || "default",
+      voice_enabled: !!settings.voiceEnabled
+    };
+    const { error } = await sb.from("app_settings").upsert(row, { onConflict: "user_id" });
+    if (error) { console.warn("[Supabase] syncSaveAppSettings:", error.message); return false; }
+    console.log("[Supabase] App settings salvos");
+    return true;
+  };
+
+  /* ---- Saved Amounts (substituicao completa por mes) ---- */
+  App.syncSaveSavedAmounts = async function (mes, amounts) {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    await sb.from("saved_amounts").delete().eq("user_id", user.id).eq("mes", mes);
+    const toInsert = (amounts || []).filter(function(s) { return s && Number(s.value || 0) > 0; });
+    if (!toInsert.length) return true;
+    const rows = toInsert.map(function(s) {
+      return {
+        user_id:   user.id,
+        mes:       mes,
+        valor:     Number(s.value || 0),
+        descricao: s.desc || s.descricao || "",
+        data:      s.date || new Date().toISOString().slice(0, 10),
+        source:    s.source || "manual"
+      };
+    });
+    const { error } = await sb.from("saved_amounts").insert(rows);
+    if (error) { console.warn("[Supabase] syncSaveSavedAmounts:", error.message); return false; }
+    return true;
+  };
+
+  /* ---- Salva historico do mes com metricas ---- */
+  App.syncSaveMonthHistory = async function (mes, d) {
+    if (!d) return false;
+    const items   = d.items   || [];
+    const saved   = d.saved   || [];
+    const salary  = Number(d.salary || 0);
+    const spent   = items.reduce(function(a, b) { return a + Number(b.amount || 0); }, 0);
+    const pago    = items.filter(function(x) { return !!x.paid; }).reduce(function(a, b) { return a + Number(b.amount || 0); }, 0);
+    const pend    = spent - pago;
+    const guardado= saved.reduce(function(a, b) { return a + Number(b.value || 0); }, 0);
+    const sobra   = salary - spent;
+    const saude   = salary > 0 ? Math.min(100, Math.max(0, Math.round((sobra / salary) * 100))) : 0;
+    return App.syncSaveHistory(mes, {
+      salary:      salary,
+      meta:        Number(d.meta || 0),
+      totalGastos: spent,
+      totalSaved:  guardado,
+      saldo:       sobra,
+      snapshot:    { total_pago: pago, total_pendente: pend, sobra: sobra, saude: saude }
+    });
+  };
+
+  /* ---- Envia estado completo atual para a nuvem ---- */
+  App.syncSaveAllToCloud = async function () {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) { App.setSyncStatus("local"); return false; }
+    App.setSyncStatus("syncing");
+    console.log("[Supabase] Salvando todo o estado na nuvem...");
+    try {
+      const mes = App.currentMonthKeyFromDate();
+      const d   = App.state && App.state.meses && App.state.meses[mes];
+      const promises = [
+        App.syncSaveCategories(App.categorias),
+        App.syncSaveFixedExpenses(App.fixos),
+        App.syncSaveFixedInvestments(App.investFixos)
+      ];
+      if (d) {
+        promises.push(App.syncSaveMonthlySettings(mes, d.salary, d.meta));
+        promises.push(App.syncSaveExpenses(mes, d.items || []));
+        promises.push(App.syncSaveSavedAmounts(mes, d.saved || []));
+        promises.push(App.syncSaveMonthHistory(mes, d));
+      }
+      await Promise.all(promises);
+      App.setSyncStatus("ok");
+      console.log("[Supabase] Estado completo salvo na nuvem");
+      return true;
+    } catch (e) {
+      App.setSyncStatus("error", e.message);
       return false;
     }
   };

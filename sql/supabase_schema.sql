@@ -556,6 +556,60 @@ FROM bank_notification_imports
 GROUP BY user_id, LEFT(COALESCE(notification_time::text, created_at::text), 7);
 
 -- ============================================================
+-- 12. APP_SETTINGS
+-- Preferencias do app por usuario (tema, voz, moeda etc.)
+-- UNIQUE (user_id) garante apenas uma linha por usuario
+-- ============================================================
+CREATE TABLE IF NOT EXISTS app_settings (
+    id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id        uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    theme          text DEFAULT 'dark'    CHECK (theme IN ('dark', 'light')),
+    accent_color   text DEFAULT '#569cff',
+    theme_preset   text DEFAULT 'default',
+    voice_enabled  boolean DEFAULT false,
+    currency       text DEFAULT 'BRL',
+    ai_enabled     boolean DEFAULT true,
+    reader_enabled boolean DEFAULT false,
+    created_at     timestamptz DEFAULT now(),
+    updated_at     timestamptz DEFAULT now(),
+    CONSTRAINT app_settings_user_unique UNIQUE (user_id)
+);
+
+DROP TRIGGER IF EXISTS app_settings_updated_at ON app_settings;
+CREATE TRIGGER app_settings_updated_at
+    BEFORE UPDATE ON app_settings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_settings TO authenticated;
+
+DROP POLICY IF EXISTS "app_settings_select_own" ON app_settings;
+CREATE POLICY "app_settings_select_own"
+    ON app_settings FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "app_settings_insert_own" ON app_settings;
+CREATE POLICY "app_settings_insert_own"
+    ON app_settings FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "app_settings_update_own" ON app_settings;
+CREATE POLICY "app_settings_update_own"
+    ON app_settings FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "app_settings_delete_own" ON app_settings;
+CREATE POLICY "app_settings_delete_own"
+    ON app_settings FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- Colunas extras: history (metricas adicionais)
+-- ============================================================
+ALTER TABLE history ADD COLUMN IF NOT EXISTS total_pago     numeric DEFAULT 0;
+ALTER TABLE history ADD COLUMN IF NOT EXISTS total_pendente numeric DEFAULT 0;
+ALTER TABLE history ADD COLUMN IF NOT EXISTS guardado       numeric DEFAULT 0;
+ALTER TABLE history ADD COLUMN IF NOT EXISTS sobra          numeric DEFAULT 0;
+ALTER TABLE history ADD COLUMN IF NOT EXISTS saude          numeric DEFAULT 0;
+
+-- ============================================================
 -- GRANTS FINAIS: sequences e view
 -- ============================================================
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;
