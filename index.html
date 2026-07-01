@@ -2942,6 +2942,22 @@ function togglePaid(idx){
   }
 
   saveAll();
+
+  // Atualiza pago no Supabase se o item tem ID
+  if(it._sbid && window.App && App.getSupabaseClient){
+    const sb = App.getSupabaseClient();
+    if(sb && USER_ID){
+      sb.from("expenses")
+        .update({ pago: !!it.paid })
+        .eq("id", it._sbid)
+        .eq("user_id", USER_ID)
+        .then(function(res){
+          if(res.error) console.warn("[Supabase] Erro ao atualizar pago:", res.error.message);
+          else console.log("[Supabase] Status pago atualizado:", it._sbid);
+        });
+    }
+  }
+
   renderSaved();
   renderList();
   renderKPIs();
@@ -2965,8 +2981,24 @@ function delItemMonthOnly(idx){
   const d = getDataMes(mesAtual);
   const it = d.items[idx];
   if(!it) return;
+  const sbid = it._sbid; // captura antes de remover
   d.items.splice(idx,1);
   saveAll();
+
+  // Deleta do Supabase se o item tem ID
+  if(sbid && window.App && App.getSupabaseClient){
+    const sb = App.getSupabaseClient();
+    if(sb && USER_ID){
+      sb.from("expenses")
+        .delete()
+        .eq("id", sbid)
+        .eq("user_id", USER_ID)
+        .then(function(res){
+          if(res.error) console.warn("[Supabase] Erro ao excluir expense:", res.error.message);
+          else console.log("[Supabase] Expense excluido:", sbid);
+        });
+    }
+  }
 }
 function delItemSmart(idx){
   const d = getDataMes(mesAtual);
@@ -3034,9 +3066,14 @@ function confirmAddExpense(){
   d.items.push(newItem);
   saveAll();
 
-  // Sync com Supabase (não bloqueia a UI)
+  // Sync com Supabase (não bloqueia a UI) — salva _sbid no item local
   if(window.App && typeof App.syncSaveOneExpense === "function"){
-    App.syncSaveOneExpense(mesAtual, newItem).catch(()=>{});
+    App.syncSaveOneExpense(mesAtual, newItem).then(function(id) {
+      if (id && typeof id === "string") {
+        newItem._sbid = id;
+        saveAll(); // re-salva com o ID do Supabase
+      }
+    }).catch(function(){});
   }
 
   closeModal("overlay-addExpense");
@@ -4196,6 +4233,8 @@ async function initSupabaseAuth() {
       const u = session.user;
       USER = u;
       USER_ID = u.id;
+      // Sincroniza com App para que syncLoadAllFromCloud use o user correto
+      if (window.App) { App.USER = u; App.USER_ID = u.id; }
       console.log("[Supabase] Sessão ativa:", u.email);
       console.log("[Supabase] User ID:", u.id);
 
@@ -4207,19 +4246,12 @@ async function initSupabaseAuth() {
       if (t === "light") document.body.classList.add("light");
 
       applyThemeSettings();
-      loadAll();
+      loadAll(); // Carrega localStorage como fallback inicial
 
       if (localStorage.getItem(kVoiceEnabled()) == null) localStorage.setItem(kVoiceEnabled(), "0");
       applyVoiceVisibility();
 
-      buildMonthSelect();
-      renderCategorias();
-      renderFixos();
-      renderInvestFixos();
-      updateInvestUI();
-      updateInvResumo();
-      buildPdfSelectors();
-
+      // Bind de eventos de UI (uma vez)
       const tipoSel = document.getElementById("tipoSimulacao");
       if (tipoSel && !tipoSel.dataset.bound) {
         tipoSel.addEventListener("change", () => {
@@ -4229,37 +4261,58 @@ async function initSupabaseAuth() {
         });
         tipoSel.dataset.bound = "1";
       }
-
       const investSel = document.getElementById("investTipo");
       if (investSel && !investSel.dataset.bound) {
         investSel.addEventListener("change", updateInvestUI);
         investSel.dataset.bound = "1";
       }
-
       ["invNome", "invMetaFinal", "invPrazoMeses"].forEach(id => {
         const el = document.getElementById(id);
-        if (el && !el.dataset.bound) {
-          el.addEventListener("input", updateInvResumo);
-          el.dataset.bound = "1";
-        }
+        if (el && !el.dataset.bound) { el.addEventListener("input", updateInvResumo); el.dataset.bound = "1"; }
       });
-
       const iaInput = document.getElementById("iaPrompt");
       if (iaInput && !iaInput.dataset.bound) {
-        iaInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            iaSend();
-          }
-        });
+        iaInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); iaSend(); } });
         iaInput.dataset.bound = "1";
       }
 
+      // Render inicial com dados do localStorage (resposta imediata)
+      buildMonthSelect();
+      renderCategorias();
+      renderFixos();
+      renderInvestFixos();
+      updateInvestUI();
+      updateInvResumo();
+      buildPdfSelectors();
       showApp();
       goHome();
       render();
       iaHealth();
       startVoiceBridge();
+
+      // Carregamento da nuvem (async — atualiza a UI quando os dados chegarem)
+      if (window.App && typeof App.syncLoadAllFromCloud === "function") {
+        App.syncLoadAllFromCloud().then(function (cloudResult) {
+          if (cloudResult === true) {
+            // Sincroniza as variáveis locais do index.html com o estado vindo da nuvem
+            state       = App.state;
+            categorias  = App.categorias.length ? App.categorias : categorias;
+            fixos       = App.fixos.length       ? App.fixos       : fixos;
+            investFixos = App.investFixos.length  ? App.investFixos  : investFixos;
+            // Re-renderiza com dados da nuvem
+            buildMonthSelect();
+            renderCategorias();
+            renderFixos();
+            renderInvestFixos();
+            render();
+            console.log("[Supabase] Render atualizado com dados da nuvem");
+          } else if (cloudResult === "empty") {
+            console.log("[Supabase] Nuvem vazia — dados locais mantidos");
+          }
+        }).catch(function (err) {
+          console.warn("[Supabase] Falha ao carregar nuvem:", err);
+        });
+      }
     }
   });
 

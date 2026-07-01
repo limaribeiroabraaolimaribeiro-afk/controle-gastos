@@ -870,11 +870,16 @@
     if (error) {
       console.error("[Supabase] Erro ao salvar:", error.message, error);
       App.setSyncStatus("error", error.message);
-      return false;
+      return null;
     }
-    console.log("[Supabase] Expense salvo com sucesso! id:", data?.id);
+    const savedId = data && data.id;
+    if (savedId) {
+      item._sbid = savedId;
+      console.log("[Supabase] ID salvo no item local:", savedId);
+    }
+    console.log("[Supabase] Expense salvo com sucesso! id:", savedId);
     App.setSyncStatus("ok");
-    return true;
+    return savedId || true;
   };
 
   App.loadAndroidImports = async function () {
@@ -1153,6 +1158,141 @@
       .limit(24);
     if (error) { console.warn("[Sync] history:", error.message); return []; }
     return data || [];
+  };
+
+  /* =========================
+     SYNC: LOAD ALL FROM CLOUD
+     Fonte de verdade: Supabase.
+     Retorna: true (dados carregados), 'empty' (nuvem vazia), false (erro)
+  ========================= */
+  App.syncLoadAllFromCloud = async function () {
+    const sb = App.getSupabaseClient();
+    const user = await App.supabaseGetSession();
+    if (!sb || !user) {
+      console.warn("[Supabase] syncLoadAllFromCloud: sem sessao ou cliente");
+      return false;
+    }
+
+    console.log("[Supabase] Carregando dados da nuvem...");
+    App.setSyncStatus("syncing");
+
+    try {
+      const uid = user.id;
+
+      const results = await Promise.all([
+        sb.from("expenses").select("*").eq("user_id", uid).order("created_at", { ascending: true }),
+        sb.from("monthly_settings").select("*").eq("user_id", uid),
+        sb.from("categories").select("*").eq("user_id", uid).order("ordem"),
+        sb.from("fixed_expenses").select("*").eq("user_id", uid).order("ordem"),
+        sb.from("fixed_investments").select("*").eq("user_id", uid),
+        sb.from("saved_amounts").select("*").eq("user_id", uid).order("created_at", { ascending: true })
+      ]);
+
+      const expList  = (results[0].data || []);
+      const setList  = (results[1].data || []);
+      const catList  = (results[2].data || []);
+      const fexpList = (results[3].data || []);
+      const fInvList = (results[4].data || []);
+      const savList  = (results[5].data || []);
+
+      if (results[0].error) console.warn("[Supabase] expenses:", results[0].error.message);
+      if (results[1].error) console.warn("[Supabase] monthly_settings:", results[1].error.message);
+      if (results[2].error) console.warn("[Supabase] categories:", results[2].error.message);
+      if (results[3].error) console.warn("[Supabase] fixed_expenses:", results[3].error.message);
+      if (results[4].error) console.warn("[Supabase] fixed_investments:", results[4].error.message);
+      if (results[5].error) console.warn("[Supabase] saved_amounts:", results[5].error.message);
+
+      console.log("[Supabase] Expenses encontrados:", expList.length);
+      console.log("[Supabase] Monthly settings encontrados:", setList.length);
+
+      const cloudHasData = expList.length > 0 || setList.length > 0 ||
+                           catList.length > 0 || fexpList.length > 0 || fInvList.length > 0;
+      if (!cloudHasData) {
+        console.log("[Supabase] Nuvem vazia — usando dados locais");
+        App.setSyncStatus("local");
+        return "empty";
+      }
+
+      const newState = { meses: {} };
+
+      setList.forEach(function (s) {
+        if (!newState.meses[s.mes]) {
+          newState.meses[s.mes] = { salary: 0, meta: 0, items: [], saved: [], hiddenFixos: [], investStatus: {} };
+        }
+        newState.meses[s.mes].salary = Number(s.salary || 0);
+        newState.meses[s.mes].meta   = Number(s.meta   || 0);
+      });
+
+      expList.forEach(function (e) {
+        var mes = e.mes;
+        if (!newState.meses[mes]) {
+          newState.meses[mes] = { salary: 0, meta: 0, items: [], saved: [], hiddenFixos: [], investStatus: {} };
+        }
+        newState.meses[mes].items.push({
+          _sbid:        e.id,
+          desc:         e.descricao  || "",
+          amount:       Number(e.valor || 0),
+          category:     e.categoria  || "Outros",
+          data:         typeof e.data === "string" ? e.data : (e.data ? String(e.data).slice(0, 10) : ""),
+          paid:         !!(e.pago || e.paid),
+          isFixo:       !!(e.is_fixo),
+          isInvestFixo: false
+        });
+      });
+
+      savList.forEach(function (s) {
+        var mes = s.mes;
+        if (!newState.meses[mes]) {
+          newState.meses[mes] = { salary: 0, meta: 0, items: [], saved: [], hiddenFixos: [], investStatus: {} };
+        }
+        newState.meses[mes].saved.push({
+          _sbid:  s.id,
+          value:  Number(s.valor || 0),
+          desc:   s.descricao || "",
+          date:   typeof s.data === "string" ? s.data : (s.data ? String(s.data).slice(0, 10) : ""),
+          source: s.source || "manual"
+        });
+      });
+
+      if (catList.length > 0) {
+        App.categorias = catList.map(function (c) { return c.nome; });
+        if (!App.categorias.some(function (c) { return String(c).toLowerCase() === "investimentos"; })) {
+          App.categorias.splice(App.categorias.length - 1, 0, "Investimentos");
+        }
+      }
+
+      if (fexpList.length > 0) {
+        App.fixos = fexpList.map(function (f) {
+          return { _sbid: f.id, desc: f.descricao || "", amount: Number(f.valor || 0), category: f.categoria || "Outros", isFixo: true };
+        });
+      }
+
+      if (fInvList.length > 0) {
+        App.investFixos = fInvList.map(function (inv) {
+          return {
+            _sbid:      inv.id,
+            id:         inv.id,
+            nome:       inv.nome || "",
+            metaFinal:  Number(inv.meta_final  || 0),
+            prazoMeses: Number(inv.prazo_meses || 12),
+            mensal:     Number(inv.mensal       || 0),
+            diaPagar:   Number(inv.dia_pagar    || 0)
+          };
+        });
+      }
+
+      App.state = newState;
+      App.saveAll();
+
+      console.log("[Supabase] Dados aplicados no estado local");
+      App.setSyncStatus("ok");
+      return true;
+
+    } catch (err) {
+      console.error("[Supabase] Erro ao carregar dados da nuvem:", err);
+      App.setSyncStatus("error", err.message);
+      return false;
+    }
   };
 
   App.syncAll = async function (dadosMes) {

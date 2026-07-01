@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v10-unpkg-ascii";
+const SW_VERSION = "gastos-pro-v11-cloud-sync";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
