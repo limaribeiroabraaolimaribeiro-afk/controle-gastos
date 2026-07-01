@@ -1106,11 +1106,16 @@ h1,h2,h3{
       <div class="hr"></div>
       <h3 style="margin:0 0 10px;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px">Financeiro PRO</h3>
       <div class="menuGrid">
+        <button class="btn menuItem" onclick="openHoje()"><span class="menuIcon">📅</span> Hoje</button>
         <button class="btn menuItem" onclick="openReceitas()"><span class="menuIcon">💰</span> Receitas</button>
         <button class="btn menuItem" onclick="openContas()"><span class="menuIcon">🏦</span> Contas</button>
         <button class="btn menuItem" onclick="openOrcamentos()"><span class="menuIcon">📊</span> Orçamentos</button>
         <button class="btn menuItem" onclick="openMetas()"><span class="menuIcon">🎯</span> Metas</button>
         <button class="btn menuItem" onclick="openCartoes()"><span class="menuIcon">💳</span> Cartões</button>
+        <button class="btn menuItem" onclick="openParcelamentos()"><span class="menuIcon">📋</span> Parcelamentos</button>
+        <button class="btn menuItem" onclick="openLembretes()"><span class="menuIcon">🔔</span> Lembretes</button>
+        <button class="btn menuItem" onclick="openCalendario()"><span class="menuIcon">🗓️</span> Calendário</button>
+        <button class="btn menuItem" onclick="openRelatorio()"><span class="menuIcon">📈</span> Relatório</button>
       </div>
 
       <div class="hr"></div>
@@ -1762,6 +1767,173 @@ h1,h2,h3{
     <div class="card">
       <h3>Minhas metas</h3>
       <div id="listaMetas"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: HOJE ===== -->
+  <div class="screen" id="screen-hoje">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">📅 Hoje</div>
+    </div>
+    <div id="hojeContent"></div>
+  </div>
+
+  <!-- ===== TELA: PARCELAMENTOS ===== -->
+  <div class="screen" id="screen-parcelamentos">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">📋 Parcelamentos</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <h3>Nova compra parcelada</h3>
+      <label>Descrição</label>
+      <input id="parlDesc" placeholder="Ex: Notebook, Geladeira, Curso...">
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Valor total (R$)</label>
+          <input id="parlValorTotal" type="number" placeholder="Ex: 2400">
+        </div>
+        <div>
+          <label>Parcelas</label>
+          <input id="parlParcelas" type="number" min="2" max="60" placeholder="Ex: 12" oninput="calcParcela()">
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Categoria</label>
+          <select id="parlCat"></select>
+        </div>
+        <div>
+          <label>Cartão</label>
+          <select id="parlCartao"><option value="">Sem cartão</option></select>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Primeiro mês de cobrança</label>
+          <input id="parlPrimeiroMes" type="month">
+        </div>
+        <div>
+          <div class="note" style="margin-top:20px">
+            <div class="small">Valor por parcela</div>
+            <div style="font-weight:900;font-size:16px" id="parlValorParcelaDisplay">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn primary" style="margin-top:10px;width:100%" onclick="criarParcelamento()">Criar parcelamento</button>
+    </div>
+
+    <div class="card">
+      <h3>Parcelamentos ativos</h3>
+      <div id="listaParcelamentos" class="small"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: LEMBRETES ===== -->
+  <div class="screen" id="screen-lembretes">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">🔔 Lembretes</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <h3>Novo lembrete</h3>
+      <label>Título</label>
+      <input id="lemTitulo" placeholder="Ex: Vencimento fatura Nubank">
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Data</label>
+          <input id="lemData" type="date">
+        </div>
+        <div>
+          <label>Tipo</label>
+          <select id="lemTipo">
+            <option value="conta">Conta</option>
+            <option value="cartao">Cartão</option>
+            <option value="meta">Meta</option>
+            <option value="investimento">Investimento</option>
+            <option value="gasto">Gasto</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn primary" style="margin-top:10px;width:100%" onclick="addLembrete()">Adicionar lembrete</button>
+    </div>
+
+    <div class="card">
+      <h3>Meus lembretes</h3>
+      <div id="listaLembretes"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: CALENDÁRIO ===== -->
+  <div class="screen" id="screen-calendario">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">🗓️ Calendário Financeiro</div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <button class="btn mini" onclick="calendarioMesPrev()">← Anterior</button>
+        <div style="font-weight:950" id="calendarioMesLabel"></div>
+        <button class="btn mini" onclick="calendarioMesNext()">Próximo →</button>
+      </div>
+    </div>
+    <div class="card">
+      <div id="calendarioGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3>Eventos do dia <span id="calendarioDiaSel"></span></h3>
+      <div id="calendarioDiaDetalhe" class="small"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: RELATÓRIO MENSAL ===== -->
+  <div class="screen" id="screen-relatorio">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">📈 Relatório Mensal</div>
+    </div>
+    <div id="relatorioContent"></div>
+  </div>
+
+  <!-- ===== TELA: ONBOARDING ===== -->
+  <div class="screen" id="screen-onboarding">
+    <div class="wrap">
+      <div class="card">
+        <div class="brand" style="text-align:center;padding:20px 0">
+          <div style="font-size:48px">💎</div>
+          <h1>Bem-vindo ao Controle de Gastos PRO</h1>
+          <p class="small">Vamos configurar sua conta em poucos passos</p>
+        </div>
+        <div id="onboardingStep1">
+          <h3>Passo 1 de 3 — Dados do mês atual</h3>
+          <label>Qual é seu salário mensal?</label>
+          <input id="obSalario" type="number" placeholder="Ex: 3500">
+          <label style="margin-top:10px">Meta máxima de gastos (R$)</label>
+          <input id="obMetaGastos" type="number" placeholder="Ex: 2000">
+          <label style="margin-top:10px">Quanto quer guardar por mês? (R$)</label>
+          <input id="obMetaGuardar" type="number" placeholder="Ex: 500">
+          <button class="btn primary" style="margin-top:16px;width:100%" onclick="onboardingProximo(2)">Próximo →</button>
+        </div>
+        <div id="onboardingStep2" style="display:none">
+          <h3>Passo 2 de 3 — Categorias</h3>
+          <div class="small" style="margin-bottom:10px">Quais categorias você mais usa? (já estão todas ativadas)</div>
+          <div id="obCategorias" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          <button class="btn primary" style="margin-top:16px;width:100%" onclick="onboardingProximo(3)">Próximo →</button>
+        </div>
+        <div id="onboardingStep3" style="display:none">
+          <h3>Passo 3 de 3 — Pronto!</h3>
+          <div class="note">
+            <div style="font-size:28px;text-align:center;padding:16px">🎉</div>
+            <div style="font-weight:900;text-align:center">Tudo configurado!</div>
+            <div class="small" style="text-align:center;margin-top:8px">Seus dados serão salvos na nuvem automaticamente.</div>
+          </div>
+          <button class="btn primary" style="margin-top:16px;width:100%" onclick="onboardingFinalizar()">Começar a usar →</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -4592,6 +4764,8 @@ async function initSupabaseAuth() {
             renderInvestFixos();
             render();
             console.log("[Supabase] Render atualizado com dados da nuvem");
+            // Verifica onboarding
+            if (typeof verificarOnboarding === "function") verificarOnboarding();
           } else if (cloudResult === "empty") {
             console.log("[Supabase] Nuvem vazia — dados locais mantidos");
           }
@@ -5256,6 +5430,9 @@ window.listarLancamentosBancariosMes = function(){
 <!-- ===== FINANCEIRO PRO: RECEITAS, CONTAS, ORÇAMENTOS, METAS, CARTÕES ===== -->
 <script>
 /* --- Estado local dos novos módulos --- */
+var _lembretes      = [];
+var _installments   = [];
+var _calendarioMes  = new Date().toISOString().slice(0,7);
 var _receitas       = [];   // [{_sbid, desc, categoria, valor, data, origem}]
 var _contas         = [];   // [{_sbid, nome, tipo, saldo_inicial, cor}]
 var _orcamentos     = [];   // [{_sbid, mes, categoria, limite}]
@@ -5593,6 +5770,401 @@ function removeCartao(idx){
   if(c._sbid && window.App && typeof App.syncDeleteCreditCard==="function"){
     App.syncDeleteCreditCard(c._sbid).catch(()=>{});
   }
+}
+
+/* ========== PARCELAMENTOS ========== */
+function openParcelamentos(){
+  _installments = [];
+  const cat = document.getElementById("parlCat");
+  if(cat) cat.innerHTML = categorias.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
+  const cardSel = document.getElementById("parlCartao");
+  if(cardSel){
+    cardSel.innerHTML = '<option value="">Sem cartão</option>' +
+      _cartoes.map(c=>`<option value="${escapeHtml(c._sbid||'')}">💳 ${escapeHtml(c.nome)}</option>`).join("");
+  }
+  const pm = document.getElementById("parlPrimeiroMes");
+  if(pm) pm.value = mesAtual;
+  renderParcelamentos();
+  openScreen("screen-parcelamentos");
+  // Carrega parcelamentos do Supabase
+  if(window.App && typeof App.syncLoadInstallmentPurchases==="function"){
+    App.syncLoadInstallmentPurchases().then(function(rows){
+      _installments = rows || [];
+      renderParcelamentos();
+    }).catch(()=>{});
+  }
+}
+function calcParcela(){
+  const total = Number(document.getElementById("parlValorTotal").value||0);
+  const n = Number(document.getElementById("parlParcelas").value||1);
+  const el = document.getElementById("parlValorParcelaDisplay");
+  if(el) el.textContent = n>0 ? money(Math.round((total/n)*100)/100) : "R$ 0,00";
+}
+function renderParcelamentos(){
+  const list = document.getElementById("listaParcelamentos");
+  if(!list) return;
+  if(!_installments.length){ list.innerHTML='<div style="padding:12px;opacity:.6">Nenhum parcelamento ativo.</div>'; return; }
+  list.innerHTML = _installments.map((p,idx)=>`
+    <div class="layoutItem" style="margin-bottom:8px">
+      <div class="layoutLeft">
+        <div>
+          <div class="layoutTitle">${escapeHtml(p.descricao||"")}</div>
+          <div class="small">${p.parcelas_total}x de ${money(p.valor_parcela||0)} • Desde ${escapeHtml(p.primeiro_mes||"")}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="font-weight:900">${money(p.valor_total||0)}</div>
+        <button class="btn icon mini" onclick="removeParcelamento(${idx})" title="Excluir">✕</button>
+      </div>
+    </div>`).join("");
+}
+async function criarParcelamento(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const desc = (document.getElementById("parlDesc").value||"").trim();
+  const total = Number(document.getElementById("parlValorTotal").value||0);
+  const n = Number(document.getElementById("parlParcelas").value||0);
+  const cat = document.getElementById("parlCat").value || "Outros";
+  const cardId = document.getElementById("parlCartao").value || null;
+  const primeiroMes = document.getElementById("parlPrimeiroMes").value || mesAtual;
+  if(!desc) return alert("Preencha a descrição.");
+  if(!total||total<=0) return alert("Preencha o valor total.");
+  if(!n||n<2) return alert("Mínimo 2 parcelas.");
+  const valorParcela = Math.round((total/n)*100)/100;
+  const purchase = {
+    descricao: desc, categoria: cat, valor_total: total, valor_parcela: valorParcela,
+    parcelas_total: n, primeiro_mes: primeiroMes, card_id: cardId,
+    data_compra: todayISO()
+  };
+  if(!window.App || typeof App.syncSaveInstallmentPurchase !== "function"){ alert("Sem conexão com Supabase"); return; }
+  const purchaseId = await App.syncSaveInstallmentPurchase(purchase);
+  if(!purchaseId){ alert("Erro ao salvar parcelamento. Tente novamente."); return; }
+  // Cria as parcelas em expenses
+  await App.syncCreateInstallmentExpenses(purchaseId, { ...purchase, parcelas: n });
+  purchase.id = purchaseId;
+  _installments.unshift(purchase);
+  document.getElementById("parlDesc").value="";
+  document.getElementById("parlValorTotal").value="";
+  document.getElementById("parlParcelas").value="";
+  document.getElementById("parlValorParcelaDisplay").textContent="R$ 0,00";
+  renderParcelamentos();
+  alert(`Parcelamento criado! ${n} parcelas de ${money(valorParcela)} geradas a partir de ${primeiroMes}.`);
+}
+async function removeParcelamento(idx){
+  const p = _installments[idx];
+  if(!p) return;
+  if(!confirm(`Excluir parcelamento "${p.descricao}"?\nIsso NÃO remove as parcelas já lançadas.`)) return;
+  _installments.splice(idx,1);
+  renderParcelamentos();
+}
+
+/* ========== LEMBRETES ========== */
+function openLembretes(){
+  _lembretes = (window.App && App.reminders) ? App.reminders.slice() : [];
+  document.getElementById("lemData").value = todayISO();
+  renderLembretes();
+  openScreen("screen-lembretes");
+}
+function renderLembretes(){
+  const list = document.getElementById("listaLembretes");
+  if(!list) return;
+  if(!_lembretes.length){ list.innerHTML='<div class="small" style="padding:12px;opacity:.6">Nenhum lembrete criado.</div>'; return; }
+  const tipos = {conta:"💡",cartao:"💳",meta:"🎯",investimento:"📈",gasto:"🧾",outro:"🔔"};
+  list.innerHTML = _lembretes.map((r,idx)=>`
+    <div class="layoutItem" style="margin-bottom:8px${r.status==='concluido'?';opacity:.5':''}">
+      <div class="layoutLeft">
+        <span style="font-size:20px">${tipos[r.tipo]||"🔔"}</span>
+        <div>
+          <div class="layoutTitle">${escapeHtml(r.titulo||"")}</div>
+          <div class="small">${r.data ? escapeHtml(r.data) : "Sem data"} • ${r.status==='concluido'?"✅ Concluído":"Pendente"}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        ${r.status!=="concluido"?`<button class="btn good mini" onclick="concluirLembrete(${idx})" title="Concluir">✓</button>`:""}
+        <button class="btn icon mini" onclick="removeLembrete(${idx})" title="Excluir">✕</button>
+      </div>
+    </div>`).join("");
+}
+function addLembrete(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const titulo = (document.getElementById("lemTitulo").value||"").trim();
+  const data = document.getElementById("lemData").value || null;
+  const tipo = document.getElementById("lemTipo").value || "outro";
+  if(!titulo) return alert("Digite o título do lembrete.");
+  const lem = { titulo, data, tipo, status:"ativo" };
+  _lembretes.unshift(lem);
+  if(window.App) App.reminders = _lembretes;
+  document.getElementById("lemTitulo").value="";
+  renderLembretes();
+  if(window.App && typeof App.syncSaveReminder==="function"){
+    App.syncSaveReminder(lem).then(function(id){ if(id) lem._sbid=id; }).catch(()=>{});
+  }
+}
+function concluirLembrete(idx){
+  const r = _lembretes[idx]; if(!r) return;
+  r.status="concluido";
+  if(window.App) App.reminders = _lembretes;
+  renderLembretes();
+  if(r._sbid && window.App && typeof App.syncUpdateReminderStatus==="function")
+    App.syncUpdateReminderStatus(r._sbid, "concluido").catch(()=>{});
+}
+function removeLembrete(idx){
+  const r = _lembretes[idx]; if(!r) return;
+  _lembretes.splice(idx,1);
+  if(window.App) App.reminders = _lembretes;
+  renderLembretes();
+  if(r._sbid && window.App && typeof App.syncDeleteReminder==="function")
+    App.syncDeleteReminder(r._sbid).catch(()=>{});
+}
+
+/* ========== HOJE ========== */
+function openHoje(){
+  renderHoje();
+  openScreen("screen-hoje");
+}
+function renderHoje(){
+  const container = document.getElementById("hojeContent");
+  if(!container) return;
+  const hoje = new Date();
+  const hojeStr = hoje.toISOString().slice(0,10);
+  const em7dias = new Date(hoje.getTime() + 7*24*3600*1000).toISOString().slice(0,10);
+  const d = getDataMes(mesAtual);
+
+  // Gastos pendentes próximos
+  const pendentes = (d.items||[]).filter(function(it){ return !it.paid; });
+  const hojeOrc = (window._orcamentos||[]).filter(function(o){
+    const d2 = getDataMes(mesAtual);
+    const gastosCat = (d2.items||[]).filter(function(i){ return i.category===o.categoria; }).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+    return o.limite>0 && (gastosCat/o.limite)>=0.7;
+  });
+  const lemHoje = (_lembretes||[]).filter(function(r){ return r.status==="ativo" && r.data && r.data<=em7dias; });
+
+  let html = '';
+  // Card saldo
+  const salary = Number(d.salary||0);
+  const spent = (d.items||[]).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  const receitas = (_receitas||[]).reduce(function(a,b){ return a+Number(b.valor||0); },0);
+  const saldoReal = salary + receitas - spent;
+  html += `<div class="kpiGrid" style="margin-bottom:12px">
+    <div class="kpiPro"><div class="kpiIcon">📥</div><div class="kpiLabel">Receitas</div><div class="kpiValue" style="color:var(--good)">${money(salary+receitas)}</div></div>
+    <div class="kpiPro kpi-spent"><div class="kpiIcon">📤</div><div class="kpiLabel">Gastos</div><div class="kpiValue">${money(spent)}</div></div>
+    <div class="kpiPro" style="grid-column:1/-1"><div class="kpiIcon">⚖️</div><div class="kpiLabel">Saldo Real</div><div class="kpiValue" style="color:${saldoReal>=0?'var(--good)':'var(--danger)'}">${money(saldoReal)}</div></div>
+  </div>`;
+
+  // Pendentes
+  if(pendentes.length){
+    html += `<div class="card" style="margin-bottom:12px"><h3>⏳ Gastos Pendentes (${pendentes.length})</h3>`;
+    html += pendentes.slice(0,5).map(function(it){
+      return `<div class="layoutItem" style="margin-bottom:6px"><div class="layoutLeft"><div class="layoutTitle">${escapeHtml(it.desc||"")}</div><div class="small">${escapeHtml(it.category||"")}</div></div><div style="font-weight:900">${money(it.amount||0)}</div></div>`;
+    }).join("");
+    if(pendentes.length>5) html += `<div class="small" style="opacity:.6;padding:8px 0">+${pendentes.length-5} mais...</div>`;
+    html += '</div>';
+  }
+
+  // Orçamentos em risco
+  if(hojeOrc.length){
+    html += `<div class="card" style="margin-bottom:12px"><h3>⚠️ Orçamentos em Atenção</h3>`;
+    html += hojeOrc.map(function(o){
+      return `<div class="small" style="padding:6px 0"><b>${escapeHtml(o.categoria)}</b> — limite ${money(o.limite)}</div>`;
+    }).join("");
+    html += '</div>';
+  }
+
+  // Lembretes
+  if(lemHoje.length){
+    html += `<div class="card" style="margin-bottom:12px"><h3>🔔 Lembretes</h3>`;
+    html += lemHoje.map(function(r){
+      return `<div class="layoutItem" style="margin-bottom:6px"><div class="layoutLeft"><div class="layoutTitle">${escapeHtml(r.titulo||"")}</div><div class="small">${escapeHtml(r.data||"")}</div></div></div>`;
+    }).join("");
+    html += '</div>';
+  }
+
+  // Metas
+  if(window._metas && _metas.length){
+    html += `<div class="card"><h3>🎯 Metas Ativas</h3>`;
+    html += _metas.slice(0,3).map(function(m){
+      const pct = m.valor_objetivo>0?Math.min(100,Math.round((m.valor_atual/m.valor_objetivo)*100)):0;
+      return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between"><b>${escapeHtml(m.nome||"")}</b><span>${pct}%</span></div><div class="progressBarTrack"><div class="progressBarFill ${pct>=100?'good':''}" style="width:${pct}%"></div></div></div>`;
+    }).join("");
+    html += '</div>';
+  }
+
+  if(!html) html = '<div class="small" style="text-align:center;padding:24px;opacity:.6">Nenhum item para hoje. Tudo em dia! 🎉</div>';
+  container.innerHTML = html;
+}
+
+/* ========== CALENDÁRIO ========== */
+function openCalendario(){
+  _calendarioMes = mesAtual;
+  renderCalendario();
+  openScreen("screen-calendario");
+}
+function calendarioMesPrev(){ var p=_calendarioMes.split("-"); var m=Number(p[1])-1; var y=Number(p[0]); if(m<1){m=12;y--;} _calendarioMes=y+"-"+String(m).padStart(2,"0"); renderCalendario(); }
+function calendarioMesNext(){ var p=_calendarioMes.split("-"); var m=Number(p[1])+1; var y=Number(p[0]); if(m>12){m=1;y++;} _calendarioMes=y+"-"+String(m).padStart(2,"0"); renderCalendario(); }
+function renderCalendario(){
+  const lbl = document.getElementById("calendarioMesLabel");
+  const grid = document.getElementById("calendarioGrid");
+  if(!lbl||!grid) return;
+  const p = _calendarioMes.split("-"); const yr=Number(p[0]); const mo=Number(p[1]);
+  const dt = new Date(yr,mo-1,1);
+  lbl.textContent = dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"}).replace(/^\w/,function(c){return c.toUpperCase();});
+  const diasSemana = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  let html = diasSemana.map(function(d){ return `<div style="text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:4px">${d}</div>`; }).join("");
+  const startDay = new Date(yr,mo-1,1).getDay();
+  for(var i=0;i<startDay;i++) html += '<div></div>';
+  const diasMes = new Date(yr,mo,0).getDate();
+  const d = getDataMes(_calendarioMes);
+  const hoje = new Date().toISOString().slice(0,10);
+  for(var dia=1;dia<=diasMes;dia++){
+    const diaStr = yr+"-"+String(mo).padStart(2,"0")+"-"+String(dia).padStart(2,"0");
+    const gastDia = (d.items||[]).filter(function(it){ return it.data===diaStr; });
+    const recDia = (_receitas||[]).filter(function(r){ return r.data===diaStr; });
+    const isHoje = diaStr===hoje;
+    const temDado = gastDia.length||recDia.length;
+    html += `<div onclick="calendarioDia('${diaStr}')" style="text-align:center;padding:6px 4px;border-radius:8px;cursor:pointer;background:${isHoje?'var(--accent)':'rgba(255,255,255,.06)'};color:${isHoje?'#fff':'inherit'};border:1px solid ${temDado?'var(--accent)':'transparent'}">
+      <div style="font-size:13px;font-weight:${isHoje?900:500}">${dia}</div>
+      ${gastDia.length?`<div style="width:6px;height:6px;border-radius:50%;background:var(--danger);margin:2px auto 0"></div>`:""}
+      ${recDia.length?`<div style="width:6px;height:6px;border-radius:50%;background:var(--good);margin:2px auto 0"></div>`:""}
+    </div>`;
+  }
+  grid.innerHTML = html;
+  document.getElementById("calendarioDiaSel").textContent = "";
+  document.getElementById("calendarioDiaDetalhe").innerHTML = '<div class="small" style="opacity:.6">Clique em um dia para ver detalhes.</div>';
+}
+function calendarioDia(diaStr){
+  document.getElementById("calendarioDiaSel").textContent = " — " + diaStr;
+  const d = getDataMes(_calendarioMes);
+  const gastDia = (d.items||[]).filter(function(it){ return it.data===diaStr; });
+  const recDia = (_receitas||[]).filter(function(r){ return r.data===diaStr; });
+  const lemDia = (_lembretes||[]).filter(function(r){ return r.data===diaStr; });
+  let html = "";
+  if(gastDia.length){
+    html += "<div style='font-weight:900;margin-bottom:8px'>Gastos</div>";
+    html += gastDia.map(function(it){ return `<div class="layoutItem" style="margin-bottom:4px"><div class="layoutTitle">${escapeHtml(it.desc||"")}</div><div style="font-weight:900;color:var(--danger)">${money(it.amount||0)}</div></div>`; }).join("");
+  }
+  if(recDia.length){
+    html += "<div style='font-weight:900;margin:8px 0'>Receitas</div>";
+    html += recDia.map(function(r){ return `<div class="layoutItem" style="margin-bottom:4px"><div class="layoutTitle">${escapeHtml(r.descricao||r.desc||"")}</div><div style="font-weight:900;color:var(--good)">${money(r.valor||0)}</div></div>`; }).join("");
+  }
+  if(lemDia.length){
+    html += "<div style='font-weight:900;margin:8px 0'>Lembretes</div>";
+    html += lemDia.map(function(r){ return `<div class="small" style="padding:4px 0">🔔 ${escapeHtml(r.titulo||"")}</div>`; }).join("");
+  }
+  if(!html) html = '<div class="small" style="opacity:.6">Nenhum evento neste dia.</div>';
+  document.getElementById("calendarioDiaDetalhe").innerHTML = html;
+}
+
+/* ========== RELATÓRIO MENSAL ========== */
+function openRelatorio(){
+  renderRelatorio();
+  openScreen("screen-relatorio");
+}
+function renderRelatorio(){
+  const el = document.getElementById("relatorioContent");
+  if(!el) return;
+  const d = getDataMes(mesAtual);
+  const items = d.items||[];
+  const salary = Number(d.salary||0);
+  const receitas = (_receitas||[]).reduce(function(a,b){ return a+Number(b.valor||0); },0);
+  const totalReceita = salary + receitas;
+  const spent = items.reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  const pago = items.filter(function(x){ return !!x.paid; }).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  const pend = spent - pago;
+  const saved = (d.saved||[]).reduce(function(a,b){ return a+Number(b.value||0); },0);
+  const saldo = totalReceita - spent;
+  const saude = totalReceita>0 ? Math.min(100,Math.max(0,Math.round((saldo/totalReceita)*100))) : 0;
+
+  // Categorias
+  const catMap = {};
+  items.forEach(function(it){ const c=it.category||"Outros"; catMap[c]=(catMap[c]||0)+Number(it.amount||0); });
+  const catSorted = Object.entries(catMap).sort(function(a,b){ return b[1]-a[1]; });
+  const topCat = catSorted[0];
+
+  // Maior gasto
+  const topGasto = items.reduce(function(a,b){ return Number(b.amount||0)>Number(a.amount||0)?b:a; }, {});
+
+  const dt = new Date(mesAtual+"-01T00:00:00");
+  const mesLabel = dt.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+
+  // Sugestoes
+  const sugestoes = [];
+  if(saude<50) sugestoes.push("⚠️ Seus gastos estão altos em relação à receita. Tente reduzir gastos variáveis.");
+  if(saved===0) sugestoes.push("💡 Você não guardou nada este mês. Tente separar pelo menos 10% do salário.");
+  if(topCat && topCat[1]>totalReceita*0.4) sugestoes.push(`📊 A categoria "${topCat[0]}" representa ${Math.round(topCat[1]/totalReceita*100)}% da sua receita.`);
+  if(pend>0) sugestoes.push(`⏳ Você tem ${money(pend)} em gastos pendentes. Verifique suas contas.`);
+
+  el.innerHTML = `
+  <div class="card" style="margin-bottom:12px">
+    <h3>📈 Relatório — ${escapeHtml(mesLabel)}</h3>
+    <div class="kpiGrid">
+      <div class="kpiPro"><div class="kpiIcon">📥</div><div class="kpiLabel">Receitas</div><div class="kpiValue" style="color:var(--good)">${money(totalReceita)}</div></div>
+      <div class="kpiPro kpi-spent"><div class="kpiIcon">📤</div><div class="kpiLabel">Gastos</div><div class="kpiValue">${money(spent)}</div></div>
+      <div class="kpiPro"><div class="kpiIcon">✅</div><div class="kpiLabel">Pago</div><div class="kpiValue">${money(pago)}</div></div>
+      <div class="kpiPro"><div class="kpiIcon">⏳</div><div class="kpiLabel">Pendente</div><div class="kpiValue">${money(pend)}</div></div>
+      <div class="kpiPro kpi-saved"><div class="kpiIcon">🏦</div><div class="kpiLabel">Guardado</div><div class="kpiValue">${money(saved)}</div></div>
+      <div class="kpiPro"><div class="kpiIcon">⚖️</div><div class="kpiLabel">Saldo</div><div class="kpiValue" style="color:${saldo>=0?'var(--good)':'var(--danger)'}">${money(saldo)}</div></div>
+    </div>
+  </div>
+  ${topCat?`<div class="card" style="margin-bottom:12px"><h3>📊 Destaques</h3>
+    <div class="small">Maior categoria: <b>${escapeHtml(topCat[0])}</b> — ${money(topCat[1])}</div>
+    ${topGasto.desc?`<div class="small" style="margin-top:6px">Maior gasto: <b>${escapeHtml(topGasto.desc)}</b> — ${money(topGasto.amount||0)}</div>`:""}
+    <div class="hr"></div>
+    <div style="margin-top:10px">${catSorted.map(function(c){
+      const pct=spent>0?Math.min(100,Math.round(c[1]/spent*100)):0;
+      return `<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between"><span>${escapeHtml(c[0])}</span><span>${money(c[1])} (${pct}%)</span></div><div class="progressBarTrack"><div class="progressBarFill" style="width:${pct}%"></div></div></div>`;
+    }).join("")}</div>
+  </div>`:""}
+  ${sugestoes.length?`<div class="card" style="margin-bottom:12px"><h3>💡 Sugestões</h3>
+    ${sugestoes.map(function(s){ return `<div class="alertItem" style="margin-bottom:8px">${s}</div>`; }).join("")}
+  </div>`:""}
+  <div class="card">
+    <h3>Nota financeira: ${saude}/100</h3>
+    <div class="progressBarTrack"><div class="progressBarFill ${saude>=70?'good':saude>=40?'warn':'danger'}" style="width:${saude}%"></div></div>
+    <div class="small" style="margin-top:6px">${saude>=70?"Excelente! Continue assim 🎉":saude>=40?"Bom, mas há espaço para melhorar":"Atenção: seus gastos estão comprometendo seu saldo"}</div>
+  </div>`;
+}
+
+/* ========== ONBOARDING ========== */
+function verificarOnboarding(){
+  if(!window.App || !App._cloudAppSettings) return;
+  if(App._cloudAppSettings.onboarding_completed===false||App._cloudAppSettings.onboarding_completed===null||App._cloudAppSettings.onboarding_completed===undefined){
+    openScreen("screen-onboarding");
+    renderOnboardingCategorias();
+  }
+}
+function renderOnboardingCategorias(){
+  const el = document.getElementById("obCategorias");
+  if(!el) return;
+  el.innerHTML = categorias.map(function(c){
+    return `<span class="badge good" style="cursor:pointer">${escapeHtml(c)}</span>`;
+  }).join("");
+}
+function onboardingProximo(step){
+  if(step===2){
+    const sal = Number(document.getElementById("obSalario").value||0);
+    if(!sal||sal<=0){ alert("Digite seu salário mensal."); return; }
+    document.getElementById("onboardingStep1").style.display="none";
+    document.getElementById("onboardingStep2").style.display="block";
+  } else if(step===3){
+    document.getElementById("onboardingStep2").style.display="none";
+    document.getElementById("onboardingStep3").style.display="block";
+  }
+}
+function onboardingFinalizar(){
+  const sal = Number(document.getElementById("obSalario").value||0);
+  const meta = Number(document.getElementById("obMetaGastos").value||0);
+  const d = getDataMes(mesAtual);
+  if(sal) d.salary = sal;
+  if(meta) d.meta = meta;
+  saveAll();
+  if(window.App){
+    if(typeof App.syncSaveMonthlySettings==="function")
+      App.syncSaveMonthlySettings(mesAtual,d.salary,d.meta).catch(()=>{});
+    if(typeof App.syncSaveAppSettings==="function")
+      App.syncSaveAppSettings({ theme:localStorage.getItem("theme")||"dark", onboarding_completed:true }).catch(()=>{});
+  }
+  buildMonthSelect();
+  goHome();
+  render();
 }
 </script>
 

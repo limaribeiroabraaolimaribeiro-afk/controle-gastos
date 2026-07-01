@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v15-fix-orcamentos-sync";
+const SW_VERSION = "gastos-pro-v16-upgrade-completo";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

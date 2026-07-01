@@ -84,6 +84,7 @@
   App.investFixos = [];
 
   // Novos modulos financeiros
+  App.reminders       = [];   // Lembretes financeiros
   App.accounts        = [];   // Contas e carteiras
   App.categoryBudgets = [];   // Orcamentos por categoria [{mes, categoria, limite, _sbid}]
   App.creditCards     = [];   // Cartoes de credito
@@ -1202,7 +1203,8 @@
         sb.from("category_budgets").select("*").eq("user_id", uid).order("created_at"),
         sb.from("credit_cards").select("*").eq("user_id", uid).order("created_at"),
         sb.from("financial_goals").select("*").eq("user_id", uid).order("created_at"),
-        sb.from("income_entries").select("*").eq("user_id", uid).order("data", { ascending: false })
+        sb.from("income_entries").select("*").eq("user_id", uid).order("data", { ascending: false }),
+        sb.from("financial_reminders").select("*").eq("user_id", uid).order("data", { ascending: true })
       ]);
 
       const expList    = (results[0].data  || []);
@@ -1217,6 +1219,7 @@
       const cardList   = (results[9].data  || []);
       const goalList   = (results[10].data || []);
       const incList    = (results[11].data || []);
+      const remList    = (results[12] && results[12].data || []);
 
       [0,1,2,3,4,5,6,7,8,9,10,11].forEach(function(i) {
         if (results[i] && results[i].error) console.warn("[Supabase] query[" + i + "]:", results[i].error.message);
@@ -1234,6 +1237,7 @@
       console.log("[Supabase] Credit cards encontrados:", cardList.length);
       console.log("[Supabase] Financial goals encontrados:", goalList.length);
       console.log("[Supabase] Income entries encontrados:", incList.length);
+      console.log("[Supabase] Reminders encontrados:", remList.length);
 
       const cloudHasData = expList.length > 0  || setList.length  > 0 ||
                            catList.length > 0  || fexpList.length > 0 || fInvList.length > 0 ||
@@ -1345,6 +1349,12 @@
           var m = e.mes;
           if (!App.incomeEntries[m]) App.incomeEntries[m] = [];
           App.incomeEntries[m].push({ _sbid: e.id, descricao: e.descricao, categoria: e.categoria, valor: Number(e.valor||0), data: e.data, origem: e.origem });
+        });
+      }
+
+      if (remList.length > 0) {
+        App.reminders = remList.map(function(r) {
+          return { _sbid: r.id, titulo: r.titulo, descricao: r.descricao, tipo: r.tipo, data: r.data, recorrente: r.recorrente, status: r.status };
         });
       }
 
@@ -1727,6 +1737,125 @@
     const { data, error } = await q;
     if (error) { console.warn("[Supabase] syncLoadGoalContributions:", error.message); return []; }
     return data || [];
+  };
+
+  // ---------- FINANCIAL REMINDERS ----------
+  App.syncSaveReminder = async function (reminder) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const row = {
+      user_id: user.id, titulo: reminder.titulo || "",
+      descricao: reminder.descricao || "", tipo: reminder.tipo || "outro",
+      data: reminder.data || null, recorrente: !!reminder.recorrente, status: "ativo"
+    };
+    const { data, error } = await sb.from("financial_reminders").insert(row).select("id").single();
+    if (error) { console.warn("[Supabase] syncSaveReminder:", error.message); return null; }
+    return data && data.id;
+  };
+
+  App.syncUpdateReminderStatus = async function (sbid, status) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("financial_reminders").update({ status }).eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncUpdateReminderStatus:", error.message); return false; }
+    return true;
+  };
+
+  App.syncDeleteReminder = async function (sbid) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !sbid) return false;
+    const { error } = await sb.from("financial_reminders").delete().eq("id", sbid).eq("user_id", user.id);
+    if (error) { console.warn("[Supabase] syncDeleteReminder:", error.message); return false; }
+    return true;
+  };
+
+  App.syncLoadReminders = async function () {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    const { data, error } = await sb.from("financial_reminders")
+      .select("*").eq("user_id", user.id).order("data", { ascending: true });
+    if (error) { console.warn("[Supabase] syncLoadReminders:", error.message); return []; }
+    return data || [];
+  };
+
+  // ---------- INSTALLMENT EXPENSES (cria parcelas em expenses) ----------
+  App.syncCreateInstallmentExpenses = async function (purchaseId, opts) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user || !purchaseId) return false;
+
+    // Verifica se parcelas ja existem para essa compra
+    const { data: existing } = await sb.from("expenses")
+      .select("id").eq("user_id", user.id).eq("installment_purchase_id", purchaseId).limit(1);
+    if (existing && existing.length > 0) {
+      console.log("[Supabase] Parcelas ja existem para esta compra, ignorando duplicata");
+      return true;
+    }
+
+    var rows = [];
+    var parts = String(opts.primeiro_mes || opts.primeiroMes || App.currentMonthKeyFromDate()).split("-");
+    var year = Number(parts[0]), month = Number(parts[1]);
+    for (var i = 1; i <= Number(opts.parcelas_total || opts.parcelas); i++) {
+      var mes = year + "-" + String(month).padStart(2, "0");
+      rows.push({
+        user_id:  user.id,
+        mes:      mes,
+        descricao: (opts.descricao || opts.desc || "") + " (" + i + "/" + opts.parcelas_total + ")",
+        categoria: opts.categoria || "Outros",
+        valor:    Number(opts.valor_parcela || 0),
+        data:     mes + "-01",
+        status:   "ativo",
+        pago:     false,
+        tipo_lancamento:         "parcela",
+        installment_purchase_id: purchaseId,
+        parcela_numero:          i,
+        parcelas_total:          Number(opts.parcelas_total)
+      });
+      month++; if (month > 12) { month = 1; year++; }
+    }
+    if (!rows.length) return false;
+    const { error } = await sb.from("expenses").insert(rows);
+    if (error) { console.warn("[Supabase] syncCreateInstallmentExpenses:", error.message); return false; }
+    console.log("[Supabase] Parcelas criadas:", rows.length);
+    return true;
+  };
+
+  // ---------- GERAR FIXOS DO MES ----------
+  App.syncGerarFixosDoMes = async function (mes) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return false;
+    if (!App.fixos || !App.fixos.length) return false;
+
+    // Busca fixos ja gerados neste mes
+    const { data: existing } = await sb.from("expenses")
+      .select("fixed_expense_id").eq("user_id", user.id).eq("mes", mes).eq("tipo_lancamento", "fixo");
+    const jaGerados = new Set((existing || []).map(function(e){ return e.fixed_expense_id; }).filter(Boolean));
+
+    var rows = [];
+    (App.fixos || []).forEach(function(f) {
+      if (!f._sbid) return;
+      if (jaGerados.has(f._sbid)) return; // ja existe neste mes
+      var diaVenc = Number(f.dia_vencimento || 1);
+      var maxDia = new Date(Number(mes.split("-")[0]), Number(mes.split("-")[1]), 0).getDate();
+      diaVenc = Math.min(diaVenc, maxDia) || 1;
+      rows.push({
+        user_id:        user.id,
+        mes:            mes,
+        descricao:      f.desc || "",
+        categoria:      f.category || "Outros",
+        valor:          Number(f.amount || 0),
+        data:           mes + "-" + String(diaVenc).padStart(2, "0"),
+        status:         "ativo",
+        pago:           false,
+        tipo_lancamento: "fixo",
+        is_fixo:        true,
+        fixed_expense_id: f._sbid
+      });
+    });
+    if (!rows.length) { console.log("[Supabase] Nenhum fixo novo para gerar em", mes); return true; }
+    const { error } = await sb.from("expenses").insert(rows);
+    if (error) { console.warn("[Supabase] syncGerarFixosDoMes:", error.message); return false; }
+    console.log("[Supabase] Gastos fixos gerados para", mes, ":", rows.length);
+    return true;
   };
 
   App.syncAll = async function (dadosMes) {

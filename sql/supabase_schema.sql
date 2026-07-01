@@ -825,6 +825,65 @@ ALTER TABLE history ADD COLUMN IF NOT EXISTS sobra          numeric DEFAULT 0;
 ALTER TABLE history ADD COLUMN IF NOT EXISTS saude          numeric DEFAULT 0;
 
 -- ============================================================
+-- 19. FINANCIAL_REMINDERS (Lembretes financeiros)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS financial_reminders (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    titulo      text NOT NULL,
+    descricao   text,
+    tipo        text DEFAULT 'outro',
+    data        date,
+    recorrente  boolean DEFAULT false,
+    status      text DEFAULT 'ativo' CHECK (status IN ('ativo', 'concluido', 'ignorado')),
+    created_at  timestamptz DEFAULT now(),
+    updated_at  timestamptz DEFAULT now()
+);
+
+DROP TRIGGER IF EXISTS reminders_updated_at ON financial_reminders;
+CREATE TRIGGER reminders_updated_at
+    BEFORE UPDATE ON financial_reminders
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE INDEX IF NOT EXISTS idx_reminders_user_data ON financial_reminders(user_id, data);
+ALTER TABLE financial_reminders ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON financial_reminders TO authenticated;
+
+DROP POLICY IF EXISTS "reminders_select_own" ON financial_reminders;
+CREATE POLICY "reminders_select_own" ON financial_reminders FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "reminders_insert_own" ON financial_reminders;
+CREATE POLICY "reminders_insert_own" ON financial_reminders FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "reminders_update_own" ON financial_reminders;
+CREATE POLICY "reminders_update_own" ON financial_reminders FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "reminders_delete_own" ON financial_reminders;
+CREATE POLICY "reminders_delete_own" ON financial_reminders FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- Colunas novas em tabelas existentes (compatibilidade total)
+-- ============================================================
+-- fixed_expenses: recorrencia
+ALTER TABLE fixed_expenses ADD COLUMN IF NOT EXISTS dia_vencimento      int DEFAULT 0;
+ALTER TABLE fixed_expenses ADD COLUMN IF NOT EXISTS recorrente          boolean DEFAULT true;
+ALTER TABLE fixed_expenses ADD COLUMN IF NOT EXISTS ultima_geracao_mes  text;
+ALTER TABLE fixed_expenses ADD COLUMN IF NOT EXISTS fixed_expense_ref   uuid;
+
+-- expenses: tipo e vinculos
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS tipo_lancamento        text DEFAULT 'variavel';
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS fixed_expense_id       uuid;
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS credit_card_id_ref     uuid;
+
+-- credit_cards: campos extras
+ALTER TABLE credit_cards ADD COLUMN IF NOT EXISTS melhor_dia_compra int DEFAULT 15;
+ALTER TABLE credit_cards ADD COLUMN IF NOT EXISTS icone             text DEFAULT '💳';
+
+-- app_settings: onboarding e plano
+ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS onboarding_completed boolean DEFAULT false;
+ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS plan                 text DEFAULT 'free';
+
+-- income_entries: account_id ja existe, garantir
+ALTER TABLE income_entries ADD COLUMN IF NOT EXISTS account_id uuid;
+
+-- ============================================================
 -- GRANTS FINAIS: sequences e view
 -- ============================================================
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;
