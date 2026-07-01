@@ -4,9 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Login - Controle de Gastos PRO</title>
-
 <meta name="theme-color" content="#569cff">
-
 <style>
 :root{
   --bg1:#0b1020;
@@ -107,7 +105,6 @@ input:focus{
   border-color: rgba(86,156,255,.9);
 }
 .btn:disabled{ opacity:.6; cursor:not-allowed; }
-
 .sep{
   display:flex;
   align-items:center;
@@ -122,7 +119,6 @@ input:focus{
   flex:1;
   background: rgba(255,255,255,.10);
 }
-
 .btn.google{
   display:flex;
   align-items:center;
@@ -130,11 +126,7 @@ input:focus{
   gap:10px;
   background: rgba(255,255,255,.10);
 }
-.gIcon{
-  width:18px;height:18px;
-  display:inline-block;
-}
-
+.gIcon{ width:18px;height:18px;display:inline-block; }
 .small{
   margin-top: 10px;
   text-align:center;
@@ -168,7 +160,7 @@ input:focus{
     <input id="email" type="email" placeholder="seuemail@gmail.com" autocomplete="email"/>
 
     <label for="senha">Senha</label>
-    <input id="senha" type="password" placeholder="••••••••" autocomplete="current-password"/>
+    <input id="senha" type="password" placeholder="senha minimo 6 caracteres" autocomplete="current-password"/>
 
     <div class="row">
       <button class="btn primary" id="btnLoginEmail">Entrar</button>
@@ -177,7 +169,6 @@ input:focus{
 
     <div class="sep">ou</div>
 
-    <!-- ✅ NOVO: Google -->
     <button class="btn google" id="btnGoogle">
       <svg class="gIcon" viewBox="0 0 48 48" aria-hidden="true">
         <path fill="#EA4335" d="M24 9.5c3.54 0 6.72 1.22 9.23 3.62l6.9-6.9C35.9 2.38 30.3 0 24 0 14.62 0 6.51 5.38 2.56 13.22l8.02 6.23C12.49 13.04 17.76 9.5 24 9.5z"/>
@@ -193,22 +184,24 @@ input:focus{
   </div>
 </div>
 
-<!-- credenciais inline — garante funcionamento mesmo se config.js falhar -->
 <script>
 window.SUPABASE_URL = 'https://uhdmjgycsyvetrjhwcpy.supabase.co';
 window.SUPABASE_ANON_KEY = 'sb_publishable_Ag-AwAqJWfaB7wykzwHQLQ_z4uZxwfT';
 </script>
-<!-- config.js sobrescreve se carregar com sucesso -->
-<script src=”./config.js”></script>
-<!-- Supabase CDN oficial -->
-<script src=”https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2”></script>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <script>
 (function () {
-  'use strict';
+
+  var sb = window.supabase.createClient(
+    window.SUPABASE_URL,
+    window.SUPABASE_ANON_KEY
+  );
+
+  console.log('[Supabase] Cliente criado');
 
   var REDIRECT = 'https://limaribeiroabraaolimaribeiro-afk.github.io/controle-gastos/';
-  var sb = null;
 
   function dbg(msg) {
     var box = document.getElementById('debugBox');
@@ -218,83 +211,67 @@ window.SUPABASE_ANON_KEY = 'sb_publishable_Ag-AwAqJWfaB7wykzwHQLQ_z4uZxwfT';
     console.error('[Login]', msg);
   }
 
-  function initSB() {
-    if (sb) return sb;
-    var url = window.SUPABASE_URL || '';
-    var key = window.SUPABASE_ANON_KEY || '';
-    console.log('[Supabase] URL carregada:', url || '(nao definida)');
-    if (!window.supabase) { dbg('CDN do Supabase nao carregou. Verifique sua conexao.'); return null; }
-    if (!url || !key) { dbg('Credenciais ausentes — SUPABASE_URL ou SUPABASE_ANON_KEY nao definidas.'); return null; }
-    sb = window.supabase.createClient(url, key);
-    return sb;
-  }
-
   function setLoading(on) {
-    ['btnLoginEmail', 'btnCriarConta', 'btnGoogle'].forEach(function (id) {
-      var el = document.getElementById(id);
+    var ids = ['btnLoginEmail', 'btnCriarConta', 'btnGoogle'];
+    for (var i = 0; i < ids.length; i++) {
+      var el = document.getElementById(ids[i]);
       if (el) el.disabled = on;
-    });
+    }
   }
 
-  async function loginEmail() {
+  function loginEmail() {
     var email = (document.getElementById('email').value || '').trim();
     var senha = (document.getElementById('senha').value || '').trim();
     if (!email || !senha) { alert('Preencha email e senha'); return; }
-    var client = initSB();
-    if (!client) return;
     setLoading(true);
-    var res = await client.auth.signInWithPassword({ email: email, password: senha });
-    if (res.error) { setLoading(false); alert(res.error.message); return; }
-    console.log('[Supabase] Sessao ativa:', res.data.user.email);
-    console.log('[Supabase] User ID:', res.data.user.id);
-    location.replace('./index.html');
+    sb.auth.signInWithPassword({ email: email, password: senha }).then(function (res) {
+      if (res.error) { setLoading(false); dbg(res.error.message); return; }
+      console.log('[Supabase] Sessao ativa:', res.data.user.email);
+      console.log('[Supabase] User ID:', res.data.user.id);
+      location.replace('./index.html');
+    });
   }
 
-  async function criarConta() {
+  function criarConta() {
     var email = (document.getElementById('email').value || '').trim();
     var senha = (document.getElementById('senha').value || '').trim();
     if (!email || !senha) { alert('Preencha email e senha'); return; }
     if (senha.length < 6) { alert('A senha deve ter pelo menos 6 caracteres'); return; }
-    var client = initSB();
-    if (!client) return;
     setLoading(true);
-    var res = await client.auth.signUp({ email: email, password: senha });
-    if (res.error) { setLoading(false); alert(res.error.message); return; }
-    if (res.data.user && !res.data.session) {
-      setLoading(false);
-      alert('Conta criada! Verifique seu email para confirmar antes de entrar.');
-      return;
-    }
-    location.replace('./index.html');
+    sb.auth.signUp({ email: email, password: senha }).then(function (res) {
+      if (res.error) { setLoading(false); dbg(res.error.message); return; }
+      if (res.data.user && !res.data.session) {
+        setLoading(false);
+        alert('Conta criada! Verifique seu email para confirmar antes de entrar.');
+        return;
+      }
+      location.replace('./index.html');
+    });
   }
 
-  async function loginGoogle() {
-    var client = initSB();
-    if (!client) return;
+  function loginGoogle() {
     setLoading(true);
-    var res = await client.auth.signInWithOAuth({
+    sb.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: REDIRECT, queryParams: { prompt: 'select_account' } }
+    }).then(function (res) {
+      if (res.error) { setLoading(false); dbg(res.error.message); }
     });
-    if (res.error) { setLoading(false); alert(res.error.message); }
   }
 
-  document.addEventListener('DOMContentLoaded', async function () {
-    var client = initSB();
-    if (!client) {
-      dbg('Supabase nao inicializado.\nURL: ' + (window.SUPABASE_URL || 'nao definida'));
-      return;
-    }
-    var res = await client.auth.getSession();
-    if (res.data && res.data.session) {
-      console.log('[Supabase] Sessao ativa:', res.data.session.user.email);
-      location.replace('./index.html');
-      return;
-    }
-    setLoading(false);
-    document.getElementById('btnLoginEmail').addEventListener('click', loginEmail);
-    document.getElementById('btnCriarConta').addEventListener('click', criarConta);
-    document.getElementById('btnGoogle').addEventListener('click', loginGoogle);
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log('[Supabase] URL carregada:', window.SUPABASE_URL);
+    sb.auth.getSession().then(function (res) {
+      if (res.data && res.data.session) {
+        console.log('[Supabase] Sessao ativa:', res.data.session.user.email);
+        location.replace('./index.html');
+        return;
+      }
+      setLoading(false);
+      document.getElementById('btnLoginEmail').addEventListener('click', loginEmail);
+      document.getElementById('btnCriarConta').addEventListener('click', criarConta);
+      document.getElementById('btnGoogle').addEventListener('click', loginGoogle);
+    });
   });
 
 }());

@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v8-cdn-final";
+const SW_VERSION = "gastos-pro-v10-unpkg-ascii";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
