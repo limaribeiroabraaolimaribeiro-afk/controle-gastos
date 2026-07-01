@@ -975,6 +975,7 @@ ALTER TABLE financial_reminders ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
 -- app_settings: sincronizacao e modo demo
 ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS last_sync_at  timestamptz;
 ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS demo_mode     boolean DEFAULT false;
+ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS selected_month text;
 
 -- profiles: avatar e nome completo
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nome text;

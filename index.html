@@ -287,9 +287,89 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 }
 .screen{display:none}
 .screen.active{display:block}
-.backRow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.backRow{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .backBtn{display:flex;align-items:center;gap:8px;border-radius:16px;padding:10px 12px;font-weight:850}
 .hr{height:1px;background:var(--stroke);margin:12px 0}
+
+/* =========================================================
+   PADRÃO DE PÁGINA — TELAS DO FINANCEIRO PRO
+   Essas telas ficam fora do .wrap principal (que é fechado logo
+   após o login/histórico para permitir a IA PRO ter largura própria),
+   então sem essa regra elas esticam 100% da largura do desktop.
+========================================================= */
+#screen-receitas,
+#screen-contas,
+#screen-orcamentos,
+#screen-cartoes,
+#screen-metas,
+#screen-calendario,
+#screen-relatorio,
+#screen-comprovante,
+#screen-meu-plano,
+#screen-perfil,
+#screen-seguranca,
+#screen-alertas,
+#screen-lixeira,
+#screen-atividades,
+#screen-diagnostico,
+#screen-hoje,
+#screen-parcelamentos,
+#screen-lembretes,
+#screen-onboarding{
+  max-width:1140px;
+  width:100%;
+  margin:0 auto;
+  padding:14px 16px 110px;
+}
+@media (min-width:900px){
+  #screen-receitas,
+  #screen-contas,
+  #screen-orcamentos,
+  #screen-cartoes,
+  #screen-metas,
+  #screen-calendario,
+  #screen-relatorio,
+  #screen-comprovante,
+  #screen-meu-plano,
+  #screen-perfil,
+  #screen-seguranca,
+  #screen-alertas,
+  #screen-lixeira,
+  #screen-atividades,
+  #screen-diagnostico,
+  #screen-hoje,
+  #screen-parcelamentos,
+  #screen-lembretes,
+  #screen-onboarding{
+    padding-top:20px;
+    padding-left:24px;
+    padding-right:24px;
+  }
+}
+
+/* Grids de formulário: 2 colunas no desktop, 1 coluna no mobile */
+@media (max-width:640px){
+  .grid2, .grid3, .grid4{
+    grid-template-columns:1fr;
+  }
+}
+
+/* Empty state padronizado (ícone + título + texto + CTA opcional) */
+.proEmpty{
+  padding:28px 20px;
+  border-radius:18px;
+  border:1px dashed var(--stroke);
+  background: rgba(255,255,255,.04);
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+.proEmpty .proEmptyIcon{ font-size:32px; opacity:.85; }
+.proEmpty .proEmptyTitle{ font-weight:900; font-size:15px; }
+.proEmpty .proEmptyText{ font-size:13px; color:var(--muted); max-width:38ch; }
+.proEmpty .proEmptyAction{ margin-top:8px; }
 .note{
   background: rgba(255,255,255,.06);
   border:1px solid var(--stroke);
@@ -1888,7 +1968,7 @@ h1,h2,h3{
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="grid2" style="gap:16px">
       <div class="card" style="border:1px solid var(--stroke)">
         <div style="font-weight:950;font-size:18px;margin-bottom:8px">Free</div>
         <div style="font-size:28px;font-weight:950;margin-bottom:16px">R$ 0<span style="font-size:14px;font-weight:500;color:var(--muted)">/mês</span></div>
@@ -2918,10 +2998,28 @@ function showScreen(id){
   const el = document.getElementById(id);
   if(el) el.classList.add("active");
 }
+/* Telas que já têm seu próprio formulário de cadastro — o FAB "+" (adicionar
+   gasto rápido) atrapalha nelas e deve ficar escondido. */
+const FAB_ADD_HIDDEN_SCREENS = new Set([
+  "screen-receitas","screen-contas","screen-orcamentos","screen-cartoes",
+  "screen-metas","screen-comprovante","screen-parcelamentos","screen-lembretes",
+  "screen-onboarding","screen-ia"
+]);
+/* Telas de fluxo dedicado — nenhum FAB deve aparecer por cima. */
+const FAB_ALL_HIDDEN_SCREENS = new Set(["screen-onboarding","screen-ia"]);
+
+function updateFabVisibility(id){
+  const fabWrap = document.querySelector(".fabWrap");
+  const addFab  = document.querySelector(".fab.add");
+  if(fabWrap) fabWrap.style.display = FAB_ALL_HIDDEN_SCREENS.has(id) ? "none" : "flex";
+  if(addFab)  addFab.style.display  = FAB_ADD_HIDDEN_SCREENS.has(id) ? "none" : "flex";
+}
+
 function openScreen(id){
   if(id !== "screen-history" && id !== "screen-ia") lastNonHistoryScreen = id;
   if(id !== "screen-ia") lastNonIAScreen = id;
   showScreen(id);
+  updateFabVisibility(id);
 }
 function goHome(){ openScreen("screen-home"); applyHomeLayoutToDOM(); }
 function openMenu(){ openScreen("screen-menu"); }
@@ -4391,7 +4489,7 @@ function renderLixeira(rows){
   const el = document.getElementById("lixeiraContent");
   if(!el) return;
   if(!rows.length){
-    el.innerHTML='<div class="card"><div class="small" style="text-align:center;padding:20px;opacity:.6">Nenhum item na lixeira.</div></div>';
+    el.innerHTML=`<div class="card">${proEmptyHTML("🗑️","Lixeira vazia","Itens excluídos aparecem aqui por 30 dias antes de serem removidos definitivamente.")}</div>`;
     return;
   }
   el.innerHTML = rows.map(function(r){
@@ -4433,12 +4531,12 @@ function openAtividades(){
   const el = document.getElementById("atividadesContent");
   if(!el) return;
   if(!window.App || typeof App.syncLoadActivityLogs!=="function"){
-    el.innerHTML='<div class="small" style="opacity:.6;padding:12px">Nenhuma atividade registrada.</div>';
+    el.innerHTML=proEmptyHTML("📜","Nenhuma atividade registrada","Suas ações no app (gastos, edições, sincronizações) vão aparecer aqui.");
     return;
   }
   App.syncLoadActivityLogs(50).then(function(rows){
     if(!rows||!rows.length){
-      el.innerHTML='<div class="small" style="opacity:.6;padding:12px">Nenhuma atividade registrada ainda.</div>';
+      el.innerHTML=proEmptyHTML("📜","Nenhuma atividade registrada","Suas ações no app (gastos, edições, sincronizações) vão aparecer aqui.");
       return;
     }
     const icons = { delete:"🗑️",restore:"↩️",create:"✅",update:"✏️",export:"⬇️",login:"🔑" };
@@ -4624,7 +4722,7 @@ async function lancarComprovante(){
 function renderListaComprovantes(){
   const el = document.getElementById("listaComprovantes");
   if(!el) return;
-  if(!_comprovantes.length){ el.innerHTML='<div style="padding:12px;opacity:.6">Nenhum comprovante importado ainda.</div>'; return; }
+  if(!_comprovantes.length){ el.innerHTML=proEmptyHTML("📷","Nenhum comprovante importado","Envie a foto de um comprovante para lançar um gasto ou receita rapidamente."); return; }
   el.innerHTML = _comprovantes.slice(0,5).map(function(r){
     return `<div class="layoutItem" style="margin-bottom:6px">
       <div class="layoutLeft">
@@ -5531,10 +5629,12 @@ async function initSupabaseAuth() {
             renderInvestFixos();
             render();
             console.log("[Supabase] Render atualizado com dados da nuvem");
-            // Verifica onboarding
-            if (typeof verificarOnboarding === "function") verificarOnboarding();
+            // Verifica onboarding — usuário tem dados na nuvem
+            if (typeof verificarOnboarding === "function") verificarOnboarding(true);
           } else if (cloudResult === "empty") {
             console.log("[Supabase] Nuvem vazia — dados locais mantidos");
+            // Nuvem sem nenhum dado: pode ser realmente o primeiro acesso
+            if (typeof verificarOnboarding === "function") verificarOnboarding(false);
           }
         }).catch(function (err) {
           console.warn("[Supabase] Falha ao carregar nuvem:", err);
@@ -5566,6 +5666,16 @@ function escapeHtml(s){
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+}
+
+/* Empty state padronizado das telas PRO (ícone + título + texto + CTA opcional) */
+function proEmptyHTML(icon, title, text, ctaHtml){
+  return `<div class="proEmpty">
+    <div class="proEmptyIcon">${icon}</div>
+    <div class="proEmptyTitle">${escapeHtml(title)}</div>
+    <div class="proEmptyText">${escapeHtml(text)}</div>
+    ${ctaHtml ? `<div class="proEmptyAction">${ctaHtml}</div>` : ""}
+  </div>`;
 }
 
   function escapeJsSingle(s){
@@ -6241,7 +6351,7 @@ function renderReceitas(){
   const items = _receitas;
   const total = items.reduce((a,b)=>a+Number(b.valor||0),0);
   if(totalEl) totalEl.textContent = money(total);
-  if(!items.length){ list.innerHTML='<div style="padding:12px;opacity:.6">Nenhuma receita neste mês.</div>'; return; }
+  if(!items.length){ list.innerHTML=proEmptyHTML("💰","Nenhuma receita neste mês","Adicione suas receitas do mês para acompanhar sua entrada de dinheiro."); return; }
   list.innerHTML = items.map((r,idx)=>`
     <div class="layoutItem" style="margin-bottom:8px">
       <div class="layoutLeft">
@@ -6297,7 +6407,7 @@ function openContas(){
 function renderContas(){
   const list = document.getElementById("listaContas");
   if(!list) return;
-  if(!_contas.length){ list.innerHTML='<div style="padding:12px;opacity:.6">Nenhuma conta cadastrada.</div>'; return; }
+  if(!_contas.length){ list.innerHTML=proEmptyHTML("🏦","Nenhuma conta cadastrada","Adicione sua primeira conta para acompanhar seu saldo por carteira."); return; }
   list.innerHTML = _contas.map((c,idx)=>`
     <div class="layoutItem" style="margin-bottom:8px">
       <div class="layoutLeft">
@@ -6373,7 +6483,7 @@ function renderOrcamentos(){
   const d = getDataMes(mesAtual);
   const gastosPorCat = {};
   (d.items||[]).forEach(it=>{ const c=it.category||"Outros"; gastosPorCat[c]=(gastosPorCat[c]||0)+Number(it.amount||0); });
-  if(!_orcamentos.length){ list.innerHTML='<div class="small" style="padding:12px;opacity:.6">Nenhum orçamento definido.</div>'; return; }
+  if(!_orcamentos.length){ list.innerHTML=proEmptyHTML("📊","Nenhum orçamento definido","Defina limites por categoria para controlar melhor seus gastos do mês."); return; }
   list.innerHTML = _orcamentos.map((o,idx)=>{
     const gasto = gastosPorCat[o.categoria]||0;
     const pct   = Math.min(100, o.limite>0 ? Math.round((gasto/o.limite)*100) : 0);
@@ -6428,7 +6538,7 @@ function openMetas(){
 function renderMetas(){
   const list = document.getElementById("listaMetas");
   if(!list) return;
-  if(!_metas.length){ list.innerHTML='<div class="small" style="padding:12px;opacity:.6">Nenhuma meta cadastrada. Crie sua primeira meta!</div>'; return; }
+  if(!_metas.length){ list.innerHTML=proEmptyHTML("🎯","Nenhuma meta cadastrada","Crie sua primeira meta para começar a acompanhar seu progresso."); return; }
   list.innerHTML = _metas.map((m,idx)=>{
     const pct = m.valor_objetivo>0 ? Math.min(100,Math.round((m.valor_atual/m.valor_objetivo)*100)) : 0;
     const falta = Math.max(0,m.valor_objetivo-m.valor_atual);
@@ -6519,7 +6629,7 @@ function openCartoes(){
 function renderCartoes(){
   const list = document.getElementById("listaCartoes");
   if(!list) return;
-  if(!_cartoes.length){ list.innerHTML='<div style="padding:12px;opacity:.6">Nenhum cartão cadastrado.</div>'; return; }
+  if(!_cartoes.length){ list.innerHTML=proEmptyHTML("💳","Nenhum cartão cadastrado","Adicione seus cartões de crédito para acompanhar faturas e limites."); return; }
   list.innerHTML = _cartoes.map((c,idx)=>`
     <div class="layoutItem" style="margin-bottom:8px">
       <div class="layoutLeft">
@@ -6591,7 +6701,7 @@ function calcParcela(){
 function renderParcelamentos(){
   const list = document.getElementById("listaParcelamentos");
   if(!list) return;
-  if(!_installments.length){ list.innerHTML='<div style="padding:12px;opacity:.6">Nenhum parcelamento ativo.</div>'; return; }
+  if(!_installments.length){ list.innerHTML=proEmptyHTML("📋","Nenhum parcelamento ativo","Cadastre uma compra parcelada para acompanhar as próximas cobranças."); return; }
   list.innerHTML = _installments.map((p,idx)=>`
     <div class="layoutItem" style="margin-bottom:8px">
       <div class="layoutLeft">
@@ -6655,7 +6765,7 @@ function openLembretes(){
 function renderLembretes(){
   const list = document.getElementById("listaLembretes");
   if(!list) return;
-  if(!_lembretes.length){ list.innerHTML='<div class="small" style="padding:12px;opacity:.6">Nenhum lembrete criado.</div>'; return; }
+  if(!_lembretes.length){ list.innerHTML=proEmptyHTML("🔔","Nenhum lembrete criado","Crie lembretes para não esquecer vencimentos de contas e cartões."); return; }
   const tipos = {conta:"💡",cartao:"💳",meta:"🎯",investimento:"📈",gasto:"🧾",outro:"🔔"};
   list.innerHTML = _lembretes.map((r,idx)=>`
     <div class="layoutItem" style="margin-bottom:8px${r.status==='concluido'?';opacity:.5':''}">
@@ -6911,13 +7021,37 @@ function renderRelatorio(){
   </div>`;
 }
 
-/* ========== ONBOARDING ========== */
-function verificarOnboarding(){
-  if(!window.App || !App._cloudAppSettings) return;
-  if(App._cloudAppSettings.onboarding_completed===false||App._cloudAppSettings.onboarding_completed===null||App._cloudAppSettings.onboarding_completed===undefined){
-    openScreen("screen-onboarding");
-    renderOnboardingCategorias();
+/* ========== ONBOARDING ==========
+   cloudHasData indica se o usuario ja possui dados na nuvem (expenses,
+   monthly_settings, income_entries, orcamentos, etc — ver App.syncLoadAllFromCloud).
+   Regra: so exibe o onboarding no PRIMEIRO acesso real (sem app_settings
+   concluido e sem nenhum dado na nuvem). */
+function verificarOnboarding(cloudHasData){
+  console.log("[Onboarding] Verificando status");
+  if(!window.App) return;
+  const settings = App._cloudAppSettings;
+
+  if(settings && settings.onboarding_completed === true){
+    console.log("[Onboarding] Já concluído");
+    localStorage.setItem("onboarding_completed", "1");
+    return;
   }
+
+  if(cloudHasData || (settings && Object.keys(settings).length > 0)){
+    // Usuário já tem dados/config na nuvem, mas o flag nunca foi salvo
+    // (ex: conta antiga ou falha de sincronização anterior). Não forçar
+    // onboarding de novo — apenas regulariza o flag silenciosamente.
+    console.log("[Onboarding] Já concluído");
+    localStorage.setItem("onboarding_completed", "1");
+    if(typeof App.syncSaveAppSettings === "function"){
+      App.syncSaveAppSettings({ onboardingCompleted:true }).catch(()=>{});
+    }
+    return;
+  }
+
+  console.log("[Onboarding] Exibindo primeiro acesso");
+  openScreen("screen-onboarding");
+  renderOnboardingCategorias();
 }
 function renderOnboardingCategorias(){
   const el = document.getElementById("obCategorias");
@@ -6944,12 +7078,29 @@ function onboardingFinalizar(){
   if(sal) d.salary = sal;
   if(meta) d.meta = meta;
   saveAll();
+
+  // Cache local imediato — evita reabrir o onboarding antes da nuvem responder
+  localStorage.setItem("onboarding_completed", "1");
+
   if(window.App){
+    const nowIso = new Date().toISOString();
+    const tarefas = [];
     if(typeof App.syncSaveMonthlySettings==="function")
-      App.syncSaveMonthlySettings(mesAtual,d.salary,d.meta).catch(()=>{});
+      tarefas.push(App.syncSaveMonthlySettings(mesAtual,d.salary,d.meta).catch(()=>{}));
     if(typeof App.syncSaveAppSettings==="function")
-      App.syncSaveAppSettings({ theme:localStorage.getItem("theme")||"dark", onboarding_completed:true }).catch(()=>{});
+      tarefas.push(App.syncSaveAppSettings({
+        theme:               localStorage.getItem("theme") || "dark",
+        onboardingCompleted: true,
+        selectedMonth:       mesAtual,
+        lastSyncAt:          nowIso
+      }));
+    Promise.all(tarefas).then(function(){
+      console.log("[Onboarding] Concluído e salvo no Supabase");
+    }).catch(function(err){
+      console.warn("[Onboarding] Falha ao salvar no Supabase:", err);
+    });
   }
+
   buildMonthSelect();
   goHome();
   render();

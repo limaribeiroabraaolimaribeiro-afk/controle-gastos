@@ -1374,20 +1374,32 @@
     }
   };
 
-  /* ---- App Settings ---- */
+  /* ---- App Settings ----
+     Faz merge com App._cloudAppSettings para nao sobrescrever campos
+     (ex: onboarding_completed, plan) quando o caller so envia um subconjunto
+     (ex: toggleTheme so envia tema). */
   App.syncSaveAppSettings = async function (settings) {
     const sb = App.getSupabaseClient();
     const user = await App.supabaseGetSession();
     if (!sb || !user) return false;
+    settings = settings || {};
+    const current = App._cloudAppSettings || {};
     const row = {
-      user_id:       user.id,
-      theme:         settings.theme         || "dark",
-      accent_color:  settings.accentColor   || settings.accent_color  || "#569cff",
-      theme_preset:  settings.themePreset   || settings.theme_preset  || "default",
-      voice_enabled: !!settings.voiceEnabled
+      user_id:              user.id,
+      theme:                settings.theme         || current.theme         || "dark",
+      accent_color:         settings.accentColor   || settings.accent_color  || current.accent_color  || "#569cff",
+      theme_preset:         settings.themePreset   || settings.theme_preset  || current.theme_preset  || "default",
+      voice_enabled:        settings.voiceEnabled        !== undefined ? !!settings.voiceEnabled        : !!current.voice_enabled,
+      onboarding_completed: settings.onboardingCompleted !== undefined ? !!settings.onboardingCompleted :
+                             settings.onboarding_completed !== undefined ? !!settings.onboarding_completed :
+                             !!current.onboarding_completed
     };
+    if (settings.selectedMonth || settings.selected_month) row.selected_month = settings.selectedMonth || settings.selected_month;
+    else if (current.selected_month) row.selected_month = current.selected_month;
+    if (settings.lastSyncAt || settings.last_sync_at) row.last_sync_at = settings.lastSyncAt || settings.last_sync_at;
     const { error } = await sb.from("app_settings").upsert(row, { onConflict: "user_id" });
     if (error) { console.warn("[Supabase] syncSaveAppSettings:", error.message); return false; }
+    App._cloudAppSettings = Object.assign({}, current, row);
     console.log("[Supabase] App settings salvos");
     return true;
   };
