@@ -4149,6 +4149,7 @@ function previewComprovante(input){
 }
 var _comprovantes = [];
 async function lancarComprovante(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
   const tipo  = document.getElementById("compTipo").value || "saida";
   const valor = Number(document.getElementById("compValor").value||0);
   const data  = document.getElementById("compData").value || todayISO();
@@ -4165,14 +4166,20 @@ async function lancarComprovante(){
     const d = getDataMes(mesAtual);
     d.items.push(newItem);
     saveAll();
-    if(window.App && typeof App.syncSaveOneExpense==="function")
-      App.syncSaveOneExpense(mesAtual, newItem).then(function(id){ if(id&&typeof id==="string") newItem._sbid=id; }).catch(()=>{});
+    if(window.App && typeof App.syncSaveOneExpense==="function"){
+      App.syncSaveOneExpense(mesAtual, newItem).then(function(id){
+        if(id && typeof id === "string"){ newItem._sbid = id; saveAll(); }
+      }).catch(()=>{});
+    }
   } else {
     const entry = { descricao:desc, categoria:cat, valor, data, origem:"comprovante", mes:mesAtual };
     window._receitas.unshift(entry);
     if(window.App && App.incomeEntries) App.incomeEntries[mesAtual] = window._receitas;
-    if(window.App && typeof App.syncSaveOneIncomeEntry==="function")
-      App.syncSaveOneIncomeEntry(entry).catch(()=>{});
+    if(window.App && typeof App.syncSaveOneIncomeEntry==="function"){
+      App.syncSaveOneIncomeEntry(entry).then(function(id){
+        if(id) entry._sbid = id;
+      }).catch(()=>{});
+    }
   }
 
   // Salva no Supabase receipt_imports
@@ -5896,9 +5903,11 @@ function openOrcamentos(){
 
   // Se ainda não há dados, tenta buscar direto do Supabase
   if(!_orcamentos.length && window.App && typeof App.syncLoadCategoryBudgets === "function"){
+    var _snapLen = _orcamentos.length; // captura estado antes do fetch
     App.syncLoadCategoryBudgets(mesAtual).then(function(rows){
       if(!rows || !rows.length) return;
-      // Merge com estado global
+      // Não sobrescreve se usuário adicionou algo durante o fetch (race condition)
+      if(_orcamentos.length > _snapLen) return;
       var novos = rows.map(function(b){
         return { _sbid: b.id, mes: b.mes, categoria: b.categoria, limite: Number(b.limite||0) };
       });
@@ -5938,18 +5947,17 @@ function addOrcamento(){
   const lim   = Number(document.getElementById("orcLimite").value||0);
   if(!cat) return alert("Escolha a categoria.");
   if(!lim||lim<=0) return alert("Digite um limite maior que zero.");
-  const existing = _orcamentos.findIndex(o=>o.categoria===cat);
+  // findIndex filtra por mes E categoria para evitar corromper outro mes
+  const existing = _orcamentos.findIndex(function(o){ return o.mes===mesAtual && o.categoria===cat; });
   if(existing>=0){ _orcamentos[existing].limite=lim; } else { _orcamentos.push({mes:mesAtual,categoria:cat,limite:lim}); }
   if(window.App) App.categoryBudgets = (App.categoryBudgets||[]).filter(b=>!(b.mes===mesAtual&&b.categoria===cat)).concat(_orcamentos.filter(b=>b.mes===mesAtual&&b.categoria===cat));
   document.getElementById("orcLimite").value="";
   renderOrcamentos();
   if(window.App && typeof App.syncSaveCategoryBudget==="function"){
     App.syncSaveCategoryBudget(mesAtual, cat, lim).then(function(id){
-      if(id && typeof id === "string"){
-        // Guarda o _sbid no item para delete futuro
-        const item = _orcamentos.find(function(o){ return o.categoria===cat; });
-        if(item) item._sbid = id;
-      }
+      // Salva _sbid independente do tipo retornado (string=insert, true=upsert sem retorno)
+      const item = _orcamentos.find(function(o){ return o.mes===mesAtual && o.categoria===cat; });
+      if(item && id && typeof id === "string") item._sbid = id;
     }).catch(()=>{});
   }
 }

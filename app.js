@@ -1221,7 +1221,7 @@
       const incList    = (results[11].data || []);
       const remList    = (results[12] && results[12].data || []);
 
-      [0,1,2,3,4,5,6,7,8,9,10,11].forEach(function(i) {
+      [0,1,2,3,4,5,6,7,8,9,10,11,12].forEach(function(i) {
         if (results[i] && results[i].error) console.warn("[Supabase] query[" + i + "]:", results[i].error.message);
       });
 
@@ -1581,8 +1581,15 @@
       { onConflict: "user_id,mes,categoria" }
     ).select("id").maybeSingle();
     if (error) { console.warn("[Supabase] syncSaveCategoryBudget erro:", error.message); return false; }
-    console.log("[Supabase] Category budget salvo. id:", data && data.id);
-    return (data && data.id) || true;
+    // Upsert com conflito pode retornar data=null; buscar ID pela chave única se necessário
+    let savedId = data && data.id;
+    if (!savedId) {
+      const { data: found } = await sb.from("category_budgets").select("id")
+        .eq("user_id", user.id).eq("mes", mes).eq("categoria", categoria).maybeSingle();
+      savedId = found && found.id;
+    }
+    console.log("[Supabase] Category budget salvo. id:", savedId);
+    return savedId || true;
   };
 
   App.syncDeleteCategoryBudget = async function (sbid) {
@@ -1791,15 +1798,18 @@
       return true;
     }
 
+    var totalParcelas = Number(opts.parcelas_total || opts.parcelas || 1);
     var rows = [];
     var parts = String(opts.primeiro_mes || opts.primeiroMes || App.currentMonthKeyFromDate()).split("-");
     var year = Number(parts[0]), month = Number(parts[1]);
-    for (var i = 1; i <= Number(opts.parcelas_total || opts.parcelas); i++) {
+    var baseDesc = opts.descricao || opts.desc || "";
+    var cardId = opts.card_id || opts.cardId || null;
+    for (var i = 1; i <= totalParcelas; i++) {
       var mes = year + "-" + String(month).padStart(2, "0");
       rows.push({
         user_id:  user.id,
         mes:      mes,
-        descricao: (opts.descricao || opts.desc || "") + " (" + i + "/" + opts.parcelas_total + ")",
+        descricao: baseDesc + " (" + i + "/" + totalParcelas + ")",
         categoria: opts.categoria || "Outros",
         valor:    Number(opts.valor_parcela || 0),
         data:     mes + "-01",
@@ -1808,7 +1818,8 @@
         tipo_lancamento:         "parcela",
         installment_purchase_id: purchaseId,
         parcela_numero:          i,
-        parcelas_total:          Number(opts.parcelas_total)
+        parcelas_total:          totalParcelas,
+        credit_card_id:          cardId
       });
       month++; if (month > 12) { month = 1; year++; }
     }
