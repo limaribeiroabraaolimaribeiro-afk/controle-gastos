@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v20-onboarding-layout-pro";
+const SW_VERSION = "gastos-pro-v21-visual-pro-desktop-mobile";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

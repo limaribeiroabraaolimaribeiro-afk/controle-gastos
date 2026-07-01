@@ -31,11 +31,16 @@
   --good:#39d98a;
   --warn:#ffd166;
   --danger:#ff5d5d;
+  --purple:#8b5cf6;
   --shadow: 0 18px 60px rgba(0,0,0,.45);
   --radius: 18px;
   --radius2: 22px;
   --pad: 14px;
   --glass: blur(14px);
+
+  --sidebar-w: 264px;
+  --header-h: 64px;
+  --bottomnav-h: 66px;
 }
 
   html, body {
@@ -82,6 +87,8 @@ h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
 .row > *{flex:1}
 .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .grid1{display:grid;grid-template-columns:1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .btn{
   appearance:none;border:0;cursor:pointer;
   background: rgba(255,255,255,.10);
@@ -315,6 +322,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 #screen-hoje,
 #screen-parcelamentos,
 #screen-lembretes,
+#screen-ajuda,
 #screen-onboarding{
   max-width:1140px;
   width:100%;
@@ -340,6 +348,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   #screen-hoje,
   #screen-parcelamentos,
   #screen-lembretes,
+  #screen-ajuda,
   #screen-onboarding{
     padding-top:20px;
     padding-left:24px;
@@ -370,6 +379,276 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
 .proEmpty .proEmptyTitle{ font-weight:900; font-size:15px; }
 .proEmpty .proEmptyText{ font-size:13px; color:var(--muted); max-width:38ch; }
 .proEmpty .proEmptyAction{ margin-top:8px; }
+
+/* =========================================================
+   ===== DESIGN SYSTEM PRO — Sidebar / Header / Bottom Nav =====
+   Shell fixo que envolve todas as telas (fica fora de .screen,
+   então não interfere no sistema de abrir/fechar telas existente).
+========================================================= */
+body{
+  background:
+    radial-gradient(1100px 800px at 15% -5%, rgba(86,156,255,.18), transparent 55%),
+    radial-gradient(900px 700px at 90% 10%, rgba(57,217,138,.12), transparent 60%),
+    radial-gradient(800px 700px at 60% 100%, rgba(20,70,60,.35), transparent 65%),
+    var(--bg);
+}
+#app{ display:block; }
+@media (min-width:900px){
+  #app{
+    display:grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    align-items:start;
+  }
+}
+
+/* ----- Sidebar (desktop) ----- */
+.sidebarPro{
+  display:none;
+}
+@media (min-width:900px){
+  .sidebarPro{
+    display:flex;
+    flex-direction:column;
+    position:sticky;
+    top:0;
+    height:100vh;
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    border-right:1px solid var(--stroke);
+    padding:18px 14px;
+  }
+}
+.sidebarLogo{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 8px 18px;
+  font-weight:950;
+  line-height:1.15;
+}
+.sidebarLogo .sidebarLogoIcon{ font-size:24px; }
+.sidebarNav{
+  flex:1;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.sidebarNav::-webkit-scrollbar{ width:6px; }
+.sidebarNav::-webkit-scrollbar-thumb{ background:var(--stroke); border-radius:6px; }
+.sidebarItem{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;
+  border-radius:14px;
+  font-size:13.5px;
+  font-weight:700;
+  color:var(--muted);
+  cursor:pointer;
+  border:1px solid transparent;
+  background:transparent;
+  text-align:left;
+  width:100%;
+}
+.sidebarItem:hover{ background: rgba(255,255,255,.06); color:var(--text); }
+.sidebarItem.active{
+  background: color-mix(in srgb, var(--accent), transparent 82%);
+  border-color: color-mix(in srgb, var(--accent), transparent 55%);
+  color:var(--text);
+}
+.sidebarItem .sbIcon{ width:20px; text-align:center; flex:0 0 auto; }
+.sidebarDivider{ height:1px; background:var(--stroke); margin:10px 4px; }
+.sidebarPlanCard{
+  margin-top:12px;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid color-mix(in srgb, var(--warn), transparent 55%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--warn), transparent 88%), transparent);
+}
+.sidebarPlanCard .spTitle{ font-size:11px; font-weight:900; color:var(--warn); text-transform:uppercase; letter-spacing:.4px; display:flex; align-items:center; gap:6px; }
+.sidebarPlanCard .spName{ font-weight:950; font-size:15px; margin-top:4px; }
+.sidebarPlanCard .spText{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+/* ----- Header (desktop + mobile) ----- */
+.headerPro{
+  padding:14px 16px;
+  border-bottom:1px solid var(--stroke);
+  background: rgba(255,255,255,.03);
+  backdrop-filter: var(--glass);
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+.headerTopRow{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  justify-content:space-between;
+}
+.headerLeft{ display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
+.headerHamburger{
+  width:40px;height:40px;border-radius:12px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.headerLogoMobile{ display:flex; align-items:center; gap:8px; font-weight:950; min-width:0; }
+.headerLogoMobile .hlmIcon{ font-size:20px; }
+.headerLogoMobile .hlmText{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.headerGreeting{ min-width:0; }
+.headerGreeting .hgTitle{ font-weight:950; font-size:17px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.headerGreeting .hgSub{ font-size:12px; color:var(--muted); margin-top:2px; }
+.headerGreetingDesktop{ display:none; }
+.headerActions{ display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+.headerSearch{
+  display:none;
+  align-items:center; gap:8px;
+  background: rgba(255,255,255,.06);
+  border:1px solid var(--stroke);
+  border-radius:14px;
+  padding:8px 12px;
+  min-width:220px;
+}
+.headerSearch input{
+  background:transparent; border:0; padding:0; font-size:13px; width:100%;
+}
+.headerIconBtn{
+  position:relative;
+  width:40px;height:40px;border-radius:12px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.headerIconBadge{
+  position:absolute; top:-4px; right:-4px;
+  min-width:17px; height:17px; padding:0 4px;
+  border-radius:999px; background:var(--danger); color:#fff;
+  font-size:10px; font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  border:2px solid var(--bg);
+}
+.headerAvatar{
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  padding:4px 10px 4px 4px; border-radius:999px;
+  border:1px solid var(--stroke); background: rgba(255,255,255,.05);
+}
+.headerAvatarPic{
+  width:32px;height:32px;border-radius:50%;
+  background: linear-gradient(135deg,var(--accent),var(--good));
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:950;color:#04152c;
+  flex:0 0 auto;
+}
+.headerAvatarInfo{ display:none; }
+.headerAvatarName{ font-weight:800; font-size:13px; display:flex; align-items:center; gap:6px; }
+.headerAvatarBadge{
+  font-size:9px; font-weight:950; padding:1px 6px; border-radius:999px;
+  background: var(--accent); color:#fff; letter-spacing:.3px;
+}
+@media (min-width:900px){
+  .headerHamburger{ display:none; }
+  .headerLogoMobile{ display:none; }
+  .headerGreetingDesktop{ display:block; }
+  .headerGreetingMobile{ display:none; }
+  .headerSearch{ display:flex; }
+  .headerAvatarInfo{ display:block; }
+}
+
+/* ----- Bottom Navigation (mobile) ----- */
+.bottomNavPro{
+  display:none;
+}
+@media (max-width:899px){
+  .bottomNavPro{
+    display:flex;
+    position:fixed; left:0; right:0; bottom:0;
+    height:var(--bottomnav-h);
+    background: color-mix(in srgb, var(--bg), transparent 4%);
+    border-top:1px solid var(--stroke);
+    backdrop-filter: var(--glass);
+    z-index:900;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottomNavItem{
+    flex:1;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px;
+    font-size:10.5px; font-weight:800;
+    color:var(--muted);
+  }
+  .bottomNavItem .bnIcon{ font-size:19px; }
+  .bottomNavItem.active{ color:var(--accent); }
+  .fabWrap{ bottom: calc(var(--bottomnav-h) + 14px); }
+  #app{ padding-bottom: var(--bottomnav-h); }
+}
+
+/* ----- Dashboard Hero (cards premium na tela inicial) ----- */
+.dashHero{ margin-bottom:6px; }
+.dashKpiRow{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+  margin-bottom:16px;
+}
+@media (max-width:900px){
+  .dashKpiRow{ grid-template-columns:repeat(2,1fr); }
+  .dashKpi.kpi-pendente{ display:none; }
+}
+.dashKpi{
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  border:1px solid var(--stroke);
+  border-radius:var(--radius2);
+  padding:16px;
+  box-shadow:var(--shadow);
+}
+.dashKpi .dkTop{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.dashKpi .dkLabel{ font-size:12.5px; color:var(--muted); font-weight:700; }
+.dashKpi .dkIcon{ width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px; }
+.dashKpi .dkValue{ font-size:20px; font-weight:950; }
+.dashKpi .dkSub{ font-size:11px; color:var(--muted); margin-top:4px; }
+.dashKpi.kpi-saldo .dkIcon{ background:color-mix(in srgb, var(--accent), transparent 78%); color:var(--accent); }
+.dashKpi.kpi-receitas .dkIcon{ background:color-mix(in srgb, var(--good), transparent 78%); color:var(--good); }
+.dashKpi.kpi-gastos .dkIcon{ background:color-mix(in srgb, var(--danger), transparent 78%); color:var(--danger); }
+.dashKpi.kpi-pendente .dkIcon{ background:color-mix(in srgb, var(--warn), transparent 72%); color:var(--warn); }
+.dashKpi.kpi-guardado .dkIcon{ background:color-mix(in srgb, var(--purple), transparent 78%); color:var(--purple); }
+
+.dashCardHead{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.dashCardHead h3{ margin:0; }
+.dashCardHead a{ font-size:12px; font-weight:800; color:var(--accent); cursor:pointer; }
+
+.creditCardVisual{
+  border-radius:20px;
+  padding:18px;
+  background:
+    radial-gradient(160px 120px at 12% 10%, rgba(255,255,255,.20), transparent 60%),
+    linear-gradient(135deg, color-mix(in srgb, var(--card-color, var(--purple)), #fff 8%), color-mix(in srgb, var(--card-color, var(--purple)), #000 45%));
+  color:#fff;
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow: var(--shadow);
+}
+.ccvTop{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; font-weight:900; }
+.ccvBrand{ font-size:22px; }
+.ccvRow{ display:flex; justify-content:space-between; gap:10px; }
+.ccvLabel{ font-size:11px; opacity:.85; }
+.ccvValue{ font-size:18px; font-weight:950; margin-top:2px; }
+.creditCardVisual .progressBarTrack{ background: rgba(255,255,255,.20); border-color: rgba(255,255,255,.28); }
+.creditCardVisual .progressBarFill{ background:#fff; }
+
+.compromissoRow{ display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--stroke); }
+.compromissoRow:last-child{ border-bottom:none; }
+.compromissoDate{
+  width:42px; text-align:center; flex:0 0 auto;
+  background: rgba(255,255,255,.06); border:1px solid var(--stroke);
+  border-radius:10px; padding:6px 4px;
+}
+.ccDay{ font-weight:950; font-size:14px; line-height:1; }
+.ccMon{ font-size:9.5px; color:var(--muted); text-transform:uppercase; margin-top:2px; }
+.compromissoMain{ flex:1; min-width:0; }
+.compromissoTitle{ font-weight:800; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.compromissoWhen{ flex:0 0 auto; white-space:nowrap; }
+
+.obProgressTrack{
+  width:100%; height:8px; border-radius:999px;
+  background: rgba(255,255,255,.10); border:1px solid var(--stroke);
+  overflow:hidden; margin-top:6px;
+}
+.obProgressFill{
+  height:100%; border-radius:999px;
+  background: linear-gradient(90deg, var(--accent), var(--good));
+  transition: width .3s ease;
+}
+
 .note{
   background: rgba(255,255,255,.06);
   border:1px solid var(--stroke);
@@ -982,9 +1261,81 @@ h1,h2,h3{
 
 <div id="app" style="display:none">
 
+  <!-- ===== SIDEBAR (desktop) ===== -->
+  <aside class="sidebarPro">
+    <div class="sidebarLogo"><span class="sidebarLogoIcon">💎</span> Controle de<br>Gastos PRO</div>
+    <nav class="sidebarNav">
+      <button class="sidebarItem" data-nav="dashboard" onclick="goHome()"><span class="sbIcon">🏠</span> Dashboard</button>
+      <button class="sidebarItem" data-nav="hoje" onclick="openHoje()"><span class="sbIcon">📅</span> Hoje</button>
+      <button class="sidebarItem" data-nav="receitas" onclick="openReceitas()"><span class="sbIcon">💰</span> Receitas</button>
+      <button class="sidebarItem" data-nav="gastos" onclick="navGastos()"><span class="sbIcon">🧾</span> Gastos</button>
+      <button class="sidebarItem" data-nav="contas" onclick="openContas()"><span class="sbIcon">🏦</span> Contas e Carteiras</button>
+      <button class="sidebarItem" data-nav="cartoes" onclick="openCartoes()"><span class="sbIcon">💳</span> Cartões</button>
+      <button class="sidebarItem" data-nav="parcelamentos" onclick="openParcelamentos()"><span class="sbIcon">📋</span> Parcelamentos</button>
+      <button class="sidebarItem" data-nav="orcamentos" onclick="openOrcamentos()"><span class="sbIcon">📊</span> Orçamentos</button>
+      <button class="sidebarItem" data-nav="metas" onclick="openMetas()"><span class="sbIcon">🎯</span> Metas</button>
+      <button class="sidebarItem" data-nav="calendario" onclick="openCalendario()"><span class="sbIcon">🗓️</span> Calendário</button>
+      <button class="sidebarItem" data-nav="lembretes" onclick="openLembretes()"><span class="sbIcon">🔔</span> Lembretes</button>
+      <button class="sidebarItem" data-nav="comprovantes" onclick="openComprovante()"><span class="sbIcon">📷</span> Comprovantes</button>
+      <button class="sidebarItem" data-nav="relatorios" onclick="openRelatorio()"><span class="sbIcon">📈</span> Relatórios</button>
+      <div class="sidebarDivider"></div>
+      <button class="sidebarItem" data-nav="iapro" onclick="openIa()"><span class="sbIcon">✨</span> IA PRO</button>
+      <button class="sidebarItem" data-nav="alertas" onclick="openAlertas()"><span class="sbIcon">🚨</span> Alertas</button>
+      <button class="sidebarItem" data-nav="lixeira" onclick="openLixeira()"><span class="sbIcon">🗑️</span> Lixeira</button>
+      <button class="sidebarItem" data-nav="historico" onclick="openHistory()"><span class="sbIcon">🕘</span> Histórico</button>
+      <div class="sidebarDivider"></div>
+      <button class="sidebarItem" data-nav="meuplano" onclick="openMeuPlano()"><span class="sbIcon">💎</span> Meu Plano</button>
+      <button class="sidebarItem" data-nav="perfil" onclick="openPerfil()"><span class="sbIcon">👤</span> Perfil</button>
+      <button class="sidebarItem" data-nav="config" onclick="openMenu()"><span class="sbIcon">⚙️</span> Configurações</button>
+      <button class="sidebarItem" data-nav="ajuda" onclick="openAjuda()"><span class="sbIcon">❓</span> Ajuda</button>
+      <button class="sidebarItem" onclick="logout()"><span class="sbIcon">🚪</span> Sair</button>
+    </nav>
+    <div class="sidebarPlanCard">
+      <div class="spTitle">👑 Plano atual</div>
+      <div class="spName" id="sidebarPlanName">Free</div>
+      <div class="spText" id="sidebarPlanText">Conheça os recursos do PRO.</div>
+    </div>
+  </aside>
+
+  <div class="mainPro">
+
+  <!-- ===== HEADER (desktop + mobile) ===== -->
+  <header class="headerPro">
+    <div class="headerTopRow">
+      <div class="headerLeft">
+        <button class="btn icon headerHamburger" onclick="openMenu()" title="Menu">☰</button>
+        <div class="headerLogoMobile"><span class="hlmIcon">💎</span><span class="hlmText">Controle de Gastos PRO</span></div>
+        <div class="headerGreeting headerGreetingDesktop">
+          <div class="hgTitle">👋 Olá, <span id="headerUserFirstName">Usuário</span>!</div>
+          <div class="hgSub">Aqui está o resumo da sua vida financeira</div>
+        </div>
+      </div>
+      <div class="headerActions">
+        <div class="headerSearch">
+          <span>🔎</span>
+          <input id="headerSearchInput" placeholder="Buscar gasto..." onkeydown="if(event.key==='Enter') headerSearchGo()">
+        </div>
+        <button class="btn icon headerIconBtn" onclick="openAlertas()" title="Alertas">
+          🔔<span class="headerIconBadge" id="headerNotifBadge" style="display:none">0</span>
+        </button>
+        <button class="btn icon headerIconBtn" onclick="toggleTheme()" title="Alternar tema">🌙</button>
+        <div class="headerAvatar" onclick="openPerfil()" title="Meu perfil">
+          <div class="headerAvatarPic" id="headerAvatarInitial">U</div>
+          <div class="headerAvatarInfo">
+            <div class="headerAvatarName"><span id="headerUserName">Usuário</span> <span class="headerAvatarBadge" id="headerPlanBadge">FREE</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="headerGreeting headerGreetingMobile" style="margin-top:12px">
+      <div class="hgTitle">👋 Olá, <span id="headerUserFirstNameMobile">Usuário</span>!</div>
+      <div class="hgSub">Aqui está o resumo da sua vida financeira</div>
+    </div>
+  </header>
+
   <div class="wrap">
 
-    <div class="topbar">
+    <div class="topbar" style="display:none">
       <div>
         <h1>Controle de Gastos PRO</h1>
         <div class="small" id="subHeader">Aqui fica só o essencial. Para editar categorias, fixos, PDF e simuladores, use o Menu.</div>
@@ -1005,6 +1356,70 @@ h1,h2,h3{
     <div id="demoBadge" style="display:none;text-align:center;padding:6px;border-radius:8px;margin:0 0 6px;background:rgba(255,209,102,.15);border:1px solid rgba(255,209,102,.35);color:var(--warn);font-size:12px;font-weight:900">🎭 Modo Demonstração — dados fictícios, nada será salvo</div>
 
     <div class="screen active" id="screen-home">
+
+      <!-- ===== DASHBOARD PRO — cards premium fixos no topo ===== -->
+      <div class="dashHero">
+        <div class="dashKpiRow">
+          <div class="dashKpi kpi-saldo">
+            <div class="dkTop"><span class="dkLabel">Saldo do mês</span><span class="dkIcon">💵</span></div>
+            <div class="dkValue" id="dashSaldoMes">R$ 0,00</div>
+          </div>
+          <div class="dashKpi kpi-receitas">
+            <div class="dkTop"><span class="dkLabel">Receitas</span><span class="dkIcon">📥</span></div>
+            <div class="dkValue" id="dashReceitas">R$ 0,00</div>
+          </div>
+          <div class="dashKpi kpi-gastos">
+            <div class="dkTop"><span class="dkLabel">Gastos</span><span class="dkIcon">🔄</span></div>
+            <div class="dkValue" id="dashGastos">R$ 0,00</div>
+          </div>
+          <div class="dashKpi kpi-pendente">
+            <div class="dkTop"><span class="dkLabel">Pendente</span><span class="dkIcon">⏰</span></div>
+            <div class="dkValue" id="dashPendente">R$ 0,00</div>
+          </div>
+          <div class="dashKpi kpi-guardado">
+            <div class="dkTop"><span class="dkLabel">Guardado</span><span class="dkIcon">🐷</span></div>
+            <div class="dkValue" id="dashGuardado">R$ 0,00</div>
+          </div>
+        </div>
+
+        <div class="grid3" style="margin-bottom:16px">
+          <div>
+            <div class="dashCardHead"><h3>💳 Cartões de crédito</h3><a onclick="openCartoes()">Ver todos →</a></div>
+            <div id="dashCartaoContent"></div>
+          </div>
+          <div class="card">
+            <div class="dashCardHead"><h3>Alertas</h3><a onclick="openAlertas()">Ver todos →</a></div>
+            <div id="dashAlertasContent" class="alertsList"></div>
+          </div>
+          <div class="card">
+            <div class="dashCardHead"><h3>Próximos compromissos</h3><a onclick="openLembretes()">Ver todos →</a></div>
+            <div id="dashCompromissosContent"></div>
+          </div>
+        </div>
+
+        <div class="grid3">
+          <div class="card">
+            <div class="dashCardHead"><h3>🎯 Metas financeiras</h3><a onclick="openMetas()">Ver todas →</a></div>
+            <div id="dashMetasContent"></div>
+          </div>
+          <div class="card">
+            <div class="dashCardHead"><h3>📊 Orçamento por categoria</h3><a onclick="openOrcamentos()">Ver todos →</a></div>
+            <div id="dashOrcamentoContent"></div>
+          </div>
+          <div class="card dashIaCard">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+              <div class="iaLogo" style="width:44px;height:44px">IA</div>
+              <div>
+                <div style="font-weight:950">IA PRO <span class="badge good" style="margin-left:6px">Novo</span></div>
+                <div class="small">Quer dicas personalizadas?</div>
+              </div>
+            </div>
+            <div class="small" style="margin-bottom:12px">Nossa IA pode analisar seus gastos e te ajudar a economizar mais.</div>
+            <button class="btn primary" style="width:100%" onclick="openIa()">Abrir IA PRO</button>
+          </div>
+        </div>
+      </div>
+
       <div id="homeContainer">
 
         <div data-home="resumo">
@@ -2117,6 +2532,38 @@ h1,h2,h3{
     <div id="diagnosticoContent"></div>
   </div>
 
+  <!-- ===== TELA: AJUDA ===== -->
+  <div class="screen" id="screen-ajuda">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="goHome()">← Voltar</button>
+      <div style="font-weight:900">❓ Ajuda</div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <h3>Perguntas frequentes</h3>
+      <div class="note" style="margin-bottom:10px">
+        <div style="font-weight:900">Meus dados ficam salvos?</div>
+        <div class="small" style="margin-top:6px">Sim. Tudo é sincronizado automaticamente com sua conta na nuvem (Supabase) e também fica salvo localmente como cache.</div>
+      </div>
+      <div class="note" style="margin-bottom:10px">
+        <div style="font-weight:900">Como uso em outro celular ou computador?</div>
+        <div class="small" style="margin-top:6px">Basta fazer login com a mesma conta — seus dados aparecem automaticamente.</div>
+      </div>
+      <div class="note" style="margin-bottom:10px">
+        <div style="font-weight:900">O que é o modo demonstração?</div>
+        <div class="small" style="margin-top:6px">Mostra dados fictícios para você conhecer o app, sem salvar nada na sua conta real.</div>
+      </div>
+      <div class="note">
+        <div style="font-weight:900">Como exporto meus dados?</div>
+        <div class="small" style="margin-top:6px">Vá em Configurações → Backup dos dados → Exportar dados.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Precisa de mais ajuda?</h3>
+      <div class="small" style="margin-bottom:10px">Fale com a gente pelo e-mail de suporte.</div>
+      <a class="btn primary" style="width:100%;text-align:center" href="mailto:suporte@gastospro.app">✉️ Enviar e-mail</a>
+    </div>
+  </div>
+
   <!-- ===== TELA: HOJE ===== -->
   <div class="screen" id="screen-hoje">
     <div class="backRow">
@@ -2255,6 +2702,8 @@ h1,h2,h3{
           <h1>Bem-vindo ao Controle de Gastos PRO</h1>
           <p class="small">Vamos configurar sua conta em poucos passos</p>
         </div>
+        <div class="obProgressTrack"><div class="obProgressFill" id="obProgressFill" style="width:33%"></div></div>
+        <div class="small" style="text-align:center;margin:8px 0 4px" id="obProgressLabel">Passo 1 de 3</div>
         <div id="onboardingStep1">
           <h3>Passo 1 de 3 — Dados do mês atual</h3>
           <label>Qual é seu salário mensal?</label>
@@ -2344,6 +2793,17 @@ h1,h2,h3{
 
     <div class="fab add" onclick="openAddExpense()" title="Adicionar gasto">+</div>
   </div>
+
+  </div><!-- /.mainPro -->
+
+  <!-- ===== BOTTOM NAVIGATION (mobile) ===== -->
+  <nav class="bottomNavPro">
+    <button class="bottomNavItem" data-nav="dashboard" onclick="goHome()"><span class="bnIcon">🏠</span>Home</button>
+    <button class="bottomNavItem" data-nav="gastos" onclick="navGastos()"><span class="bnIcon">🧾</span>Gastos</button>
+    <button class="bottomNavItem" data-nav="receitas" onclick="openReceitas()"><span class="bnIcon">💰</span>Receitas</button>
+    <button class="bottomNavItem" data-nav="relatorios" onclick="openRelatorio()"><span class="bnIcon">📈</span>Relatórios</button>
+    <button class="bottomNavItem" data-nav="perfil" onclick="openPerfil()"><span class="bnIcon">👤</span>Perfil</button>
+  </nav>
 
 </div>
 
@@ -2992,7 +3452,8 @@ function titleCase(s){
 }
 
 function showLoading(){ document.getElementById("app").style.display="none"; document.getElementById("loading").style.display="flex"; }
-function showApp(){ document.getElementById("loading").style.display="none"; document.getElementById("app").style.display="block"; }
+/* Não força display:block — deixa o CSS decidir (grid no desktop, block no mobile) */
+function showApp(){ document.getElementById("loading").style.display="none"; document.getElementById("app").style.display=""; }
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   const el = document.getElementById(id);
@@ -3015,16 +3476,57 @@ function updateFabVisibility(id){
   if(addFab)  addFab.style.display  = FAB_ADD_HIDDEN_SCREENS.has(id) ? "none" : "flex";
 }
 
+/* Mapeia telas para a chave de navegação usada na sidebar/bottom nav */
+const SCREEN_NAV_KEY = {
+  "screen-home":"dashboard", "screen-hoje":"hoje", "screen-receitas":"receitas",
+  "screen-contas":"contas", "screen-cartoes":"cartoes", "screen-parcelamentos":"parcelamentos",
+  "screen-orcamentos":"orcamentos", "screen-metas":"metas", "screen-calendario":"calendario",
+  "screen-lembretes":"lembretes", "screen-comprovante":"comprovantes", "screen-relatorio":"relatorios",
+  "screen-ia":"iapro", "screen-alertas":"alertas", "screen-lixeira":"lixeira", "screen-history":"historico",
+  "screen-meu-plano":"meuplano", "screen-perfil":"perfil", "screen-menu":"config", "screen-ajuda":"ajuda"
+};
+function setActiveNav(key){
+  document.querySelectorAll("[data-nav]").forEach(el=>{
+    el.classList.toggle("active", el.getAttribute("data-nav")===key);
+  });
+}
+function updateNavActive(id){
+  const key = SCREEN_NAV_KEY[id];
+  if(key) setActiveNav(key);
+}
+
 function openScreen(id){
   if(id !== "screen-history" && id !== "screen-ia") lastNonHistoryScreen = id;
   if(id !== "screen-ia") lastNonIAScreen = id;
   showScreen(id);
   updateFabVisibility(id);
+  updateNavActive(id);
 }
 function goHome(){ openScreen("screen-home"); applyHomeLayoutToDOM(); }
 function openMenu(){ openScreen("screen-menu"); }
-function openHistory(){ buildHistoryUI(); showScreen("screen-history"); }
-function goBackFromHistory(){ showScreen(lastNonHistoryScreen || "screen-home"); }
+function openHistory(){ buildHistoryUI(); openScreen("screen-history"); }
+function goBackFromHistory(){
+  const target = lastNonHistoryScreen || "screen-home";
+  showScreen(target);
+  updateFabVisibility(target);
+  updateNavActive(target);
+}
+
+/* "Gastos" na sidebar/bottom nav: os lançamentos ficam na própria Home
+   (lista do mês), então navega para lá e rola até a lista. */
+function navGastos(){
+  goHome();
+  setActiveNav("gastos");
+  setTimeout(function(){
+    const el = document.querySelector('[data-home="lista"]');
+    if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+  }, 60);
+}
+function headerSearchGo(){
+  const term = (document.getElementById("headerSearchInput")||{}).value || "";
+  navGastos();
+  if(typeof filterExpenseList === "function") setTimeout(()=>filterExpenseList(term), 120);
+}
 
 function toggleTheme(){
   document.body.classList.toggle("light");
@@ -3050,7 +3552,12 @@ function openIa(){
   sessionStorage.setItem("return_screen", current);
   location.href = "./ia.html";
 }
-function goBackFromIA(){ showScreen(lastNonIAScreen || "screen-home"); }
+function goBackFromIA(){
+  const target = lastNonIAScreen || "screen-home";
+  showScreen(target);
+  updateFabVisibility(target);
+  updateNavActive(target);
+}
 
 /* =========================
    STORAGE KEYS
@@ -3908,6 +4415,19 @@ function drawEvolucao(){
   });
 }
 
+/* Filtro visual da lista de gastos (busca do header) — não altera os dados,
+   só mostra/esconde linhas já renderizadas pela tabela #list. */
+function filterExpenseList(term){
+  const table = document.getElementById("list");
+  if(!table) return;
+  const t = String(term||"").trim().toLowerCase();
+  table.querySelectorAll("tr").forEach(function(tr){
+    if(!t){ tr.style.display=""; return; }
+    const txt = (tr.textContent||"").toLowerCase();
+    tr.style.display = txt.indexOf(t) > -1 ? "" : "none";
+  });
+}
+
 function renderList(){
   const d = getDataMes(mesAtual);
   const table = document.getElementById("list");
@@ -4252,6 +4772,163 @@ function renderProDashboard(){
   renderProKPIs();
   renderFaturaCartao();
   renderComparacaoMeses();
+  renderDashboardHero();
+}
+
+/* =========================
+   DASHBOARD HERO — cards premium fixos no topo da Home
+   (usam os mesmos dados reais já carregados: expenses, income_entries,
+   saved_amounts, credit_cards, financial_goals, category_budgets,
+   financial_reminders). Não duplicam lógica de sync, só leitura.
+========================= */
+function renderDashboardHero(){
+  const d = getDataMes(mesAtual);
+  const items = d.items||[];
+  const salary = Number(d.salary||0);
+  const receitas = (window._receitas||[]).reduce(function(a,b){ return a+Number(b.valor||0); },0);
+  const totalReceita = salary + receitas;
+  const spent = items.reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  const pago = items.filter(function(i){ return !!i.paid; }).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  const pendente = Math.max(0, spent - pago);
+  const saved = (d.saved||[]).reduce(function(a,b){ return a+Number(b.value||0); },0);
+  const saldo = totalReceita - spent;
+
+  const elSaldo = document.getElementById("dashSaldoMes");
+  if(elSaldo){
+    elSaldo.textContent = money(saldo);
+    elSaldo.style.color = saldo>=0 ? "var(--good)" : "var(--danger)";
+  }
+  const elRec = document.getElementById("dashReceitas"); if(elRec) elRec.textContent = money(totalReceita);
+  const elGas = document.getElementById("dashGastos");   if(elGas) elGas.textContent = money(spent);
+  const elPen = document.getElementById("dashPendente"); if(elPen) elPen.textContent = money(pendente);
+  const elGua = document.getElementById("dashGuardado"); if(elGua) elGua.textContent = money(saved);
+
+  renderDashCartao();
+  renderDashAlertas();
+  renderDashCompromissos();
+  renderDashMetas();
+  renderDashOrcamento();
+  updateHeaderNotifBadge();
+}
+
+function renderDashCartao(){
+  const el = document.getElementById("dashCartaoContent");
+  if(!el) return;
+  const cards = window._cartoes||[];
+  if(!cards.length){
+    el.innerHTML = `<div class="card">${proEmptyHTML("💳","Nenhum cartão cadastrado","Adicione um cartão para ver a fatura aqui.")}</div>`;
+    return;
+  }
+  const d = getDataMes(mesAtual);
+  const c = cards[0];
+  const sbid = c._sbid||c.id||"";
+  const faturaAtual = items_filterByCard(d.items||[], sbid).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  const limite = Number(c.limite||0);
+  const disponivel = limite>0 ? Math.max(0, limite-faturaAtual) : null;
+  const pctUsado = limite>0 ? Math.min(100, Math.round((faturaAtual/limite)*100)) : 0;
+  el.innerHTML = `
+    <div class="creditCardVisual" style="--card-color:${escapeHtml(c.cor||'#7c5cff')}">
+      <div class="ccvTop"><div>${escapeHtml(c.nome||"Cartão")}</div><div class="ccvBrand">💳</div></div>
+      <div class="ccvRow">
+        <div><div class="ccvLabel">Fatura atual</div><div class="ccvValue">${money(faturaAtual)}</div></div>
+        <div style="text-align:right"><div class="ccvLabel">Limite disponível</div><div class="ccvValue">${disponivel!==null?money(disponivel):"—"}</div></div>
+      </div>
+      <div class="progressBarTrack" style="margin-top:10px"><div class="progressBarFill" style="width:${pctUsado}%"></div></div>
+      <div class="small" style="margin-top:6px;opacity:.85">Limite utilizado: ${pctUsado}%</div>
+    </div>`;
+}
+function items_filterByCard(items, sbid){
+  return (items||[]).filter(function(it){ return it.credit_card_id===sbid || it.credit_card_id_ref===sbid; });
+}
+
+function renderDashAlertas(){
+  const el = document.getElementById("dashAlertasContent");
+  if(!el) return;
+  const alertas = (typeof gerarAlertasDinamicos==="function" ? gerarAlertasDinamicos() : []).slice(0,4);
+  if(!alertas.length){
+    el.innerHTML = `<div class="alertItem good"><span class="alertIcon">✅</span> Tudo em ordem por aqui!</div>`;
+    return;
+  }
+  el.innerHTML = alertas.map(function(a){
+    return `<div class="alertItem ${a.nivel}">
+      <span class="alertIcon">${a.icon}</span>
+      <div><div style="font-weight:900">${escapeHtml(a.titulo)}</div><div class="small">${escapeHtml(a.desc)}</div></div>
+    </div>`;
+  }).join("");
+}
+
+function renderDashCompromissos(){
+  const el = document.getElementById("dashCompromissosContent");
+  if(!el) return;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const list = (window._lembretes||[])
+    .filter(function(r){ return r.status==="ativo" && r.data; })
+    .map(function(r){ return Object.assign({}, r, { _diff: Math.round((new Date(r.data+"T00:00:00")-hoje)/86400000) }); })
+    .filter(function(r){ return r._diff>=0; })
+    .sort(function(a,b){ return a._diff-b._diff; })
+    .slice(0,4);
+  if(!list.length){
+    el.innerHTML = proEmptyHTML("🔔","Nenhum compromisso próximo","Crie lembretes para acompanhar vencimentos.");
+    return;
+  }
+  const tipos = { conta:"💡", cartao:"💳", meta:"🎯", investimento:"📈", gasto:"🧾", outro:"🔔" };
+  el.innerHTML = list.map(function(r){
+    const dt = new Date(r.data+"T00:00:00");
+    const dia = String(dt.getDate()).padStart(2,"0");
+    const mesLbl = dt.toLocaleDateString("pt-BR",{month:"short"}).replace(".","").toUpperCase();
+    const rel = r._diff===0 ? "Hoje" : r._diff===1 ? "Amanhã" : `Em ${r._diff} dias`;
+    return `<div class="compromissoRow">
+      <div class="compromissoDate"><div class="ccDay">${dia}</div><div class="ccMon">${mesLbl}</div></div>
+      <div class="compromissoMain">
+        <div class="compromissoTitle">${escapeHtml(r.titulo)}</div>
+        <div class="small">${tipos[r.tipo]||"🔔"} ${escapeHtml(r.tipo||"")}</div>
+      </div>
+      <div class="compromissoWhen small">${rel}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderDashMetas(){
+  const el = document.getElementById("dashMetasContent");
+  if(!el) return;
+  const metas = (window._metas||[]).slice(0,2);
+  if(!metas.length){
+    el.innerHTML = proEmptyHTML("🎯","Nenhuma meta cadastrada","Crie uma meta para acompanhar seu progresso aqui.");
+    return;
+  }
+  el.innerHTML = metas.map(function(m){
+    const objetivo = Number(m.valor_objetivo||0);
+    const atual = Number(m.valor_atual||0);
+    const pct = objetivo>0 ? Math.min(100,Math.round((atual/objetivo)*100)) : 0;
+    const falta = Math.max(0, objetivo-atual);
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-weight:900"><span>${escapeHtml(m.icone||"🎯")} ${escapeHtml(m.nome||"")}</span><span>${pct}%</span></div>
+      <div class="progressBarTrack" style="margin-top:6px"><div class="progressBarFill" style="width:${pct}%"></div></div>
+      <div class="progressFoot"><span>${money(atual)} de ${money(objetivo)}</span><span>Falta ${money(falta)}</span></div>
+    </div>`;
+  }).join("");
+}
+
+function renderDashOrcamento(){
+  const el = document.getElementById("dashOrcamentoContent");
+  if(!el) return;
+  const orcs = (window._orcamentos||[]).slice(0,4);
+  if(!orcs.length){
+    el.innerHTML = proEmptyHTML("📊","Nenhum orçamento definido","Defina limites por categoria para ver o progresso aqui.");
+    return;
+  }
+  const d = getDataMes(mesAtual);
+  const catMap = {};
+  (d.items||[]).forEach(function(it){ const c=it.category||"Outros"; catMap[c]=(catMap[c]||0)+Number(it.amount||0); });
+  el.innerHTML = orcs.map(function(o){
+    const gasto = catMap[o.categoria]||0;
+    const pct = o.limite>0 ? Math.min(100,Math.round((gasto/o.limite)*100)) : 0;
+    const cls = pct>=100 ? "danger" : pct>=80 ? "warn" : "";
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between"><span>${escapeHtml(o.categoria)}</span><span>${money(gasto)} / ${money(o.limite)}</span></div>
+      <div class="progressBarTrack" style="margin-top:6px"><div class="progressBarFill ${cls}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join("");
 }
 
 function renderProKPIs(){
@@ -4609,6 +5286,7 @@ function openDiagnostico(){
   renderDiagnostico();
   openScreen("screen-diagnostico");
 }
+function openAjuda(){ openScreen("screen-ajuda"); }
 function renderDiagnostico(){
   const el = document.getElementById("diagnosticoContent");
   if(!el) return;
@@ -5521,6 +6199,7 @@ async function initSupabaseAuth() {
       document.getElementById("userName").textContent =
         (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || "Usuário";
       document.getElementById("userEmail").textContent = u.email || "";
+      updateHeaderUser();
 
       const t = localStorage.getItem("theme");
       if (t === "light") document.body.classList.add("light");
@@ -5621,6 +6300,7 @@ async function initSupabaseAuth() {
                 applyVoiceVisibility();
               }
             }
+            updateHeaderUser();
 
             // Re-renderiza com dados da nuvem
             buildMonthSelect();
@@ -5676,6 +6356,43 @@ function proEmptyHTML(icon, title, text, ctaHtml){
     <div class="proEmptyText">${escapeHtml(text)}</div>
     ${ctaHtml ? `<div class="proEmptyAction">${ctaHtml}</div>` : ""}
   </div>`;
+}
+
+/* Popula nome/avatar/badge do plano no header e na sidebar com dados reais do usuário */
+function updateHeaderUser(){
+  if(!USER) return;
+  const displayName = (USER.user_metadata && (USER.user_metadata.full_name || USER.user_metadata.name)) || USER.email || "Usuário";
+  const firstName = String(displayName).trim().split(" ")[0] || "Usuário";
+  const initial = firstName.charAt(0).toUpperCase() || "U";
+  const plan = (window.App && App._cloudAppSettings && App._cloudAppSettings.plan) || "free";
+  const isPro = plan === "pro";
+
+  ["headerUserFirstName","headerUserFirstNameMobile"].forEach(function(id){
+    const el = document.getElementById(id); if(el) el.textContent = firstName;
+  });
+  const nameEl = document.getElementById("headerUserName");
+  if(nameEl) nameEl.textContent = displayName;
+  const initialEl = document.getElementById("headerAvatarInitial");
+  if(initialEl) initialEl.textContent = initial;
+  const badgeEl = document.getElementById("headerPlanBadge");
+  if(badgeEl) badgeEl.textContent = isPro ? "PRO" : "FREE";
+
+  const spName = document.getElementById("sidebarPlanName");
+  const spText = document.getElementById("sidebarPlanText");
+  if(spName) spName.textContent = isPro ? "PRO" : "Free";
+  if(spText) spText.textContent = isPro ? "Aproveite todos os recursos sem limitações." : "Conheça os recursos do PRO.";
+}
+/* Badge de notificações no sino do header — reaproveita os mesmos alertas da tela de Alertas */
+function updateHeaderNotifBadge(){
+  const badge = document.getElementById("headerNotifBadge");
+  if(!badge) return;
+  const count = (typeof gerarAlertasDinamicos === "function") ? gerarAlertasDinamicos().length : 0;
+  if(count > 0){
+    badge.style.display = "flex";
+    badge.textContent = count > 9 ? "9+" : String(count);
+  } else {
+    badge.style.display = "none";
+  }
 }
 
   function escapeJsSingle(s){
@@ -5758,7 +6475,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if(new URLSearchParams(window.location.search).get("demo")==="1"){
     // Simula login mínimo para exibir o app
     USER_ID = "demo-user";
-    USER = { email:"demo@gastospro.app", id:"demo-user", created_at:new Date().toISOString() };
+    USER = { email:"demo@gastospro.app", id:"demo-user", created_at:new Date().toISOString(), user_metadata:{ full_name:"Visitante" } };
     if(window.App){ App.USER=USER; App.USER_ID="demo-user"; }
     const t = localStorage.getItem("theme");
     if(t === "light") document.body.classList.add("light");
@@ -5768,6 +6485,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderCategorias();
     renderFixos();
     showApp();
+    updateHeaderUser();
     goHome();
     ativarModoDemo();
     return;
@@ -7070,6 +7788,13 @@ function onboardingProximo(step){
     document.getElementById("onboardingStep2").style.display="none";
     document.getElementById("onboardingStep3").style.display="block";
   }
+  updateOnboardingProgress(step);
+}
+function updateOnboardingProgress(step){
+  const fill = document.getElementById("obProgressFill");
+  const label = document.getElementById("obProgressLabel");
+  if(fill) fill.style.width = (step*33.33)+"%";
+  if(label) label.textContent = `Passo ${step} de 3`;
 }
 function onboardingFinalizar(){
   const sal = Number(document.getElementById("obSalario").value||0);
