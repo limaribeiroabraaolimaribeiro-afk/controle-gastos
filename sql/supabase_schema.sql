@@ -499,8 +499,7 @@ CREATE TABLE IF NOT EXISTS income_entries (
     categoria      text DEFAULT 'Entrada',
     valor          numeric NOT NULL CHECK (valor > 0),
     data           date,
-    origem         text DEFAULT 'manual'
-                       CHECK (origem IN ('manual', 'notificacao_banco', 'pwa')),
+    origem         text DEFAULT 'manual',
     bank_import_id uuid REFERENCES bank_notification_imports(id) ON DELETE SET NULL,
     created_at     timestamptz DEFAULT now(),
     updated_at     timestamptz DEFAULT now()

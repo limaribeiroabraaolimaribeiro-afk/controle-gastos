@@ -1235,8 +1235,10 @@
       console.log("[Supabase] Financial goals encontrados:", goalList.length);
       console.log("[Supabase] Income entries encontrados:", incList.length);
 
-      const cloudHasData = expList.length > 0 || setList.length > 0 ||
-                           catList.length > 0 || fexpList.length > 0 || fInvList.length > 0;
+      const cloudHasData = expList.length > 0  || setList.length  > 0 ||
+                           catList.length > 0  || fexpList.length > 0 || fInvList.length > 0 ||
+                           budgList.length > 0 || accList.length  > 0 || goalList.length > 0 ||
+                           incList.length > 0  || cardList.length > 0;
       if (!cloudHasData) {
         console.log("[Supabase] Nuvem vazia — usando dados locais");
         App.setSyncStatus("local");
@@ -1324,6 +1326,7 @@
         App.categoryBudgets = budgList.map(function(b) {
           return { _sbid: b.id, mes: b.mes, categoria: b.categoria, limite: Number(b.limite||0) };
         });
+        console.log("[Supabase] Category budgets aplicados no estado local:", App.categoryBudgets.length);
       }
       if (cardList.length > 0) {
         App.creditCards = cardList.map(function(c) {
@@ -1562,12 +1565,14 @@
   App.syncSaveCategoryBudget = async function (mes, categoria, limite) {
     const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
     if (!sb || !user) return false;
-    const { error } = await sb.from("category_budgets").upsert(
-      { user_id: user.id, mes, categoria, limite: Number(limite) },
+    console.log("[Supabase] Salvando category budget:", categoria, mes, limite);
+    const { data, error } = await sb.from("category_budgets").upsert(
+      { user_id: user.id, mes: mes, categoria: categoria, limite: Number(limite) },
       { onConflict: "user_id,mes,categoria" }
-    );
-    if (error) { console.warn("[Supabase] syncSaveCategoryBudget:", error.message); return false; }
-    return true;
+    ).select("id").maybeSingle();
+    if (error) { console.warn("[Supabase] syncSaveCategoryBudget erro:", error.message); return false; }
+    console.log("[Supabase] Category budget salvo. id:", data && data.id);
+    return (data && data.id) || true;
   };
 
   App.syncDeleteCategoryBudget = async function (sbid) {

@@ -4546,11 +4546,28 @@ async function initSupabaseAuth() {
             investFixos = App.investFixos.length  ? App.investFixos  : investFixos;
 
             // Sincroniza novos módulos financeiros com variáveis locais
-            if (App.accounts && App.accounts.length) window._contas = App.accounts.slice();
-            if (App.creditCards && App.creditCards.length) window._cartoes = App.creditCards.slice();
+            if (App.accounts && App.accounts.length)       window._contas    = App.accounts.slice();
+            if (App.creditCards && App.creditCards.length) window._cartoes   = App.creditCards.slice();
             if (App.financialGoals && App.financialGoals.length) window._metas = App.financialGoals.slice();
-            if (App.categoryBudgets) window._orcamentos = App.categoryBudgets.filter(function(b){ return b.mes===mesAtual; });
             if (App.incomeEntries && App.incomeEntries[mesAtual]) window._receitas = App.incomeEntries[mesAtual];
+            // Orçamentos: atualiza sempre (mesmo vazio = limpa lista)
+            window._orcamentos = App.categoryBudgets
+              ? App.categoryBudgets.filter(function(b){ return b.mes === mesAtual; })
+              : [];
+            console.log("[Supabase] Category budgets encontrados:", (App.categoryBudgets||[]).length,
+                        "— do mes atual:", window._orcamentos.length);
+
+            // Atualiza telas já abertas
+            var activeScreen = document.querySelector(".screen.active");
+            var activeId = activeScreen ? activeScreen.id : "";
+            if (activeId === "screen-orcamentos" && typeof renderOrcamentos === "function") {
+              renderOrcamentos();
+              console.log("[Supabase] Tela de orçamentos atualizada");
+            }
+            if (activeId === "screen-metas"    && typeof renderMetas    === "function") renderMetas();
+            if (activeId === "screen-contas"   && typeof renderContas   === "function") renderContas();
+            if (activeId === "screen-cartoes"  && typeof renderCartoes  === "function") renderCartoes();
+            if (activeId === "screen-receitas" && typeof renderReceitas === "function") renderReceitas();
 
             // Aplica configurações de tema/preferências da nuvem
             if (App._cloudAppSettings) {
@@ -5358,11 +5375,31 @@ function removeConta(idx){
 
 /* ========== ORÇAMENTOS ========== */
 function openOrcamentos(){
-  _orcamentos = (window.App && App.categoryBudgets) ? App.categoryBudgets.filter(b=>b.mes===mesAtual) : [];
+  // Lê do estado já carregado
+  _orcamentos = (window.App && App.categoryBudgets)
+    ? App.categoryBudgets.filter(function(b){ return b.mes === mesAtual; })
+    : [];
   const sel = document.getElementById("orcCategoria");
   if(sel) sel.innerHTML = categorias.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
   renderOrcamentos();
   openScreen("screen-orcamentos");
+
+  // Se ainda não há dados, tenta buscar direto do Supabase
+  if(!_orcamentos.length && window.App && typeof App.syncLoadCategoryBudgets === "function"){
+    App.syncLoadCategoryBudgets(mesAtual).then(function(rows){
+      if(!rows || !rows.length) return;
+      // Merge com estado global
+      var novos = rows.map(function(b){
+        return { _sbid: b.id, mes: b.mes, categoria: b.categoria, limite: Number(b.limite||0) };
+      });
+      App.categoryBudgets = (App.categoryBudgets||[])
+        .filter(function(b){ return b.mes !== mesAtual; })
+        .concat(novos);
+      _orcamentos = novos;
+      renderOrcamentos();
+      console.log("[Supabase] Tela de orçamentos atualizada após busca direta:", novos.length);
+    }).catch(function(){});
+  }
 }
 function renderOrcamentos(){
   const list = document.getElementById("listaOrcamentos");
@@ -5397,7 +5434,13 @@ function addOrcamento(){
   document.getElementById("orcLimite").value="";
   renderOrcamentos();
   if(window.App && typeof App.syncSaveCategoryBudget==="function"){
-    App.syncSaveCategoryBudget(mesAtual, cat, lim).catch(()=>{});
+    App.syncSaveCategoryBudget(mesAtual, cat, lim).then(function(id){
+      if(id && typeof id === "string"){
+        // Guarda o _sbid no item para delete futuro
+        const item = _orcamentos.find(function(o){ return o.categoria===cat; });
+        if(item) item._sbid = id;
+      }
+    }).catch(()=>{});
   }
 }
 function removeOrcamento(idx){
