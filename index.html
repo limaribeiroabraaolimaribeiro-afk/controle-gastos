@@ -1086,6 +1086,42 @@ h1,h2,h3{
           </div>
         </div>
 
+        <!-- PRO: Receitas e Saldo Real -->
+        <div data-home="receitasSaldo" style="margin-top:12px">
+          <div class="kpiGrid">
+            <div class="kpiPro" style="border-color:rgba(57,217,138,.35)">
+              <div class="kpiIcon" style="background:rgba(57,217,138,.15);color:var(--good)">📥</div>
+              <div class="kpiLabel">Receitas do mês</div>
+              <div class="kpiValue" id="kpiReceitas" style="color:var(--good)">R$ 0,00</div>
+            </div>
+            <div class="kpiPro">
+              <div class="kpiIcon">⚖️</div>
+              <div class="kpiLabel">Saldo Real</div>
+              <div class="kpiValue" id="kpiSaldoReal">R$ 0,00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRO: Fatura dos Cartões -->
+        <div data-home="faturaCartao" style="margin-top:12px">
+          <div class="card">
+            <h3>💳 Faturas dos Cartões</h3>
+            <div id="faturaCartaoContent">
+              <div class="small" style="opacity:.6">Nenhum cartão. <button class="btn mini" onclick="openCartoes()">Adicionar</button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRO: Comparação com mês anterior -->
+        <div data-home="comparacaoMeses" style="margin-top:12px">
+          <div class="card">
+            <h3>📅 vs. Mês Anterior</h3>
+            <div id="comparacaoContent">
+              <div class="small" style="opacity:.6">Sem dados do mês anterior.</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1116,6 +1152,8 @@ h1,h2,h3{
         <button class="btn menuItem" onclick="openLembretes()"><span class="menuIcon">🔔</span> Lembretes</button>
         <button class="btn menuItem" onclick="openCalendario()"><span class="menuIcon">🗓️</span> Calendário</button>
         <button class="btn menuItem" onclick="openRelatorio()"><span class="menuIcon">📈</span> Relatório</button>
+        <button class="btn menuItem" onclick="openComprovante()"><span class="menuIcon">📷</span> Comprovante</button>
+        <button class="btn menuItem" onclick="openMeuPlano()"><span class="menuIcon">💎</span> Meu Plano</button>
       </div>
 
       <div class="hr"></div>
@@ -1767,6 +1805,109 @@ h1,h2,h3{
     <div class="card">
       <h3>Minhas metas</h3>
       <div id="listaMetas"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: COMPROVANTE ===== -->
+  <div class="screen" id="screen-comprovante">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">📷 Importar Comprovante</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <h3>Imagem do comprovante</h3>
+      <input type="file" id="comprovanteFile" accept="image/*" onchange="previewComprovante(this)" style="width:100%;padding:10px">
+      <img id="comprovantePreview" style="display:none;max-width:100%;border-radius:12px;margin-top:10px;max-height:300px;object-fit:contain">
+    </div>
+
+    <div class="card">
+      <h3>Dados do lançamento</h3>
+      <div class="grid2">
+        <div>
+          <label>Tipo</label>
+          <select id="compTipo">
+            <option value="saida">Saída (gasto)</option>
+            <option value="entrada">Entrada (receita)</option>
+          </select>
+        </div>
+        <div>
+          <label>Valor (R$)</label>
+          <input id="compValor" type="number" placeholder="Ex: 150.00">
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <label>Data</label>
+          <input id="compData" type="date">
+        </div>
+        <div>
+          <label>Categoria</label>
+          <select id="compCat"></select>
+        </div>
+      </div>
+      <label style="margin-top:10px">Descrição</label>
+      <input id="compDesc" placeholder="Ex: Pagamento supermercado">
+      <button class="btn primary" style="margin-top:14px;width:100%" onclick="lancarComprovante()">Lançar</button>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>Comprovantes recentes</h3>
+      <div id="listaComprovantes" class="small"></div>
+    </div>
+  </div>
+
+  <!-- ===== TELA: MEU PLANO ===== -->
+  <div class="screen" id="screen-meu-plano">
+    <div class="backRow">
+      <button class="btn backBtn" onclick="openMenu()">← Voltar</button>
+      <div style="font-weight:900">💎 Meu Plano</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="font-size:36px">👤</div>
+        <div>
+          <div style="font-weight:950" id="planoUserName">Usuário</div>
+          <div class="small" id="planoUserEmail"></div>
+        </div>
+        <div id="planoBadge" style="margin-left:auto;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:900;background:rgba(86,156,255,.2);color:var(--accent);border:1px solid rgba(86,156,255,.35)">Free</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card" style="border:1px solid var(--stroke)">
+        <div style="font-weight:950;font-size:18px;margin-bottom:8px">Free</div>
+        <div style="font-size:28px;font-weight:950;margin-bottom:16px">R$ 0<span style="font-size:14px;font-weight:500;color:var(--muted)">/mês</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+          <div>✅ Controle mensal</div>
+          <div>✅ Categorias</div>
+          <div>✅ PDF básico</div>
+          <div>✅ Metas básicas</div>
+          <div>✅ Sync Supabase</div>
+          <div>✅ PWA offline</div>
+        </div>
+      </div>
+      <div class="card" style="border:1px solid rgba(86,156,255,.45);background:linear-gradient(180deg,rgba(86,156,255,.10),rgba(86,156,255,.04))">
+        <div style="font-weight:950;font-size:18px;margin-bottom:4px">PRO</div>
+        <div style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;background:var(--accent);color:#fff;margin-bottom:8px">Em breve</div>
+        <div style="font-size:28px;font-weight:950;margin-bottom:16px">💎</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+          <div>✅ Tudo do Free</div>
+          <div>✅ IA PRO</div>
+          <div>✅ Leitor Android</div>
+          <div>✅ Relatórios PRO</div>
+          <div>✅ Cartões + Parcelas</div>
+          <div>✅ Calendário</div>
+          <div>✅ Comparativos</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;text-align:center">
+      <div style="font-size:20px;margin-bottom:8px">🚀</div>
+      <div style="font-weight:900">Quer ser PRO?</div>
+      <div class="small" style="margin:8px 0">Aguarde o lançamento. Todas as funcionalidades PRO estão disponíveis no plano Free durante o período de testes.</div>
+      <button class="btn primary" onclick="alert('Em breve! Por enquanto você tem acesso total como usuário de teste.')">Me avisar quando lançar</button>
     </div>
   </div>
 
@@ -2527,15 +2668,18 @@ function resetThemes(){
    HOME LAYOUT
 ========================= */
 const HOME_SECTIONS = [
-  { id:"resumo",  title:"Resumo do mês" },
-  { id:"saude",   title:"Saúde Financeira" },
-  { id:"alertas", title:"Alertas inteligentes" },
-  { id:"progresso", title:"Progresso da meta mensal" },
-  { id:"kpis",    title:"Cards (Salário/Gasto/Sobra/Guardado)" },
-  { id:"resumoRapido", title:"Resumo rápido" },
-  { id:"chartCat",title:"Gráfico por categoria" },
-  { id:"chartEvo",title:"Gráfico evolução" },
-  { id:"lista",   title:"Lista do mês" }
+  { id:"resumo",         title:"Resumo do mês" },
+  { id:"saude",          title:"Saúde Financeira" },
+  { id:"alertas",        title:"Alertas inteligentes" },
+  { id:"progresso",      title:"Progresso da meta mensal" },
+  { id:"kpis",           title:"Cards (Salário/Gasto/Sobra/Guardado)" },
+  { id:"receitasSaldo",  title:"Receitas e Saldo Real (PRO)" },
+  { id:"faturaCartao",   title:"Fatura dos Cartões (PRO)" },
+  { id:"comparacaoMeses",title:"Comparação com Mês Anterior (PRO)" },
+  { id:"resumoRapido",   title:"Resumo rápido" },
+  { id:"chartCat",       title:"Gráfico por categoria" },
+  { id:"chartEvo",       title:"Gráfico evolução" },
+  { id:"lista",          title:"Lista do mês" }
 ];
 function kHomeLayout(){ return `home_layout_${USER_ID || "guest"}`; }
 function defaultHomeLayout(){ return HOME_SECTIONS.map(s=>({ id:s.id, show:true })); }
@@ -3882,6 +4026,195 @@ function render(){
   renderQuickSummary();
   drawChart(d.items||[]);
   drawEvolucao();
+  renderProDashboard();
+}
+
+/* =========================
+   PRO DASHBOARD — Receitas, Saldo Real, Faturas, Comparação
+========================= */
+function renderProDashboard(){
+  renderProKPIs();
+  renderFaturaCartao();
+  renderComparacaoMeses();
+}
+
+function renderProKPIs(){
+  const d = getDataMes(mesAtual);
+  const salary = Number(d.salary||0);
+  const spent = (d.items||[]).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  const incList = (window._receitas||[]);
+  const totalReceitas = incList.reduce(function(a,b){ return a+Number(b.valor||0); },0);
+  const saldoReal = salary + totalReceitas - spent;
+
+  const elRec = document.getElementById("kpiReceitas");
+  const elSaldo = document.getElementById("kpiSaldoReal");
+  if(elRec) elRec.textContent = money(totalReceitas);
+  if(elSaldo){
+    elSaldo.textContent = money(saldoReal);
+    elSaldo.style.color = saldoReal >= 0 ? "var(--good)" : "var(--danger)";
+  }
+}
+
+function renderFaturaCartao(){
+  const el = document.getElementById("faturaCartaoContent");
+  if(!el) return;
+  const cards = window._cartoes||[];
+  if(!cards.length){
+    el.innerHTML = '<div class="small" style="opacity:.6">Nenhum cartão. <button class="btn mini" onclick="openCartoes()">Adicionar cartão</button></div>';
+    return;
+  }
+  const d = getDataMes(mesAtual);
+  var parts = mesAtual.split("-");
+  var nm = Number(parts[1])+1; var ny = Number(parts[0]);
+  if(nm>12){nm=1;ny++;}
+  var nextMes = ny+"-"+String(nm).padStart(2,"0");
+  const dNext = getDataMes(nextMes);
+
+  el.innerHTML = cards.map(function(c){
+    const sbid = c._sbid||c.id||"";
+    const faturaAtual = (d.items||[]).filter(function(it){ return it.credit_card_id===sbid||it.credit_card_id_ref===sbid; }).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+    const proximaFatura = (dNext.items||[]).filter(function(it){ return it.credit_card_id===sbid||it.credit_card_id_ref===sbid; }).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+    const limite = Number(c.limite||0);
+    const disponivel = limite>0 ? Math.max(0,limite-faturaAtual) : null;
+    return `<div class="layoutItem" style="margin-bottom:8px">
+      <div class="layoutLeft">
+        <div style="width:34px;height:34px;border-radius:10px;background:${escapeHtml(c.cor||"#ff5d5d")}33;display:flex;align-items:center;justify-content:center;font-size:16px">💳</div>
+        <div>
+          <div class="layoutTitle">${escapeHtml(c.nome||"")}</div>
+          <div class="small">Vence dia ${c.dia_vencimento||5}${disponivel!==null?" • Disponível: "+money(disponivel):""}</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:900;color:var(--danger)">${money(faturaAtual)}</div>
+        <div class="small">próxima: ${money(proximaFatura)}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderComparacaoMeses(){
+  const el = document.getElementById("comparacaoContent");
+  if(!el) return;
+  var p = mesAtual.split("-"); var m=Number(p[1])-1; var y=Number(p[0]);
+  if(m<1){m=12;y--;} var prevMes=y+"-"+String(m).padStart(2,"0");
+  const dC = getDataMes(mesAtual); const dP = getDataMes(prevMes);
+  const gastC = (dC.items||[]).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  const gastP = (dP.items||[]).reduce(function(a,b){ return a+Number(b.amount||0); },0);
+  if(!gastP){
+    el.innerHTML='<div class="small" style="opacity:.6">Sem dados do mês anterior ainda.</div>';
+    return;
+  }
+  const diff = gastC - gastP;
+  const pct = gastP>0 ? Math.round((diff/gastP)*100) : 0;
+  const prevLabel = new Date(prevMes+"-01T00:00:00").toLocaleDateString("pt-BR",{month:"long"});
+  const catC={}, catP={};
+  (dC.items||[]).forEach(function(it){ const c=it.category||"Outros"; catC[c]=(catC[c]||0)+Number(it.amount||0); });
+  (dP.items||[]).forEach(function(it){ const c=it.category||"Outros"; catP[c]=(catP[c]||0)+Number(it.amount||0); });
+  var topUp=null, topDown=null;
+  Object.keys(catC).forEach(function(cat){
+    const d=(catC[cat]||0)-(catP[cat]||0);
+    if(d>0&&(!topUp||d>topUp.d)) topUp={cat,d};
+    if(d<0&&(!topDown||d<topDown.d)) topDown={cat,d};
+  });
+  let html=`<div class="grid2" style="margin-bottom:10px">
+    <div class="kpi"><div class="small">Este mês</div><div class="v">${money(gastC)}</div></div>
+    <div class="kpi"><div class="small">${escapeHtml(prevLabel)}</div><div class="v">${money(gastP)}</div></div>
+  </div>
+  <div style="padding:10px;border-radius:10px;background:${diff<0?"rgba(57,217,138,.10)":"rgba(255,93,93,.10)"}">`;
+  if(diff<0) html+=`✅ Você gastou <b>${money(Math.abs(diff))}</b> a menos (${Math.abs(pct)}% menos que ${prevLabel}).`;
+  else if(diff>0) html+=`⚠️ Você gastou <b>${money(diff)}</b> a mais (${pct}% mais que ${prevLabel}).`;
+  else html+="✓ Gastos iguais ao mês anterior.";
+  html+="</div>";
+  if(topUp) html+=`<div class="small" style="margin-top:8px">📈 <b>${escapeHtml(topUp.cat)}</b> aumentou ${money(topUp.d)}.</div>`;
+  if(topDown) html+=`<div class="small" style="margin-top:4px">📉 <b>${escapeHtml(topDown.cat)}</b> caiu ${money(Math.abs(topDown.d))}.</div>`;
+  el.innerHTML = html;
+}
+
+/* ========== COMPROVANTE ========== */
+function openComprovante(){
+  if(!USER_ID){ alert("Faça login primeiro"); return; }
+  const cc = document.getElementById("compCat");
+  if(cc) cc.innerHTML = categorias.map(function(c){ return `<option>${escapeHtml(c)}</option>`; }).join("");
+  document.getElementById("compData").value = todayISO();
+  document.getElementById("comprovantePreview").style.display="none";
+  renderListaComprovantes();
+  openScreen("screen-comprovante");
+}
+function previewComprovante(input){
+  const preview = document.getElementById("comprovantePreview");
+  if(!input.files||!input.files[0]||!preview) return;
+  const reader = new FileReader();
+  reader.onload = function(e){ preview.src=e.target.result; preview.style.display="block"; };
+  reader.readAsDataURL(input.files[0]);
+}
+var _comprovantes = [];
+async function lancarComprovante(){
+  const tipo  = document.getElementById("compTipo").value || "saida";
+  const valor = Number(document.getElementById("compValor").value||0);
+  const data  = document.getElementById("compData").value || todayISO();
+  const desc  = (document.getElementById("compDesc").value||"").trim();
+  const cat   = document.getElementById("compCat").value || "Outros";
+  if(!valor||valor<=0) return alert("Digite o valor.");
+  if(!desc) return alert("Preencha a descrição.");
+
+  const receipt = { tipo, valor, data, descricao:desc, categoria:cat, mes:mesAtual };
+
+  if(tipo==="saida"){
+    const newItem = ensureItemDefaults({ desc, amount:valor, category:cat, isFixo:false, isInvestFixo:false, data });
+    newItem.data = data;
+    const d = getDataMes(mesAtual);
+    d.items.push(newItem);
+    saveAll();
+    if(window.App && typeof App.syncSaveOneExpense==="function")
+      App.syncSaveOneExpense(mesAtual, newItem).then(function(id){ if(id&&typeof id==="string") newItem._sbid=id; }).catch(()=>{});
+  } else {
+    const entry = { descricao:desc, categoria:cat, valor, data, origem:"comprovante", mes:mesAtual };
+    window._receitas.unshift(entry);
+    if(window.App && App.incomeEntries) App.incomeEntries[mesAtual] = window._receitas;
+    if(window.App && typeof App.syncSaveOneIncomeEntry==="function")
+      App.syncSaveOneIncomeEntry(entry).catch(()=>{});
+  }
+
+  // Salva no Supabase receipt_imports
+  if(window.App && typeof App.syncSaveReceiptImport==="function")
+    App.syncSaveReceiptImport(receipt).catch(()=>{});
+
+  _comprovantes.unshift(receipt);
+  document.getElementById("compValor").value="";
+  document.getElementById("compDesc").value="";
+  document.getElementById("comprovantePreview").style.display="none";
+  renderListaComprovantes();
+  render();
+  alert("Lançamento realizado com sucesso!");
+}
+function renderListaComprovantes(){
+  const el = document.getElementById("listaComprovantes");
+  if(!el) return;
+  if(!_comprovantes.length){ el.innerHTML='<div style="padding:12px;opacity:.6">Nenhum comprovante importado ainda.</div>'; return; }
+  el.innerHTML = _comprovantes.slice(0,5).map(function(r){
+    return `<div class="layoutItem" style="margin-bottom:6px">
+      <div class="layoutLeft">
+        <span style="font-size:18px">${r.tipo==="entrada"?"📥":"📤"}</span>
+        <div>
+          <div class="layoutTitle">${escapeHtml(r.descricao||"")}</div>
+          <div class="small">${escapeHtml(r.data||"")} • ${escapeHtml(r.categoria||"")}</div>
+        </div>
+      </div>
+      <div style="font-weight:900;color:${r.tipo==="entrada"?"var(--good)":"var(--danger)"}">${money(r.valor||0)}</div>
+    </div>`;
+  }).join("");
+}
+
+/* ========== MEU PLANO ========== */
+function openMeuPlano(){
+  const nameEl = document.getElementById("planoUserName");
+  const emailEl = document.getElementById("planoUserEmail");
+  const badgeEl = document.getElementById("planoBadge");
+  if(nameEl) nameEl.textContent = (USER&&(USER.user_metadata&&(USER.user_metadata.full_name||USER.user_metadata.name)))||"Usuário";
+  if(emailEl) emailEl.textContent = (USER&&USER.email)||"";
+  const plan = (window.App&&App._cloudAppSettings&&App._cloudAppSettings.plan)||"free";
+  if(badgeEl){ badgeEl.textContent = plan==="pro"?"💎 PRO":"Free"; badgeEl.style.background=plan==="pro"?"var(--accent)":"rgba(255,255,255,.10)"; }
+  openScreen("screen-meu-plano");
 }
 
 /* =========================

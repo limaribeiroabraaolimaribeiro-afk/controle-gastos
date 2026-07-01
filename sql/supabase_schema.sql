@@ -884,6 +884,38 @@ ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS plan                 text DEFA
 ALTER TABLE income_entries ADD COLUMN IF NOT EXISTS account_id uuid;
 
 -- ============================================================
+-- 20. RECEIPT_IMPORTS (Comprovantes importados manualmente)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS receipt_imports (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    tipo        text NOT NULL DEFAULT 'saida' CHECK (tipo IN ('entrada', 'saida')),
+    valor       numeric NOT NULL CHECK (valor > 0),
+    data        date DEFAULT CURRENT_DATE,
+    descricao   text,
+    categoria   text DEFAULT 'Outros',
+    account_id  uuid REFERENCES accounts(id) ON DELETE SET NULL,
+    image_name  text,
+    status      text DEFAULT 'confirmado',
+    mes         text,
+    created_at  timestamptz DEFAULT now(),
+    updated_at  timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_receipt_imports_user ON receipt_imports(user_id, created_at DESC);
+ALTER TABLE receipt_imports ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON receipt_imports TO authenticated;
+
+DROP POLICY IF EXISTS "receipt_select_own" ON receipt_imports;
+CREATE POLICY "receipt_select_own" ON receipt_imports FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "receipt_insert_own" ON receipt_imports;
+CREATE POLICY "receipt_insert_own" ON receipt_imports FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "receipt_update_own" ON receipt_imports;
+CREATE POLICY "receipt_update_own" ON receipt_imports FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "receipt_delete_own" ON receipt_imports;
+CREATE POLICY "receipt_delete_own" ON receipt_imports FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
 -- GRANTS FINAIS: sequences e view
 -- ============================================================
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;

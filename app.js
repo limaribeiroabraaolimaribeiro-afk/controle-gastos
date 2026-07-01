@@ -1858,6 +1858,31 @@
     return true;
   };
 
+  // ---------- RECEIPT IMPORTS ----------
+  App.syncSaveReceiptImport = async function (receipt) {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return null;
+    const row = {
+      user_id: user.id, tipo: receipt.tipo || "saida",
+      valor: Number(receipt.valor || 0), data: receipt.data || new Date().toISOString().slice(0,10),
+      descricao: receipt.descricao || "", categoria: receipt.categoria || "Outros",
+      mes: receipt.mes || App.currentMonthKeyFromDate(),
+      image_name: receipt.image_name || null, status: "confirmado"
+    };
+    if (row.valor <= 0) return null;
+    const { data, error } = await sb.from("receipt_imports").insert(row).select("id").single();
+    if (error) { console.warn("[Supabase] syncSaveReceiptImport:", error.message); return null; }
+    return data && data.id;
+  };
+
+  App.syncLoadReceiptImports = async function () {
+    const sb = App.getSupabaseClient(); const user = await App.supabaseGetSession();
+    if (!sb || !user) return [];
+    const { data, error } = await sb.from("receipt_imports").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
+    if (error) { console.warn("[Supabase] syncLoadReceiptImports:", error.message); return []; }
+    return data || [];
+  };
+
   App.syncAll = async function (dadosMes) {
     const sb = App.getSupabaseClient();
     const user = await App.supabaseGetSession();

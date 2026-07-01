@@ -1,4 +1,4 @@
-const SW_VERSION = "gastos-pro-v16-upgrade-completo";
+const SW_VERSION = "gastos-pro-v17-dashboard-pro-completo";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
